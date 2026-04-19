@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>KYNOS needs access to your health data (HRV, Heart Rate, Sleep) to provide personalised AI coaching and biomechanical insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>KYNOS needs access to your health data to provide personalised AI coaching and biomechanical insights.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
