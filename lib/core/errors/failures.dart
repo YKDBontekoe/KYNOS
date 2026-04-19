@@ -25,5 +25,5 @@ final class StorageFailure extends Failure {
 
 final class PrivacyConstraintFailure extends Failure {
   const PrivacyConstraintFailure(
-      [super.message = 'Operation blocked by Zero-Knowledge policy']);
+      [super.message = 'Operation blocked by Zero-Knowledge policy',]);
 }
