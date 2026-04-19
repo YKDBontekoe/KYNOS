@@ -8,19 +8,17 @@ class KynosApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-      child: Consumer(
-        builder: (context, ref, _) {
-          final router = ref.watch(routerProvider);
-          return MaterialApp.router(
-            title: 'KYNOS',
-            theme: AppTheme.light,
-            themeMode: ThemeMode.light,
-            routerConfig: router,
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
+    return Consumer(
+      builder: (context, ref, _) {
+        final router = ref.watch(routerProvider);
+        return MaterialApp.router(
+          title: 'KYNOS',
+          theme: AppTheme.light,
+          themeMode: ThemeMode.light,
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

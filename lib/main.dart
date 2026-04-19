@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/app/app.dart';
 
 Future<void> main() async {
@@ -10,5 +11,9 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
 
-  runApp(const KynosApp());
+  runApp(
+    const ProviderScope(
+      child: KynosApp(),
+    ),
+  );
 }
