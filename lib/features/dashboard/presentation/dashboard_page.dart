@@ -1,10 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 // ── Root ──────────────────────────────────────────────────────────────────
@@ -18,14 +21,14 @@ class DashboardPage extends StatelessWidget {
 
 // ── Shell ─────────────────────────────────────────────────────────────────
 
-class _Shell extends StatefulWidget {
+class _Shell extends ConsumerStatefulWidget {
   const _Shell();
 
   @override
-  State<_Shell> createState() => _ShellState();
+  ConsumerState<_Shell> createState() => _ShellState();
 }
 
-class _ShellState extends State<_Shell> {
+class _ShellState extends ConsumerState<_Shell> {
   int _index = 0;
 
   static const _labels = ['Today', 'Coach', 'Lab', 'Plan', 'Profile'];
@@ -186,7 +189,7 @@ class _Placeholder extends StatelessWidget {
 
 // ── Today tab ─────────────────────────────────────────────────────────────
 
-class _TodayTab extends StatelessWidget {
+class _TodayTab extends ConsumerWidget {
   const _TodayTab();
 
   String _greeting() {
@@ -209,7 +212,9 @@ class _TodayTab extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final healthSummary = ref.watch(healthSummaryProvider);
+
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
@@ -262,63 +267,91 @@ class _TodayTab extends StatelessWidget {
               const Gap(tokens.Spacing.lg),
 
               // ── Readiness ──────────────────────────────────────────────
-              _ReadinessCard(),
+              const _ReadinessCard(),
               const Gap(tokens.Spacing.lg),
 
               // ── Metrics ────────────────────────────────────────────────
               const _SectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
-              const Row(
-                children: [
-                  Expanded(
-                    child: MetricTile(
-                      label: 'HRV',
-                      value: '—',
-                      unit: 'ms',
-                      accentColor: AppTheme.exercise,
-                    ),
+              healthSummary.when(
+                data: (summary) => _HealthMetricsGrid(summary: summary),
+                loading: () => const _HealthMetricsGrid(summary: null),
+                error: (e, s) => Center(
+                  child: Text(
+                    'Error loading metrics: $e',
+                    style: const TextStyle(color: Colors.red),
                   ),
-                  Gap(tokens.Spacing.sm),
-                  Expanded(
-                    child: MetricTile(
-                      label: 'Resting HR',
-                      value: '—',
-                      unit: 'bpm',
-                      accentColor: AppTheme.move,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(tokens.Spacing.sm),
-              const Row(
-                children: [
-                  Expanded(
-                    child: MetricTile(
-                      label: 'Sleep',
-                      value: '—',
-                      unit: 'h',
-                      accentColor: AppTheme.stand,
-                    ),
-                  ),
-                  Gap(tokens.Spacing.sm),
-                  Expanded(
-                    child: MetricTile(
-                      label: 'Active kcal',
-                      value: '—',
-                      unit: 'kcal',
-                      accentColor: AppTheme.energy,
-                    ),
-                  ),
-                ],
+                ),
               ),
               const Gap(tokens.Spacing.lg),
 
               // ── Connect ────────────────────────────────────────────────
-              const _SectionHeader(title: 'Get Started'),
-              const Gap(tokens.Spacing.sm),
-              _ConnectCard(),
+              if (healthSummary.value == null && !healthSummary.isLoading) ...[
+                const _SectionHeader(title: 'Get Started'),
+                const Gap(tokens.Spacing.sm),
+                const _ConnectCard(),
+              ],
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Health metrics grid ─────────────────────────────────────────────────────
+
+class _HealthMetricsGrid extends StatelessWidget {
+  final HealthSummary? summary;
+
+  const _HealthMetricsGrid({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: MetricTile(
+                label: 'HRV',
+                value: summary?.hrvMs?.round().toString(),
+                unit: 'ms',
+                accentColor: AppTheme.exercise,
+              ),
+            ),
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: MetricTile(
+                label: 'Resting HR',
+                value: summary?.rhrBpm?.round().toString(),
+                unit: 'bpm',
+                accentColor: AppTheme.move,
+              ),
+            ),
+          ],
+        ),
+        const Gap(tokens.Spacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: MetricTile(
+                label: 'Sleep',
+                value: summary?.sleepHours?.toStringAsFixed(1),
+                unit: 'h',
+                accentColor: AppTheme.stand,
+              ),
+            ),
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: MetricTile(
+                label: 'Active kcal',
+                value: summary?.activeCalories?.round().toString(),
+                unit: 'kcal',
+                accentColor: AppTheme.energy,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -399,7 +432,6 @@ class _HeroBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-
               ],
             ),
           ),
@@ -431,9 +463,13 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Readiness card ─────────────────────────────────────────────────────────
 
-class _ReadinessCard extends StatelessWidget {
+class _ReadinessCard extends ConsumerWidget {
+  const _ReadinessCard();
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final healthSummary = ref.watch(healthSummaryProvider);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -449,11 +485,15 @@ class _ReadinessCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const _ActivityRing(
-            progress: 0,
+          _ActivityRing(
+            progress: healthSummary.when(
+              data: (summary) => summary != null ? 0.75 : 0,
+              loading: () => 0,
+              error: (e, s) => 0,
+            ),
             size: 80,
             strokeWidth: 8,
-            colors: [AppTheme.move, AppTheme.exercise, AppTheme.stand],
+            colors: const [AppTheme.move, AppTheme.exercise, AppTheme.stand],
           ),
           const Gap(20),
           Expanded(
@@ -470,19 +510,35 @@ class _ReadinessCard extends StatelessWidget {
                   ),
                 ),
                 const Gap(4),
-                Text(
-                  '—',
-                  style: GoogleFonts.inter(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.label,
-                    height: 1,
-                    letterSpacing: -1,
+                healthSummary.when(
+                  data: (summary) => Text(
+                    summary != null ? '84' : '—',
+                    style: GoogleFonts.inter(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.label,
+                      height: 1,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  loading: () => const SizedBox(
+                    height: 40,
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                  error: (e, s) => Text(
+                    'Error',
+                    style: GoogleFonts.inter(fontSize: 24, color: Colors.red),
                   ),
                 ),
                 const Gap(6),
                 Text(
-                  'Connect HealthKit to unlock your daily readiness.',
+                  healthSummary.when(
+                    data: (summary) => summary != null
+                        ? 'Great recovery. Optimal conditions for a high-intensity interval run today.'
+                        : 'Connect HealthKit to unlock your daily readiness.',
+                    loading: () => 'Calculating readiness...',
+                    error: (e, s) => 'Could not calculate readiness.',
+                  ),
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: AppTheme.secondaryLabel,
@@ -579,9 +635,11 @@ class _RingPainter extends CustomPainter {
 
 // ── Connect card ───────────────────────────────────────────────────────────
 
-class _ConnectCard extends StatelessWidget {
+class _ConnectCard extends ConsumerWidget {
+  const _ConnectCard();
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.card,
@@ -661,7 +719,13 @@ class _ConnectCard extends StatelessWidget {
                 ),
                 const Gap(16),
                 FilledButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final repo = ref.read(healthRepositoryProvider);
+                    final success = await repo.requestPermissions();
+                    if (success) {
+                      ref.invalidate(healthSummaryProvider);
+                    }
+                  },
                   child: const Text('Connect HealthKit'),
                 ),
               ],
