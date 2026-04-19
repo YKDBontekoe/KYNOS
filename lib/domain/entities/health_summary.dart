@@ -1,0 +1,39 @@
+/// Aggregated biometric snapshot used by the AI coaching agent.
+///
+/// Sourced from Apple HealthKit (iOS) or Google Health Connect (Android).
+class HealthSummary {
+  final DateTime date;
+
+  /// Heart Rate Variability — higher is generally better recovery.
+  final double? hrvMs;
+
+  /// Resting Heart Rate (bpm).
+  final double? rhrBpm;
+
+  /// Sleep duration in hours.
+  final double? sleepHours;
+
+  /// Active energy expenditure in kcal.
+  final double? activeCalories;
+
+  /// Running power in Watts (if available from wearable).
+  final double? runningPowerWatts;
+
+  const HealthSummary({
+    required this.date,
+    this.hrvMs,
+    this.rhrBpm,
+    this.sleepHours,
+    this.activeCalories,
+    this.runningPowerWatts,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'date': date.toIso8601String(),
+        'hrv_ms': hrvMs,
+        'rhr_bpm': rhrBpm,
+        'sleep_hours': sleepHours,
+        'active_calories': activeCalories,
+        'running_power_watts': runningPowerWatts,
+      };
+}

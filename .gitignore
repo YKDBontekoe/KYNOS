@@ -1,3 +1,15 @@
+# KYNOS — Model weights (large binary files, download separately)
+assets/models/*.task
+assets/models/*.bin
+assets/models/*.tflite
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
 # Miscellaneous
 *.class
 *.lock
