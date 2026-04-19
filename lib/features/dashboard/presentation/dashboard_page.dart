@@ -43,8 +43,8 @@ class _ShellState extends State<_Shell> {
       backgroundColor: AppTheme.background,
       body: IndexedStack(
         index: _index,
-        children: [
-          const _TodayTab(),
+        children: const [
+          _TodayTab(),
           _Placeholder(label: 'Coach', icon: Icons.chat_bubble_rounded),
           _Placeholder(label: 'Lab', icon: Icons.science_rounded),
           _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
@@ -238,7 +238,7 @@ class _TodayTab extends StatelessWidget {
               child: Container(
                 width: 34,
                 height: 34,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.separator,
                   shape: BoxShape.circle,
                 ),
@@ -266,9 +266,9 @@ class _TodayTab extends StatelessWidget {
               const Gap(tokens.Spacing.lg),
 
               // ── Metrics ────────────────────────────────────────────────
-              _SectionHeader(title: "Today's Metrics"),
+              const _SectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
-              Row(
+              const Row(
                 children: [
                   Expanded(
                     child: MetricTile(
@@ -278,7 +278,7 @@ class _TodayTab extends StatelessWidget {
                       accentColor: AppTheme.exercise,
                     ),
                   ),
-                  const Gap(tokens.Spacing.sm),
+                  Gap(tokens.Spacing.sm),
                   Expanded(
                     child: MetricTile(
                       label: 'Resting HR',
@@ -290,7 +290,7 @@ class _TodayTab extends StatelessWidget {
                 ],
               ),
               const Gap(tokens.Spacing.sm),
-              Row(
+              const Row(
                 children: [
                   Expanded(
                     child: MetricTile(
@@ -300,7 +300,7 @@ class _TodayTab extends StatelessWidget {
                       accentColor: AppTheme.stand,
                     ),
                   ),
-                  const Gap(tokens.Spacing.sm),
+                  Gap(tokens.Spacing.sm),
                   Expanded(
                     child: MetricTile(
                       label: 'Active kcal',
@@ -314,7 +314,7 @@ class _TodayTab extends StatelessWidget {
               const Gap(tokens.Spacing.lg),
 
               // ── Connect ────────────────────────────────────────────────
-              _SectionHeader(title: 'Get Started'),
+              const _SectionHeader(title: 'Get Started'),
               const Gap(tokens.Spacing.sm),
               _ConnectCard(),
             ],

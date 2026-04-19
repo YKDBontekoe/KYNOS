@@ -54,6 +54,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  riverpod_lint: ^2.6.3
+  custom_lint: ^0.7.0
 
   # ── Code Generation ──────────────────────────────────────────────────────
   build_runner: ^2.4.14
