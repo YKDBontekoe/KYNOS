@@ -1,6 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  plugins:
+    - custom_lint
   language:
     strict-casts: true
     strict-inference: true
@@ -40,3 +42,8 @@ linter:
     use_decorated_box: false   # Container with boxShadow needs Container, not DecoratedBox
     sized_box_shrink_expand: true
     avoid_unnecessary_containers: true
+
+    # Riverpod / Quality
+    use_build_context_synchronously: true
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
