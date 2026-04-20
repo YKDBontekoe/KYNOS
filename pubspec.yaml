@@ -6,7 +6,7 @@ publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: ^3.11.1
+  sdk: ^3.11.0
 
 dependencies:
   flutter:
@@ -54,6 +54,8 @@ dependencies:
 
   # ── AI / On-Device Inference ─────────────────────────────────────────────
   flutter_gemma: ^0.12.6    # MediaPipe-backed on-device Gemma inference
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
