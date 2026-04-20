@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import 'package:kynos/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -76,7 +75,6 @@ class _SettingsSection extends StatelessWidget {
   final List<Widget> children;
 
   const _SettingsSection({
-    super.key,
     required this.title,
     required this.children,
   });
@@ -111,7 +109,6 @@ class _SwitchTile extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   const _SwitchTile({
-    super.key,
     required this.title,
     required this.icon,
     required this.value,
@@ -140,7 +137,6 @@ class _DropdownTile extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   const _DropdownTile({
-    super.key,
     required this.title,
     required this.icon,
     required this.value,
@@ -170,7 +166,6 @@ class _ActionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   const _ActionTile({
-    super.key,
     required this.title,
     required this.icon,
     required this.onTap,
