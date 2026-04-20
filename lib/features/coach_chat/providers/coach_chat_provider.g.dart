@@ -6,7 +6,7 @@ part of 'coach_chat_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$coachChatNotifierHash() => r'6ab0088bcef63d1020dccb45696b1bd0d85a3a11';
+String _$coachChatNotifierHash() => r'293036e299c289ec7fb6707ac8bc767c50fa9070';
 
 /// See also [CoachChatNotifier].
 @ProviderFor(CoachChatNotifier)
