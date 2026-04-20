@@ -54,7 +54,6 @@ dependencies:
 
   # ── AI / On-Device Inference ─────────────────────────────────────────────
   flutter_gemma: ^0.12.6    # MediaPipe-backed on-device Gemma inference
-  shared_preferences: ^2.5.5
   lottie: ^3.3.3
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
