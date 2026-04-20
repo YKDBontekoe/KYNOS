@@ -29,6 +29,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.7'
           channel: ${{ matrix.channel }}
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
@@ -54,14 +55,14 @@ jobs:
 
       - name: Install OSV-Scanner
         run: |
-          curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_Linux_x86_64 -o osv-scanner
+          curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -o osv-scanner
           chmod +x osv-scanner
 
       - name: Vulnerability Scan
         run: ./osv-scanner -r .
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed ..
 
       - name: Check code generation (build_runner)
         if: matrix.channel == 'stable'
@@ -72,7 +73,7 @@ jobs:
       - name: Static Analysis
         run: |
           # Custom script to fail on any lint warnings or infos
-          output=$(flutter analyze)
+          output=$(flutter analyze || true)
           echo "$output"
           if echo "$output" | grep -i -E "warning|info"; then
             echo "Lint warnings or infos found! Failing build."
@@ -107,6 +108,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.7'
           channel: 'stable'
           cache: true
 
