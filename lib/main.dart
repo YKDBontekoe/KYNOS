@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -14,8 +16,13 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
 
+  final prefs = await SharedPreferences.getInstance();
+
   runApp(
-    const ProviderScope(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
       child: KynosApp(),
     ),
   );
