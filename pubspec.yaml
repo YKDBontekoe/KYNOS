@@ -53,7 +53,7 @@ dependencies:
   logger: ^2.5.0
 
   # ── AI / On-Device Inference ─────────────────────────────────────────────
-  flutter_gemma: ^0.12.6    # MediaPipe-backed on-device Gemma inference
+  flutter_gemma: ^0.13.5    # LiteRT-LM + MediaPipe on-device inference (Gemma 4, iOS .litertlm support)
   lottie: ^3.3.3
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
@@ -82,3 +82,6 @@ flutter:
     - .env
     - assets/images/
     - assets/models/    # Gemma 4 E2B INT4 weights — NOT committed to git
+
+dependency_overrides:
+  sqlite3: ^3.1.0
