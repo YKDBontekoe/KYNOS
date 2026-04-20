@@ -37,84 +37,76 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final healthSummary = ref.watch(healthSummaryProvider);
 
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
-      slivers: [
-        SliverAppBar(
-          backgroundColor: AppTheme.background,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          pinned: true,
-          toolbarHeight: 56,
-          titleSpacing: 20,
-          title: Text(
-            _dateLabel(),
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.tertiaryLabel,
-              letterSpacing: 0.2,
-            ),
-          ),
-          actions: [
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: AppTheme.separator,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  size: 18,
-                  color: AppTheme.secondaryLabel,
-                ),
-              ),
-            ),
-            const Gap(20),
-          ],
-        ),
-
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-          sliver: SliverList.list(
-            children: [
-              _HeroBanner(greeting: _greeting()),
-              const Gap(tokens.Spacing.lg),
-
-              const _ReadinessCard(),
-              const Gap(tokens.Spacing.lg),
-
-              const _SectionHeader(title: "Today's Metrics"),
-              const Gap(tokens.Spacing.sm),
-              healthSummary.when(
-                data: (summary) => _HealthMetricsGrid(summary: summary),
-                loading: () => const _HealthMetricsGrid(summary: null),
-                error: (e, s) => Center(
-                  child: Text(
-                    'Error loading metrics: $e',
-                    style: const TextStyle(color: Colors.red),
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Gap(8),
+            Row(
+              children: [
+                Text(
+                  _dateLabel(),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.tertiaryLabel,
+                    letterSpacing: 0.2,
                   ),
                 ),
-              ),
-              const Gap(tokens.Spacing.lg),
-
-              if (healthSummary.value == null && !healthSummary.isLoading) ...[
-                const _SectionHeader(title: 'Get Started'),
-                const Gap(tokens.Spacing.sm),
-                const _ConnectCard(),
-                const Gap(tokens.Spacing.lg),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.separator,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      size: 18,
+                      color: AppTheme.secondaryLabel,
+                    ),
+                  ),
+                ),
               ],
+            ),
+            const Gap(tokens.Spacing.sm),
+            _HeroBanner(greeting: _greeting()),
+            const Gap(tokens.Spacing.lg),
 
-              const _PrivacyNotice(),
+            const _ReadinessCard(),
+            const Gap(tokens.Spacing.lg),
+
+            const _SectionHeader(title: "Today's Metrics"),
+            const Gap(tokens.Spacing.sm),
+            healthSummary.when(
+              data: (summary) => _HealthMetricsGrid(summary: summary),
+              loading: () => const _HealthMetricsGrid(summary: null),
+              error: (e, s) => Center(
+                child: Text(
+                  'Error loading metrics: $e',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
+            const Gap(tokens.Spacing.lg),
+
+            if (healthSummary.value == null && !healthSummary.isLoading) ...[
+              const _SectionHeader(title: 'Get Started'),
+              const Gap(tokens.Spacing.sm),
+              const _ConnectCard(),
+              const Gap(tokens.Spacing.lg),
             ],
-          ),
+
+            const _PrivacyNotice(),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -456,6 +448,9 @@ class _ConnectCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final permissionState = ref.watch(healthPermissionsNotifierProvider);
+    final isLoading = permissionState.isLoading;
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.card,
@@ -535,12 +530,45 @@ class _ConnectCard extends ConsumerWidget {
                 ),
                 const Gap(16),
                 FilledButton(
-                  onPressed: () async {
-                    await ref
-                        .read(healthPermissionsNotifierProvider.notifier)
-                        .request();
-                  },
-                  child: const Text('Connect HealthKit'),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          await ref
+                              .read(healthPermissionsNotifierProvider.notifier)
+                              .request();
+
+                          final state = ref.read(
+                            healthPermissionsNotifierProvider,
+                          );
+                          if (!context.mounted) return;
+
+                          state.whenOrNull(
+                            data: (granted) {
+                              final message = granted
+                                  ? 'HealthKit connected.'
+                                  : 'HealthKit permission not granted. Enable access in Apple Health > Sharing > Apps > Kynos.';
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                            },
+                            error: (error, _) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'HealthKit connection failed: $error',
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Connect HealthKit'),
                 ),
               ],
             ),

@@ -4,16 +4,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 abstract final class AppConstants {
   // ── AI Model ──────────────────────────────────────────────────────────────
   /// Preferred on-device model for mid-range iOS (iPhone 14 Pro, 6 GB RAM).
-  static const String defaultModelId = 'gemma4-e2b-int4';
-
-  /// Fallback model when thermals exceed [thermalThresholdCelsius].
-  static const String fallbackModelId = 'gemma4-e2b-int4'; // same tier, lower threads
+  static const String defaultModelId = 'gemma3-1b-int4';
+  static const String fallbackModelId = 'gemma3-1b-int4-task';
 
   /// Maximum RAM budget (bytes) reserved for the AI runtime.
   static const int aiRamBudgetBytes = 3 * 1024 * 1024 * 1024; // 3 GB
 
-  /// Context window (tokens) supported by Gemma 4 E2B on mobile.
-  static const int modelContextWindow = 1024;
+  /// Conservative context window for stable mobile inference.
+  static const int modelContextWindow = 256;
 
   // ── Inference ─────────────────────────────────────────────────────────────
   /// Target frame render budget at 120 Hz ProMotion (ms).
@@ -30,11 +28,15 @@ abstract final class AppConstants {
   static const double weeklyVolumeTolerance = 0.10; // ±10 %
 
   // ── Model download ────────────────────────────────────────────────────────
-  /// HuggingFace repository path for the on-device Gemma model.
-  /// Verify the exact filename against the HF repo before shipping.
+  /// Primary mobile-safe Gemma model (smaller profile).
   static const String modelDownloadUrl =
-      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm'
-      '/resolve/main/gemma-4-E2B-it.litertlm?download=true';
+      'https://huggingface.co/litert-community/Gemma3-1B-IT'
+      '/resolve/main/gemma3-1b-it-int4.task?download=true';
+
+  /// Fallback bundle variant for runtimes preferring .litertlm packaging.
+  static const String fallbackModelDownloadUrl =
+      'https://huggingface.co/litert-community/Gemma3-1B-IT'
+      '/resolve/main/gemma3-1b-it-int4.litertlm?download=true';
 
   /// HuggingFace API token — set HF_TOKEN in your .env file.
   /// Leave empty for public/ungated model files.

@@ -1,8 +1,9 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 
-/// LiteRT-LM / flutter_gemma implementation of [AiCoachRepository].
+/// Direct flutter_gemma implementation of [AiCoachRepository].
 ///
 /// Runs entirely on-device — no data leaves the device at inference time.
 class OnDeviceAiCoachRepository implements AiCoachRepository {
@@ -19,12 +20,27 @@ class OnDeviceAiCoachRepository implements AiCoachRepository {
 
   Future<void> _ensureReady() async {
     if (_chat != null) return;
+
     await FlutterGemma.initialize();
-    // 0.13.x: LiteRT-LM engine handles .litertlm on iOS (Metal) automatically.
-    _model ??= await FlutterGemma.getActiveModel(
-      maxTokens: 1024,
-      preferredBackend: PreferredBackend.gpu,
-    );
+
+    try {
+      _model ??= await FlutterGemma.getActiveModel(
+        maxTokens: AppConstants.modelContextWindow,
+        preferredBackend: PreferredBackend.cpu,
+      );
+    } on StateError catch (e) {
+      final normalized = e.toString().toLowerCase();
+      final noActiveModel =
+          normalized.contains('no active inference model set') ||
+          (normalized.contains('no active') && normalized.contains('model'));
+      if (noActiveModel) {
+        throw Exception(
+          'No active Gemma model is installed. Complete model setup before starting chat.',
+        );
+      }
+      rethrow;
+    }
+
     _chat = await _model!.createChat(
       systemInstruction: _systemInstruction,
     );
@@ -36,11 +52,25 @@ class OnDeviceAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
   }) async* {
     await _ensureReady();
-    await _chat!.addQueryChunk(Message.text(text: userMessage, isUser: true));
-    await for (final response in _chat!.generateChatResponseAsync()) {
-      if (response is TextResponse) {
-        yield response.token;
-      }
+
+    final model = _model;
+    if (model == null) {
+      throw Exception('Model session unavailable');
+    }
+
+    final session = model.session;
+    if (session == null) {
+      throw Exception('Model session unavailable');
+    }
+
+    await session.addQueryChunk(
+      Message.text(text: userMessage, isUser: true),
+    );
+
+    final fullResponse = await session.getResponse();
+    final words = fullResponse.split(' ');
+    for (var i = 0; i < words.length; i++) {
+      yield i == 0 ? words[i] : ' ${words[i]}';
     }
   }
 

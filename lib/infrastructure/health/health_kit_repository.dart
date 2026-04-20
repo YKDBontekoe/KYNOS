@@ -18,6 +18,9 @@ class HealthKitRepository implements HealthRepository {
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_IN_BED,
     HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.STEPS,
+    HealthDataType.DISTANCE_WALKING_RUNNING,
+    HealthDataType.EXERCISE_TIME,
   ];
 
   Future<void> _ensureConfigured() async {
@@ -31,9 +34,9 @@ class HealthKitRepository implements HealthRepository {
   Future<bool> requestPermissions() async {
     await _ensureConfigured();
     // Explicitly demand READ-ONLY access. By default ^12.2.0 tries
-    // READ_WRITE, which can crash violently if iOS rejects write capabilities.
-    final permissions = _types.map((e) => HealthDataAccess.READ).toList();
-    return await _health.requestAuthorization(_types, permissions: permissions);
+    // READ_WRITE, which can crash if iOS rejects write capabilities.
+    final permissions = _types.map((_) => HealthDataAccess.READ).toList();
+    return _health.requestAuthorization(_types, permissions: permissions);
   }
 
   @override
@@ -45,48 +48,84 @@ class HealthKitRepository implements HealthRepository {
       final now = DateTime.now();
       final startTime = now.subtract(Duration(days: days));
 
-      // Fetch health data points.
       final List<HealthDataPoint> data = await _health.getHealthDataFromTypes(
         types: _types,
         startTime: startTime,
         endTime: now,
       );
 
-      // Aggregate data by day.
-      final Map<DateTime, HealthSummary> aggregated = {};
+      final Map<DateTime, _DailyAccumulator> aggregated =
+          <DateTime, _DailyAccumulator>{};
 
-      for (var point in data) {
-        final date = DateTime(point.dateFrom.year, point.dateFrom.month, point.dateFrom.day);
-        
-        final existing = aggregated[date] ?? HealthSummary(date: date);
-        double? hrv = existing.hrvMs;
-        double? rhr = existing.rhrBpm;
-        double? sleep = existing.sleepHours;
-        double? active = existing.activeCalories;
+      for (final point in data) {
+        final date = DateTime(
+          point.dateFrom.year,
+          point.dateFrom.month,
+          point.dateFrom.day,
+        );
+        final entry = aggregated.putIfAbsent(date, _DailyAccumulator.new);
 
         if (point.type == HealthDataType.HEART_RATE_VARIABILITY_SDNN) {
-          hrv = (point.value as NumericHealthValue).numericValue.toDouble();
-        } else if (point.type == HealthDataType.RESTING_HEART_RATE) {
-          rhr = (point.value as NumericHealthValue).numericValue.toDouble();
-        } else if (point.type == HealthDataType.SLEEP_ASLEEP || point.type == HealthDataType.SLEEP_IN_BED) {
-          // Calculate duration in hours.
-          final duration = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
-          sleep = (sleep ?? 0) + duration;
-        } else if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
-          active = (active ?? 0) + (point.value as NumericHealthValue).numericValue.toDouble();
+          entry.hrvMs = _asNumeric(point);
+          continue;
         }
-
-        aggregated[date] = HealthSummary(
-          date: date,
-          hrvMs: hrv,
-          rhrBpm: rhr,
-          sleepHours: sleep,
-          activeCalories: active,
-        );
+        if (point.type == HealthDataType.RESTING_HEART_RATE) {
+          entry.rhrBpm = _asNumeric(point);
+          continue;
+        }
+        if (point.type == HealthDataType.SLEEP_ASLEEP ||
+            point.type == HealthDataType.SLEEP_IN_BED) {
+          entry.sleepHours +=
+              point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
+          continue;
+        }
+        if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
+          entry.activeCalories += _asNumeric(point) ?? 0;
+          continue;
+        }
+        if (point.type == HealthDataType.STEPS) {
+          entry.steps += _asNumeric(point) ?? 0;
+          continue;
+        }
+        if (point.type == HealthDataType.DISTANCE_WALKING_RUNNING ||
+            point.type == HealthDataType.DISTANCE_DELTA) {
+          entry.distanceMeters += _asNumeric(point) ?? 0;
+          continue;
+        }
+        if (point.type == HealthDataType.EXERCISE_TIME) {
+          entry.exerciseMinutes += _asNumeric(point) ?? 0;
+          continue;
+        }
+        if (point.type == HealthDataType.WORKOUT) {
+          final workout = point.value;
+          if (workout is! WorkoutHealthValue) {
+            continue;
+          }
+          final isRunWorkout =
+              workout.workoutActivityType ==
+                  HealthWorkoutActivityType.RUNNING ||
+              workout.workoutActivityType ==
+                  HealthWorkoutActivityType.RUNNING_TREADMILL;
+          if (!isRunWorkout) {
+            continue;
+          }
+          if (workout.totalDistance != null) {
+            entry.distanceMeters += workout.totalDistance!.toDouble();
+          }
+          if (workout.totalSteps != null) {
+            entry.steps += workout.totalSteps!.toDouble();
+          }
+          entry.exerciseMinutes += point.dateTo
+              .difference(point.dateFrom)
+              .inMinutes;
+        }
       }
 
-      final summaries = aggregated.values.toList()
-        ..sort((a, b) => b.date.compareTo(a.date));
+      final summaries =
+          aggregated.entries
+              .map((entry) => entry.value.toSummary(date: entry.key))
+              .toList()
+            ..sort((a, b) => b.date.compareTo(a.date));
 
       return (summaries: summaries, failure: null);
     } catch (e) {
@@ -108,6 +147,46 @@ class HealthKitRepository implements HealthRepository {
     return (
       summary: result.summaries.isNotEmpty ? result.summaries.first : null,
       failure: null,
+    );
+  }
+
+  double? _asNumeric(HealthDataPoint point) {
+    final value = point.value;
+    if (value is NumericHealthValue) {
+      return value.numericValue.toDouble();
+    }
+    return null;
+  }
+}
+
+class _DailyAccumulator {
+  double? hrvMs;
+  double? rhrBpm;
+  double sleepHours = 0;
+  double activeCalories = 0;
+  double steps = 0;
+  double distanceMeters = 0;
+  double exerciseMinutes = 0;
+
+  HealthSummary toSummary({required DateTime date}) {
+    final cadence = exerciseMinutes > 0 ? steps / exerciseMinutes : null;
+    final strideLength = steps > 0 ? distanceMeters / steps : null;
+
+    // Convert kcal over active duration into estimated mechanical power.
+    final powerWatts = (exerciseMinutes > 0 && activeCalories > 0)
+        ? (activeCalories * 4184.0) / (exerciseMinutes * 60.0)
+        : null;
+
+    return HealthSummary(
+      date: date,
+      hrvMs: hrvMs,
+      rhrBpm: rhrBpm,
+      sleepHours: sleepHours > 0 ? sleepHours : null,
+      activeCalories: activeCalories > 0 ? activeCalories : null,
+      runningPowerWatts: powerWatts,
+      cadenceSpm: cadence,
+      strideLengthMeters: strideLength,
+      exerciseMinutes: exerciseMinutes > 0 ? exerciseMinutes : null,
     );
   }
 }

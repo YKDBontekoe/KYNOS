@@ -1,6 +1,6 @@
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
-import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/health_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_provider.g.dart';
@@ -9,21 +9,17 @@ part 'health_provider.g.dart';
 HealthRepository healthRepository(HealthRepositoryRef ref) {
   // Delegate to the infrastructure binding — feature layer stays decoupled
   // from the concrete HealthKitRepository class.
-  return ref.watch(healthKitRepositoryProvider);
+  return ref.watch(sharedHealthRepositoryProvider);
 }
 
 @riverpod
 Future<HealthSummary?> healthSummary(HealthSummaryRef ref) async {
   final repository = ref.watch(healthRepositoryProvider);
 
-  // HealthKit requires authorisation before querying; this triggers the
-  // system dialog on first run and is a no-op on subsequent calls.
-  await repository.requestPermissions();
-
   final result = await repository.getToday();
-  if (result.failure != null) {
-    throw result.failure!;
-  }
+  // Fail closed to "no data" so the dashboard still renders and can show
+  // the explicit Connect HealthKit call-to-action.
+  if (result.failure != null) return null;
   return result.summary;
 }
 
