@@ -1,10 +1,9 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/core/errors/failures.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 /// Verifies zero-knowledge constraints before biomechanics training starts.
 class LocalSyncPrivacyGuard {

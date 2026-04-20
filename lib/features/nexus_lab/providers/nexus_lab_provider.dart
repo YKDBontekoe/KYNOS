@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import 'package:kynos/domain/repositories/biomechanics_repository.dart';
 import 'package:kynos/shared/providers/biomechanics_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'nexus_lab_provider.g.dart';
 

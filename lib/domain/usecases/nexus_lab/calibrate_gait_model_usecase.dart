@@ -113,7 +113,7 @@ class CalibrateGaitModelUseCase {
       }
       final delta = newValue - oldValue;
       final sign = delta >= 0 ? '+' : '';
-      return '${newValue.toStringAsFixed(6)} (${sign}${delta.toStringAsFixed(6)})';
+      return '${newValue.toStringAsFixed(6)} ($sign${delta.toStringAsFixed(6)})';
     }
 
     return 'Calibration Summary\n'
