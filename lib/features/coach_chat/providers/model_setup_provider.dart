@@ -13,11 +13,11 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
 
   Future<void> checkAndInstall() async {
     state = const AsyncLoading();
-    
+
     try {
       // 1. Initialise as per docs
       await FlutterGemma.initialize();
-      
+
       // 2. Check if installed
       if (FlutterGemma.hasActiveModel()) {
         state = const AsyncData(true);
@@ -28,8 +28,8 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
       await FlutterGemma.installModel(modelType: ModelType.gemmaIt)
           .fromNetwork(
             AppConstants.modelDownloadUrl,
-            token: AppConstants.huggingFaceToken.isEmpty 
-                ? null 
+            token: AppConstants.huggingFaceToken.isEmpty
+                ? null
                 : AppConstants.huggingFaceToken,
           )
           .install();

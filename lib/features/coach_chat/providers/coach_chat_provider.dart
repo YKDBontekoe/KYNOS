@@ -1,8 +1,7 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
-import 'package:kynos/core/constants/app_constants.dart';
+
 import 'package:kynos/domain/entities/chat_message.dart';
-import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,7 +10,7 @@ part 'coach_chat_provider.g.dart';
 @Riverpod(keepAlive: true)
 class CoachChatNotifier extends _$CoachChatNotifier {
   final _logger = Logger();
-  
+
   InferenceModel? _model;
   InferenceChat? _chat;
 
@@ -28,7 +27,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
 
     // Direct package implementation as per documentation
     await FlutterGemma.initialize();
-    
+
     _model ??= await FlutterGemma.getActiveModel(
       maxTokens: 512,
       preferredBackend: PreferredBackend.gpu,
@@ -65,7 +64,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
 
       // Simple system prompt prepended for 0.12.x
       final fullPrompt = 'You are KYNOS coach.\n\n$userMessage';
-      
+
       await _chat!.addQueryChunk(Message.text(text: fullPrompt, isUser: true));
 
       await for (final response in _chat!.generateChatResponseAsync()) {

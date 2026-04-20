@@ -7,35 +7,104 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  quality_and_testing:
+    name: Code Quality & Testing
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.7' # Satisfies Dart SDK ^3.11.1
+          channel: 'stable'
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+          pub-cache-key: "flutter-pub:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Cache build_runner
+        uses: actions/cache@v4
+        with:
+          path: .dart_tool/build
+          key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.yaml', '**/*.dart') }}
+          restore-keys: |
+            ${{ runner.os }}-build-runner-
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Check code generation (build_runner)
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code || (echo "Generated files are out of sync. Please run build_runner and commit the changes." && false)
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Custom Lint
+        run: dart run custom_lint
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Enforce 90% test coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: './coverage/lcov.info'
+          min_coverage: 90
+          exclude: '**/*.g.dart **/*.freezed.dart'
+
+      - name: Upload coverage results
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  build_android_and_web:
+    name: Build Android & Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
           channel: 'stable'
           cache: true
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Check code generation (build_runner)
-        run: |
-          dart run build_runner build --delete-conflicting-outputs
-          git diff --exit-code || (echo "Generated files are out of sync. Please run build_runner and commit the changes." && exit 1)
+      - name: Generate Code
+        run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Analyze code
-        run: flutter analyze
+      - name: Build Web
+        run: flutter build web --release
 
-      - name: Run tests
-        run: flutter test --coverage
+      - name: Build Android
+        run: flutter build apk --debug
 
-      - name: Upload coverage results
-        uses: codecov/codecov-action@v4
+  build_ios:
+    name: Build iOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # Optional: Requires Codecov setup
-          fail_ci_if_error: false
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign

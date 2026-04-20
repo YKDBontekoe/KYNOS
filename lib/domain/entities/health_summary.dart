@@ -29,11 +29,11 @@ class HealthSummary {
   });
 
   Map<String, dynamic> toJson() => {
-        'date': date.toIso8601String(),
-        'hrv_ms': hrvMs,
-        'rhr_bpm': rhrBpm,
-        'sleep_hours': sleepHours,
-        'active_calories': activeCalories,
-        'running_power_watts': runningPowerWatts,
-      };
+    'date': date.toIso8601String(),
+    'hrv_ms': hrvMs,
+    'rhr_bpm': rhrBpm,
+    'sleep_hours': sleepHours,
+    'active_calories': activeCalories,
+    'running_power_watts': runningPowerWatts,
+  };
 }

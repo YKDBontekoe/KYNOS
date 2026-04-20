@@ -56,8 +56,12 @@ class HealthKitRepository implements HealthRepository {
       final Map<DateTime, HealthSummary> aggregated = {};
 
       for (var point in data) {
-        final date = DateTime(point.dateFrom.year, point.dateFrom.month, point.dateFrom.day);
-        
+        final date = DateTime(
+          point.dateFrom.year,
+          point.dateFrom.month,
+          point.dateFrom.day,
+        );
+
         final existing = aggregated[date] ?? HealthSummary(date: date);
         double? hrv = existing.hrvMs;
         double? rhr = existing.rhrBpm;
@@ -68,12 +72,16 @@ class HealthKitRepository implements HealthRepository {
           hrv = (point.value as NumericHealthValue).numericValue.toDouble();
         } else if (point.type == HealthDataType.RESTING_HEART_RATE) {
           rhr = (point.value as NumericHealthValue).numericValue.toDouble();
-        } else if (point.type == HealthDataType.SLEEP_ASLEEP || point.type == HealthDataType.SLEEP_IN_BED) {
+        } else if (point.type == HealthDataType.SLEEP_ASLEEP ||
+            point.type == HealthDataType.SLEEP_IN_BED) {
           // Calculate duration in hours.
-          final duration = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
+          final duration =
+              point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
           sleep = (sleep ?? 0) + duration;
         } else if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
-          active = (active ?? 0) + (point.value as NumericHealthValue).numericValue.toDouble();
+          active =
+              (active ?? 0) +
+              (point.value as NumericHealthValue).numericValue.toDouble();
         }
 
         aggregated[date] = HealthSummary(

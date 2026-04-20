@@ -267,11 +267,13 @@ class _NavIconPainter extends CustomPainter {
       }
       switch (cmd) {
         case 'M':
-          cx = next(); cy = next();
+          cx = next();
+          cy = next();
           path.moveTo(cx, cy);
           cmd = 'L';
         case 'L':
-          cx = next(); cy = next();
+          cx = next();
+          cy = next();
           path.lineTo(cx, cy);
         case 'H':
           cx = next();
@@ -282,11 +284,13 @@ class _NavIconPainter extends CustomPainter {
         case 'C':
           final x1 = next(), y1 = next();
           final x2 = next(), y2 = next();
-          cx = next(); cy = next();
+          cx = next();
+          cy = next();
           path.cubicTo(x1, y1, x2, y2, cx, cy);
         case 'Q':
           final x1 = next(), y1 = next();
-          cx = next(); cy = next();
+          cx = next();
+          cy = next();
           path.quadraticBezierTo(x1, y1, cx, cy);
         case 'A':
           // rx ry x-rotation large-arc-flag sweep-flag x y
@@ -294,7 +298,8 @@ class _NavIconPainter extends CustomPainter {
           final rot = next();
           final largeArc = next() == 1;
           final sweep = next() == 1;
-          cx = next(); cy = next();
+          cx = next();
+          cy = next();
           path.arcToPoint(
             Offset(cx, cy),
             radius: Radius.elliptical(rx, ry),
@@ -302,13 +307,16 @@ class _NavIconPainter extends CustomPainter {
             largeArc: largeArc,
             clockwise: sweep,
           );
-        case 'Z': case 'z':
+        case 'Z':
+        case 'z':
           path.close();
         case 'l':
-          cx += next(); cy += next();
+          cx += next();
+          cy += next();
           path.lineTo(cx, cy);
         case 'm':
-          cx += next(); cy += next();
+          cx += next();
+          cy += next();
           path.moveTo(cx, cy);
           cmd = 'l';
         case 'h':
@@ -321,8 +329,16 @@ class _NavIconPainter extends CustomPainter {
           final dx1 = next(), dy1 = next();
           final dx2 = next(), dy2 = next();
           final dx = next(), dy = next();
-          path.cubicTo(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
-          cx += dx; cy += dy;
+          path.cubicTo(
+            cx + dx1,
+            cy + dy1,
+            cx + dx2,
+            cy + dy2,
+            cx + dx,
+            cy + dy,
+          );
+          cx += dx;
+          cy += dy;
         case 'a':
           final rx = next(), ry = next();
           final rot = next();
@@ -336,7 +352,8 @@ class _NavIconPainter extends CustomPainter {
             largeArc: largeArc,
             clockwise: sweep,
           );
-          cx = ex; cy = ey;
+          cx = ex;
+          cy = ey;
         default:
           i++; // skip unknown
       }
@@ -348,12 +365,10 @@ class _NavIconPainter extends CustomPainter {
 // ── Nav SVG path constants (24×24 viewBox, Lucide stroke icons) ────────────
 abstract final class _NavPaths {
   // Bolt / zap — Today tab
-  static const bolt =
-      'M13 2 3 14 12 14 11 22 21 10 12 10 13 2';
+  static const bolt = 'M13 2 3 14 12 14 11 22 21 10 12 10 13 2';
 
-  // Message circle — Coach tab  
-  static const chat =
-      'M7.9 20A9 9 0 1 0 4 16.1L2 22Z';
+  // Message circle — Coach tab
+  static const chat = 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z';
 
   // Flask conical — Lab tab
   static const lab =
@@ -423,8 +438,18 @@ class _TodayTab extends ConsumerWidget {
   String _dateLabel() {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final now = DateTime.now();
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
@@ -539,7 +564,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'HRV',
-                value: summary == null ? null : (summary!.hrvMs?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.hrvMs?.round().toString() ?? '—'),
                 unit: 'ms',
                 accentColor: AppTheme.exercise,
               ),
@@ -548,7 +575,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Resting HR',
-                value: summary == null ? null : (summary!.rhrBpm?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.rhrBpm?.round().toString() ?? '—'),
                 unit: 'bpm',
                 accentColor: AppTheme.move,
               ),
@@ -561,7 +590,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Sleep',
-                value: summary == null ? null : (summary!.sleepHours?.toStringAsFixed(1) ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.sleepHours?.toStringAsFixed(1) ?? '—'),
                 unit: 'h',
                 accentColor: AppTheme.stand,
               ),
@@ -570,7 +601,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Active kcal',
-                value: summary == null ? null : (summary!.activeCalories?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.activeCalories?.round().toString() ?? '—'),
                 unit: 'kcal',
                 accentColor: AppTheme.energy,
               ),
@@ -748,7 +781,9 @@ class _ReadinessCard extends ConsumerWidget {
                   ),
                   loading: () => const SizedBox(
                     height: 40,
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
                   error: (e, s) => Text(
                     'Error',
@@ -972,18 +1007,11 @@ class _PrivacyNotice extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(
-          Icons.lock_rounded,
-          size: 14,
-          color: AppTheme.tertiaryLabel,
-        ),
+        const Icon(Icons.lock_rounded, size: 14, color: AppTheme.tertiaryLabel),
         const Gap(tokens.Spacing.sm),
         Text(
           'All data stays on your device',
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: AppTheme.tertiaryLabel,
-          ),
+          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.tertiaryLabel),
         ),
       ],
     );

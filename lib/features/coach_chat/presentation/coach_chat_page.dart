@@ -67,7 +67,8 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       loading: () => _ModelSetupScreen.checking(),
       error: (e, _) => _ModelSetupScreen.error(
         message: e.toString(),
-        onRetry: () => ref.read(modelSetupNotifierProvider.notifier).checkAndInstall(),
+        onRetry: () =>
+            ref.read(modelSetupNotifierProvider.notifier).checkAndInstall(),
       ),
       data: (isReady) {
         if (!isReady) return _ModelSetupScreen.checking();
@@ -78,12 +79,20 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
   Widget _buildChat() {
     ref.listen(
-      coachChatNotifierProvider.select((s) => s.valueOrNull?.lastOrNull?.content),
+      coachChatNotifierProvider.select(
+        (s) => s.valueOrNull?.lastOrNull?.content,
+      ),
       (prev, next) => _scrollToBottom(),
     );
 
-    final messages = ref.watch(coachChatNotifierProvider.select((s) => s.valueOrNull ?? const []));
-    final isStreaming = ref.watch(coachChatNotifierProvider.select((s) => s.valueOrNull?.any((m) => m.isStreaming) ?? false));
+    final messages = ref.watch(
+      coachChatNotifierProvider.select((s) => s.valueOrNull ?? const []),
+    );
+    final isStreaming = ref.watch(
+      coachChatNotifierProvider.select(
+        (s) => s.valueOrNull?.any((m) => m.isStreaming) ?? false,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -91,12 +100,17 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       body: Column(
         children: [
           _AppBar(
-            onClear: () => ref.read(coachChatNotifierProvider.notifier).clearConversation(),
+            onClear: () => ref
+                .read(coachChatNotifierProvider.notifier)
+                .clearConversation(),
           ),
           Expanded(
             child: messages.isEmpty
                 ? _EmptyState(onSuggestionTap: _handleSend)
-                : _MessageList(messages: messages, scrollController: _scrollController),
+                : _MessageList(
+                    messages: messages,
+                    scrollController: _scrollController,
+                  ),
           ),
           _InputBar(
             controller: _textController,
@@ -122,18 +136,30 @@ class _AppBar extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(tokens.Spacing.md, tokens.Spacing.xs, tokens.Spacing.md, tokens.Spacing.sm),
+        padding: const EdgeInsets.fromLTRB(
+          tokens.Spacing.md,
+          tokens.Spacing.xs,
+          tokens.Spacing.md,
+          tokens.Spacing.sm,
+        ),
         child: Row(
           children: [
             Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(color: AppTheme.exercise, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: AppTheme.exercise,
+                shape: BoxShape.circle,
+              ),
             ),
             const Gap(tokens.Spacing.sm),
             Text(
               'KYNOS Coach',
-              style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.label),
+              style: GoogleFonts.inter(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.label,
+              ),
             ),
             const Spacer(),
             _OnDeviceBadge(),
@@ -143,8 +169,15 @@ class _AppBar extends StatelessWidget {
               child: Container(
                 width: 32,
                 height: 32,
-                decoration: BoxDecoration(color: AppTheme.separator, borderRadius: BorderRadius.circular(tokens.Radius.md)),
-                child: const Icon(Icons.refresh_rounded, size: 18, color: AppTheme.secondaryLabel),
+                decoration: BoxDecoration(
+                  color: AppTheme.separator,
+                  borderRadius: BorderRadius.circular(tokens.Radius.md),
+                ),
+                child: const Icon(
+                  Icons.refresh_rounded,
+                  size: 18,
+                  color: AppTheme.secondaryLabel,
+                ),
               ),
             ),
           ],
@@ -168,7 +201,14 @@ class _OnDeviceBadge extends StatelessWidget {
         children: [
           Icon(Icons.lock_rounded, size: 11, color: AppTheme.exercise),
           Gap(4),
-          Text('On-Device', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.exercise)),
+          Text(
+            'On-Device',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.exercise,
+            ),
+          ),
         ],
       ),
     );
@@ -187,7 +227,12 @@ class _MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(tokens.Spacing.md, tokens.Spacing.sm, tokens.Spacing.md, 96),
+      padding: const EdgeInsets.fromLTRB(
+        tokens.Spacing.md,
+        tokens.Spacing.sm,
+        tokens.Spacing.md,
+        96,
+      ),
       itemCount: messages.length,
       itemBuilder: (context, index) => RepaintBoundary(
         child: Padding(
@@ -207,7 +252,10 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (message.role) {
       MessageRole.user => _UserBubble(content: message.content),
-      MessageRole.assistant => _AssistantBubble(content: message.content, isStreaming: message.isStreaming),
+      MessageRole.assistant => _AssistantBubble(
+        content: message.content,
+        isStreaming: message.isStreaming,
+      ),
     };
   }
 }
@@ -221,8 +269,13 @@ class _UserBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.76),
-        padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md, vertical: tokens.Spacing.sm),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.76,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: tokens.Spacing.md,
+          vertical: tokens.Spacing.sm,
+        ),
         decoration: const BoxDecoration(
           color: AppTheme.stand,
           borderRadius: BorderRadius.only(
@@ -232,7 +285,14 @@ class _UserBubble extends StatelessWidget {
             bottomRight: Radius.circular(4),
           ),
         ),
-        child: Text(content, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.45)),
+        child: Text(
+          content,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.white,
+            height: 1.45,
+          ),
+        ),
       ),
     );
   }
@@ -249,11 +309,25 @@ class _AssistantBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.84),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.84,
+        ),
         child: GlassCard(
           borderRadius: tokens.Radius.lg,
-          padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md, vertical: tokens.Spacing.sm),
-          child: isStreaming && content.isEmpty ? const _TypingIndicator() : Text(content, style: const TextStyle(fontSize: 15, color: AppTheme.label, height: 1.5)),
+          padding: const EdgeInsets.symmetric(
+            horizontal: tokens.Spacing.md,
+            vertical: tokens.Spacing.sm,
+          ),
+          child: isStreaming && content.isEmpty
+              ? const _TypingIndicator()
+              : Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppTheme.label,
+                    height: 1.5,
+                  ),
+                ),
         ),
       ),
     );
@@ -266,23 +340,46 @@ class _TypingIndicator extends StatefulWidget {
   State<_TypingIndicator> createState() => _TypingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat();
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat();
   @override
-  void dispose() { _controller.dispose(); super.dispose(); }
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) => Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(3, (i) => Padding(
-          padding: EdgeInsets.only(left: i > 0 ? 6 : 0),
-          child: Opacity(
-            opacity: 0.25 + 0.75 * math.sin((_controller.value + i / 3.0) % 1.0 * math.pi).clamp(0.0, 1.0),
-            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppTheme.secondaryLabel, shape: BoxShape.circle)),
+        children: List.generate(
+          3,
+          (i) => Padding(
+            padding: EdgeInsets.only(left: i > 0 ? 6 : 0),
+            child: Opacity(
+              opacity:
+                  0.25 +
+                  0.75 *
+                      math
+                          .sin((_controller.value + i / 3.0) % 1.0 * math.pi)
+                          .clamp(0.0, 1.0),
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppTheme.secondaryLabel,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
           ),
-        )),
+        ),
       ),
     );
   }
@@ -298,16 +395,36 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppTheme.stand),
+          const Icon(
+            Icons.chat_bubble_outline_rounded,
+            size: 48,
+            color: AppTheme.stand,
+          ),
           const Gap(16),
-          const Text('Your AI Coach', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text(
+            'Your AI Coach',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+          ),
           const Gap(8),
-          const Text('Ask about training or recovery.\nAll analysis runs on-device.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.secondaryLabel)),
+          const Text(
+            'Ask about training or recovery.\nAll analysis runs on-device.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.secondaryLabel),
+          ),
           const Gap(24),
-          ...['How is my recovery?', 'Am I ready for a workout?'].map((s) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 4),
-            child: ListTile(title: Text(s), tileColor: AppTheme.separator, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), onTap: () => onSuggestionTap(s)),
-          )),
+          ...['How is my recovery?', 'Am I ready for a workout?'].map(
+            (s) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 4),
+              child: ListTile(
+                title: Text(s),
+                tileColor: AppTheme.separator,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                onTap: () => onSuggestionTap(s),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -320,7 +437,12 @@ class _InputBar extends StatelessWidget {
   final bool isStreaming;
   final ValueChanged<String> onSend;
 
-  const _InputBar({required this.controller, required this.focusNode, required this.isStreaming, required this.onSend});
+  const _InputBar({
+    required this.controller,
+    required this.focusNode,
+    required this.isStreaming,
+    required this.onSend,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -333,8 +455,21 @@ class _InputBar extends StatelessWidget {
           borderRadius: tokens.Radius.full,
           child: Row(
             children: [
-              Expanded(child: TextField(controller: controller, focusNode: focusNode, enabled: !isStreaming, decoration: const InputDecoration(hintText: 'Ask your coach...', border: InputBorder.none))),
-              IconButton(icon: Icon(isStreaming ? Icons.hourglass_empty : Icons.send), onPressed: isStreaming ? null : () => onSend(controller.text)),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  enabled: !isStreaming,
+                  decoration: const InputDecoration(
+                    hintText: 'Ask your coach...',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(isStreaming ? Icons.hourglass_empty : Icons.send),
+                onPressed: isStreaming ? null : () => onSend(controller.text),
+              ),
             ],
           ),
         ),
@@ -349,10 +484,26 @@ class _ModelSetupScreen extends StatelessWidget {
   final VoidCallback? onRetry;
   final bool isLoading;
 
-  const _ModelSetupScreen({this.title, this.subtitle, this.onRetry, this.isLoading = false});
+  const _ModelSetupScreen({
+    this.title,
+    this.subtitle,
+    this.onRetry,
+    this.isLoading = false,
+  });
 
-  factory _ModelSetupScreen.checking() => const _ModelSetupScreen(title: 'Preparing AI Coach', subtitle: 'Checking for model...', isLoading: true);
-  factory _ModelSetupScreen.error({required String message, required VoidCallback onRetry}) => _ModelSetupScreen(title: 'Setup Failed', subtitle: message, onRetry: onRetry);
+  factory _ModelSetupScreen.checking() => const _ModelSetupScreen(
+    title: 'Preparing AI Coach',
+    subtitle: 'Checking for model...',
+    isLoading: true,
+  );
+  factory _ModelSetupScreen.error({
+    required String message,
+    required VoidCallback onRetry,
+  }) => _ModelSetupScreen(
+    title: 'Setup Failed',
+    subtitle: message,
+    onRetry: onRetry,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -363,12 +514,27 @@ class _ModelSetupScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (isLoading) const CircularProgressIndicator() else const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              if (isLoading)
+                const CircularProgressIndicator()
+              else
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const Gap(24),
-              Text(title ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(
+                title ?? '',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const Gap(8),
               Text(subtitle ?? '', textAlign: TextAlign.center),
-              if (onRetry != null) ...[const Gap(24), ElevatedButton(onPressed: onRetry, child: const Text('Try Again'))],
+              if (onRetry != null) ...[
+                const Gap(24),
+                ElevatedButton(
+                  onPressed: onRetry,
+                  child: const Text('Try Again'),
+                ),
+              ],
             ],
           ),
         ),

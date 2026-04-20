@@ -50,106 +50,103 @@ class AppTheme {
 
   // ── Theme ─────────────────────────────────────────────────────────────────
   static ThemeData get light => ThemeData(
-        brightness: Brightness.light,
-        colorScheme: const ColorScheme.light(
-          primary: stand,
-          secondary: exercise,
-          error: move,
-          surface: card,
-          onSurface: label,
+    brightness: Brightness.light,
+    colorScheme: const ColorScheme.light(
+      primary: stand,
+      secondary: exercise,
+      error: move,
+      surface: card,
+      onSurface: label,
+    ),
+    scaffoldBackgroundColor: background,
+    textTheme: _textTheme(),
+    cardTheme: CardThemeData(
+      color: card,
+      elevation: 0,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: stand,
+        foregroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(54),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
         ),
-        scaffoldBackgroundColor: background,
-        textTheme: _textTheme(),
-        cardTheme: CardThemeData(
-          color: card,
-          elevation: 0,
-          shadowColor: Colors.black.withValues(alpha: 0.08),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
+        textStyle: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.1,
         ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: stand,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(54),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-            ),
-            textStyle: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.1,
-            ),
-          ),
-        ),
-        dividerTheme: const DividerThemeData(
-          color: separator,
-          thickness: 0.5,
-        ),
-        splashFactory: InkRipple.splashFactory,
-      );
+      ),
+    ),
+    dividerTheme: const DividerThemeData(color: separator, thickness: 0.5),
+    splashFactory: InkRipple.splashFactory,
+  );
 
   static TextTheme _textTheme() => TextTheme(
-        // Big metric numbers — DM Mono
-        displayLarge: GoogleFonts.dmMono(
-          fontSize: 48,
-          fontWeight: FontWeight.w700,
-          color: label,
-          height: 1,
-          letterSpacing: -2,
-        ),
-        // Section hero number
-        displayMedium: GoogleFonts.inter(
-          fontSize: 36,
-          fontWeight: FontWeight.w800,
-          color: label,
-          height: 1,
-          letterSpacing: -1.5,
-        ),
-        // Page title / card heading
-        displaySmall: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-          color: label,
-          height: 1.1,
-          letterSpacing: -0.8,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: label,
-          letterSpacing: -0.4,
-        ),
-        titleMedium: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: label,
-          letterSpacing: -0.2,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: secondaryLabel,
-          height: 1.4,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
-          color: secondaryLabel,
-          height: 1.4,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: secondaryLabel,
-          letterSpacing: 0.2,
-        ),
-        labelSmall: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.8,
-          color: tertiaryLabel,
-        ),
-      );
+    // Big metric numbers — DM Mono
+    displayLarge: GoogleFonts.dmMono(
+      fontSize: 48,
+      fontWeight: FontWeight.w700,
+      color: label,
+      height: 1,
+      letterSpacing: -2,
+    ),
+    // Section hero number
+    displayMedium: GoogleFonts.inter(
+      fontSize: 36,
+      fontWeight: FontWeight.w800,
+      color: label,
+      height: 1,
+      letterSpacing: -1.5,
+    ),
+    // Page title / card heading
+    displaySmall: GoogleFonts.inter(
+      fontSize: 24,
+      fontWeight: FontWeight.w800,
+      color: label,
+      height: 1.1,
+      letterSpacing: -0.8,
+    ),
+    titleLarge: GoogleFonts.inter(
+      fontSize: 18,
+      fontWeight: FontWeight.w700,
+      color: label,
+      letterSpacing: -0.4,
+    ),
+    titleMedium: GoogleFonts.inter(
+      fontSize: 15,
+      fontWeight: FontWeight.w600,
+      color: label,
+      letterSpacing: -0.2,
+    ),
+    bodyLarge: GoogleFonts.inter(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: secondaryLabel,
+      height: 1.4,
+    ),
+    bodyMedium: GoogleFonts.inter(
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      color: secondaryLabel,
+      height: 1.4,
+    ),
+    labelLarge: GoogleFonts.inter(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: secondaryLabel,
+      letterSpacing: 0.2,
+    ),
+    labelSmall: GoogleFonts.inter(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.8,
+      color: tertiaryLabel,
+    ),
+  );
 }

@@ -12,11 +12,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: MetricTile(
-              label: 'Heart Rate',
-              value: '72',
-              unit: 'BPM',
-            ),
+            body: MetricTile(label: 'Heart Rate', value: '72', unit: 'BPM'),
           ),
         ),
       );
@@ -29,12 +25,7 @@ void main() {
     testWidgets('renders loading shimmer when value is null', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: MetricTile(
-              label: 'Heart Rate',
-              value: null,
-            ),
-          ),
+          home: Scaffold(body: MetricTile(label: 'Heart Rate', value: null)),
         ),
       );
 
@@ -65,11 +56,7 @@ void main() {
   group('GlowText Tests', () {
     testWidgets('renders text with shadows', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: GlowText('Glow Me'),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: GlowText('Glow Me'))),
       );
 
       final textWidget = tester.widget<Text>(find.text('Glow Me'));
@@ -82,11 +69,7 @@ void main() {
     testWidgets('renders child and applies BackdropFilter', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: GlassCard(
-              child: Text('Glass Content'),
-            ),
-          ),
+          home: Scaffold(body: GlassCard(child: Text('Glass Content'))),
         ),
       );
 

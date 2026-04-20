@@ -7,7 +7,8 @@ abstract final class AppConstants {
   static const String defaultModelId = 'gemma4-e2b-int4';
 
   /// Fallback model when thermals exceed [thermalThresholdCelsius].
-  static const String fallbackModelId = 'gemma4-e2b-int4'; // same tier, lower threads
+  static const String fallbackModelId =
+      'gemma4-e2b-int4'; // same tier, lower threads
 
   /// Maximum RAM budget (bytes) reserved for the AI runtime.
   static const int aiRamBudgetBytes = 3 * 1024 * 1024 * 1024; // 3 GB

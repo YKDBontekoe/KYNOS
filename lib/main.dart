@@ -10,13 +10,7 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env');
 
   // Lock to portrait while the full layout is being built.
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  runApp(
-    const ProviderScope(
-      child: KynosApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: KynosApp()));
 }
