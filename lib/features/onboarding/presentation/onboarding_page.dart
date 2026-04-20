@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart';
-import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:lottie/lottie.dart';
 
 class OnboardingItem {
   final String lottieUrl;
@@ -188,7 +188,7 @@ class _OnboardingPageWidget extends StatelessWidget {
               item.lottieUrl,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stack) =>
-                  Icon(Icons.image_not_supported, size: 100, color: AppTheme.tertiaryLabel),
+                  const Icon(Icons.image_not_supported, size: 100, color: AppTheme.tertiaryLabel),
             ),
           ),
           const Gap(Spacing.xxl),
