@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -9,6 +7,10 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
+import 'package:kynos/core/utils/readiness_calculator.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/recovery_trend_chart.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
 
 /// Today tab — health metrics, readiness ring, and connect card.
 class DashboardPage extends ConsumerWidget {
@@ -26,8 +28,18 @@ class DashboardPage extends ConsumerWidget {
   String _dateLabel() {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final now = DateTime.now();
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
@@ -35,7 +47,15 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final healthSummary = ref.watch(healthSummaryProvider);
+    final healthSummaryAsync = ref.watch(healthSummaryProvider);
+
+    // Evaluate readiness score
+    final score = healthSummaryAsync.when(
+      data: (summary) => calculateReadiness(summary),
+      loading: () => 50,
+      error: (_, __) => 0,
+    );
+    final isReadyToTrain = score >= 60;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
@@ -86,12 +106,111 @@ class DashboardPage extends ConsumerWidget {
               _HeroBanner(greeting: _greeting()),
               const Gap(tokens.Spacing.lg),
 
-              const _ReadinessCard(),
+              if (healthSummaryAsync.value != null) ...[
+                const CoachInsightCard(),
+                const Gap(tokens.Spacing.lg),
+              ],
+
+              const ReadinessCard(),
               const Gap(tokens.Spacing.lg),
+
+              if (healthSummaryAsync.value != null && isReadyToTrain) ...[
+                const _SectionHeader(title: 'Suggested Workout'),
+                const Gap(tokens.Spacing.sm),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.exercise.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTheme.exercise.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.directions_run_rounded,
+                        color: AppTheme.exercise,
+                        size: 32,
+                      ),
+                      const Gap(16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Interval Sprints',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.label,
+                              ),
+                            ),
+                            Text(
+                              'High intensity to capitalize on recovery',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppTheme.secondaryLabel,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(tokens.Spacing.lg),
+              ] else if (healthSummaryAsync.value != null) ...[
+                const _SectionHeader(title: 'Recovery Focus'),
+                const Gap(tokens.Spacing.sm),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.move.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTheme.move.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.self_improvement_rounded,
+                        color: AppTheme.move,
+                        size: 32,
+                      ),
+                      const Gap(16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Active Recovery & Rest',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.label,
+                              ),
+                            ),
+                            Text(
+                              'Light stretching to reduce fatigue',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppTheme.secondaryLabel,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Gap(tokens.Spacing.lg),
+              ],
 
               const _SectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
-              healthSummary.when(
+              healthSummaryAsync.when(
                 data: (summary) => _HealthMetricsGrid(summary: summary),
                 loading: () => const _HealthMetricsGrid(summary: null),
                 error: (e, s) => Center(
@@ -103,7 +222,13 @@ class DashboardPage extends ConsumerWidget {
               ),
               const Gap(tokens.Spacing.lg),
 
-              if (healthSummary.value == null && !healthSummary.isLoading) ...[
+              if (healthSummaryAsync.value != null) ...[
+                const RecoveryTrendChart(),
+                const Gap(tokens.Spacing.lg),
+              ],
+
+              if (healthSummaryAsync.value == null &&
+                  !healthSummaryAsync.isLoading) ...[
                 const _SectionHeader(title: 'Get Started'),
                 const Gap(tokens.Spacing.sm),
                 const _ConnectCard(),
@@ -135,7 +260,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'HRV',
-                value: summary == null ? null : (summary!.hrvMs?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.hrvMs?.round().toString() ?? '—'),
                 unit: 'ms',
                 accentColor: AppTheme.exercise,
               ),
@@ -144,7 +271,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Resting HR',
-                value: summary == null ? null : (summary!.rhrBpm?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.rhrBpm?.round().toString() ?? '—'),
                 unit: 'bpm',
                 accentColor: AppTheme.move,
               ),
@@ -157,7 +286,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Sleep',
-                value: summary == null ? null : (summary!.sleepHours?.toStringAsFixed(1) ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.sleepHours?.toStringAsFixed(1) ?? '—'),
                 unit: 'h',
                 accentColor: AppTheme.stand,
               ),
@@ -166,7 +297,9 @@ class _HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Active kcal',
-                value: summary == null ? null : (summary!.activeCalories?.round().toString() ?? '—'),
+                value: summary == null
+                    ? null
+                    : (summary!.activeCalories?.round().toString() ?? '—'),
                 unit: 'kcal',
                 accentColor: AppTheme.energy,
               ),
@@ -275,178 +408,6 @@ class _SectionHeader extends StatelessWidget {
       ),
     );
   }
-}
-
-// ── Readiness card ─────────────────────────────────────────────────────────
-
-class _ReadinessCard extends ConsumerWidget {
-  const _ReadinessCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final healthSummary = ref.watch(healthSummaryProvider);
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _ActivityRing(
-            progress: healthSummary.when(
-              data: (summary) => summary != null ? 0.75 : 0.0,
-              loading: () => 0.0,
-              error: (e, s) => 0.0,
-            ),
-            size: 80,
-            strokeWidth: 8,
-            colors: const [AppTheme.move, AppTheme.exercise, AppTheme.stand],
-          ),
-          const Gap(20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'READINESS',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.secondaryLabel,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const Gap(4),
-                healthSummary.when(
-                  data: (summary) => Text(
-                    summary != null ? '87' : '—',
-                    style: GoogleFonts.inter(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: summary != null ? AppTheme.purple : AppTheme.label,
-                      height: 1,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  loading: () => const SizedBox(
-                    height: 40,
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
-                  error: (e, s) => Text(
-                    'Error',
-                    style: GoogleFonts.inter(fontSize: 24, color: Colors.red),
-                  ),
-                ),
-                const Gap(6),
-                Text(
-                  healthSummary.when(
-                    data: (summary) => summary != null
-                        ? 'Great recovery. Optimal conditions for a high-intensity interval run today.'
-                        : 'Connect HealthKit to unlock your daily readiness.',
-                    loading: () => 'Calculating readiness...',
-                    error: (e, s) => 'Could not calculate readiness.',
-                  ),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: AppTheme.secondaryLabel,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Activity rings ─────────────────────────────────────────────────────────
-
-class _ActivityRing extends StatelessWidget {
-  final double progress;
-  final double size;
-  final double strokeWidth;
-  final List<Color> colors;
-
-  const _ActivityRing({
-    required this.progress,
-    required this.size,
-    required this.strokeWidth,
-    required this.colors,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _RingPainter(
-          progress: progress,
-          strokeWidth: strokeWidth,
-          colors: colors,
-        ),
-      ),
-    );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  final double progress;
-  final double strokeWidth;
-  final List<Color> colors;
-
-  const _RingPainter({
-    required this.progress,
-    required this.strokeWidth,
-    required this.colors,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    for (var i = 0; i < colors.length; i++) {
-      final spacing = strokeWidth * 0.28;
-      final radius =
-          (size.width / 2) - strokeWidth / 2 - (strokeWidth + spacing) * i;
-
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth
-          ..color = colors[i].withValues(alpha: 0.15),
-      );
-
-      if (progress > 0) {
-        canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          -math.pi / 2,
-          2 * math.pi * progress,
-          false,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = strokeWidth
-            ..color = colors[i]
-            ..strokeCap = StrokeCap.round,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter old) => old.progress != progress;
 }
 
 // ── Connect card ───────────────────────────────────────────────────────────
@@ -561,18 +522,11 @@ class _PrivacyNotice extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(
-          Icons.lock_rounded,
-          size: 14,
-          color: AppTheme.tertiaryLabel,
-        ),
+        const Icon(Icons.lock_rounded, size: 14, color: AppTheme.tertiaryLabel),
         const Gap(tokens.Spacing.sm),
         Text(
           'All data stays on your device',
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: AppTheme.tertiaryLabel,
-          ),
+          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.tertiaryLabel),
         ),
       ],
     );
