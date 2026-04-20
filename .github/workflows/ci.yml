@@ -62,7 +62,7 @@ jobs:
         run: ./osv-scanner -r .
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed ..
+        run: dart format --output=none --set-exit-if-changed .
 
       - name: Check code generation (build_runner)
         if: matrix.channel == 'stable'
