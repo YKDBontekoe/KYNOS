@@ -21,7 +21,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          cp .env.example .env
+          flutter pub get
 
       - name: Check code generation (build_runner)
         run: |
