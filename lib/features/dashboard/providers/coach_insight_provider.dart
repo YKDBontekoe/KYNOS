@@ -1,6 +1,6 @@
 import 'package:kynos/core/utils/readiness_calculator.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_insight_provider.g.dart';

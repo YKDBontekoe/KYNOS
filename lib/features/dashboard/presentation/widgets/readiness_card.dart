@@ -4,8 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/utils/readiness_calculator.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/activity_ring.dart';
+import 'package:kynos/features/dashboard/providers/health_provider.dart';
 
 class ReadinessCard extends ConsumerWidget {
   const ReadinessCard({super.key});
@@ -17,7 +17,7 @@ class ReadinessCard extends ConsumerWidget {
     final score = healthSummaryAsync.when(
       data: (summary) => calculateReadiness(summary),
       loading: () => 0,
-      error: (_, __) => 0,
+      error: (_, _) => 0,
     );
 
     return Container(

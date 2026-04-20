@@ -4,13 +4,13 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/utils/readiness_calculator.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/recovery_trend_chart.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
-import 'package:kynos/core/utils/readiness_calculator.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/recovery_trend_chart.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
 
 /// Today tab — health metrics, readiness ring, and connect card.
 class DashboardPage extends ConsumerWidget {
@@ -53,7 +53,7 @@ class DashboardPage extends ConsumerWidget {
     final score = healthSummaryAsync.when(
       data: (summary) => calculateReadiness(summary),
       loading: () => 50,
-      error: (_, __) => 0,
+      error: (_, _) => 0,
     );
     final isReadyToTrain = score >= 60;
 
