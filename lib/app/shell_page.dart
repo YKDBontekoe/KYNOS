@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +5,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
+import 'package:kynos/features/nexus_lab/presentation/nexus_lab_page.dart';
 
 /// Root app shell — owns the floating bottom nav and the [IndexedStack] of tabs.
 ///
@@ -37,16 +36,7 @@ class _ShellState extends State<ShellPage> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       extendBody: true,
-      body: IndexedStack(
-        index: _index,
-        children: const [
-          DashboardPage(),
-          CoachChatPage(),
-          _Placeholder(label: 'Lab', icon: Icons.science_rounded),
-          _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
-          _Placeholder(label: 'Profile', icon: Icons.person_rounded),
-        ],
-      ),
+      body: _tabForIndex(_index),
       bottomNavigationBar: _BottomBar(
         labels: _labels,
         paths: _navPaths,
@@ -54,6 +44,23 @@ class _ShellState extends State<ShellPage> {
         onTap: (i) => setState(() => _index = i),
       ),
     );
+  }
+
+  Widget _tabForIndex(int index) {
+    return switch (index) {
+      0 => const DashboardPage(),
+      1 => const CoachChatPage(),
+      2 => const NexusLabPage(),
+      3 => const _Placeholder(
+          label: 'Plan',
+          icon: Icons.calendar_month_rounded,
+        ),
+      4 => const _Placeholder(
+          label: 'Profile',
+          icon: Icons.person_rounded,
+        ),
+      _ => const DashboardPage(),
+    };
   }
 }
 
@@ -82,44 +89,41 @@ class _BottomBar extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.93),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    width: 0.5,
+            child: Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  width: 0.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 48,
+                    offset: const Offset(0, 16),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 48,
-                      offset: const Offset(0, 16),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < labels.length; i++)
-                      Expanded(
-                        child: _BarItem(
-                          svgPath: paths[i],
-                          label: labels[i],
-                          selected: selectedIndex == i,
-                          onTap: () => onTap(i),
-                        ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
+                children: [
+                  for (var i = 0; i < labels.length; i++)
+                    Expanded(
+                      child: _BarItem(
+                        svgPath: paths[i],
+                        label: labels[i],
+                        selected: selectedIndex == i,
+                        onTap: () => onTap(i),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -378,4 +382,3 @@ class _Placeholder extends StatelessWidget {
     );
   }
 }
-

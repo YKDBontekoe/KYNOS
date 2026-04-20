@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'model_setup_provider.dart';
+part of 'nexus_lab_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$modelSetupNotifierHash() =>
-    r'ed9a6452374c3adee4ecfaf38ae3fbdee5c0c7ee';
+String _$nexusLabNotifierHash() => r'c718e85eb6cdd8f03fdecfb74d2d20fad7e65d6b';
 
-/// See also [ModelSetupNotifier].
-@ProviderFor(ModelSetupNotifier)
-final modelSetupNotifierProvider =
-    NotifierProvider<ModelSetupNotifier, AsyncValue<bool>>.internal(
-      ModelSetupNotifier.new,
-      name: r'modelSetupNotifierProvider',
+/// See also [NexusLabNotifier].
+@ProviderFor(NexusLabNotifier)
+final nexusLabNotifierProvider =
+    AsyncNotifierProvider<NexusLabNotifier, NexusLabState>.internal(
+      NexusLabNotifier.new,
+      name: r'nexusLabNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$modelSetupNotifierHash,
+          : _$nexusLabNotifierHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$ModelSetupNotifier = Notifier<AsyncValue<bool>>;
+typedef _$NexusLabNotifier = AsyncNotifier<NexusLabState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

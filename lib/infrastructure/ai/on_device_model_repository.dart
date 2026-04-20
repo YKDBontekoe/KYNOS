@@ -13,8 +13,8 @@ class OnDeviceModelRepository implements AiModelRepository {
 
   @override
   Future<void> installFromNetwork({required String url, String? token}) async {
-    await FlutterGemma.installModel(modelType: ModelType.gemmaIt)
-        .fromNetwork(url, token: token)
-        .install();
+    await FlutterGemma.installModel(
+      modelType: ModelType.gemmaIt,
+    ).fromNetwork(url, token: token).install();
   }
 }
