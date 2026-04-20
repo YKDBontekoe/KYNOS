@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
 
 /// All named route paths — single source of truth.
@@ -19,8 +20,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.dashboard,
         builder: (context, state) => const DashboardPage(),
       ),
+      GoRoute(
+        path: Routes.coachChat,
+        builder: (context, state) => const CoachChatPage(),
+      ),
       // Additional routes added as features are built:
-      // GoRoute(path: Routes.coachChat, ...)
       // GoRoute(path: Routes.nexusLab, ...)
       // GoRoute(path: Routes.trainingPlan, ...)
       // GoRoute(path: Routes.settings, ...)

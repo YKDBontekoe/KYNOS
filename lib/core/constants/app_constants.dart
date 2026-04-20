@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Compile-time constants for KYNOS.
 abstract final class AppConstants {
   // ── AI Model ──────────────────────────────────────────────────────────────
@@ -10,8 +12,8 @@ abstract final class AppConstants {
   /// Maximum RAM budget (bytes) reserved for the AI runtime.
   static const int aiRamBudgetBytes = 3 * 1024 * 1024 * 1024; // 3 GB
 
-  /// Context window (tokens) supported by Gemma 4 E2B.
-  static const int modelContextWindow = 128000;
+  /// Context window (tokens) supported by Gemma 4 E2B on mobile.
+  static const int modelContextWindow = 1024;
 
   // ── Inference ─────────────────────────────────────────────────────────────
   /// Target frame render budget at 120 Hz ProMotion (ms).
@@ -26,6 +28,17 @@ abstract final class AppConstants {
 
   /// Recommended volume variation tolerance between training weeks.
   static const double weeklyVolumeTolerance = 0.10; // ±10 %
+
+  // ── Model download ────────────────────────────────────────────────────────
+  /// HuggingFace repository path for the on-device Gemma model.
+  /// Verify the exact filename against the HF repo before shipping.
+  static const String modelDownloadUrl =
+      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm'
+      '/resolve/main/gemma-4-E2B-it.litertlm?download=true';
+
+  /// HuggingFace API token — set HF_TOKEN in your .env file.
+  /// Leave empty for public/ungated model files.
+  static String get huggingFaceToken => dotenv.env['HF_TOKEN'] ?? '';
 
   // ── Privacy ───────────────────────────────────────────────────────────────
   /// All biometric data stays on-device; this flag disables any cloud path.

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
@@ -53,7 +54,7 @@ class _ShellState extends ConsumerState<_Shell> {
         index: _index,
         children: const [
           _TodayTab(),
-          _Placeholder(label: 'Coach', icon: Icons.chat_bubble_rounded),
+          CoachChatPage(),
           _Placeholder(label: 'Lab', icon: Icons.science_rounded),
           _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
           _Placeholder(label: 'Profile', icon: Icons.person_rounded),

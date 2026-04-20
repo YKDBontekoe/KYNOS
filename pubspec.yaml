@@ -43,12 +43,14 @@ dependencies:
   # ── Networking (coach ↔ optional remote sync) ────────────────────────────
   dio: ^5.8.0+1
 
+  # ── Config ───────────────────────────────────────────────────────────────
+  flutter_dotenv: ^5.2.1    # .env file for secrets (HF_TOKEN, etc.)
+
   # ── Logging ──────────────────────────────────────────────────────────────
   logger: ^2.5.0
 
   # ── AI / On-Device Inference ─────────────────────────────────────────────
-  # litert_lm: (pending pub.dev — LiteRT-LM Gemma 4 runtime)
-  # flutter_ai_monitor: (pending pub.dev — energy/thermal monitoring)
+  flutter_gemma: ^0.12.6    # MediaPipe-backed on-device Gemma inference
 
 dev_dependencies:
   flutter_test:
@@ -71,5 +73,6 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/images/
     - assets/models/    # Gemma 4 E2B INT4 weights — NOT committed to git

@@ -3,6 +3,9 @@ assets/models/*.task
 assets/models/*.bin
 assets/models/*.tflite
 
+# Secrets — copy .env.example → .env and fill in your token
+.env
+
 # IDEs and editors
 .idea/
 .vscode/

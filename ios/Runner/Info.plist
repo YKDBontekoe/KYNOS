@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>KYNOS needs access to your health data (HRV, Heart Rate, Sleep) to provide personalised AI coaching and biomechanical insights.</string>
 	<key>NSHealthUpdateUsageDescription</key>
