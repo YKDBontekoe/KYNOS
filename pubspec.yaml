@@ -46,6 +46,9 @@ dependencies:
   # ── Config ───────────────────────────────────────────────────────────────
   flutter_dotenv: ^5.2.1    # .env file for secrets (HF_TOKEN, etc.)
 
+  # ── Utilities ────────────────────────────────────────────────────────────
+  meta: ^1.17.0               # @immutable / @sealed for domain entities (pure Dart)
+
   # ── Logging ──────────────────────────────────────────────────────────────
   logger: ^2.5.0
 

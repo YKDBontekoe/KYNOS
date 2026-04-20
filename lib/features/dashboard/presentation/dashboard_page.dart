@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,408 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
-// ── Root ──────────────────────────────────────────────────────────────────
-
-class DashboardPage extends StatelessWidget {
+/// Today tab — health metrics, readiness ring, and connect card.
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
-
-  @override
-  Widget build(BuildContext context) => const _Shell();
-}
-
-// ── Shell ─────────────────────────────────────────────────────────────────
-
-class _Shell extends ConsumerStatefulWidget {
-  const _Shell();
-
-  @override
-  ConsumerState<_Shell> createState() => _ShellState();
-}
-
-class _ShellState extends ConsumerState<_Shell> {
-  int _index = 0;
-
-  static const _labels = ['Today', 'Coach', 'Lab', 'Plan', 'Profile'];
-
-  // Lucide-quality SVG path data — matches the interactive prototype
-  static const _navPaths = [
-    _NavPaths.bolt,
-    _NavPaths.chat,
-    _NavPaths.lab,
-    _NavPaths.plan,
-    _NavPaths.profile,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      // Allows body content to flow under the floating nav pill
-      extendBody: true,
-      body: IndexedStack(
-        index: _index,
-        children: const [
-          _TodayTab(),
-          CoachChatPage(),
-          _Placeholder(label: 'Lab', icon: Icons.science_rounded),
-          _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
-          _Placeholder(label: 'Profile', icon: Icons.person_rounded),
-        ],
-      ),
-      bottomNavigationBar: _BottomBar(
-        labels: _labels,
-        paths: _navPaths,
-        selectedIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-      ),
-    );
-  }
-}
-
-// ── Bottom bar ────────────────────────────────────────────────────────────
-
-class _BottomBar extends StatelessWidget {
-  final List<String> labels;
-  final List<String> paths;
-  final int selectedIndex;
-  final ValueChanged<int> onTap;
-
-  const _BottomBar({
-    required this.labels,
-    required this.paths,
-    required this.selectedIndex,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Floating glass pill — truly floating via Scaffold.extendBody = true
-    // Color.transparent background ensures nothing fills the area _below_ the pill
-    return ColoredBox(
-      color: Colors.transparent,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  // Near-opaque white so blur + shadow read well
-                  color: Colors.white.withValues(alpha: 0.93),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    width: 0.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 48,
-                      offset: const Offset(0, 16),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < labels.length; i++)
-                      Expanded(
-                        child: _BarItem(
-                          svgPath: paths[i],
-                          label: labels[i],
-                          selected: selectedIndex == i,
-                          onTap: () => onTap(i),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BarItem extends StatelessWidget {
-  final String svgPath;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _BarItem({
-    required this.svgPath,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? AppTheme.stand : const Color(0xFF606060);
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: selected
-                  ? AppTheme.stand.withValues(alpha: 0.10)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: CustomPaint(
-                  key: ValueKey('$svgPath-$selected'),
-                  size: const Size(22, 22),
-                  painter: _NavIconPainter(
-                    pathData: svgPath,
-                    color: color,
-                    strokeWidth: selected ? 2.0 : 1.8,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const Gap(2),
-          AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-              color: color,
-              letterSpacing: selected ? -0.2 : 0.1,
-            ),
-            child: Text(label),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Nav icon SVG path painter ──────────────────────────────────────────────
-
-/// Paints a single Lucide-quality SVG path at 24×24 viewBox → 22×22 widget.
-class _NavIconPainter extends CustomPainter {
-  final String pathData;
-  final Color color;
-  final double strokeWidth;
-
-  const _NavIconPainter({
-    required this.pathData,
-    required this.color,
-    required this.strokeWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scale = size.width / 24.0;
-    canvas.scale(scale, scale);
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth / scale
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final path = _parseSvgPath(pathData);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_NavIconPainter old) =>
-      old.pathData != pathData ||
-      old.color != color ||
-      old.strokeWidth != strokeWidth;
-
-  /// Minimal SVG path parser — supports M, L, H, V, C, Q, Z and A (absolute + relative).
-  static Path _parseSvgPath(String d) {
-    final path = Path();
-    final tokens = RegExp(
-      r'[MLHVCSQTAZmlhvcsqtaz]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?',
-    ).allMatches(d).map((m) => m.group(0)!).toList();
-
-    var i = 0;
-    double cx = 0, cy = 0;
-    String cmd = 'M';
-
-    double next() => double.parse(tokens[i++]);
-
-    while (i < tokens.length) {
-      final t = tokens[i];
-      if (RegExp(r'^[A-Za-z]$').hasMatch(t)) {
-        cmd = t;
-        i++;
-      }
-      switch (cmd) {
-        case 'M':
-          cx = next(); cy = next();
-          path.moveTo(cx, cy);
-          cmd = 'L';
-        case 'L':
-          cx = next(); cy = next();
-          path.lineTo(cx, cy);
-        case 'H':
-          cx = next();
-          path.lineTo(cx, cy);
-        case 'V':
-          cy = next();
-          path.lineTo(cx, cy);
-        case 'C':
-          final x1 = next(), y1 = next();
-          final x2 = next(), y2 = next();
-          cx = next(); cy = next();
-          path.cubicTo(x1, y1, x2, y2, cx, cy);
-        case 'Q':
-          final x1 = next(), y1 = next();
-          cx = next(); cy = next();
-          path.quadraticBezierTo(x1, y1, cx, cy);
-        case 'A':
-          // rx ry x-rotation large-arc-flag sweep-flag x y
-          final rx = next(), ry = next();
-          final rot = next();
-          final largeArc = next() == 1;
-          final sweep = next() == 1;
-          cx = next(); cy = next();
-          path.arcToPoint(
-            Offset(cx, cy),
-            radius: Radius.elliptical(rx, ry),
-            rotation: rot,
-            largeArc: largeArc,
-            clockwise: sweep,
-          );
-        case 'Z': case 'z':
-          path.close();
-        case 'l':
-          cx += next(); cy += next();
-          path.lineTo(cx, cy);
-        case 'm':
-          cx += next(); cy += next();
-          path.moveTo(cx, cy);
-          cmd = 'l';
-        case 'h':
-          cx += next();
-          path.lineTo(cx, cy);
-        case 'v':
-          cy += next();
-          path.lineTo(cx, cy);
-        case 'c':
-          final dx1 = next(), dy1 = next();
-          final dx2 = next(), dy2 = next();
-          final dx = next(), dy = next();
-          path.cubicTo(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
-          cx += dx; cy += dy;
-        case 'a':
-          final rx = next(), ry = next();
-          final rot = next();
-          final largeArc = next() == 1;
-          final sweep = next() == 1;
-          final ex = cx + next(), ey = cy + next();
-          path.arcToPoint(
-            Offset(ex, ey),
-            radius: Radius.elliptical(rx, ry),
-            rotation: rot,
-            largeArc: largeArc,
-            clockwise: sweep,
-          );
-          cx = ex; cy = ey;
-        default:
-          i++; // skip unknown
-      }
-    }
-    return path;
-  }
-}
-
-// ── Nav SVG path constants (24×24 viewBox, Lucide stroke icons) ────────────
-abstract final class _NavPaths {
-  // Bolt / zap — Today tab
-  static const bolt =
-      'M13 2 3 14 12 14 11 22 21 10 12 10 13 2';
-
-  // Message circle — Coach tab  
-  static const chat =
-      'M7.9 20A9 9 0 1 0 4 16.1L2 22Z';
-
-  // Flask conical — Lab tab
-  static const lab =
-      'M10 2v7.31l-5.24 9.65A1 1 0 0 0 5.68 21h12.64a1 1 0 0 0 .88-1.54L14 9.31V2 M8.5 2h7 M7 16h10';
-
-  // Calendar with check mark — Plan tab
-  static const plan =
-      'M3 4h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z M16 2v4 M8 2v4 M1 10h22 M9 16l2 2 4-4';
-
-  // Circle user — Profile tab
-  static const profile =
-      'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z M6.168 18.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855';
-}
-
-// ── Placeholder ───────────────────────────────────────────────────────────
-
-class _Placeholder extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _Placeholder({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 48, color: AppTheme.tertiaryLabel),
-          const Gap(tokens.Spacing.md),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.secondaryLabel,
-            ),
-          ),
-          const Gap(tokens.Spacing.xs),
-          Text(
-            'Coming soon',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.tertiaryLabel,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Today tab ─────────────────────────────────────────────────────────────
-
-class _TodayTab extends ConsumerWidget {
-  const _TodayTab();
 
   String _greeting() {
     final h = DateTime.now().hour;
@@ -439,7 +42,6 @@ class _TodayTab extends ConsumerWidget {
         parent: BouncingScrollPhysics(),
       ),
       slivers: [
-        // ── App bar ───────────────────────────────────────────────────────
         SliverAppBar(
           backgroundColor: AppTheme.background,
           surfaceTintColor: Colors.transparent,
@@ -478,19 +80,15 @@ class _TodayTab extends ConsumerWidget {
         ),
 
         SliverPadding(
-          // Extra bottom padding for the floating nav bar
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
           sliver: SliverList.list(
             children: [
-              // ── Hero banner ────────────────────────────────────────────
               _HeroBanner(greeting: _greeting()),
               const Gap(tokens.Spacing.lg),
 
-              // ── Readiness ──────────────────────────────────────────────
               const _ReadinessCard(),
               const Gap(tokens.Spacing.lg),
 
-              // ── Metrics ────────────────────────────────────────────────
               const _SectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
               healthSummary.when(
@@ -505,7 +103,6 @@ class _TodayTab extends ConsumerWidget {
               ),
               const Gap(tokens.Spacing.lg),
 
-              // ── Connect ────────────────────────────────────────────────
               if (healthSummary.value == null && !healthSummary.isLoading) ...[
                 const _SectionHeader(title: 'Get Started'),
                 const Gap(tokens.Spacing.sm),
@@ -513,7 +110,6 @@ class _TodayTab extends ConsumerWidget {
                 const Gap(tokens.Spacing.lg),
               ],
 
-              // ── Privacy notice ─────────────────────────────────────────
               const _PrivacyNotice(),
             ],
           ),
@@ -582,7 +178,7 @@ class _HealthMetricsGrid extends StatelessWidget {
   }
 }
 
-// ── Hero banner with runner ────────────────────────────────────────────────
+// ── Hero banner ────────────────────────────────────────────────────────────
 
 class _HeroBanner extends StatelessWidget {
   final String greeting;
@@ -599,7 +195,6 @@ class _HeroBanner extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
-          // Subtle inner highlight at top
           Positioned(
             top: -40,
             left: -40,
@@ -612,13 +207,10 @@ class _HeroBanner extends StatelessWidget {
               ),
             ),
           ),
-
-          // Content
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
             child: Row(
               children: [
-                // Text left
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -740,7 +332,6 @@ class _ReadinessCard extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 40,
                       fontWeight: FontWeight.w800,
-                      // Purple for readiness score — matches design prototype
                       color: summary != null ? AppTheme.purple : AppTheme.label,
                       height: 1,
                       letterSpacing: -1,
@@ -945,11 +536,9 @@ class _ConnectCard extends ConsumerWidget {
                 const Gap(16),
                 FilledButton(
                   onPressed: () async {
-                    final repo = ref.read(healthRepositoryProvider);
-                    final success = await repo.requestPermissions();
-                    if (success) {
-                      ref.invalidate(healthSummaryProvider);
-                    }
+                    await ref
+                        .read(healthPermissionsNotifierProvider.notifier)
+                        .request();
                   },
                   child: const Text('Connect HealthKit'),
                 ),
