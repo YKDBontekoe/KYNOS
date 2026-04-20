@@ -7,7 +7,7 @@ part of 'model_setup_provider.dart';
 // **************************************************************************
 
 String _$modelSetupNotifierHash() =>
-    r'3b4dfb9c5fe729612a88c0891ba778aa98bf7a80';
+    r'ed9a6452374c3adee4ecfaf38ae3fbdee5c0c7ee';
 
 /// See also [ModelSetupNotifier].
 @ProviderFor(ModelSetupNotifier)

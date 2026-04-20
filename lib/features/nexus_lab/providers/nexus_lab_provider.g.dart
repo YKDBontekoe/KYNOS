@@ -6,7 +6,7 @@ part of 'nexus_lab_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$nexusLabNotifierHash() => r'26304fe98130937cc1e32ee17a5b227cb3b5261b';
+String _$nexusLabNotifierHash() => r'c718e85eb6cdd8f03fdecfb74d2d20fad7e65d6b';
 
 /// See also [NexusLabNotifier].
 @ProviderFor(NexusLabNotifier)
