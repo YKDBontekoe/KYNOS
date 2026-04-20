@@ -1,6 +1,0 @@
-{
-  "branch_name": "feat/onboarding",
-  "commit_message": "feat: implement high-fidelity 3-page onboarding flow",
-  "title": "feat: implement high-fidelity 3-page onboarding flow",
-  "description": "Implemented the onboarding flow with shared_preferences, Lottie animations, and go_router integration."
-}
