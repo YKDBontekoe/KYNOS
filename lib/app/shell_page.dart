@@ -7,6 +7,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
+import 'package:kynos/features/nexus_lab/presentation/nexus_lab_page.dart';
 
 /// Root app shell — owns the floating bottom nav and the [IndexedStack] of tabs.
 ///
@@ -42,7 +43,7 @@ class _ShellState extends State<ShellPage> {
         children: const [
           DashboardPage(),
           CoachChatPage(),
-          _Placeholder(label: 'Lab', icon: Icons.science_rounded),
+          NexusLabPage(),
           _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
           _Placeholder(label: 'Profile', icon: Icons.person_rounded),
         ],

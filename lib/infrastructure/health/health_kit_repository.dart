@@ -18,6 +18,9 @@ class HealthKitRepository implements HealthRepository {
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_IN_BED,
     HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.WALKING_STEPS,
+    HealthDataType.WALKING_STRIDE_LENGTH,
+    HealthDataType.EXERCISE_TIME,
   ];
 
   Future<void> _ensureConfigured() async {
@@ -63,17 +66,31 @@ class HealthKitRepository implements HealthRepository {
         double? rhr = existing.rhrBpm;
         double? sleep = existing.sleepHours;
         double? active = existing.activeCalories;
+        double? cadence = existing.cadenceSpm;
+        double? stride = existing.strideLengthMeters;
+        double? exercise = existing.exerciseMinutes;
+
+        final numericValue = point.value is NumericHealthValue 
+            ? (point.value as NumericHealthValue).numericValue.toDouble() 
+            : 0.0;
 
         if (point.type == HealthDataType.HEART_RATE_VARIABILITY_SDNN) {
-          hrv = (point.value as NumericHealthValue).numericValue.toDouble();
+          hrv = numericValue;
         } else if (point.type == HealthDataType.RESTING_HEART_RATE) {
-          rhr = (point.value as NumericHealthValue).numericValue.toDouble();
+          rhr = numericValue;
         } else if (point.type == HealthDataType.SLEEP_ASLEEP || point.type == HealthDataType.SLEEP_IN_BED) {
           // Calculate duration in hours.
           final duration = point.dateTo.difference(point.dateFrom).inMinutes / 60.0;
           sleep = (sleep ?? 0) + duration;
         } else if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
-          active = (active ?? 0) + (point.value as NumericHealthValue).numericValue.toDouble();
+          active = (active ?? 0) + numericValue;
+        } else if (point.type == HealthDataType.WALKING_STEPS) {
+          // This is steps/min during the measurement interval
+          cadence = numericValue;
+        } else if (point.type == HealthDataType.WALKING_STRIDE_LENGTH) {
+          stride = numericValue;
+        } else if (point.type == HealthDataType.EXERCISE_TIME) {
+          exercise = (exercise ?? 0) + numericValue;
         }
 
         aggregated[date] = HealthSummary(
@@ -82,6 +99,9 @@ class HealthKitRepository implements HealthRepository {
           rhrBpm: rhr,
           sleepHours: sleep,
           activeCalories: active,
+          cadenceSpm: cadence,
+          strideLengthMeters: stride,
+          exerciseMinutes: exercise,
         );
       }
 
@@ -99,8 +119,6 @@ class HealthKitRepository implements HealthRepository {
 
   @override
   Future<({HealthSummary? summary, Failure? failure})> getToday() async {
-    // days: 1 = past 24 h — covers today regardless of time-of-day.
-    // days: 0 would set startTime = endTime = now (zero-second window).
     final result = await getSummaries(days: 1);
     if (result.failure != null) {
       return (summary: null, failure: result.failure);

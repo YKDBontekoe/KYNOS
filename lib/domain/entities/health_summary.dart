@@ -19,6 +19,15 @@ class HealthSummary {
   /// Running power in Watts (if available from wearable).
   final double? runningPowerWatts;
 
+  /// Running cadence (steps per minute).
+  final double? cadenceSpm;
+
+  /// Running stride length in meters.
+  final double? strideLengthMeters;
+
+  /// Total exercise duration in minutes.
+  final double? exerciseMinutes;
+
   const HealthSummary({
     required this.date,
     this.hrvMs,
@@ -26,6 +35,9 @@ class HealthSummary {
     this.sleepHours,
     this.activeCalories,
     this.runningPowerWatts,
+    this.cadenceSpm,
+    this.strideLengthMeters,
+    this.exerciseMinutes,
   });
 
   Map<String, dynamic> toJson() => {
@@ -35,5 +47,8 @@ class HealthSummary {
         'sleep_hours': sleepHours,
         'active_calories': activeCalories,
         'running_power_watts': runningPowerWatts,
+        'cadence_spm': cadenceSpm,
+        'stride_length_m': strideLengthMeters,
+        'exercise_minutes': exerciseMinutes,
       };
 }
