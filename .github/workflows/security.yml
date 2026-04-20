@@ -27,7 +27,9 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          cp .env.example .env
+          flutter pub get
 
       - name: Dependency Vulnerability Audit (osv-scanner)
         uses: google/osv-scanner-action/osv-scanner-action@v1.9.1

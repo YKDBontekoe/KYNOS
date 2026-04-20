@@ -16,6 +16,7 @@ See `AGENTS.md` for the full rule set. Key points:
 
 ```bash
 # Install dependencies
+cp .env.example .env
 flutter pub get
 
 # Run code generation (freezed + riverpod)

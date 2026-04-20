@@ -98,6 +98,7 @@ kynos/
 
 ```bash
 # Install dependencies
+cp .env.example .env
 flutter pub get
 
 # Generate freezed / riverpod code
