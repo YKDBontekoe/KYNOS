@@ -7,6 +7,8 @@ part 'health_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 HealthRepository healthRepository(HealthRepositoryRef ref) {
+  // Delegate to the infrastructure binding — feature layer stays decoupled
+  // from the concrete HealthKitRepository class.
   return ref.watch(healthKitRepositoryProvider);
 }
 
