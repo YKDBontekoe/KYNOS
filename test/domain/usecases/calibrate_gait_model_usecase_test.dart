@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/entities/workout_route_point.dart';
+import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/biomechanics_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/domain/usecases/nexus_lab/calibrate_gait_model_usecase.dart';
@@ -106,6 +108,21 @@ class _FakeHealthRepository implements HealthRepository {
 
   @override
   Future<bool> requestPermissions() async => true;
+
+  @override
+  Future<({Failure? failure, List<WorkoutSession> runs})> getRecentRuns({
+    required int days,
+    int limit = 30,
+  }) async {
+    return (runs: const <WorkoutSession>[], failure: null);
+  }
+
+  @override
+  Future<({Failure? failure, List<WorkoutRoutePoint> points})> getRunRoute({
+    required String workoutUuid,
+  }) async {
+    return (points: const <WorkoutRoutePoint>[], failure: null);
+  }
 }
 
 class _FakeBiomechanicsRepository implements BiomechanicsRepository {
