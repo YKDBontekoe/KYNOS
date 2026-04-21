@@ -1,6 +1,6 @@
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'model_setup_provider.g.dart';
@@ -13,7 +13,7 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
   Future<void> checkAndInstall() async {
     state = const AsyncLoading();
     try {
-      final AiModelRepository repo = ref.read(aiModelRepositoryProvider);
+      final AiModelRepository repo = ref.read(sharedAiModelRepositoryProvider);
       await repo.initialize();
 
       if (repo.hasActiveModel) {
