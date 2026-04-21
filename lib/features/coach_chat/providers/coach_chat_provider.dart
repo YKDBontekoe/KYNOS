@@ -1,6 +1,6 @@
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

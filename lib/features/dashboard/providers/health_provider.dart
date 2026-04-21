@@ -1,6 +1,6 @@
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
-import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/health_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_provider.g.dart';
