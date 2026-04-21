@@ -7,10 +7,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/entities/insights/insight_confidence.dart';
+import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
+import 'package:kynos/shared/utils/insight_text_formatter.dart';
 
-/// Today tab — health metrics, readiness ring, and connect card.
+/// Today tab — readiness, AI insight, and today's health metrics.
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
@@ -26,8 +31,18 @@ class DashboardPage extends ConsumerWidget {
   String _dateLabel() {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final now = DateTime.now();
     return '${days[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
@@ -35,7 +50,8 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final healthSummary = ref.watch(healthSummaryProvider);
+    final summary = ref.watch(healthSummaryProvider);
+    final todayInsightsState = ref.watch(todayInsightsStateProvider);
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
@@ -58,58 +74,33 @@ class DashboardPage extends ConsumerWidget {
               letterSpacing: 0.2,
             ),
           ),
-          actions: [
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: AppTheme.separator,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  size: 18,
-                  color: AppTheme.secondaryLabel,
-                ),
-              ),
-            ),
-            const Gap(20),
-          ],
         ),
-
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          padding: const EdgeInsets.fromLTRB(
+            tokens.Spacing.md,
+            0,
+            tokens.Spacing.md,
+            168,
+          ),
           sliver: SliverList.list(
             children: [
               _HeroBanner(greeting: _greeting()),
               const Gap(tokens.Spacing.lg),
-
-              const _ReadinessCard(),
+              _ReadinessCard(
+                summary: summary.value,
+                todayInsightsState: todayInsightsState,
+              ),
+              const Gap(tokens.Spacing.md),
+              _TodayInsightCards(todayInsightsState: todayInsightsState),
               const Gap(tokens.Spacing.lg),
-
               const _SectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
-              healthSummary.when(
-                data: (summary) => _HealthMetricsGrid(summary: summary),
-                loading: () => const _HealthMetricsGrid(summary: null),
-                error: (e, s) => Center(
-                  child: Text(
-                    'Error loading metrics: $e',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-              ),
+              _HealthMetricsGrid(summary: summary.value),
               const Gap(tokens.Spacing.lg),
-
-              if (healthSummary.value == null && !healthSummary.isLoading) ...[
-                const _SectionHeader(title: 'Get Started'),
-                const Gap(tokens.Spacing.sm),
+              if (summary.value == null && !summary.isLoading)
                 const _ConnectCard(),
+              if (summary.value == null && !summary.isLoading)
                 const Gap(tokens.Spacing.lg),
-              ],
-
               const _PrivacyNotice(),
             ],
           ),
@@ -119,70 +110,12 @@ class DashboardPage extends ConsumerWidget {
   }
 }
 
-// ── Health metrics grid ─────────────────────────────────────────────────────
-
-class _HealthMetricsGrid extends StatelessWidget {
-  final HealthSummary? summary;
-
-  const _HealthMetricsGrid({required this.summary});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: MetricTile(
-                label: 'HRV',
-                value: summary == null ? null : (summary!.hrvMs?.round().toString() ?? '—'),
-                unit: 'ms',
-                accentColor: AppTheme.exercise,
-              ),
-            ),
-            const Gap(tokens.Spacing.sm),
-            Expanded(
-              child: MetricTile(
-                label: 'Resting HR',
-                value: summary == null ? null : (summary!.rhrBpm?.round().toString() ?? '—'),
-                unit: 'bpm',
-                accentColor: AppTheme.move,
-              ),
-            ),
-          ],
-        ),
-        const Gap(tokens.Spacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: MetricTile(
-                label: 'Sleep',
-                value: summary == null ? null : (summary!.sleepHours?.toStringAsFixed(1) ?? '—'),
-                unit: 'h',
-                accentColor: AppTheme.stand,
-              ),
-            ),
-            const Gap(tokens.Spacing.sm),
-            Expanded(
-              child: MetricTile(
-                label: 'Active kcal',
-                value: summary == null ? null : (summary!.activeCalories?.round().toString() ?? '—'),
-                unit: 'kcal',
-                accentColor: AppTheme.energy,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ── Hero banner ────────────────────────────────────────────────────────────
+// ── Hero banner ───────────────────────────────────────────────────────────────
 
 class _HeroBanner extends StatelessWidget {
-  final String greeting;
   const _HeroBanner({required this.greeting});
+
+  final String greeting;
 
   @override
   Widget build(BuildContext context) {
@@ -209,43 +142,37 @@ class _HeroBanner extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        greeting,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.70),
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                      const Gap(4),
-                      Text(
-                        'KYNOS',
-                        style: GoogleFonts.inter(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -1.0,
-                          height: 1.0,
-                        ),
-                      ),
-                      const Gap(6),
-                      Text(
-                        'Your AI running coach',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withValues(alpha: 0.60),
-                        ),
-                      ),
-                    ],
+                Text(
+                  greeting,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.70),
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const Gap(4),
+                Text(
+                  'KYNOS',
+                  style: GoogleFonts.inter(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: -1,
+                    height: 1,
+                  ),
+                ),
+                const Gap(6),
+                Text(
+                  'Your AI running coach',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.60),
                   ),
                 ),
               ],
@@ -257,11 +184,557 @@ class _HeroBanner extends StatelessWidget {
   }
 }
 
-// ── Section header ─────────────────────────────────────────────────────────
+// ── Readiness card ────────────────────────────────────────────────────────────
+
+class _ReadinessCard extends StatelessWidget {
+  const _ReadinessCard({
+    required this.summary,
+    required this.todayInsightsState,
+  });
+
+  final HealthSummary? summary;
+  final AsyncValue<TodayInsightsState> todayInsightsState;
+
+  @override
+  Widget build(BuildContext context) {
+    final score = _readinessScore(summary);
+
+    return KynosCard(
+      padding: const EdgeInsets.all(tokens.Spacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _ActivityRing(
+                progress: score / 100,
+                size: 82,
+                strokeWidth: 8,
+                colors: const [
+                  AppTheme.move,
+                  AppTheme.exercise,
+                  AppTheme.stand,
+                ],
+              ),
+              const Gap(tokens.Spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'READINESS',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const Gap(tokens.Spacing.xs),
+                    Text(
+                      summary == null ? '—' : score.round().toString(),
+                      style: GoogleFonts.inter(
+                        fontSize: 38,
+                        fontWeight: FontWeight.w800,
+                        color: summary == null
+                            ? AppTheme.secondaryLabel
+                            : AppTheme.purple,
+                        height: 1,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const Gap(tokens.Spacing.xs),
+                    Text(
+                      summary == null
+                          ? 'Connect HealthKit to calculate a real readiness score.'
+                          : _readinessBrief(
+                              score: score,
+                              todayInsightsState: todayInsightsState,
+                            ),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          _ConfidenceBadgeRow(todayInsightsState: todayInsightsState),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfidenceBadgeRow extends StatelessWidget {
+  const _ConfidenceBadgeRow({required this.todayInsightsState});
+
+  final AsyncValue<TodayInsightsState> todayInsightsState;
+
+  @override
+  Widget build(BuildContext context) {
+    return todayInsightsState.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (state) {
+        final insights = state.insights;
+        if (insights == null) return const SizedBox.shrink();
+        return Column(
+          children: [
+            const Gap(tokens.Spacing.sm),
+            const Divider(height: 1),
+            const Gap(tokens.Spacing.sm),
+            Row(
+              children: [
+                Icon(
+                  Icons.verified_rounded,
+                  size: 14,
+                  color: AppTheme.purple.withValues(alpha: 0.75),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Text(
+                  'Confidence: ${insights.confidence.label}${state.usedModel ? ' • Gemma refined' : ' • Rule-based'}',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppTheme.tertiaryLabel,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _TodayInsightCards extends StatelessWidget {
+  const _TodayInsightCards({required this.todayInsightsState});
+
+  final AsyncValue<TodayInsightsState> todayInsightsState;
+
+  @override
+  Widget build(BuildContext context) {
+    return todayInsightsState.when(
+      loading: () => const KynosCard(
+        child: _LoadingLine(label: 'Generating today insights...'),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (state) {
+        final insights = state.insights;
+        if (insights == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          children: [
+            _InsightExpandableCard(
+              title: 'Quick Changes',
+              icon: Icons.compare_arrows_rounded,
+              lines: insights.whatChanged,
+            ),
+            const Gap(tokens.Spacing.md),
+            _InsightExpandableCard(
+              title: 'Top Risks',
+              icon: Icons.warning_amber_rounded,
+              lines: insights.riskFlags,
+            ),
+            const Gap(tokens.Spacing.md),
+            _ActionCompactCard(
+              actionNow: insights.actionNow,
+              actionTonight: insights.actionTonight,
+              evidence: insights.evidence,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _LoadingLine extends StatelessWidget {
+  const _LoadingLine({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const SizedBox(
+          width: 12,
+          height: 12,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+            color: AppTheme.tertiaryLabel,
+          ),
+        ),
+        const Gap(tokens.Spacing.sm),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.tertiaryLabel),
+        ),
+      ],
+    );
+  }
+}
+
+class _InsightExpandableCard extends StatefulWidget {
+  const _InsightExpandableCard({
+    required this.title,
+    required this.icon,
+    required this.lines,
+  });
+
+  final String title;
+  final IconData icon;
+  final List<String> lines;
+
+  @override
+  State<_InsightExpandableCard> createState() => _InsightExpandableCardState();
+}
+
+class _InsightExpandableCardState extends State<_InsightExpandableCard> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return KynosCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(widget.icon, size: 14, color: AppTheme.secondaryLabel),
+              const Gap(tokens.Spacing.sm),
+              Expanded(
+                child: Text(
+                  widget.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              TextButton(
+                onPressed: () => setState(() => _expanded = !_expanded),
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(_expanded ? 'Hide' : 'Details'),
+              ),
+            ],
+          ),
+          const Gap(tokens.Spacing.sm),
+          Wrap(
+            spacing: tokens.Spacing.xs,
+            runSpacing: tokens.Spacing.xs,
+            children: [
+              for (final line in widget.lines.take(2))
+                _CompactChip(
+                  label: InsightTextFormatter.compactChipLabel(line),
+                ),
+            ],
+          ),
+          if (_expanded) ...[
+            const Gap(tokens.Spacing.sm),
+            for (final line in widget.lines.take(3)) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• ',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: AppTheme.secondaryLabel,
+                      height: 1.4,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      line,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(tokens.Spacing.xs),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionCompactCard extends StatefulWidget {
+  const _ActionCompactCard({
+    required this.actionNow,
+    required this.actionTonight,
+    required this.evidence,
+  });
+
+  final String actionNow;
+  final String actionTonight;
+  final List<String> evidence;
+
+  @override
+  State<_ActionCompactCard> createState() => _ActionCompactCardState();
+}
+
+class _ActionCompactCardState extends State<_ActionCompactCard> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return KynosCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Quick Actions',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () => setState(() => _expanded = !_expanded),
+                style: TextButton.styleFrom(
+                  minimumSize: Size.zero,
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(_expanded ? 'Hide' : 'Open'),
+              ),
+            ],
+          ),
+          const Gap(tokens.Spacing.sm),
+          Wrap(
+            spacing: tokens.Spacing.xs,
+            runSpacing: tokens.Spacing.xs,
+            children: [
+              _CompactChip(label: 'Now'),
+              _CompactChip(label: 'Tonight'),
+              if (widget.evidence.isNotEmpty)
+                _CompactChip(label: '${widget.evidence.length} signals'),
+            ],
+          ),
+          if (_expanded) ...[
+            const Gap(tokens.Spacing.sm),
+            _ActionRow(
+              icon: Icons.play_arrow_rounded,
+              label: 'Now',
+              value: widget.actionNow,
+            ),
+            const Gap(tokens.Spacing.xs),
+            _ActionRow(
+              icon: Icons.nights_stay_rounded,
+              label: 'Tonight',
+              value: widget.actionTonight,
+            ),
+            if (widget.evidence.isNotEmpty) ...[
+              const Gap(tokens.Spacing.sm),
+              Text(
+                widget.evidence.join(' • '),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppTheme.tertiaryLabel,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactChip extends StatelessWidget {
+  const _CompactChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: tokens.Spacing.sm,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: AppTheme.background,
+        borderRadius: BorderRadius.circular(tokens.Radius.md),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 12,
+          color: AppTheme.secondaryLabel,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: AppTheme.secondaryLabel),
+        const Gap(tokens.Spacing.xs),
+        Text(
+          '$label:',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.secondaryLabel,
+          ),
+        ),
+        const Gap(tokens.Spacing.xs),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Metrics grid ──────────────────────────────────────────────────────────────
+
+class _HealthMetricsGrid extends StatelessWidget {
+  const _HealthMetricsGrid({required this.summary});
+
+  final HealthSummary? summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: MetricTile(
+                label: 'Recovery',
+                value: _round(summary?.hrvMs),
+                unit: 'ms',
+                accentColor: AppTheme.exercise,
+              ),
+            ),
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: MetricTile(
+                label: 'Resting pulse',
+                value: _round(summary?.rhrBpm),
+                unit: 'bpm',
+                accentColor: AppTheme.move,
+              ),
+            ),
+          ],
+        ),
+        const Gap(tokens.Spacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: MetricTile(
+                label: 'Sleep',
+                value: _fixed(summary?.sleepHours, 1),
+                unit: 'h',
+                accentColor: AppTheme.stand,
+              ),
+            ),
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: MetricTile(
+                label: 'SpO2',
+                value: _fixed(summary?.bloodOxygenPercent, 1),
+                unit: '%',
+                accentColor: AppTheme.exercise,
+              ),
+            ),
+          ],
+        ),
+        const Gap(tokens.Spacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: MetricTile(
+                label: 'Distance',
+                value: _fixed(_toKm(summary?.distanceMeters), 2),
+                unit: 'km',
+                accentColor: AppTheme.stand,
+              ),
+            ),
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: MetricTile(
+                label: 'Steps',
+                value: summary?.steps?.toString() ?? '—',
+                unit: null,
+                accentColor: AppTheme.energy,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Connect HealthKit card ────────────────────────────────────────────────────
+
+class _ConnectCard extends ConsumerWidget {
+  const _ConnectCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return KynosCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connect HealthKit',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const Gap(tokens.Spacing.xs),
+          Text(
+            'Grant access to recovery and workout data to unlock your readiness score and AI coaching insights.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const Gap(tokens.Spacing.md),
+          FilledButton(
+            onPressed: () async {
+              await ref
+                  .read(healthPermissionsNotifierProvider.notifier)
+                  .request();
+            },
+            child: const Text('Connect HealthKit'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Section header ────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
-  final String title;
   const _SectionHeader({required this.title});
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -277,113 +750,41 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Readiness card ─────────────────────────────────────────────────────────
+// ── Privacy notice ────────────────────────────────────────────────────────────
 
-class _ReadinessCard extends ConsumerWidget {
-  const _ReadinessCard();
+class _PrivacyNotice extends StatelessWidget {
+  const _PrivacyNotice();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final healthSummary = ref.watch(healthSummaryProvider);
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _ActivityRing(
-            progress: healthSummary.when(
-              data: (summary) => summary != null ? 0.75 : 0.0,
-              loading: () => 0.0,
-              error: (e, s) => 0.0,
-            ),
-            size: 80,
-            strokeWidth: 8,
-            colors: const [AppTheme.move, AppTheme.exercise, AppTheme.stand],
-          ),
-          const Gap(20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'READINESS',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.secondaryLabel,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const Gap(4),
-                healthSummary.when(
-                  data: (summary) => Text(
-                    summary != null ? '87' : '—',
-                    style: GoogleFonts.inter(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: summary != null ? AppTheme.purple : AppTheme.label,
-                      height: 1,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  loading: () => const SizedBox(
-                    height: 40,
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                  ),
-                  error: (e, s) => Text(
-                    'Error',
-                    style: GoogleFonts.inter(fontSize: 24, color: Colors.red),
-                  ),
-                ),
-                const Gap(6),
-                Text(
-                  healthSummary.when(
-                    data: (summary) => summary != null
-                        ? 'Great recovery. Optimal conditions for a high-intensity interval run today.'
-                        : 'Connect HealthKit to unlock your daily readiness.',
-                    loading: () => 'Calculating readiness...',
-                    error: (e, s) => 'Could not calculate readiness.',
-                  ),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: AppTheme.secondaryLabel,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.lock_rounded, size: 14, color: AppTheme.tertiaryLabel),
+        const Gap(tokens.Spacing.sm),
+        Text(
+          'All data stays on your device',
+          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.tertiaryLabel),
+        ),
+      ],
     );
   }
 }
 
-// ── Activity rings ─────────────────────────────────────────────────────────
+// ── Activity ring ─────────────────────────────────────────────────────────────
 
 class _ActivityRing extends StatelessWidget {
-  final double progress;
-  final double size;
-  final double strokeWidth;
-  final List<Color> colors;
-
   const _ActivityRing({
     required this.progress,
     required this.size,
     required this.strokeWidth,
     required this.colors,
   });
+
+  final double progress;
+  final double size;
+  final double strokeWidth;
+  final List<Color> colors;
 
   @override
   Widget build(BuildContext context) {
@@ -402,15 +803,15 @@ class _ActivityRing extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  final double progress;
-  final double strokeWidth;
-  final List<Color> colors;
-
   const _RingPainter({
     required this.progress,
     required this.strokeWidth,
     required this.colors,
   });
+
+  final double progress;
+  final double strokeWidth;
+  final List<Color> colors;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -449,132 +850,48 @@ class _RingPainter extends CustomPainter {
   bool shouldRepaint(_RingPainter old) => old.progress != progress;
 }
 
-// ── Connect card ───────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-class _ConnectCard extends ConsumerWidget {
-  const _ConnectCard();
+double _readinessScore(HealthSummary? summary) {
+  if (summary == null) return 0;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppTheme.exercise.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.health_and_safety_rounded,
-                    color: AppTheme.exercise,
-                    size: 24,
-                  ),
-                ),
-                const Gap(12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Connect HealthKit',
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.label,
-                        ),
-                      ),
-                      Text(
-                        'Required for AI coaching',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppTheme.secondaryLabel,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppTheme.tertiaryLabel,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 0, indent: 72),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Grant access to HRV, resting heart rate, sleep, and activity '
-                  'data to unlock personalised AI coaching.',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: AppTheme.secondaryLabel,
-                    height: 1.5,
-                  ),
-                ),
-                const Gap(16),
-                FilledButton(
-                  onPressed: () async {
-                    await ref
-                        .read(healthPermissionsNotifierProvider.notifier)
-                        .request();
-                  },
-                  child: const Text('Connect HealthKit'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  final hrvScore = ((summary.hrvMs ?? 20).clamp(20, 110) - 20) / 90;
+  final rhrScore = 1 - (((summary.rhrBpm ?? 75).clamp(45, 90) - 45) / 45);
+  final sleepScore = ((summary.sleepHours ?? 5).clamp(4, 9) - 4) / 5;
+  final spo2Score =
+      ((summary.bloodOxygenPercent ?? 95).clamp(90, 100) - 90) / 10;
+
+  return ((hrvScore * 0.35 +
+              rhrScore * 0.25 +
+              sleepScore * 0.25 +
+              spo2Score * 0.15) *
+          100)
+      .clamp(0, 100);
 }
 
-// ── Privacy notice ──────────────────────────────────────────────────────────
-
-class _PrivacyNotice extends StatelessWidget {
-  const _PrivacyNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.lock_rounded,
-          size: 14,
-          color: AppTheme.tertiaryLabel,
-        ),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          'All data stays on your device',
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: AppTheme.tertiaryLabel,
-          ),
-        ),
-      ],
-    );
+String _readinessBrief({
+  required double score,
+  required AsyncValue<TodayInsightsState> todayInsightsState,
+}) {
+  final todayInsights = todayInsightsState.value?.insights;
+  if (todayInsights != null && todayInsights.readinessBrief.isNotEmpty) {
+    return todayInsights.readinessBrief;
   }
+  return _readinessSummary(score);
 }
+
+String _readinessSummary(double score) {
+  if (score >= 80)
+    return 'Strong recovery. High quality session is supported today.';
+  if (score >= 65)
+    return 'Stable recovery. Tempo or aerobic run should feel good.';
+  if (score >= 45) return 'Moderate readiness. Keep intensity controlled.';
+  return 'Low readiness. Prioritise recovery and easy movement.';
+}
+
+String _round(double? value) => value == null ? '—' : value.round().toString();
+
+String _fixed(double? value, int digits) =>
+    value == null ? '—' : value.toStringAsFixed(digits);
+
+double? _toKm(double? meters) => meters == null ? null : meters / 1000;

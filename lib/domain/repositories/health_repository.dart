@@ -1,5 +1,7 @@
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/entities/workout_route_point.dart';
+import 'package:kynos/domain/entities/workout_session.dart';
 
 /// Contract for accessing biometric data from the platform health store.
 ///
@@ -11,6 +13,17 @@ abstract interface class HealthRepository {
   /// Returns aggregated daily summaries for the past [days] days.
   Future<({List<HealthSummary> summaries, Failure? failure})> getSummaries({
     required int days,
+  });
+
+  /// Returns recent running workouts for the past [days] days.
+  Future<({List<WorkoutSession> runs, Failure? failure})> getRecentRuns({
+    required int days,
+    int limit = 30,
+  });
+
+  /// Returns route points for a given workout session UUID.
+  Future<({List<WorkoutRoutePoint> points, Failure? failure})> getRunRoute({
+    required String workoutUuid,
   });
 
   /// Returns the most recent single-day summary.

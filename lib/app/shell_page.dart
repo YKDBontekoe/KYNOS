@@ -4,14 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/features/coach_chat/presentation/coach_chat_page.dart';
+import 'package:kynos/features/character/presentation/character_page.dart';
 import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
+import 'package:kynos/features/training/presentation/training_page.dart';
 
-/// Root app shell — owns the floating bottom nav and the [IndexedStack] of tabs.
-///
-/// Lives in [lib/app/] because it is the only layer allowed to import multiple
-/// feature subtrees simultaneously.
+/// Root app shell — floating bottom nav with three focused tabs.
 class ShellPage extends StatefulWidget {
   const ShellPage({super.key});
 
@@ -22,14 +19,12 @@ class ShellPage extends StatefulWidget {
 class _ShellState extends State<ShellPage> {
   int _index = 0;
 
-  static const _labels = ['Today', 'Coach', 'Lab', 'Plan', 'Profile'];
+  static const _labels = ['Today', 'Training', 'Character'];
 
   static const _navPaths = [
-    _NavPaths.bolt,
-    _NavPaths.chat,
-    _NavPaths.lab,
-    _NavPaths.plan,
-    _NavPaths.profile,
+    _NavPaths.home,
+    _NavPaths.activity,
+    _NavPaths.character,
   ];
 
   @override
@@ -41,10 +36,8 @@ class _ShellState extends State<ShellPage> {
         index: _index,
         children: const [
           DashboardPage(),
-          CoachChatPage(),
-          _Placeholder(label: 'Lab', icon: Icons.science_rounded),
-          _Placeholder(label: 'Plan', icon: Icons.calendar_month_rounded),
-          _Placeholder(label: 'Profile', icon: Icons.person_rounded),
+          TrainingPage(),
+          CharacterPage(),
         ],
       ),
       bottomNavigationBar: _BottomBar(
@@ -57,20 +50,20 @@ class _ShellState extends State<ShellPage> {
   }
 }
 
-// ── Bottom bar ────────────────────────────────────────────────────────────
+// ── Bottom bar ────────────────────────────────────────────────────────────────
 
 class _BottomBar extends StatelessWidget {
-  final List<String> labels;
-  final List<String> paths;
-  final int selectedIndex;
-  final ValueChanged<int> onTap;
-
   const _BottomBar({
     required this.labels,
     required this.paths,
     required this.selectedIndex,
     required this.onTap,
   });
+
+  final List<String> labels;
+  final List<String> paths;
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -130,17 +123,17 @@ class _BottomBar extends StatelessWidget {
 }
 
 class _BarItem extends StatelessWidget {
-  final String svgPath;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
   const _BarItem({
     required this.svgPath,
     required this.label,
     required this.selected,
     required this.onTap,
   });
+
+  final String svgPath;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -194,19 +187,18 @@ class _BarItem extends StatelessWidget {
   }
 }
 
-// ── Nav icon SVG path painter ──────────────────────────────────────────────
+// ── Nav icon SVG path painter ──────────────────────────────────────────────────
 
-/// Paints a single Lucide-quality SVG path at 24×24 viewBox → 22×22 widget.
 class _NavIconPainter extends CustomPainter {
-  final String pathData;
-  final Color color;
-  final double strokeWidth;
-
   const _NavIconPainter({
     required this.pathData,
     required this.color,
     required this.strokeWidth,
   });
+
+  final String pathData;
+  final Color color;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -230,7 +222,6 @@ class _NavIconPainter extends CustomPainter {
       old.color != color ||
       old.strokeWidth != strokeWidth;
 
-  /// Minimal SVG path parser — supports M, L, H, V, C, Q, Z and A (absolute + relative).
   static Path _parseSvgPath(String d) {
     final path = Path();
     final tokens = RegExp(
@@ -304,7 +295,11 @@ class _NavIconPainter extends CustomPainter {
           final dx1 = next(), dy1 = next();
           final dx2 = next(), dy2 = next();
           final dx = next(), dy = next();
-          path.cubicTo(cx + dx1, cy + dy1, cx + dx2, cy + dy2, cx + dx, cy + dy);
+          path.cubicTo(
+            cx + dx1, cy + dy1,
+            cx + dx2, cy + dy2,
+            cx + dx, cy + dy,
+          );
           cx += dx; cy += dy;
         case 'a':
           final rx = next(), ry = next();
@@ -328,54 +323,18 @@ class _NavIconPainter extends CustomPainter {
   }
 }
 
-// ── Nav SVG path constants (24×24 viewBox, Lucide stroke icons) ────────────
+// ── Nav icon paths (24×24 viewBox, Lucide stroke icons) ──────────────────────
 
 abstract final class _NavPaths {
-  static const bolt = 'M13 2 3 14 12 14 11 22 21 10 12 10 13 2';
-  static const chat = 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z';
-  static const lab =
-      'M10 2v7.31l-5.24 9.65A1 1 0 0 0 5.68 21h12.64a1 1 0 0 0 .88-1.54L14 9.31V2 M8.5 2h7 M7 16h10';
-  static const plan =
-      'M3 4h18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z M16 2v4 M8 2v4 M1 10h22 M9 16l2 2 4-4';
-  static const profile =
-      'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z M6.168 18.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855';
-}
+  /// Lucide "home" — house outline
+  static const home =
+      'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10';
 
-// ── Placeholder tabs ───────────────────────────────────────────────────────
+  /// Lucide "activity" — EKG waveform
+  static const activity = 'M22 12H18L15 21 9 3 6 12H2';
 
-class _Placeholder extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _Placeholder({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 48, color: AppTheme.tertiaryLabel),
-          const Gap(tokens.Spacing.md),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.secondaryLabel,
-            ),
-          ),
-          const Gap(tokens.Spacing.xs),
-          Text(
-            'Coming soon',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.tertiaryLabel,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  /// Lucide "shield" — character class icon
+  static const character =
+      'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z';
 }
 
