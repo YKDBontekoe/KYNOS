@@ -18,8 +18,8 @@ class HealthKitRepository implements HealthRepository {
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_IN_BED,
     HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.WALKING_STEPS,
-    HealthDataType.WALKING_STRIDE_LENGTH,
+    HealthDataType.STEPS,
+    HealthDataType.WALKING_SPEED,
     HealthDataType.EXERCISE_TIME,
   ];
 
@@ -84,10 +84,12 @@ class HealthKitRepository implements HealthRepository {
           sleep = (sleep ?? 0) + duration;
         } else if (point.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
           active = (active ?? 0) + numericValue;
-        } else if (point.type == HealthDataType.WALKING_STEPS) {
+        } else if (point.type == HealthDataType.STEPS) {
           // This is steps/min during the measurement interval
           cadence = numericValue;
-        } else if (point.type == HealthDataType.WALKING_STRIDE_LENGTH) {
+        } else if (point.type == HealthDataType.WALKING_SPEED) {
+          // TODO: health package ^13.3.1 lacks WALKING_STRIDE_LENGTH. 
+          // Using WALKING_SPEED as a proxy for biomechanical movement data for now.
           stride = numericValue;
         } else if (point.type == HealthDataType.EXERCISE_TIME) {
           exercise = (exercise ?? 0) + numericValue;

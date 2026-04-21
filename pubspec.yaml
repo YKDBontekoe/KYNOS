@@ -38,7 +38,7 @@ dependencies:
   path: ^1.9.1
 
   # ── Health Data ──────────────────────────────────────────────────────────
-  health: ^12.2.0              # HealthKit (iOS) + Health Connect (Android)
+  health: ^13.3.1              # HealthKit (iOS) + Health Connect (Android)
 
   # ── Networking (coach ↔ optional remote sync) ────────────────────────────
   dio: ^5.8.0+1
