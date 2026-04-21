@@ -13,7 +13,7 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
   Future<void> checkAndInstall() async {
     state = const AsyncLoading();
     try {
-      final AiModelRepository repo = ref.read(sharedAiModelRepositoryProvider);
+      final AiModelRepository repo = ref.read(aiModelRepositoryProvider);
       await repo.initialize();
 
       if (repo.hasActiveModel) {

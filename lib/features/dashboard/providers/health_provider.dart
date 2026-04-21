@@ -7,7 +7,7 @@ part 'health_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 HealthRepository healthRepository(HealthRepositoryRef ref) {
-  return ref.watch(sharedHealthRepositoryProvider);
+  return ref.watch(healthKitRepositoryProvider);
 }
 
 @riverpod

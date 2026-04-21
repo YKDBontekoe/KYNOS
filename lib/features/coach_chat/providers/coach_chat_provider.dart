@@ -13,7 +13,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
   @override
   Future<List<ChatMessage>> build() async {
     ref.onDispose(() async {
-      await ref.read(sharedAiCoachRepositoryProvider).dispose();
+      await ref.read(aiCoachRepositoryProvider).dispose();
     });
     return const [];
   }
@@ -40,7 +40,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     state = AsyncData([...state.value!, placeholder]);
 
     try {
-      final AiCoachRepository repository = ref.read(sharedAiCoachRepositoryProvider);
+      final AiCoachRepository repository = ref.read(aiCoachRepositoryProvider);
       await for (final chunk in repository.chat(userMessage: userMessage)) {
         final msgs = state.value!;
         final idx = msgs.indexWhere((m) => m.id == assistantId);
@@ -60,7 +60,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
 
   Future<void> clearConversation() async {
     state = const AsyncData([]);
-    await ref.read(sharedAiCoachRepositoryProvider).resetSession();
+    await ref.read(aiCoachRepositoryProvider).resetSession();
   }
 
   void _finaliseMessage(String id, {required bool streaming, String? content}) {
