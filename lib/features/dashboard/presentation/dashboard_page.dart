@@ -9,7 +9,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/providers/health_data_providers.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';

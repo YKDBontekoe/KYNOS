@@ -1,7 +1,7 @@
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/character/providers/character_provider.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/providers/health_data_providers.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

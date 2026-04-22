@@ -1,6 +1,6 @@
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'model_setup_provider.g.dart';

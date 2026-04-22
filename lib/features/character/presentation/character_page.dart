@@ -12,6 +12,7 @@ import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/features/character/providers/character_provider.dart';
 import 'package:kynos/features/character/providers/quest_provider.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
+import 'package:kynos/shared/utils/character_stat_colors.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 class CharacterPage extends ConsumerWidget {

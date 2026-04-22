@@ -6,7 +6,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/providers/health_data_providers.dart';
 
 class RunRoutePage extends ConsumerWidget {
   final WorkoutSession run;
@@ -15,7 +15,7 @@ class RunRoutePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final routeAsync = ref.watch(runRouteProvider(workoutUuid: run.id));
+    final routeAsync = ref.watch(runRouteProvider(run.id));
 
     return Scaffold(
       backgroundColor: AppTheme.background,
