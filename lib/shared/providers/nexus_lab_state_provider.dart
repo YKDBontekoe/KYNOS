@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/domain/repositories/biomechanics_repository.dart';
 import 'package:kynos/shared/providers/biomechanics_provider.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'nexus_lab_provider.g.dart';
 
 class NexusLabState {
   NexusLabState({
@@ -33,8 +31,7 @@ class NexusLabState {
   }
 }
 
-@Riverpod(keepAlive: true)
-class NexusLabNotifier extends _$NexusLabNotifier {
+class NexusLabNotifier extends AsyncNotifier<NexusLabState> {
   @override
   Future<NexusLabState> build() async {
     final BiomechanicsRepository repository = ref.read(
@@ -47,7 +44,6 @@ class NexusLabNotifier extends _$NexusLabNotifier {
     if (restoreFailure != null) {
       throw restoreFailure;
     }
-
     return NexusLabState(coefficients: repository.coefficients);
   }
 
@@ -72,3 +68,8 @@ class NexusLabNotifier extends _$NexusLabNotifier {
     );
   }
 }
+
+final nexusLabNotifierProvider =
+    AsyncNotifierProvider<NexusLabNotifier, NexusLabState>(
+      NexusLabNotifier.new,
+    );

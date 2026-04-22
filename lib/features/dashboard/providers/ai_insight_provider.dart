@@ -1,5 +1,5 @@
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/health_data_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ai_insight_provider.g.dart';

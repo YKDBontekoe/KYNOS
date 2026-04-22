@@ -4,7 +4,7 @@ import 'package:kynos/domain/repositories/gamekit_repository.dart';
 import 'package:kynos/domain/usecases/gamification/assign_character_class_usecase.dart';
 import 'package:kynos/domain/usecases/gamification/compute_xp_usecase.dart';
 import 'package:kynos/domain/usecases/gamification/generate_daily_quests_usecase.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/infrastructure/gamification/character_persistence_repository.dart';
 import 'package:kynos/infrastructure/gamification/gamekit_repository_impl.dart';
 import 'package:kynos/shared/providers/health_repository_provider.dart';

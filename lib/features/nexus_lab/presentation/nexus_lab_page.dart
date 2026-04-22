@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/features/nexus_lab/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/providers/nexus_lab_state_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
