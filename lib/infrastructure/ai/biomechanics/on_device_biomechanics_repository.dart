@@ -212,17 +212,18 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
     _responseController = StreamController<AiIsolateResponse>.broadcast();
     _isolate = await Isolate.spawn(aiIsolateEntrypoint, receivePort.sendPort);
 
+    final sendPortCompleter = Completer<SendPort>();
     receivePort.listen((message) {
       if (message is SendPort) {
-        _isolateSendPort = message;
+        if (!sendPortCompleter.isCompleted) {
+          sendPortCompleter.complete(message);
+        }
       } else if (message is AiIsolateResponse) {
         _responseController?.add(message);
       }
     });
 
-    while (_isolateSendPort == null) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-    }
+    _isolateSendPort = await sendPortCompleter.future;
   }
 
   Future<File> _modelFile() async {
