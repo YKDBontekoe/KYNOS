@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'health_provider.dart';
+part of 'health_providers.dart';
 
 // **************************************************************************
 // RiverpodGenerator

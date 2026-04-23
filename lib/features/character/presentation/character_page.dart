@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/character_stat_colors.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
