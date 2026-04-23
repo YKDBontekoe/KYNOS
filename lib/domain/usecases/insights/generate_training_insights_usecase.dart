@@ -6,6 +6,7 @@ import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/shared/utils/llm_output_parser.dart';
 
 class GenerateTrainingInsightsUseCase {
   const GenerateTrainingInsightsUseCase({
@@ -265,30 +266,15 @@ class GenerateTrainingInsightsUseCase {
 
   ({String sessionIntent, List<String> adjustments, List<String> debrief})?
   _parseModelText(String raw) {
-    String? take(String key) {
-      final match = RegExp('$key\\s*:(.*)', multiLine: true).firstMatch(raw);
-      return match?.group(1)?.trim();
-    }
-
-    List<String> splitList(String? value) {
-      if (value == null || value.isEmpty) return const [];
-      return value
-          .split('|')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .take(3)
-          .toList();
-    }
-
-    final sessionIntent = take('SESSION_INTENT');
-    if (sessionIntent == null || sessionIntent.isEmpty) {
-      return null;
-    }
+    final sessionIntent = LlmOutputParser.take(raw, 'SESSION_INTENT');
+    if (sessionIntent == null || sessionIntent.isEmpty) return null;
 
     return (
       sessionIntent: sessionIntent,
-      adjustments: splitList(take('ADJUSTMENTS')),
-      debrief: splitList(take('DEBRIEF')),
+      adjustments:
+          LlmOutputParser.splitList(LlmOutputParser.take(raw, 'ADJUSTMENTS')),
+      debrief:
+          LlmOutputParser.splitList(LlmOutputParser.take(raw, 'DEBRIEF')),
     );
   }
 }

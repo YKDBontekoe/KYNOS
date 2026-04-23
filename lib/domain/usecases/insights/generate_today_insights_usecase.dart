@@ -1,10 +1,12 @@
 import 'package:kynos/core/errors/failures.dart';
+import 'package:kynos/core/utils/readiness_score.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/shared/utils/llm_output_parser.dart';
 
 class GenerateTodayInsightsUseCase {
   const GenerateTodayInsightsUseCase({
@@ -80,7 +82,14 @@ class GenerateTodayInsightsUseCase {
     required HealthSummary today,
     required HealthSummary? yesterday,
   }) {
-    final readiness = _readinessScore(today);
+    // Pessimistic defaults: missing data → worse readiness for "today" insight.
+    final readiness = ReadinessScore.compute(
+      today,
+      fallbackHrvMs: 20,
+      fallbackRhrBpm: 75,
+      fallbackSleepHours: 5,
+      fallbackBloodOxygenPercent: 95,
+    );
 
     final whatChanged = <String>[
       ..._deltaLine(
@@ -199,21 +208,6 @@ class GenerateTodayInsightsUseCase {
     return InsightConfidence.low;
   }
 
-  double _readinessScore(HealthSummary summary) {
-    final hrvScore = ((summary.hrvMs ?? 20).clamp(20, 110) - 20) / 90;
-    final rhrScore = 1 - (((summary.rhrBpm ?? 75).clamp(45, 90) - 45) / 45);
-    final sleepScore = ((summary.sleepHours ?? 5).clamp(4, 9) - 4) / 5;
-    final spo2Score =
-        ((summary.bloodOxygenPercent ?? 95).clamp(90, 100) - 90) / 10;
-
-    return ((hrvScore * 0.35 +
-                rhrScore * 0.25 +
-                sleepScore * 0.25 +
-                spo2Score * 0.15) *
-            100)
-        .clamp(0, 100);
-  }
-
   String _readinessSummary(double score) {
     if (score >= 80) return 'Great readiness. Good day for quality work.';
     if (score >= 65) return 'Solid readiness. Tempo or aerobic work fits.';
@@ -296,38 +290,20 @@ class GenerateTodayInsightsUseCase {
     List<String> risks,
   })?
   _parseModelText(String raw) {
-    String? take(String key) {
-      final match = RegExp('$key\\s*:(.*)', multiLine: true).firstMatch(raw);
-      return match?.group(1)?.trim();
-    }
-
-    List<String> splitList(String? value) {
-      if (value == null || value.isEmpty) return const [];
-      return value
-          .split('|')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .take(3)
-          .toList();
-    }
-
-    final readinessBrief = take('READINESS_BRIEF');
-    final actionNow = take('ACTION_NOW');
-    final actionTonight = take('ACTION_TONIGHT');
+    final readinessBrief = LlmOutputParser.take(raw, 'READINESS_BRIEF');
+    final actionNow = LlmOutputParser.take(raw, 'ACTION_NOW');
+    final actionTonight = LlmOutputParser.take(raw, 'ACTION_TONIGHT');
 
     if (readinessBrief == null || actionNow == null || actionTonight == null) {
       return null;
     }
 
-    final changed = splitList(take('CHANGED'));
-    final risks = splitList(take('RISKS'));
-
     return (
       readinessBrief: readinessBrief,
       actionNow: actionNow,
       actionTonight: actionTonight,
-      changed: changed,
-      risks: risks,
+      changed: LlmOutputParser.splitList(LlmOutputParser.take(raw, 'CHANGED')),
+      risks: LlmOutputParser.splitList(LlmOutputParser.take(raw, 'RISKS')),
     );
   }
 }

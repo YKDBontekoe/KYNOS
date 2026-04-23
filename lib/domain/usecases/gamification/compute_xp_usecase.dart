@@ -1,3 +1,4 @@
+import 'package:kynos/core/utils/readiness_score.dart';
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
@@ -20,7 +21,7 @@ class ComputeXpUseCase {
     final baseXp = (distanceKm * 12 + durationMin * 1.5).round();
 
     // Readiness multiplier — running on low readiness earns Willpower bonus
-    final readiness = _readiness(sameDaySummary);
+    final readiness = ReadinessScore.compute(sameDaySummary);
     final readinessMultiplier = readiness < 40
         ? 1.6
         : readiness < 60
@@ -49,23 +50,6 @@ class ComputeXpUseCase {
       earnedAt: session.end,
       statDeltas: deltas,
     );
-  }
-
-  double _readiness(HealthSummary? summary) {
-    if (summary == null) return 60;
-    final hrvScore = ((summary.hrvMs ?? 40).clamp(20, 110) - 20) / 90;
-    final rhrScore =
-        1 - (((summary.rhrBpm ?? 65).clamp(45, 90) - 45) / 45);
-    final sleepScore =
-        ((summary.sleepHours ?? 7).clamp(4, 9) - 4) / 5;
-    final spo2Score =
-        ((summary.bloodOxygenPercent ?? 97).clamp(90, 100) - 90) / 10;
-    return ((hrvScore * 0.35 +
-                rhrScore * 0.25 +
-                sleepScore * 0.25 +
-                spo2Score * 0.15) *
-            100)
-        .clamp(0, 100);
   }
 
   Map<CharacterStatId, int> _computeStatDeltas({

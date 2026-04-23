@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
+import 'package:kynos/shared/utils/llm_output_parser.dart';
 
 class GenerateDailyQuestsUseCase {
   const GenerateDailyQuestsUseCase({
@@ -215,15 +216,9 @@ class GenerateDailyQuestsUseCase {
   }
 
   Quest? _parseModelOutput(String raw, Quest base) {
-    String? take(String key) {
-      final match =
-          RegExp('$key\\s*:(.*)', multiLine: true).firstMatch(raw);
-      return match?.group(1)?.trim();
-    }
-
-    final title = take('TITLE');
-    final narrative = take('NARRATIVE');
-    final objective = take('OBJECTIVE');
+    final title = LlmOutputParser.take(raw, 'TITLE');
+    final narrative = LlmOutputParser.take(raw, 'NARRATIVE');
+    final objective = LlmOutputParser.take(raw, 'OBJECTIVE');
 
     if (title == null ||
         narrative == null ||
