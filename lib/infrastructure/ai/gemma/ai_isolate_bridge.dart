@@ -26,22 +26,6 @@ class AiTrainRegressionRequest implements AiIsolateRequest {
   final List<AiRegressionSample> samples;
 }
 
-class AiInferRegressionRequest implements AiIsolateRequest {
-  AiInferRegressionRequest({
-    required this.cadenceSpm,
-    required this.powerWatts,
-    required this.b0,
-    required this.b1,
-    required this.b2,
-  });
-
-  final double cadenceSpm;
-  final double powerWatts;
-  final double b0;
-  final double b1;
-  final double b2;
-}
-
 class AiResetSessionRequest implements AiIsolateRequest {}
 
 class AiDisposeRequest implements AiIsolateRequest {}
@@ -81,12 +65,6 @@ class AiTrainRegressionResult implements AiIsolateResponse {
   final double b0;
   final double b1;
   final double b2;
-}
-
-class AiInferRegressionResult implements AiIsolateResponse {
-  AiInferRegressionResult(this.prediction);
-
-  final double prediction;
 }
 
 class AiIsolateError implements AiIsolateResponse {
@@ -214,15 +192,6 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
       } catch (e) {
         mainSendPort.send(AiIsolateError(e.toString()));
       }
-      continue;
-    }
-
-    if (message is AiInferRegressionRequest) {
-      final prediction =
-          message.b0 +
-          (message.b1 * message.cadenceSpm) +
-          (message.b2 * message.powerWatts);
-      mainSendPort.send(AiInferRegressionResult(prediction));
       continue;
     }
 
