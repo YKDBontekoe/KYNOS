@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-
 enum CharacterStatId {
   strength,
   endurance,
@@ -34,15 +31,6 @@ enum CharacterStatId {
         form => 'Gait model quality & cadence',
         recovery => 'HRV, sleep & readiness score',
         willpower => 'Runs completed under low readiness',
-      };
-
-  Color get color => switch (this) {
-        strength => AppTheme.energy,
-        endurance => AppTheme.stand,
-        speed => AppTheme.move,
-        form => AppTheme.exercise,
-        recovery => AppTheme.purple,
-        willpower => const Color(0xFFFFD60A),
       };
 }
 

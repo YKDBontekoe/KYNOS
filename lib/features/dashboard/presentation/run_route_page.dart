@@ -6,7 +6,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/providers/health_provider.dart';
 
 class RunRoutePage extends ConsumerWidget {
   final WorkoutSession run;
