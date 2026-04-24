@@ -20,6 +20,7 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
   Isolate? _isolate;
   SendPort? _isolateSendPort;
   StreamController<AiIsolateResponse>? _responseController;
+  Completer<SendPort>? _sendPortCompleter;
 
   double? _b0;
   double? _b1;
@@ -100,43 +101,9 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
       );
     }
 
-    try {
-      await _ensureIsolate();
-
-      final completer = Completer<AiInferRegressionResult>();
-      late final StreamSubscription<AiIsolateResponse> sub;
-      sub = _responseController!.stream.listen((response) {
-        if (response is AiInferRegressionResult) {
-          if (!completer.isCompleted) {
-            completer.complete(response);
-          }
-          unawaited(sub.cancel());
-        } else if (response is AiIsolateError) {
-          if (!completer.isCompleted) {
-            completer.completeError(StateError(response.error));
-          }
-          unawaited(sub.cancel());
-        }
-      });
-
-      _isolateSendPort!.send(
-        AiInferRegressionRequest(
-          cadenceSpm: cadenceSpm,
-          powerWatts: powerWatts,
-          b0: b0,
-          b1: b1,
-          b2: b2,
-        ),
-      );
-
-      final result = await completer.future.timeout(const Duration(seconds: 5));
-      return (prediction: result.prediction, failure: null);
-    } catch (e) {
-      return (
-        prediction: null,
-        failure: BiomechanicsModelFailure(e.toString()),
-      );
-    }
+    // β0 + β1·cadence + β2·power: trivial arithmetic; no isolate round-trip needed.
+    final prediction = b0 + (b1 * cadenceSpm) + (b2 * powerWatts);
+    return (prediction: prediction, failure: null);
   }
 
   @override
@@ -199,6 +166,7 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
     _isolate = null;
     _isolateSendPort = null;
     _responseController = null;
+    _sendPortCompleter = null;
   }
 
   Future<void> _ensureIsolate() async {
@@ -210,19 +178,20 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
 
     final receivePort = ReceivePort();
     _responseController = StreamController<AiIsolateResponse>.broadcast();
-    _isolate = await Isolate.spawn(aiIsolateEntrypoint, receivePort.sendPort);
+    final completer = Completer<SendPort>();
+    _sendPortCompleter = completer;
 
     receivePort.listen((message) {
       if (message is SendPort) {
         _isolateSendPort = message;
+        if (!completer.isCompleted) completer.complete(message);
       } else if (message is AiIsolateResponse) {
         _responseController?.add(message);
       }
     });
 
-    while (_isolateSendPort == null) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-    }
+    _isolate = await Isolate.spawn(aiIsolateEntrypoint, receivePort.sendPort);
+    await completer.future;
   }
 
   Future<File> _modelFile() async {

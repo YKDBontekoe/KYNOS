@@ -40,9 +40,6 @@ dependencies:
   # ── Health Data ──────────────────────────────────────────────────────────
   health: ^12.2.0              # HealthKit (iOS) + Health Connect (Android)
 
-  # ── Networking (coach ↔ optional remote sync) ────────────────────────────
-  dio: ^5.8.0+1
-
   # ── Config ───────────────────────────────────────────────────────────────
   flutter_dotenv: ^5.2.1    # .env file for secrets (HF_TOKEN, etc.)
 

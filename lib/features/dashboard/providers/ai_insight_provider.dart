@@ -1,3 +1,6 @@
+// TODO (AI): Extract AI coach + model repository access into a shared provider
+// (e.g. shared/providers/ai_repository_provider.dart) so that feature providers
+// depend only on domain interfaces and never import from infrastructure/ directly.
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
