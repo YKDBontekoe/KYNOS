@@ -6,6 +6,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
+import 'package:kynos/shared/utils/character_stat_colors.dart';
 import 'package:kynos/domain/entities/gamification/earned_title.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';

@@ -3,7 +3,7 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
-import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/health_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_provider.g.dart';
@@ -12,7 +12,7 @@ part 'health_provider.g.dart';
 HealthRepository healthRepository(HealthRepositoryRef ref) {
   // Delegate to the infrastructure binding — feature layer stays decoupled
   // from the concrete HealthKitRepository class.
-  return ref.watch(healthKitRepositoryProvider);
+  return ref.watch(sharedHealthRepositoryProvider);
 }
 
 @riverpod
