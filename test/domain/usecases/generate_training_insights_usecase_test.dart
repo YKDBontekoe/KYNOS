@@ -95,8 +95,6 @@ class _FakeHealthRepository implements HealthRepository {
     required List<HealthSummary> history,
     required List<WorkoutSession> runs,
     this.summariesFailure,
-    this.runsFailure,
-    this.todayFailure,
   }) : _history = history,
        _runs = runs;
 
@@ -104,8 +102,6 @@ class _FakeHealthRepository implements HealthRepository {
   final List<HealthSummary> _history;
   final List<WorkoutSession> _runs;
   final Failure? summariesFailure;
-  final Failure? runsFailure;
-  final Failure? todayFailure;
 
   @override
   Future<({List<HealthSummary> summaries, Failure? failure})> getSummaries({
@@ -116,7 +112,7 @@ class _FakeHealthRepository implements HealthRepository {
 
   @override
   Future<({HealthSummary? summary, Failure? failure})> getToday() async {
-    return (summary: today, failure: todayFailure);
+    return (summary: today, failure: null);
   }
 
   @override
@@ -127,7 +123,7 @@ class _FakeHealthRepository implements HealthRepository {
     required int days,
     int limit = 30,
   }) async {
-    return (runs: _runs, failure: runsFailure);
+    return (runs: _runs, failure: null);
   }
 
   @override

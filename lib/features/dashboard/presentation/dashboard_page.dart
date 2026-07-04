@@ -8,12 +8,11 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
-import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/utils/insight_text_formatter.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
-import 'package:kynos/shared/utils/insight_text_formatter.dart';
 
 /// Today tab — readiness, AI insight, and today's health metrics.
 class DashboardPage extends ConsumerWidget {
@@ -313,7 +312,7 @@ class _TodayInsightCards extends StatelessWidget {
       loading: () => const KynosCard(
         child: _LoadingLine(label: 'Generating today insights...'),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (state) {
         final insights = state.insights;
         if (insights == null) {
@@ -507,8 +506,8 @@ class _ActionCompactCardState extends State<_ActionCompactCard> {
             spacing: tokens.Spacing.xs,
             runSpacing: tokens.Spacing.xs,
             children: [
-              _CompactChip(label: 'Now'),
-              _CompactChip(label: 'Tonight'),
+              const _CompactChip(label: 'Now'),
+              const _CompactChip(label: 'Tonight'),
               if (widget.evidence.isNotEmpty)
                 _CompactChip(label: '${widget.evidence.length} signals'),
             ],
@@ -881,10 +880,12 @@ String _readinessBrief({
 }
 
 String _readinessSummary(double score) {
-  if (score >= 80)
+  if (score >= 80) {
     return 'Strong recovery. High quality session is supported today.';
-  if (score >= 65)
+  }
+  if (score >= 65) {
     return 'Stable recovery. Tempo or aerobic run should feel good.';
+  }
   if (score >= 45) return 'Moderate readiness. Keep intensity controlled.';
   return 'Low readiness. Prioritise recovery and easy movement.';
 }
