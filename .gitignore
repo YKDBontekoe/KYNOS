@@ -121,6 +121,10 @@ unlinked_spec.ds
 # Coverage
 coverage/
 
+# Release tooling
+node_modules/
+dist/
+
 # Symbols
 app.*.symbols
 
