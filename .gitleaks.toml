@@ -1,0 +1,10 @@
+title = "KYNOS gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "SharedPreferences storage keys are not secrets"
+paths = [
+  '''lib/infrastructure/gamification/character_persistence_repository.dart''',
+]
