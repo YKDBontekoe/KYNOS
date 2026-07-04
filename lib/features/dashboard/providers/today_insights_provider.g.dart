@@ -7,7 +7,7 @@ part of 'today_insights_provider.dart';
 // **************************************************************************
 
 String _$todayInsightsStateHash() =>
-    r'2b4f91b5b3904f9e250e66cfea4c8fa1505cbe9e';
+    r'd0d3a89bc19e83a9787f1fba1a707d3f3bde6cf8';
 
 /// See also [todayInsightsState].
 @ProviderFor(todayInsightsState)

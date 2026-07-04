@@ -7,7 +7,7 @@ part of 'training_insights_provider.dart';
 // **************************************************************************
 
 String _$trainingInsightsStateHash() =>
-    r'265852a165942eecc979be10951c027a40becbf3';
+    r'969a032ed9fcb94e8acd8e9622f11baa9a86e19d';
 
 /// See also [trainingInsightsState].
 @ProviderFor(trainingInsightsState)
