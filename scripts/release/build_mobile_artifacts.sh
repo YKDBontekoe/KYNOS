@@ -13,24 +13,24 @@ echo "Building Android release APK..."
 flutter build apk --release
 cp build/app/outputs/flutter-apk/app-release.apk dist/kynos-android.apk
 
-ios_certificate="${IOS_SIDELOAD_CERTIFICATE_P12_BASE64:-${IOS_DISTRIBUTION_CERTIFICATE_P12_BASE64:-}}"
-if [[ -n "${ios_certificate}" ]]; then
-  echo "Building iOS sideload IPA (development export)..."
-  flutter build ipa \
-    --release \
-    --export-method development \
-    --export-options-plist=ios/ExportOptions.plist
+echo "Building unsigned iOS IPA..."
+flutter build ios --release --no-codesign
 
-  ipa_path="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
-  if [[ -z "${ipa_path}" ]]; then
-    echo "IPA build completed but no .ipa file was found."
-    exit 1
-  fi
-
-  cp "${ipa_path}" dist/kynos-ios-sideload.ipa
-else
-  echo "Skipping iOS sideload IPA: set IOS_SIDELOAD_CERTIFICATE_P12_BASE64 to enable sideload builds."
+app_path="${ROOT_DIR}/build/ios/iphoneos/Runner.app"
+if [[ ! -d "${app_path}" ]]; then
+  echo "Runner.app not found at ${app_path}"
+  exit 1
 fi
+
+ipa_staging="${ROOT_DIR}/build/ios/unsigned-ipa"
+rm -rf "${ipa_staging}"
+mkdir -p "${ipa_staging}/Payload"
+ditto "${app_path}" "${ipa_staging}/Payload/Runner.app"
+
+(
+  cd "${ipa_staging}"
+  zip -qr "${ROOT_DIR}/dist/kynos-ios-unsigned.ipa" Payload
+)
 
 echo "Release artifacts prepared in dist/:"
 ls -la dist/
