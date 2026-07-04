@@ -50,7 +50,7 @@ class CharacterPage extends ConsumerWidget {
               child: CircularProgressIndicator(color: AppTheme.stand),
             ),
           ),
-          error: (_, _2) => SliverFillRemaining(
+          error: (_, _) => SliverFillRemaining(
             child: Center(
               child: Text(
                 'Could not load character',
@@ -77,16 +77,16 @@ class CharacterPage extends ConsumerWidget {
                   const Gap(tokens.Spacing.md),
                   _XpBar(character: character),
                   const Gap(tokens.Spacing.lg),
-                  _SectionLabel(label: 'STATS'),
+                  const _SectionLabel(label: 'STATS'),
                   const Gap(tokens.Spacing.sm),
                   _StatsPanel(character: character),
                   const Gap(tokens.Spacing.lg),
-                  _SectionLabel(label: "TODAY'S QUEST"),
+                  const _SectionLabel(label: "TODAY'S QUEST"),
                   const Gap(tokens.Spacing.sm),
                   _QuestPanel(questsAsync: questsAsync),
                   const Gap(tokens.Spacing.lg),
                   if (character.earnedTitles.isNotEmpty) ...[
-                    _SectionLabel(label: 'TITLES'),
+                    const _SectionLabel(label: 'TITLES'),
                     const Gap(tokens.Spacing.sm),
                     _TitlesPanel(titles: character.earnedTitles),
                     const Gap(tokens.Spacing.lg),
@@ -394,7 +394,7 @@ class _QuestPanel extends StatelessWidget {
       loading: () => const KynosCard(
         child: _LoadingLine(label: 'Generating quest...'),
       ),
-      error: (_, _2) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (quests) {
         if (quests.isEmpty) {
           return KynosCard(

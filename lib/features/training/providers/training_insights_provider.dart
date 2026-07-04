@@ -23,8 +23,8 @@ Future<TrainingInsightsState> trainingInsightsState(
   TrainingInsightsStateRef ref,
 ) async {
   if (kIsWeb) {
-    return TrainingInsightsState(
-      insights: const TrainingInsights(
+    return const TrainingInsightsState(
+      insights: TrainingInsights(
         sessionIntent: 'Intent: recovery-biased preview day. Keep RPE 4-6.',
         adjustmentHints: <String>[
           'If breathing rises early, reduce one interval block.',

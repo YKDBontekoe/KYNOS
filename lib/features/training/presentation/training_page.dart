@@ -12,7 +12,6 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
-import 'package:kynos/domain/entities/insights/training_insights.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/features/nexus_lab/providers/nexus_lab_provider.dart';
@@ -366,7 +365,7 @@ class _TrainingInsightsCards extends StatelessWidget {
       loading: () => const KynosCard(
         child: _InsightLoadingLine(label: 'Building training insights...'),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
       data: (state) {
         final insights = state.insights;
         if (insights == null) return const SizedBox.shrink();

@@ -21,8 +21,8 @@ class TodayInsightsState {
 @riverpod
 Future<TodayInsightsState> todayInsightsState(TodayInsightsStateRef ref) async {
   if (kIsWeb) {
-    return TodayInsightsState(
-      insights: const TodayInsights(
+    return const TodayInsightsState(
+      insights: TodayInsights(
         readinessBrief:
             'Preview mode: connect HealthKit on iOS for live readiness.',
         whatChanged: <String>[
