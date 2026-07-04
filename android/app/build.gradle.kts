@@ -29,7 +29,8 @@ android {
 
     defaultConfig {
         applicationId = "com.kynos.kynos"
-        minSdk = flutter.minSdkVersion
+        // Required by the health plugin (Flutter default minSdk is 24).
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
