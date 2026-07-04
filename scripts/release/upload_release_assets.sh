@@ -15,4 +15,13 @@ if [[ ! -d dist ]] || [[ -z "$(find dist -maxdepth 1 -type f -print -quit)" ]]; 
   exit 1
 fi
 
-gh release upload "${VERSION}" dist/* --clobber
+# gh CLI expects the release tag (semantic-release uses tagFormat v${version}).
+if [[ "${VERSION}" == v* ]]; then
+  TAG="${VERSION}"
+else
+  TAG="v${VERSION}"
+fi
+
+export GH_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+
+gh release upload "${TAG}" dist/* --clobber

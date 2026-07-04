@@ -41,6 +41,9 @@ jobs:
       - name: Run tests
         run: flutter test --coverage
 
+      - name: Verify Android release APK build
+        run: flutter build apk --release
+
       - name: Upload coverage results
         uses: codecov/codecov-action@v4
         with:
@@ -117,4 +120,5 @@ jobs:
       - name: Semantic release (APK + unsigned IPA)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
