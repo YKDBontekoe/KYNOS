@@ -23,7 +23,7 @@ final healthRepositoryProvider = Provider<HealthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HealthRepositoryRef = ProviderRef<HealthRepository>;
-String _$healthSummaryHash() => r'478240d0b7537c111cee63b178c866cdad8f1f52';
+String _$healthSummaryHash() => r'b4c005aaab86f2be2bfcb6d2da47d780ff7decb3';
 
 /// See also [healthSummary].
 @ProviderFor(healthSummary)
