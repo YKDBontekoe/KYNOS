@@ -7,8 +7,8 @@ import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
-import 'package:kynos/domain/utils/health_context_formatter.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_bridge.dart';
+import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
@@ -32,11 +32,6 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   @override
   AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
-
-  static const _systemInstruction =
-      'You are KYNOS Coach — an expert on-device running coach. '
-      'Give concise, biomechanics-aware advice. '
-      'Never reveal you are an AI model or reference any training data.';
 
   @override
   Stream<AiChunk> chat({
@@ -106,13 +101,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     return controller.stream;
   }
 
-  String _buildPrompt(String userMessage, List<HealthSummary>? healthContext) {
-    if (healthContext == null || healthContext.isEmpty) return userMessage;
-    final lines = HealthContextFormatter.summarizeForPrompt(healthContext);
-    return '$_systemInstruction\n\n'
-        'Recent athlete metrics:\n${lines.join('\n')}\n\n'
-        'Athlete question: $userMessage';
-  }
+  String _buildPrompt(String userMessage, List<HealthSummary>? healthContext) =>
+      buildCoachUserMessage(userMessage, healthContext);
 
   Future<void> _ensureIsolate() async {
     if (_isolateSendPort != null && _initialized) return;

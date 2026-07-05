@@ -28,7 +28,7 @@ dependencies:
   dio: ^5.10.0
   meta: ^1.18.0
   logger: ^2.5.0
-  flutter_gemma: ^1.2.0
+  flutter_gemma: ^1.2.1
   flutter_gemma_litertlm: ^1.0.2
   lottie: ^3.4.0
   shared_preferences: ^2.5.5

@@ -210,7 +210,11 @@ class OnDeviceBiomechanicsRepository implements BiomechanicsRepository {
 
     final receivePort = ReceivePort();
     _responseController = StreamController<AiIsolateResponse>.broadcast();
-    _isolate = await Isolate.spawn(aiIsolateEntrypoint, receivePort.sendPort);
+    _isolate = await Isolate.spawn(
+      regressionIsolateEntrypoint,
+      receivePort.sendPort,
+      debugName: 'kynos-regression-isolate',
+    );
 
     receivePort.listen((message) {
       if (message is SendPort) {
