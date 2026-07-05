@@ -9,8 +9,8 @@ mkdir -p dist
 cp .env.example .env
 flutter pub get
 
-echo "Building Android release APK..."
-flutter build apk --release
+echo "Building Android release APK (arm64 only)..."
+flutter build apk --release --target-platform android-arm64
 cp build/app/outputs/flutter-apk/app-release.apk dist/kynos-android.apk
 
 echo "Building unsigned iOS IPA..."
