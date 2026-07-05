@@ -108,20 +108,10 @@ jobs:
           retention-days: 1
           path: coverage/lcov.info
 
-  build:
+  build-web:
     needs: bootstrap
-    if: >-
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      (github.event_name == 'pull_request' || matrix.target == 'web')
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: web
-            command: flutter build web
-          - target: apk
-            command: flutter build apk --release
 
     steps:
       - uses: actions/checkout@v4
@@ -143,8 +133,38 @@ jobs:
         with:
           name: generated-code
 
-      - name: Build ${{ matrix.target }}
-        run: ${{ matrix.command }}
+      - name: Build web
+        run: flutter build web
+
+  build-apk:
+    needs: bootstrap
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get
+
+      - name: Download generated code
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-code
+
+      - name: Build apk
+        run: flutter build apk --release
 
   coverage:
     needs: test
@@ -166,7 +186,7 @@ jobs:
           fail_ci_if_error: false
 
   ci-success:
-    needs: [bootstrap, analyze, test, build]
+    needs: [bootstrap, analyze, test, build-web, build-apk]
     if: always()
     runs-on: ubuntu-latest
 
@@ -177,7 +197,8 @@ jobs:
           BOOTSTRAP_RESULT: ${{ needs.bootstrap.result }}
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           TEST_RESULT: ${{ needs.test.result }}
-          BUILD_RESULT: ${{ needs.build.result }}
+          BUILD_WEB_RESULT: ${{ needs.build-web.result }}
+          BUILD_APK_RESULT: ${{ needs.build-apk.result }}
         run: |
           if [[ "$SKIP_CI" == "true" ]]; then
             echo "CI skipped via commit message"
@@ -189,14 +210,17 @@ jobs:
             exit 1
           fi
 
-          for job in analyze test build; do
-            result_var="${job^^}_RESULT"
-            result="${!result_var}"
+          for result in "$ANALYZE_RESULT" "$TEST_RESULT" "$BUILD_WEB_RESULT"; do
             if [[ "$result" != "success" ]]; then
-              echo "$job did not succeed: $result"
+              echo "A required job did not succeed: $result"
               exit 1
             fi
           done
+
+          if [[ "$BUILD_APK_RESULT" != "success" && "$BUILD_APK_RESULT" != "skipped" ]]; then
+            echo "build-apk did not succeed: $BUILD_APK_RESULT"
+            exit 1
+          fi
 
   release:
     needs: ci-success
