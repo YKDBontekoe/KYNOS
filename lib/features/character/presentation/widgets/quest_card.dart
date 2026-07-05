@@ -6,6 +6,8 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/features/character/providers/quest_provider.dart';
+import 'package:kynos/shared/providers/gamification_providers.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -36,8 +38,10 @@ class QuestPanel extends StatelessWidget {
         }
         return Column(
           children: [
-            for (final quest in quests)
+            for (final quest in quests) ...[
               QuestCard(quest: quest),
+              if (quest != quests.last) const Gap(tokens.Spacing.sm),
+            ],
           ],
         );
       },
@@ -62,6 +66,29 @@ class QuestCard extends ConsumerWidget {
     final kynos = context.kynosTheme;
     final isCompleted = quest.status == QuestStatus.completed;
     final diffColor = _difficultyColor(quest.difficulty);
+    final objective = quest.measurableObjective;
+    final isMeasurable = objective != null && objective.isMeasurable;
+
+    double progress = 0;
+    if (isMeasurable && !isCompleted) {
+      final summary = ref.watch(healthSummaryProvider).value;
+      final runsAsync = ref.watch(recentRunsProvider(days: 1, limit: 20));
+      final today = DateTime.now();
+      final todayRuns = runsAsync.value
+              ?.where(
+                (r) =>
+                    r.start.year == today.year &&
+                    r.start.month == today.month &&
+                    r.start.day == today.day,
+              )
+              .toList() ??
+          const [];
+      progress = ref.read(evaluateQuestProgressUseCaseProvider).progressFraction(
+            quest: quest,
+            summary: summary,
+            todayRuns: todayRuns,
+          );
+    }
 
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.md),
@@ -150,6 +177,26 @@ class QuestCard extends ConsumerWidget {
               height: 1.4,
             ),
           ),
+          if (isMeasurable && !isCompleted) ...[
+            const Gap(tokens.Spacing.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(Radius.sm),
+              child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0),
+                minHeight: 6,
+                backgroundColor: AppTheme.separator,
+                color: diffColor,
+              ),
+            ),
+            const Gap(tokens.Spacing.xs),
+            Text(
+              '${(progress * 100).round()}% complete',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: AppTheme.tertiaryLabel,
+              ),
+            ),
+          ],
           const Gap(tokens.Spacing.sm),
           Wrap(
             spacing: Spacing.xs,
@@ -165,7 +212,7 @@ class QuestCard extends ConsumerWidget {
                   label: '+${entry.value} ${entry.key.label}',
                   color: kynos.accentForKey(entry.key.colorKey),
                 ),
-              if (!isCompleted)
+              if (!isCompleted && !isMeasurable)
                 FilledButton(
                   onPressed: () => ref
                       .read(questProvider.notifier)
@@ -178,6 +225,14 @@ class QuestCard extends ConsumerWidget {
                     ),
                   ),
                   child: const Text('Complete'),
+                ),
+              if (!isCompleted && isMeasurable)
+                Text(
+                  'Auto-completes from health data',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: AppTheme.tertiaryLabel,
+                  ),
                 ),
             ],
           ),

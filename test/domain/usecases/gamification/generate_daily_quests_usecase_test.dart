@@ -42,8 +42,9 @@ void main() {
 
       expect(result.failure, isNull);
       expect(result.usedModel, isFalse);
-      expect(result.quests, hasLength(1));
+      expect(result.quests, hasLength(2));
       expect(result.quests.first.title, isNotEmpty);
+      expect(result.quests.last.measurableObjective, isNotNull);
     });
   });
 }

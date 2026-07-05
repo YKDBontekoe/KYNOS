@@ -10,6 +10,7 @@ import 'package:kynos/features/character/presentation/widgets/quest_card.dart';
 import 'package:kynos/features/character/presentation/widgets/signatory_power_card.dart';
 import 'package:kynos/features/character/presentation/widgets/stats_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
+import 'package:kynos/features/character/presentation/widgets/trail_run_game_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
 import 'package:kynos/features/character/providers/character_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -84,6 +85,8 @@ class CharacterPage extends ConsumerWidget {
               ),
               sliver: SliverList.list(
                 children: [
+                  const TrailRunGamePanel(),
+                  const Gap(tokens.Spacing.lg),
                   CharacterHeroCard(character: character),
                   const Gap(tokens.Spacing.md),
                   XpBar(character: character),
