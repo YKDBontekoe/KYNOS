@@ -29,6 +29,9 @@ abstract final class AppConstants {
   /// Recommended volume variation tolerance between training weeks.
   static const double weeklyVolumeTolerance = 0.10; // ±10 %
 
+  /// Default weekly running distance goal (km) for dashboard progress ring.
+  static const double weeklyDistanceGoalKm = 30;
+
   // ── Model download ────────────────────────────────────────────────────────
   /// HuggingFace repository path for the on-device Gemma model.
   /// Verify the exact filename against the HF repo before shipping.

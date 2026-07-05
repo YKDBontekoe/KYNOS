@@ -3,10 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
+import 'package:kynos/domain/entities/gamification/character_class.dart';
+import 'package:kynos/domain/entities/gamification/character_stats.dart';
+import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
+import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -24,6 +30,28 @@ void main() {
     runningWorkoutDistanceMeters: 5200,
   );
 
+  final dashboardSummary = DashboardSummary(
+    runStreak: 5,
+    weeklyMomentum: const WeeklyMomentum(
+      thisWeekDistanceKm: 12.5,
+      thisWeekRuns: 3,
+      thisWeekActiveKcal: 900,
+      distanceDeltaPct: 12,
+      distanceGoalKm: 30,
+      distanceGoalProgress: 0.42,
+    ),
+    personalBestCallouts: const ['Best HRV in 14 days'],
+    character: RunnerCharacter(
+      characterClass: const Phantom(),
+      level: 4,
+      xp: 500,
+      stats: const CharacterStats(recovery: 8),
+      createdAt: DateTime(2026, 1, 1),
+      lastUpdated: DateTime(2026, 4, 20),
+    ),
+    history7Day: [summary],
+  );
+
   const insightsState = TodayInsightsState(
     insights: TodayInsights(
       readinessBrief: 'Solid readiness. Tempo work fits today.',
@@ -38,19 +66,23 @@ void main() {
     failureMessage: null,
   );
 
-  // Override is sealed/internal in Riverpod 3 — overrideWith return types are
-  // checked at each call site; ProviderScope accepts the inferred list.
   List<dynamic> defaultOverrides({
     required Future<HealthSummary?> Function(Ref ref) health,
     required Future<TodayInsightsState> Function(Ref ref) insights,
     List<HealthSummary> history = const [],
+    DashboardSummary? dashSummary,
   }) {
     return [
       healthSummaryProvider.overrideWith(health),
       todayInsightsStateProvider.overrideWith(insights),
       healthHistoryProvider(days: 7).overrideWith((ref) async => history),
-      recentRunsProvider(days: 30, limit: 1).overrideWith((ref) async => const []),
+      healthHistoryProvider(days: 28).overrideWith((ref) async => history),
+      healthHistoryProvider(days: 30).overrideWith((ref) async => history),
+      recentRunsProvider(days: 30, limit: 3).overrideWith((ref) async => const []),
       dailyQuestsProvider.overrideWith((ref) async => const []),
+      dashboardSummaryProvider.overrideWith(
+        (ref) async => dashSummary ?? dashboardSummary,
+      ),
     ];
   }
 
@@ -74,13 +106,27 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('KYNOS'), findsOneWidget);
     expect(find.text('READINESS'), findsOneWidget);
     expect(find.text('Solid readiness. Tempo work fits today.'), findsOneWidget);
-    expect(find.text('Quick Changes'), findsOneWidget);
     expect(find.text('THIS WEEK'), findsOneWidget);
     expect(find.text('Ask Coach'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('LEVEL 4'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('LEVEL 4'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Quick Changes'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Quick Changes'), findsOneWidget);
   });
 
   testWidgets('DashboardPage shows loading shimmer for metrics', (tester) async {
@@ -115,8 +161,13 @@ void main() {
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 500));
 
+    await tester.scrollUntilVisible(
+      find.text('Could not generate today insights.'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Could not generate today insights.'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
   });

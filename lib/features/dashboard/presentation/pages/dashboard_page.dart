@@ -6,22 +6,31 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/utils/acwr.dart';
+import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/acwr_guardrail_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/character_glance_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/gait_teaser_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/health_metrics_grid.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/last_run_preview.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/today_insight_cards.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/weekly_snapshot_row.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/trend_carousel.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/what_changed_chips.dart';
+import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
@@ -64,14 +73,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     ref.invalidate(healthSummaryProvider);
     ref.invalidate(todayInsightsStateProvider);
     ref.invalidate(healthHistoryProvider(days: 28));
-    ref.invalidate(recentRunsProvider(days: 30, limit: 1));
+    ref.invalidate(healthHistoryProvider(days: 30));
+    ref.invalidate(recentRunsProvider(days: 30, limit: 3));
     ref.invalidate(dailyQuestsProvider);
+    ref.invalidate(dashboardSummaryProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
       ref.read(healthHistoryProvider(days: 28).future),
-      ref.read(recentRunsProvider(days: 30, limit: 1).future),
+      ref.read(recentRunsProvider(days: 30, limit: 3).future),
       ref.read(dailyQuestsProvider.future),
+      ref.read(dashboardSummaryProvider.future),
     ]);
   }
 
@@ -100,6 +112,41 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'What should I prioritise in training today?';
   }
 
+  Color _heroAccentColor({
+    required KynosThemeExtension kynos,
+    required HealthSummary? summary,
+    required List<HealthSummary> history,
+  }) {
+    final acwr = computeAcwr(history);
+    if (isAcwrElevated(acwr)) return kynos.move;
+
+    final score = readinessScore(summary);
+    if (score >= 65) return kynos.exercise;
+    if (score >= 45) return kynos.stand;
+    return kynos.move;
+  }
+
+  String _statusStrip({
+    required HealthSummary? summary,
+    required DashboardSummary? dash,
+  }) {
+    final parts = <String>[];
+    final score = readinessScore(summary);
+    if (score > 0) {
+      parts.add(readinessSummaryBrief(score).split('.').first);
+    }
+    if (dash != null && dash.runStreak > 0) {
+      parts.add('${dash.runStreak}-day streak');
+    }
+    final character = dash?.character;
+    if (character != null) {
+      final className = character.characterClass.name.replaceFirst('The ', '');
+      parts.add('Level ${character.level} $className');
+    }
+    if (parts.isEmpty) return 'Your AI running coach';
+    return parts.join(' · ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
@@ -107,8 +154,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final todayInsightsState = ref.watch(todayInsightsStateProvider);
     final loadHistory = ref.watch(healthHistoryProvider(days: 28));
     final weekHistory = _last7Days(loadHistory.value ?? const []);
-    final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 1));
+    final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 3));
     final dailyQuests = ref.watch(dailyQuestsProvider);
+    final dashboardSummaryAsync = ref.watch(dashboardSummaryProvider);
+    final dash = dashboardSummaryAsync.value;
     final showConnectCard = !kIsWeb &&
         summary.hasValue &&
         summary.requireValue == null;
@@ -171,10 +220,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             sliver: SliverList.list(
               children: [
                 KynosHeroBanner(
-                  accentColor: kynos.stand,
+                  accentColor: _heroAccentColor(
+                    kynos: kynos,
+                    summary: summary.value,
+                    history: loadHistory.value ?? const [],
+                  ),
                   subtitle: _greeting(),
                   title: 'KYNOS',
-                  caption: 'Your AI running coach',
+                  caption: _statusStrip(summary: summary.value, dash: dash),
                   actionLabel: 'Ask Coach',
                   onActionTap: () => _openCoachChat(),
                 ),
@@ -184,7 +237,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   todayInsightsState: todayInsightsState,
                   history: weekHistory,
                 ),
-                const Gap(tokens.Spacing.md),
+                const Gap(tokens.Spacing.sm),
+                WhatChangedChips(
+                  insights: todayInsightsState.value?.insights,
+                ),
+                if (todayInsightsState.value?.insights != null)
+                  const Gap(tokens.Spacing.md),
                 AcwrGuardrailCard(
                   history: loadHistory.value ?? const <HealthSummary>[],
                 ),
@@ -207,10 +265,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ],
                 ),
                 const Gap(tokens.Spacing.sm),
-                WeeklySnapshotRow(
-                  history: weekHistory,
-                  isLoading: loadHistory.isLoading,
+                WeekMomentumCard(
+                  momentum: dash?.weeklyMomentum,
+                  isLoading:
+                      loadHistory.isLoading || dashboardSummaryAsync.isLoading,
                 ),
+                const Gap(tokens.Spacing.lg),
+                const KynosSectionHeader(title: 'Trends'),
+                const Gap(tokens.Spacing.sm),
+                TrendCarousel(history: weekHistory),
                 const Gap(tokens.Spacing.lg),
                 TodayInsightCards(
                   todayInsightsState: todayInsightsState,
@@ -221,13 +284,53 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 ),
                 const Gap(tokens.Spacing.lg),
+                if (dash?.streakNudge != null) ...[
+                  KynosCard(
+                    padding: const EdgeInsets.all(tokens.Spacing.md),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_fire_department, color: kynos.energy),
+                        const Gap(tokens.Spacing.sm),
+                        Expanded(
+                          child: Text(
+                            dash!.streakNudge!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(tokens.Spacing.lg),
+                ],
+                if (dash?.character != null) ...[
+                  CharacterGlanceCard(
+                    character: dash!.character!,
+                    onViewCharacter: widget.onViewCharacter,
+                  ),
+                  const Gap(tokens.Spacing.md),
+                ],
                 DailyQuestTeaser(
                   questsAsync: dailyQuests,
                   onViewCharacter: widget.onViewCharacter,
                 ),
                 if (dailyQuests.value?.isNotEmpty ?? false)
                   const Gap(tokens.Spacing.lg),
-                const KynosSectionHeader(title: 'Last Run'),
+                if (dash != null && dash.personalBestCallouts.isNotEmpty) ...[
+                  SizedBox(
+                    height: 32,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: dash.personalBestCallouts.length,
+                      separatorBuilder: (_, _) => const Gap(tokens.Spacing.sm),
+                      itemBuilder: (context, index) => KynosChip.accent(
+                        label: dash.personalBestCallouts[index],
+                        color: kynos.willpower,
+                      ),
+                    ),
+                  ),
+                  const Gap(tokens.Spacing.lg),
+                ],
+                const KynosSectionHeader(title: 'Recent Runs'),
                 const Gap(tokens.Spacing.sm),
                 LastRunPreview(runsAsync: recentRuns),
                 const Gap(tokens.Spacing.lg),
@@ -235,9 +338,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 const Gap(tokens.Spacing.sm),
                 HealthMetricsGrid(
                   summary: summary.value,
+                  dashboardSummary: dash,
                   isLoading: summary.isLoading,
+                  onViewTraining: widget.onViewTraining,
+                  onAskCoach: (seed) => _openCoachChat(seedMessage: seed),
                 ),
                 const Gap(tokens.Spacing.lg),
+                if (!kIsWeb && dash?.isGaitCalibrated == true) ...[
+                  GaitTeaserCard(
+                    coefficients: dash!.gaitCoefficients,
+                    summary: summary.value,
+                    calibratedAt: dash.gaitCalibratedAt,
+                    onViewTraining: widget.onViewTraining,
+                  ),
+                  const Gap(tokens.Spacing.lg),
+                ],
                 if (showHealthError) ...[
                   KynosCard(
                     child: Column(

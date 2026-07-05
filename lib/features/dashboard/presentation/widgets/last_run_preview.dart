@@ -9,7 +9,7 @@ import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
 
-/// Shows the most recent run on the Today tab.
+/// Shows up to three recent runs on the Today tab.
 class LastRunPreview extends StatelessWidget {
   const LastRunPreview({
     super.key,
@@ -22,7 +22,7 @@ class LastRunPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return runsAsync.when(
       loading: () => const KynosCard(
-        child: KynosLoadingLine(label: 'Loading recent run...'),
+        child: KynosLoadingLine(label: 'Loading recent runs...'),
       ),
       error: (_, _) => KynosCard(
         child: Text(
@@ -51,7 +51,25 @@ class LastRunPreview extends StatelessWidget {
             ),
           );
         }
-        return RunCard(run: runs.first);
+
+        if (runs.length == 1) {
+          return RunCard(run: runs.first);
+        }
+
+        return SizedBox(
+          height: 132,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: runs.length,
+            separatorBuilder: (_, _) => const Gap(Spacing.sm),
+            itemBuilder: (context, index) {
+              return SizedBox(
+                width: 280,
+                child: RunCard(run: runs[index]),
+              );
+            },
+          ),
+        );
       },
     );
   }
