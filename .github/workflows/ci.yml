@@ -168,9 +168,13 @@ jobs:
       - name: Build web
         run: flutter build web
 
+  # Disabled by default — a universal APK build adds ~15–25 min per PR on Ubuntu
+  # while build-web already validates compilation. IPA is only built on release.
+  # Re-enable by setting repository variable CI_BUILD_APK=true.
   build-apk:
     needs: bootstrap
     if: >-
+      vars.CI_BUILD_APK == 'true' &&
       github.event_name == 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
@@ -195,8 +199,15 @@ jobs:
         with:
           name: generated-code
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '17'
+          cache: gradle
+
       - name: Build apk
-        run: flutter build apk --release
+        run: flutter build apk --release --target-platform android-arm64
 
   coverage:
     needs: test
