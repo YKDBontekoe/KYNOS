@@ -9,15 +9,44 @@ on:
     - cron: '0 0 * * 1' # Weekly audit on Mondays
 
 jobs:
-  audit:
+  gitleaks:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full history required for secret scanning (gitleaks)
+
+      - name: Secret Scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  osv-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency Vulnerability Audit (osv-scanner)
+        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+        with:
+          scan-args: --recursive ./
+
+  pub-outdated:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -31,18 +60,27 @@ jobs:
           cp .env.example .env
           flutter pub get
 
-      - name: Dependency Vulnerability Audit (osv-scanner)
-        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
-        with:
-          scan-args: --recursive ./
-
       - name: Outdated Package Check
         run: |
           # Fails if any packages have major version updates (optional threshold)
           flutter pub outdated --no-dev-dependencies --up-to-date --json > outdated.json
           # You can add custom logic here to fail the build if critical packages are old
 
-      - name: Secret Scanning (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2.3.9
+  security-success:
+    needs: [gitleaks, osv-scan, pub-outdated]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify all security scans passed
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_RESULT: ${{ needs.gitleaks.result }}
+          OSV_RESULT: ${{ needs['osv-scan'].result }}
+          OUTDATED_RESULT: ${{ needs['pub-outdated'].result }}
+        run: |
+          for result in "$GITLEAKS_RESULT" "$OSV_RESULT" "$OUTDATED_RESULT"; do
+            if [[ "$result" != "success" ]]; then
+              echo "A security scan did not succeed: $result"
+              exit 1
+            fi
+          done
