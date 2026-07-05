@@ -59,4 +59,4 @@ final class DailyQuestsProvider
   }
 }
 
-String _$dailyQuestsHash() => r'da2f1e72841ecb9ad5577c19fc6c6a02c81a7845';
+String _$dailyQuestsHash() => r'deb493b3391351b56b1d981e0a7f11ed3fbb1f23';
