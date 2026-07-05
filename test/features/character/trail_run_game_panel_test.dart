@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/entities/gamification/activity_resources.dart';
 import 'package:kynos/domain/entities/gamification/adventure_session.dart';
-import 'package:kynos/domain/entities/gamification/trail_node.dart';
 import 'package:kynos/domain/usecases/gamification/generate_daily_trail_usecase.dart';
 import 'package:kynos/features/character/presentation/widgets/trail_run_game_panel.dart';
 import 'package:kynos/features/character/providers/adventure_provider.dart';
