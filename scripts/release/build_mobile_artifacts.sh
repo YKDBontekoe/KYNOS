@@ -34,3 +34,6 @@ ditto "${app_path}" "${ipa_staging}/Payload/Runner.app"
 
 echo "Release artifacts prepared in dist/:"
 ls -la dist/
+
+echo "Generating SideStore source..."
+bash scripts/release/generate_sidestore_source.sh

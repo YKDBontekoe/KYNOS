@@ -69,6 +69,15 @@ flutter test
 flutter run -d "iPhone 16 Pro"
 ```
 
+## SideStore Source
+
+KYNOS can be distributed to SideStore from this source URL:
+
+`https://raw.githubusercontent.com/YKDBontekoe/KYNOS/main/docs/sidestore-source.json`
+
+Each GitHub release updates the source metadata and points SideStore to the latest
+`kynos-ios-unsigned.ipa` asset.
+
 ---
 
 ## On-Device AI Architecture
