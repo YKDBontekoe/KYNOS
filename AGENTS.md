@@ -132,12 +132,21 @@ beginning — you must actively shepherd it through review.
 - [ ] `flutter build web` — succeeds (see [§16 Validation & Iteration](#16-validation--iteration))
 - [ ] Visual proof attached (screenshots or screen recording of changed UI)
 - [ ] Commit messages are clear, descriptive sentences
+- [ ] PR title follows [Conventional Commits](#42-opening-the-pr) (CI blocks non-conforming titles)
 - [ ] Branch pushed with `git push -u origin <branch-name>`
 
 ### 4.2 Opening the PR
 
 - Target branch: **`main`**
-- Use a descriptive title summarising the change
+- **PR title must use [Conventional Commits](https://www.conventionalcommits.org/)** — enforced by the `validate-pr-title` CI job
+- Format: `type` or `type(scope): subject`
+- Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- Subject must be **lowercase** after the type prefix (no leading capital letter)
+- Use an optional scope when the change is platform- or area-specific (e.g. `ios`, `android`, `ci`, `release`)
+- Examples:
+  - `feat: add coach readiness widgets`
+  - `fix(ios): healthkit permission snackbar shows settings hint`
+  - `fix(ci): unblock semantic-release for non-conventional squash commits`
 - Body should explain **what** changed and **why**
 - Link related issues when applicable
 - Mark as draft only if explicitly requested

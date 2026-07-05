@@ -63,7 +63,7 @@ class ConnectHealthkitCard extends ConsumerWidget {
                       data: (granted) {
                         final message = granted
                             ? '$platform connected.'
-                            : '$platform permission not granted. $_settingsHint()';
+                            : '$platform permission not granted. ${_settingsHint()}';
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(message)),
                         );

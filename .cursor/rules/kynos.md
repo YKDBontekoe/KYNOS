@@ -6,3 +6,4 @@
 4. Never import one feature's `providers/` from another feature.
 5. Keep hand-written files under ~250 lines; split into `presentation/widgets/`.
 6. Run `dart run tool/generate_codemap.dart` after structural changes.
+7. PR titles must use Conventional Commits: `type` or `type(scope): subject` with a lowercase subject (e.g. `fix(ios): healthkit snackbar shows settings hint`). CI rejects non-conforming titles.
