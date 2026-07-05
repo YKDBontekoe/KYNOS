@@ -7,6 +7,8 @@ import 'package:kynos/features/dashboard/presentation/pages/run_history_page.dar
 import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
 import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/features/settings/presentation/pages/health_import_page.dart';
+import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart';
 import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
 
@@ -19,6 +21,8 @@ abstract final class Routes {
   static const coachChat = '/coach';
   static const settings = '/settings';
   static const openRouterModels = '/settings/openrouter-models';
+  static const healthImport = '/settings/import';
+  static const manualRun = '/settings/manual-run';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -65,6 +69,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'openrouter-models',
             builder: (context, state) => const OpenRouterModelPickerPage(),
+          ),
+          GoRoute(
+            path: 'import',
+            builder: (context, state) => const HealthImportPage(),
+          ),
+          GoRoute(
+            path: 'manual-run',
+            builder: (context, state) => const ManualRunPage(),
           ),
         ],
       ),

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -45,7 +47,8 @@ class ConnectHealthkitCard extends ConsumerWidget {
           ),
           const Gap(Spacing.xs),
           Text(
-            'Grant access via $platform to unlock your readiness score and AI coaching insights.',
+            'Grant access via $platform to unlock your readiness score and AI coaching insights. '
+            'Sideloaded installs can import GPX files or log runs manually instead.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const Gap(Spacing.md),
@@ -81,6 +84,17 @@ class ConnectHealthkitCard extends ConsumerWidget {
                   },
             child: Text(isLoading ? 'Connecting…' : 'Connect $platform'),
           ),
+          if (!isLoading) ...[
+            const Gap(Spacing.sm),
+            TextButton(
+              onPressed: () => context.push(Routes.healthImport),
+              child: const Text('Import run from file'),
+            ),
+            TextButton(
+              onPressed: () => context.push(Routes.manualRun),
+              child: const Text('Log a run manually'),
+            ),
+          ],
         ],
       ),
     );
