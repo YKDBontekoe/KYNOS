@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.3.0...v1.4.0) (2026-07-05)
+
+
+### Features
+
+* implement hybrid ai strategy with openrouter model browser ([#38](https://github.com/YKDBontekoe/KYNOS/issues/38)) ([c4626d8](https://github.com/YKDBontekoe/KYNOS/commit/c4626d844e23ad51c1414dd94d9e12569dd6afd1))
+
 # [1.3.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.2.0...v1.3.0) (2026-07-05)
 
 
