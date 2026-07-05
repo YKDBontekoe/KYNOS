@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.7.0...v1.8.0) (2026-07-05)
+
+
+### Features
+
+* import full Apple Health export.zip with metrics and routes ([#42](https://github.com/YKDBontekoe/KYNOS/issues/42)) ([e84c79f](https://github.com/YKDBontekoe/KYNOS/commit/e84c79fedf5c9dc7536e146ad5c78ebf0b54c844))
+* **ui:** introduce Apple Liquid Glass in nav bar and action buttons ([#44](https://github.com/YKDBontekoe/KYNOS/issues/44)) ([98c183e](https://github.com/YKDBontekoe/KYNOS/commit/98c183e356f9be4731da959a8363e439b615193e))
+
 # [1.7.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.6.0...v1.7.0) (2026-07-05)
 
 
