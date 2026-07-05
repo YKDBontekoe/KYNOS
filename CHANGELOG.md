@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.0.1...v1.1.0) (2026-07-05)
+
+
+### Bug Fixes
+
+* **ci:** unblock semantic-release for non-conventional squash commits ([#34](https://github.com/YKDBontekoe/KYNOS/issues/34)) ([d11b2c9](https://github.com/YKDBontekoe/KYNOS/commit/d11b2c90fa26ed64e11bed984658aef2627029f0))
+
 ## [1.0.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.0.0...v1.0.1) (2026-07-05)
 
 
