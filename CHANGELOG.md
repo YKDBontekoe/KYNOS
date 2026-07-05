@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.6.0...v1.7.0) (2026-07-05)
+
+
+### Features
+
+* polish floating bottom navigation bar ([#43](https://github.com/YKDBontekoe/KYNOS/issues/43)) ([e9f29e2](https://github.com/YKDBontekoe/KYNOS/commit/e9f29e2ade08c45d9acd0cb6f76c60980cb44536))
+
 # [1.6.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.5.0...v1.6.0) (2026-07-05)
 
 
