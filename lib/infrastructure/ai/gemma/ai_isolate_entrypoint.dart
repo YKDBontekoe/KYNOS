@@ -6,6 +6,7 @@ import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_messages.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_regression_math.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 
 Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
   final receivePort = ReceivePort();
@@ -25,7 +26,7 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
 
         // Each isolate must initialize flutter_gemma runtime separately.
         // Do not install here; setup flow already owns installation.
-        await FlutterGemma.initialize();
+        await GemmaRuntime.initialize();
 
         try {
           model ??= await FlutterGemma.getActiveModel(
@@ -42,10 +43,8 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
 
           // Active model selection is isolate-local in flutter_gemma.
           // Re-running installModel() restores active selection for this isolate.
-          await FlutterGemma.installModel(
-            modelType: ModelType.gemmaIt,
-          ).fromNetwork(
-            AppConstants.modelDownloadUrl,
+          await GemmaRuntime.installGemma4E2B().fromNetwork(
+            GemmaRuntime.modelDownloadUrl,
             token: AppConstants.huggingFaceToken.isEmpty
                 ? null
                 : AppConstants.huggingFaceToken,

@@ -31,6 +31,16 @@
 
   <title>kynos</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- LiteRT-LM Web Inference for .litertlm models via WebGPU/WASM.
+       Dart awaits window.litertLmReady before any static interop. -->
+  <script type="module">
+  window.litertLmReady = (async () => {
+    const m = await import('https://cdn.jsdelivr.net/npm/@litert-lm/core@0.12.1/+esm');
+    window.Engine = m.Engine;
+    return m.Engine;
+  })();
+  </script>
 </head>
 <body>
   <!--

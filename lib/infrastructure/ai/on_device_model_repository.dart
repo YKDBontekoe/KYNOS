@@ -1,6 +1,7 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 
 /// flutter_gemma implementation of [AiModelRepository].
@@ -11,7 +12,7 @@ class OnDeviceModelRepository implements AiModelRepository {
   bool get hasActiveModel => FlutterGemma.hasActiveModel();
 
   @override
-  Future<void> initialize() => FlutterGemma.initialize();
+  Future<void> initialize() => GemmaRuntime.initialize();
 
   @override
   Future<void> installFromNetwork({required String url, String? token}) async {
@@ -23,7 +24,7 @@ class OnDeviceModelRepository implements AiModelRepository {
       );
     }
 
-    await FlutterGemma.installModel(modelType: ModelType.gemmaIt)
+    await GemmaRuntime.installGemma4E2B()
         .fromNetwork(url, token: token)
         .install();
 
