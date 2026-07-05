@@ -34,6 +34,7 @@ import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
+import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
 /// Today tab — readiness, AI insight, and today's health metrics.
 class DashboardPage extends ConsumerStatefulWidget {
@@ -203,10 +204,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () => context.push(Routes.settings),
-                tooltip: 'Settings',
+              Padding(
+                padding: const EdgeInsets.only(right: tokens.Spacing.sm),
+                child: LiquidGlassIconButton(
+                  icon: Icons.settings_outlined,
+                  onPressed: () => context.push(Routes.settings),
+                  tooltip: 'Settings',
+                ),
               ),
             ],
           ),

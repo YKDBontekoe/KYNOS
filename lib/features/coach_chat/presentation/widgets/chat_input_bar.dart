@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
+import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
 class ChatInputBar extends StatelessWidget {
   const ChatInputBar({
@@ -40,9 +41,12 @@ class ChatInputBar extends StatelessWidget {
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(isStreaming ? Icons.hourglass_empty : Icons.send),
-                onPressed: isStreaming ? null : () => onSend(controller.text),
+              LiquidGlassIconButton(
+                icon: isStreaming ? Icons.hourglass_empty : Icons.send_rounded,
+                onPressed:
+                    isStreaming ? null : () => onSend(controller.text),
+                size: 36,
+                iconSize: 20,
               ),
             ],
           ),

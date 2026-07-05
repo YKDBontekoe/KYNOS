@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/shared/widgets/liquid_glass_surface.dart';
 
-/// Liquid glass card — frosted blur + translucent surface + subtle border.
+/// Liquid glass card — frosted blur + translucent surface + specular edge.
 ///
-/// The blur effect mimics Apple's visionOS / iOS 18 glass material.
+/// Wraps [LiquidGlassSurface] for coach bubbles, input bars, and floating nav.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -28,37 +27,17 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final glassFill = tintColor ??
-        (isDark
-            ? Colors.white.withValues(alpha: 0.07)
-            : Colors.white.withValues(alpha: 0.65));
-
-    final glassBorder = border ??
-        Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.white.withValues(alpha: 0.8),
-        );
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              color: glassFill,
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: glassBorder,
-            ),
-            padding: padding,
-            child: child,
-          ),
-        ),
-      ),
+    final surface = LiquidGlassSurface(
+      borderRadius: borderRadius,
+      blurSigma: blurSigma,
+      padding: padding,
+      tintColor: tintColor,
+      border: border,
+      child: child,
     );
+
+    if (onTap == null) return surface;
+
+    return GestureDetector(onTap: onTap, child: surface);
   }
 }

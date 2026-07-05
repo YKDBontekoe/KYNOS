@@ -7,6 +7,7 @@ import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
 class OnboardingItem {
   final String imagePath;
@@ -80,18 +81,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: Spacing.md, top: Spacing.sm),
-                child: TextButton(
+                child: LiquidGlassButton(
+                  label: 'Skip',
                   onPressed: _finishOnboarding,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.secondaryLabel,
-                  ),
-                  child: Text(
-                    'Skip',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
               ),
             ),

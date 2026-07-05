@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
 /// Coloured hero banner with decorative orb — used on tab landing screens.
 class KynosHeroBanner extends StatelessWidget {
@@ -111,17 +112,10 @@ class KynosHeroBanner extends StatelessWidget {
             Positioned(
               right: Spacing.md,
               bottom: Spacing.md,
-              child: TextButton(
+              child: LiquidGlassButton(
+                label: actionLabel!,
                 onPressed: onActionTap,
-                style: TextButton.styleFrom(
-                  foregroundColor: KynosColors.onAccent,
-                  backgroundColor: KynosColors.onAccent.withValues(alpha: 0.15),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Spacing.md,
-                    vertical: Spacing.xs,
-                  ),
-                ),
-                child: Text(actionLabel!),
+                onAccent: true,
               ),
             ),
         ],

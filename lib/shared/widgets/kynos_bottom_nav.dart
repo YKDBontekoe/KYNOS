@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/layout.dart';
+import 'package:kynos/core/theme/liquid_glass_tokens.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/typography.dart';
-import 'package:kynos/shared/widgets/glass_card.dart';
+import 'package:kynos/shared/widgets/liquid_glass_surface.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 
 /// Configuration for a single tab in [KynosBottomNav].
@@ -20,7 +21,7 @@ class KynosBottomNavItem {
   final String iconPath;
 }
 
-/// Floating glass bottom navigation bar with a sliding selection indicator.
+/// Floating Liquid Glass bottom navigation bar with a sliding glass pill indicator.
 class KynosBottomNav extends StatelessWidget {
   const KynosBottomNav({
     super.key,
@@ -33,7 +34,7 @@ class KynosBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  static const _indicatorDuration = Duration(milliseconds: 250);
+  static const _indicatorDuration = Duration(milliseconds: 280);
   static const _itemAnimDuration = Duration(milliseconds: 200);
 
   void _handleTap(int index) {
@@ -64,15 +65,10 @@ class KynosBottomNav extends StatelessWidget {
                 boxShadow: kynos.navBarShadow,
                 borderRadius: BorderRadius.circular(tokens.Radius.full),
               ),
-              child: GlassCard(
+              child: LiquidGlassSurface(
                 borderRadius: tokens.Radius.full,
-                blurSigma: 40,
+                blurSigma: LiquidGlassTokens.navBlurSigma,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                tintColor: kynos.glassFill.withValues(alpha: 0.93),
-                border: Border.all(
-                  color: kynos.glassBorder,
-                  width: 0.5,
-                ),
                 child: SizedBox(
                   height: 64,
                   child: Stack(
@@ -81,18 +77,17 @@ class KynosBottomNav extends StatelessWidget {
                       AnimatedAlign(
                         duration: _indicatorDuration,
                         curve: Curves.easeOutCubic,
-                        alignment: _alignmentFor(selectedIndex, items.length),
+                        alignment:
+                            _alignmentFor(selectedIndex, items.length),
                         child: FractionallySizedBox(
                           widthFactor: 1 / items.length,
-                          child: Align(
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: kynos.stand.withValues(alpha: 0.10),
-                                borderRadius:
-                                    BorderRadius.circular(tokens.Radius.sm + 2),
-                              ),
+                          child: const Align(
+                            child: LiquidGlassSurface(
+                              borderRadius: tokens.Radius.md + 2,
+                              blurSigma: LiquidGlassTokens.indicatorBlurSigma,
+                              padding: EdgeInsets.zero,
+                              applyVibrancy: false,
+                              child: SizedBox(width: 52, height: 40),
                             ),
                           ),
                         ),
