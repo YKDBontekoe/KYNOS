@@ -64,7 +64,7 @@ class RunHistoryPage extends ConsumerWidget {
                         ),
                         const Gap(tokens.Spacing.xs),
                         Text(
-                          'Import a GPX file or log a run manually in Settings.',
+                          'Import Apple Health export.zip or log a run manually in Settings.',
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             color: AppTheme.tertiaryLabel,

@@ -5,6 +5,7 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/infrastructure/health/imported_health_store.dart';
+import 'package:kynos/infrastructure/health/imported_summary_merger.dart';
 import 'package:kynos/infrastructure/health/imported_workout_summary_aggregator.dart';
 
 /// [HealthRepository] backed by locally imported workout data.
@@ -23,8 +24,10 @@ class ImportedHealthRepository implements HealthRepository {
     try {
       final since = DateTime.now().subtract(Duration(days: days));
       final workouts = await _store.getWorkouts(since: since);
+      final storedSummaries = await _store.getSummaries(since: since);
+      final workoutSummaries = deriveSummariesFromWorkouts(workouts);
       return (
-        summaries: deriveSummariesFromWorkouts(workouts),
+        summaries: mergeImportedSummaries(storedSummaries, workoutSummaries),
         failure: null,
       );
     } catch (e) {

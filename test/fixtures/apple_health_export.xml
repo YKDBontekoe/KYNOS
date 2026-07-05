@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HealthData [
+<!ELEMENT HealthData (ExportDate,Me,(Record|Workout|ActivitySummary)*)>
+]>
+<HealthData locale="en_US">
+  <ExportDate value="2026-04-21 12:00:00 +0000"/>
+  <Me HKCharacteristicTypeIdentifierDateOfBirth="1990-01-01" HKCharacteristicTypeIdentifierBiologicalSex="HKBiologicalSexNotSet" HKCharacteristicTypeIdentifierBloodType="HKBloodTypeNotSet" HKCharacteristicTypeIdentifierFitzpatrickSkinType="HKFitzpatrickSkinTypeNotSet"/>
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count" value="8421" sourceName="Café Watch" startDate="2026-04-20 08:00:00 +0000" endDate="2026-04-20 08:05:00 +0000"/>
+  <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" unit="ms" value="62" sourceName="Café Watch" startDate="2026-04-20 07:30:00 +0000" endDate="2026-04-20 07:30:00 +0000"/>
+  <Record type="HKQuantityTypeIdentifierActiveEnergyBurned" unit="kcal" value="420" sourceName="Apple Watch" startDate="2026-04-20 00:00:00 +0000" endDate="2026-04-20 23:59:59 +0000"/>
+  <Record type="HKCategoryTypeIdentifierSleepAnalysis" value="HKCategoryValueSleepAnalysisAsleep" sourceName="Apple Watch" startDate="2026-04-20 23:00:00 +0000" endDate="2026-04-21 06:30:00 +0000"/>
+  <ActivitySummary dateComponents="2026-04-20" activeEnergyBurned="450" activeEnergyBurnedUnit="kcal" appleExerciseTime="35"/>
+  <Workout workoutActivityType="HKWorkoutActivityTypeRunning" duration="32.5" durationUnit="min" totalDistance="5.2" totalDistanceUnit="km" totalEnergyBurned="310" totalEnergyBurnedUnit="kcal" sourceName="Apple Watch" startDate="2026-04-20 07:00:00 +0000" endDate="2026-04-20 07:32:30 +0000">
+    <WorkoutRoute sourceName="Apple Watch" startDate="2026-04-20 07:00:00 +0000" endDate="2026-04-20 07:32:30 +0000">
+      <FileReference path="workout-routes/route_2026-04-20.gpx"/>
+    </WorkoutRoute>
+  </Workout>
+</HealthData>

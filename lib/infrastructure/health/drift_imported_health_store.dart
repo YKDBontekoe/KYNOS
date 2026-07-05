@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/infrastructure/health/imported_health_database.dart';
@@ -103,6 +106,47 @@ class DriftImportedHealthStore implements ImportedHealthStore {
     await _db.transaction(() async {
       await _db.delete(_db.importedRoutePoints).go();
       await _db.delete(_db.importedWorkouts).go();
+      await _db.delete(_db.importedDailySummaries).go();
+    });
+  }
+
+  @override
+  Future<List<HealthSummary>> getSummaries({required DateTime since}) async {
+    final rows = await (_db.select(_db.importedDailySummaries)
+          ..where((row) => row.date.isBiggerOrEqualValue(since))
+          ..orderBy([(row) => OrderingTerm.desc(row.date)]))
+        .get();
+
+    return rows
+        .map(
+          (row) => healthSummaryFromJson(
+            jsonDecode(row.payload) as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> saveSummaries(List<HealthSummary> summaries) async {
+    if (summaries.isEmpty) {
+      return;
+    }
+
+    await _db.batch((batch) {
+      for (final summary in summaries) {
+        batch.insert(
+          _db.importedDailySummaries,
+          ImportedDailySummariesCompanion.insert(
+            date: DateTime(
+              summary.date.year,
+              summary.date.month,
+              summary.date.day,
+            ),
+            payload: jsonEncode(healthSummaryToJson(summary)),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
     });
   }
 

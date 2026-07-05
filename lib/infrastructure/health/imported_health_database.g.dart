@@ -1153,6 +1153,224 @@ class ImportedRoutePointsCompanion extends UpdateCompanion<ImportedRoutePoint> {
   }
 }
 
+class $ImportedDailySummariesTable extends ImportedDailySummaries
+    with TableInfo<$ImportedDailySummariesTable, ImportedDailySummary> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportedDailySummariesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date, payload];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'imported_daily_summaries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportedDailySummary> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  ImportedDailySummary map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportedDailySummary(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportedDailySummariesTable createAlias(String alias) {
+    return $ImportedDailySummariesTable(attachedDatabase, alias);
+  }
+}
+
+class ImportedDailySummary extends DataClass
+    implements Insertable<ImportedDailySummary> {
+  final DateTime date;
+  final String payload;
+  const ImportedDailySummary({required this.date, required this.payload});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<DateTime>(date);
+    map['payload'] = Variable<String>(payload);
+    return map;
+  }
+
+  ImportedDailySummariesCompanion toCompanion(bool nullToAbsent) {
+    return ImportedDailySummariesCompanion(
+      date: Value(date),
+      payload: Value(payload),
+    );
+  }
+
+  factory ImportedDailySummary.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportedDailySummary(
+      date: serializer.fromJson<DateTime>(json['date']),
+      payload: serializer.fromJson<String>(json['payload']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<DateTime>(date),
+      'payload': serializer.toJson<String>(payload),
+    };
+  }
+
+  ImportedDailySummary copyWith({DateTime? date, String? payload}) =>
+      ImportedDailySummary(
+        date: date ?? this.date,
+        payload: payload ?? this.payload,
+      );
+  ImportedDailySummary copyWithCompanion(ImportedDailySummariesCompanion data) {
+    return ImportedDailySummary(
+      date: data.date.present ? data.date.value : this.date,
+      payload: data.payload.present ? data.payload.value : this.payload,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportedDailySummary(')
+          ..write('date: $date, ')
+          ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, payload);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportedDailySummary &&
+          other.date == this.date &&
+          other.payload == this.payload);
+}
+
+class ImportedDailySummariesCompanion
+    extends UpdateCompanion<ImportedDailySummary> {
+  final Value<DateTime> date;
+  final Value<String> payload;
+  final Value<int> rowid;
+  const ImportedDailySummariesCompanion({
+    this.date = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportedDailySummariesCompanion.insert({
+    required DateTime date,
+    required String payload,
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       payload = Value(payload);
+  static Insertable<ImportedDailySummary> custom({
+    Expression<DateTime>? date,
+    Expression<String>? payload,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (payload != null) 'payload': payload,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportedDailySummariesCompanion copyWith({
+    Value<DateTime>? date,
+    Value<String>? payload,
+    Value<int>? rowid,
+  }) {
+    return ImportedDailySummariesCompanion(
+      date: date ?? this.date,
+      payload: payload ?? this.payload,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportedDailySummariesCompanion(')
+          ..write('date: $date, ')
+          ..write('payload: $payload, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$ImportedHealthDatabase extends GeneratedDatabase {
   _$ImportedHealthDatabase(QueryExecutor e) : super(e);
   $ImportedHealthDatabaseManager get managers =>
@@ -1162,6 +1380,8 @@ abstract class _$ImportedHealthDatabase extends GeneratedDatabase {
   );
   late final $ImportedRoutePointsTable importedRoutePoints =
       $ImportedRoutePointsTable(this);
+  late final $ImportedDailySummariesTable importedDailySummaries =
+      $ImportedDailySummariesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1169,6 +1389,7 @@ abstract class _$ImportedHealthDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     importedWorkouts,
     importedRoutePoints,
+    importedDailySummaries,
   ];
 }
 
@@ -1999,6 +2220,168 @@ typedef $$ImportedRoutePointsTableProcessedTableManager =
       ImportedRoutePoint,
       PrefetchHooks Function({bool workoutId})
     >;
+typedef $$ImportedDailySummariesTableCreateCompanionBuilder =
+    ImportedDailySummariesCompanion Function({
+      required DateTime date,
+      required String payload,
+      Value<int> rowid,
+    });
+typedef $$ImportedDailySummariesTableUpdateCompanionBuilder =
+    ImportedDailySummariesCompanion Function({
+      Value<DateTime> date,
+      Value<String> payload,
+      Value<int> rowid,
+    });
+
+class $$ImportedDailySummariesTableFilterComposer
+    extends Composer<_$ImportedHealthDatabase, $ImportedDailySummariesTable> {
+  $$ImportedDailySummariesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImportedDailySummariesTableOrderingComposer
+    extends Composer<_$ImportedHealthDatabase, $ImportedDailySummariesTable> {
+  $$ImportedDailySummariesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImportedDailySummariesTableAnnotationComposer
+    extends Composer<_$ImportedHealthDatabase, $ImportedDailySummariesTable> {
+  $$ImportedDailySummariesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+}
+
+class $$ImportedDailySummariesTableTableManager
+    extends
+        RootTableManager<
+          _$ImportedHealthDatabase,
+          $ImportedDailySummariesTable,
+          ImportedDailySummary,
+          $$ImportedDailySummariesTableFilterComposer,
+          $$ImportedDailySummariesTableOrderingComposer,
+          $$ImportedDailySummariesTableAnnotationComposer,
+          $$ImportedDailySummariesTableCreateCompanionBuilder,
+          $$ImportedDailySummariesTableUpdateCompanionBuilder,
+          (
+            ImportedDailySummary,
+            BaseReferences<
+              _$ImportedHealthDatabase,
+              $ImportedDailySummariesTable,
+              ImportedDailySummary
+            >,
+          ),
+          ImportedDailySummary,
+          PrefetchHooks Function()
+        > {
+  $$ImportedDailySummariesTableTableManager(
+    _$ImportedHealthDatabase db,
+    $ImportedDailySummariesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportedDailySummariesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ImportedDailySummariesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ImportedDailySummariesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<DateTime> date = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImportedDailySummariesCompanion(
+                date: date,
+                payload: payload,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required DateTime date,
+                required String payload,
+                Value<int> rowid = const Value.absent(),
+              }) => ImportedDailySummariesCompanion.insert(
+                date: date,
+                payload: payload,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImportedDailySummariesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ImportedHealthDatabase,
+      $ImportedDailySummariesTable,
+      ImportedDailySummary,
+      $$ImportedDailySummariesTableFilterComposer,
+      $$ImportedDailySummariesTableOrderingComposer,
+      $$ImportedDailySummariesTableAnnotationComposer,
+      $$ImportedDailySummariesTableCreateCompanionBuilder,
+      $$ImportedDailySummariesTableUpdateCompanionBuilder,
+      (
+        ImportedDailySummary,
+        BaseReferences<
+          _$ImportedHealthDatabase,
+          $ImportedDailySummariesTable,
+          ImportedDailySummary
+        >,
+      ),
+      ImportedDailySummary,
+      PrefetchHooks Function()
+    >;
 
 class $ImportedHealthDatabaseManager {
   final _$ImportedHealthDatabase _db;
@@ -2007,4 +2390,9 @@ class $ImportedHealthDatabaseManager {
       $$ImportedWorkoutsTableTableManager(_db, _db.importedWorkouts);
   $$ImportedRoutePointsTableTableManager get importedRoutePoints =>
       $$ImportedRoutePointsTableTableManager(_db, _db.importedRoutePoints);
+  $$ImportedDailySummariesTableTableManager get importedDailySummaries =>
+      $$ImportedDailySummariesTableTableManager(
+        _db,
+        _db.importedDailySummaries,
+      );
 }

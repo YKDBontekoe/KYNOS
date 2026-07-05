@@ -1,3 +1,4 @@
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 
@@ -16,6 +17,10 @@ abstract interface class ImportedHealthStore {
     required WorkoutSession workout,
     List<WorkoutRoutePoint> routePoints = const [],
   });
+
+  Future<List<HealthSummary>> getSummaries({required DateTime since});
+
+  Future<void> saveSummaries(List<HealthSummary> summaries);
 
   Future<void> clearAll();
 }
@@ -81,4 +86,37 @@ List<WorkoutRoutePoint> routePointsFromJson(List<dynamic> json) {
         },
       )
       .toList();
+}
+
+Map<String, dynamic> healthSummaryToJson(HealthSummary summary) {
+  return summary.toJson();
+}
+
+HealthSummary healthSummaryFromJson(Map<String, dynamic> json) {
+  return HealthSummary(
+    date: DateTime.parse(json['date'] as String),
+    hrvMs: (json['hrv_ms'] as num?)?.toDouble(),
+    rhrBpm: (json['rhr_bpm'] as num?)?.toDouble(),
+    avgHeartRateBpm: (json['avg_heart_rate_bpm'] as num?)?.toDouble(),
+    respiratoryRateBrpm: (json['respiratory_rate_brpm'] as num?)?.toDouble(),
+    bloodOxygenPercent: (json['blood_oxygen_percent'] as num?)?.toDouble(),
+    sleepHours: (json['sleep_hours'] as num?)?.toDouble(),
+    activeCalories: (json['active_calories'] as num?)?.toDouble(),
+    basalCalories: (json['basal_calories'] as num?)?.toDouble(),
+    totalCalories: (json['total_calories'] as num?)?.toDouble(),
+    steps: json['steps'] as int?,
+    distanceMeters: (json['distance_meters'] as num?)?.toDouble(),
+    flightsClimbed: (json['flights_climbed'] as num?)?.toDouble(),
+    runningPowerWatts: (json['running_power_watts'] as num?)?.toDouble(),
+    cadenceSpm: (json['cadence_spm'] as num?)?.toDouble(),
+    strideLengthMeters: (json['stride_length_m'] as num?)?.toDouble(),
+    exerciseMinutes: (json['exercise_minutes'] as num?)?.toDouble(),
+    runningWorkoutCount: json['running_workout_count'] as int?,
+    runningWorkoutMinutes:
+        (json['running_workout_minutes'] as num?)?.toDouble(),
+    runningWorkoutDistanceMeters:
+        (json['running_workout_distance_m'] as num?)?.toDouble(),
+    runningWorkoutCalories:
+        (json['running_workout_calories'] as num?)?.toDouble(),
+  );
 }

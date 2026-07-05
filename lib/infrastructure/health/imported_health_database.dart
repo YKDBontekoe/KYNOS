@@ -31,12 +31,29 @@ class ImportedRoutePoints extends Table {
   IntColumn get sequence => integer()();
 }
 
-@DriftDatabase(tables: [ImportedWorkouts, ImportedRoutePoints])
+class ImportedDailySummaries extends Table {
+  DateTimeColumn get date => dateTime()();
+  TextColumn get payload => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {date};
+}
+
+@DriftDatabase(tables: [ImportedWorkouts, ImportedRoutePoints, ImportedDailySummaries])
 class ImportedHealthDatabase extends _$ImportedHealthDatabase {
   ImportedHealthDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            await migrator.createTable(importedDailySummaries);
+          }
+        },
+      );
 }
 
 QueryExecutor openImportedHealthConnection() => createImportedHealthConnection();

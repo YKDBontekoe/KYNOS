@@ -48,7 +48,7 @@ class ConnectHealthkitCard extends ConsumerWidget {
           const Gap(Spacing.xs),
           Text(
             'Grant access via $platform to unlock your readiness score and AI coaching insights. '
-            'Sideloaded installs can import GPX files or log runs manually instead.',
+            'Sideloaded installs can import Apple Health export.zip or log runs manually.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const Gap(Spacing.md),
