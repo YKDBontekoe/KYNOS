@@ -18,9 +18,9 @@ class _ShellState extends State<ShellPage> {
   int _index = 0;
 
   static const _navItems = [
-    KynosBottomNavItem(label: 'Today', iconPath: NavIconPaths.home),
-    KynosBottomNavItem(label: 'Training', iconPath: NavIconPaths.activity),
-    KynosBottomNavItem(label: 'Character', iconPath: NavIconPaths.character),
+    KynosBottomNavItem(label: 'Today', icon: NavIconPaths.today),
+    KynosBottomNavItem(label: 'Training', icon: NavIconPaths.training),
+    KynosBottomNavItem(label: 'Character', icon: NavIconPaths.character),
   ];
 
   @override

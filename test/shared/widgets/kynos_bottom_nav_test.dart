@@ -14,9 +14,9 @@ Widget _wrap(Widget child, {ThemeData? theme}) => MaterialApp(
 
 void main() {
   const items = [
-    KynosBottomNavItem(label: 'Today', iconPath: NavIconPaths.home),
-    KynosBottomNavItem(label: 'Training', iconPath: NavIconPaths.activity),
-    KynosBottomNavItem(label: 'Character', iconPath: NavIconPaths.character),
+    KynosBottomNavItem(label: 'Today', icon: NavIconPaths.today),
+    KynosBottomNavItem(label: 'Training', icon: NavIconPaths.training),
+    KynosBottomNavItem(label: 'Character', icon: NavIconPaths.character),
   ];
 
   group('KynosBottomNav', () {
@@ -97,7 +97,8 @@ void main() {
       );
     });
 
-    testWidgets('selected tab icon uses stand color', (tester) async {
+    testWidgets('selected tab icon uses stand color and filled style',
+        (tester) async {
       await tester.pumpWidget(
         _wrap(
           KynosBottomNav(
@@ -120,6 +121,28 @@ void main() {
 
       expect(selectedPainter, isNotNull);
       expect(selectedPainter!.color, KynosColors.stand);
+      expect(selectedPainter.filled, isTrue);
+    });
+
+    testWidgets('unselected tab icon uses outline style', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          KynosBottomNav(
+            items: items,
+            selectedIndex: 0,
+            onSelected: (_) {},
+          ),
+        ),
+      );
+
+      final painters = tester
+          .widgetList<CustomPaint>(find.byType(CustomPaint))
+          .map((w) => w.painter)
+          .whereType<NavIconPainter>()
+          .toList();
+
+      expect(painters.length, greaterThanOrEqualTo(3));
+      expect(painters.where((p) => !p.filled).length, 2);
     });
 
     testWidgets('renders in dark theme with glass border', (tester) async {
