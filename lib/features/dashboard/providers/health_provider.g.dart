@@ -23,7 +23,7 @@ final healthRepositoryProvider = Provider<HealthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HealthRepositoryRef = ProviderRef<HealthRepository>;
-String _$healthSummaryHash() => r'a32b97aa6bf12ac07e302436c49090c9685ce3b6';
+String _$healthSummaryHash() => r'2cfada56ccd36a831f1add03a58c0767c4c90c6a';
 
 /// See also [healthSummary].
 @ProviderFor(healthSummary)
@@ -41,7 +41,7 @@ final healthSummaryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef HealthSummaryRef = AutoDisposeFutureProviderRef<HealthSummary?>;
-String _$healthHistoryHash() => r'8480e37dcb743335c30759e6ed903093037f54ef';
+String _$healthHistoryHash() => r'2418565bc56b423bf7845b9c9484e9552cdd1817';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -183,7 +183,7 @@ class _HealthHistoryProviderElement
   int get days => (origin as HealthHistoryProvider).days;
 }
 
-String _$recentRunsHash() => r'a545bb02ae2da26a882954d04866b8d89007c75c';
+String _$recentRunsHash() => r'3be75064ad3d03e9dfec0d6d2e8997ddfe881af7';
 
 /// See also [recentRuns].
 @ProviderFor(recentRuns)
@@ -315,7 +315,7 @@ class _RecentRunsProviderElement
   int get limit => (origin as RecentRunsProvider).limit;
 }
 
-String _$runRouteHash() => r'bce740d4f9deff4aa919a7468fc1a51055e05934';
+String _$runRouteHash() => r'aa71b00f43a58fad74396fff9709b8c945641176';
 
 /// See also [runRoute].
 @ProviderFor(runRoute)
