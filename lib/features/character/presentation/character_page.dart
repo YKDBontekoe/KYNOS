@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/earned_title.dart';
@@ -13,6 +13,11 @@ import 'package:kynos/features/character/providers/character_provider.dart';
 import 'package:kynos/features/character/providers/quest_provider.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
+import 'package:kynos/shared/widgets/kynos_section_header.dart';
+import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class CharacterPage extends ConsumerWidget {
   const CharacterPage({super.key});
@@ -46,8 +51,17 @@ class CharacterPage extends ConsumerWidget {
         ),
         characterAsync.when(
           loading: () => const SliverFillRemaining(
-            child: Center(
-              child: CircularProgressIndicator(color: AppTheme.stand),
+            child: Padding(
+              padding: EdgeInsets.all(tokens.Spacing.md),
+              child: Column(
+                children: [
+                  KynosSkeleton.tile(height: 160),
+                  Gap(tokens.Spacing.md),
+                  KynosSkeleton.tile(height: 48),
+                  Gap(tokens.Spacing.lg),
+                  KynosSkeleton.tile(height: 200),
+                ],
+              ),
             ),
           ),
           error: (_, _) => SliverFillRemaining(
@@ -69,7 +83,7 @@ class CharacterPage extends ConsumerWidget {
                 tokens.Spacing.md,
                 0,
                 tokens.Spacing.md,
-                100,
+                LayoutTokens.shellBottomPadding,
               ),
               sliver: SliverList.list(
                 children: [
@@ -77,16 +91,16 @@ class CharacterPage extends ConsumerWidget {
                   const Gap(tokens.Spacing.md),
                   _XpBar(character: character),
                   const Gap(tokens.Spacing.lg),
-                  const _SectionLabel(label: 'STATS'),
+                  const KynosSectionHeader(title: 'STATS'),
                   const Gap(tokens.Spacing.sm),
                   _StatsPanel(character: character),
                   const Gap(tokens.Spacing.lg),
-                  const _SectionLabel(label: "TODAY'S QUEST"),
+                  const KynosSectionHeader(title: "TODAY'S QUEST"),
                   const Gap(tokens.Spacing.sm),
                   _QuestPanel(questsAsync: questsAsync),
                   const Gap(tokens.Spacing.lg),
                   if (character.earnedTitles.isNotEmpty) ...[
-                    const _SectionLabel(label: 'TITLES'),
+                    const KynosSectionHeader(title: 'TITLES'),
                     const Gap(tokens.Spacing.sm),
                     _TitlesPanel(titles: character.earnedTitles),
                     const Gap(tokens.Spacing.lg),
@@ -115,112 +129,75 @@ class _ClassHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final klass = character.characterClass;
     final classColor = Color(klass.colorValue);
+    final kynos = context.kynosTheme;
 
-    return Container(
-      height: 160,
-      decoration: BoxDecoration(
-        color: classColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
+    return KynosHeroBanner(
+      accentColor: classColor,
+      height: LayoutTokens.heroBannerHeightLarge,
+      orbAlignment: Alignment.topRight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background orbs
-          Positioned(
-            top: -50,
-            right: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: KynosColors.onAccent.withValues(alpha: 0.20),
+                  borderRadius: BorderRadius.circular(tokens.Radius.sm),
+                ),
+                child: Text(
+                  'LV ${character.level}',
+                  style: kynos.heroSubtitleStyle.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: KynosColors.onAccent,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            bottom: -30,
-            left: -20,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.20),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'LV ${character.level}',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
+              const Gap(Spacing.sm),
+              if (character.activeTitle != null)
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: KynosColors.onAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(tokens.Radius.sm),
+                    ),
+                    child: Text(
+                      '"${character.activeTitle}"',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: kynos.heroSubtitleStyle.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: KynosColors.onAccent.withValues(alpha: 0.90),
+                        fontStyle: FontStyle.italic,
                       ),
                     ),
-                    const Gap(8),
-                    if (character.activeTitle != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '"${character.activeTitle}"',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white.withValues(alpha: 0.90),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  klass.name.toUpperCase(),
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                    height: 1,
                   ),
                 ),
-                const Gap(4),
-                Text(
-                  klass.epithet,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.75),
-                  ),
-                ),
-              ],
+            ],
+          ),
+          const Spacer(),
+          Text(
+            klass.name.toUpperCase(),
+            style: kynos.heroTitleStyle.copyWith(fontSize: 28, letterSpacing: -0.5),
+          ),
+          const Gap(tokens.Spacing.xs),
+          Text(
+            klass.epithet,
+            style: kynos.heroSubtitleStyle.copyWith(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: KynosColors.onAccent.withValues(alpha: 0.75),
             ),
           ),
         ],
@@ -328,6 +305,8 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+    final statColor = kynos.accentForKey(stat.colorKey);
     final pct = value / 100.0;
 
     return Row(
@@ -339,7 +318,7 @@ class _StatRow extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: stat.color,
+              color: statColor,
               letterSpacing: 0.4,
             ),
           ),
@@ -356,8 +335,8 @@ class _StatRow extends StatelessWidget {
                 return LinearProgressIndicator(
                   value: val,
                   minHeight: 6,
-                  backgroundColor: AppTheme.separator,
-                  valueColor: AlwaysStoppedAnimation(stat.color),
+                  backgroundColor: kynos.separator,
+                  valueColor: AlwaysStoppedAnimation(statColor),
                 );
               },
             ),
@@ -392,7 +371,7 @@ class _QuestPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return questsAsync.when(
       loading: () => const KynosCard(
-        child: _LoadingLine(label: 'Generating quest...'),
+        child: KynosLoadingLine(label: 'Generating quest...'),
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (quests) {
@@ -432,6 +411,7 @@ class _QuestCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     final isCompleted = quest.status == QuestStatus.completed;
     final diffColor = _difficultyColor(quest.difficulty);
 
@@ -531,76 +511,38 @@ class _QuestCard extends ConsumerWidget {
           ),
           const Gap(tokens.Spacing.sm),
 
-          // Rewards row
-          Row(
+          // Rewards
+          Wrap(
+            spacing: Spacing.xs,
+            runSpacing: Spacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _RewardChip(
+              KynosChip.accent(
                 label: '+${quest.xpReward} XP',
-                color: AppTheme.purple,
+                color: kynos.purple,
               ),
-              const Gap(tokens.Spacing.xs),
               for (final entry in quest.statRewards.entries)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: _RewardChip(
-                    label: '+${entry.value} ${entry.key.label}',
-                    color: entry.key.color,
-                  ),
+                KynosChip.accent(
+                  label: '+${entry.value} ${entry.key.label}',
+                  color: kynos.accentForKey(entry.key.colorKey),
                 ),
-              const Spacer(),
               if (!isCompleted)
-                GestureDetector(
-                  onTap: () => ref
+                FilledButton(
+                  onPressed: () => ref
                       .read(questProvider.notifier)
                       .completeQuest(quest.id),
-                  child: Container(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 32),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 7,
                     ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.label,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      'Complete',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
+                  child: const Text('Complete'),
                 ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RewardChip extends StatelessWidget {
-  const _RewardChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
       ),
     );
   }
@@ -638,7 +580,7 @@ class _TitlesPanel extends StatelessWidget {
                   size: 14,
                   color: AppTheme.energy,
                 ),
-                const Gap(6),
+                const Gap(Spacing.sm),
                 Text(
                   title.name,
                   style: GoogleFonts.inter(
@@ -793,7 +735,7 @@ class _GameKitButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 16, color: AppTheme.secondaryLabel),
-            const Gap(6),
+            const Gap(Spacing.sm),
             Text(
               label,
               style: GoogleFonts.inter(
@@ -849,59 +791,6 @@ class _EmptyCharacterState extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ── Section label ──────────────────────────────────────────────────────────────
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.secondaryLabel,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-}
-
-// ── Loading line ───────────────────────────────────────────────────────────────
-
-class _LoadingLine extends StatelessWidget {
-  const _LoadingLine({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(
-          width: 12,
-          height: 12,
-          child: CircularProgressIndicator(
-            strokeWidth: 1.5,
-            color: AppTheme.tertiaryLabel,
-          ),
-        ),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: AppTheme.tertiaryLabel,
-          ),
-        ),
-      ],
     );
   }
 }

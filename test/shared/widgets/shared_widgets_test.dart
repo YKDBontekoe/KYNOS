@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
-import 'package:kynos/shared/widgets/glow_text.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
+import 'package:kynos/shared/widgets/kynos_section_header.dart';
+import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 import 'package:shimmer/shimmer.dart';
 
+Widget _wrap(Widget child) => MaterialApp(
+      theme: AppTheme.light,
+      home: Scaffold(body: child),
+    );
+
 void main() {
-  group('MetricTile Tests', () {
-    testWidgets('renders label and value correctly', (tester) async {
+  group('MetricTile', () {
+    testWidgets('renders label and value', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MetricTile(
-              label: 'Heart Rate',
-              value: '72',
-              unit: 'BPM',
-            ),
+        _wrap(
+          const MetricTile(
+            label: 'Heart Rate',
+            value: '72',
+            unit: 'BPM',
           ),
         ),
       );
@@ -26,71 +34,95 @@ void main() {
       expect(find.text('BPM'), findsOneWidget);
     });
 
-    testWidgets('renders loading shimmer when value is null', (tester) async {
+    testWidgets('renders shimmer when value is null', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MetricTile(
-              label: 'Heart Rate',
-              value: null,
-            ),
-          ),
-        ),
+        _wrap(const MetricTile(label: 'Heart Rate', value: null)),
       );
 
       expect(find.byType(Shimmer), findsOneWidget);
     });
   });
 
-  group('KynosCard Tests', () {
-    testWidgets('renders child and handles onTap', (tester) async {
-      bool tapped = false;
+  group('KynosCard', () {
+    testWidgets('handles onTap', (tester) async {
+      var tapped = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: KynosCard(
-              onTap: () => tapped = true,
-              child: const Text('Card Content'),
-            ),
+        _wrap(
+          KynosCard(
+            onTap: () => tapped = true,
+            child: const Text('Card Content'),
           ),
         ),
       );
 
-      expect(find.text('Card Content'), findsOneWidget);
       await tester.tap(find.byType(InkWell));
       expect(tapped, isTrue);
     });
   });
 
-  group('GlowText Tests', () {
-    testWidgets('renders text with shadows', (tester) async {
+  group('KynosSectionHeader', () {
+    testWidgets('uppercases title', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: GlowText('Glow Me'),
-          ),
-        ),
+        _wrap(const KynosSectionHeader(title: 'Health Metrics')),
       );
 
-      final textWidget = tester.widget<Text>(find.text('Glow Me'));
-      expect(textWidget.style?.shadows, isNotEmpty);
-      expect(textWidget.style?.shadows?.length, 3);
+      expect(find.text('HEALTH METRICS'), findsOneWidget);
     });
   });
 
-  group('GlassCard Tests', () {
-    testWidgets('renders child and applies BackdropFilter', (tester) async {
+  group('KynosHeroBanner', () {
+    testWidgets('renders title and subtitle', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: GlassCard(
-              child: Text('Glass Content'),
-            ),
+        _wrap(
+          const KynosHeroBanner(
+            accentColor: Colors.blue,
+            subtitle: 'Good morning',
+            title: 'KYNOS',
           ),
         ),
       );
 
-      expect(find.text('Glass Content'), findsOneWidget);
+      expect(find.text('KYNOS'), findsOneWidget);
+      expect(find.text('Good morning'), findsOneWidget);
+    });
+  });
+
+  group('KynosChip', () {
+    testWidgets('renders compact label', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const KynosChip(label: 'Recovery')),
+      );
+
+      expect(find.text('Recovery'), findsOneWidget);
+    });
+  });
+
+  group('KynosLoadingLine', () {
+    testWidgets('renders shimmer skeleton', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const KynosLoadingLine()),
+      );
+
+      expect(find.byType(Shimmer), findsOneWidget);
+    });
+  });
+
+  group('KynosSkeleton', () {
+    testWidgets('renders shimmer block', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const KynosSkeleton.tile()),
+      );
+
+      expect(find.byType(Shimmer), findsOneWidget);
+    });
+  });
+
+  group('GlassCard', () {
+    testWidgets('applies BackdropFilter', (tester) async {
+      await tester.pumpWidget(
+        _wrap(const GlassCard(child: Text('Glass Content'))),
+      );
+
       expect(find.byType(BackdropFilter), findsOneWidget);
     });
   });

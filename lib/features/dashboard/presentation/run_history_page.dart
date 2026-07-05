@@ -5,7 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
-import 'package:kynos/features/training/presentation/training_page.dart';
+import 'package:kynos/shared/widgets/kynos_skeleton.dart';
+import 'package:kynos/shared/widgets/run_card.dart';
 
 class RunHistoryPage extends ConsumerWidget {
   const RunHistoryPage({super.key});
@@ -89,7 +90,18 @@ class RunHistoryPage extends ConsumerWidget {
               );
             },
             loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              child: Padding(
+                padding: EdgeInsets.all(tokens.Spacing.md),
+                child: Column(
+                  children: [
+                    KynosSkeleton.tile(height: 120),
+                    Gap(tokens.Spacing.sm),
+                    KynosSkeleton.tile(height: 120),
+                    Gap(tokens.Spacing.sm),
+                    KynosSkeleton.tile(height: 120),
+                  ],
+                ),
+              ),
             ),
             error: (e, _) => SliverFillRemaining(
               child: Center(

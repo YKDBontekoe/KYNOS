@@ -20,7 +20,7 @@ class KynosApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'KYNOS',
             theme: AppTheme.light,
-            darkTheme: ThemeData.dark(useMaterial3: true),
+            darkTheme: AppTheme.dark,
             themeMode: settingsController.themeMode,
             routerConfig: router,
             debugShowCheckedModeBanner: false,

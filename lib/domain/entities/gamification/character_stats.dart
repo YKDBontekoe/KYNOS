@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-
 enum CharacterStatId {
   strength,
   endurance,
@@ -36,13 +33,14 @@ enum CharacterStatId {
         willpower => 'Runs completed under low readiness',
       };
 
-  Color get color => switch (this) {
-        strength => AppTheme.energy,
-        endurance => AppTheme.stand,
-        speed => AppTheme.move,
-        form => AppTheme.exercise,
-        recovery => AppTheme.purple,
-        willpower => const Color(0xFFFFD60A),
+  /// Semantic colour key for UI layer mapping via [KynosColors.accentForKey].
+  String get colorKey => switch (this) {
+        strength => 'energy',
+        endurance => 'stand',
+        speed => 'move',
+        form => 'exercise',
+        recovery => 'purple',
+        willpower => 'willpower',
       };
 }
 

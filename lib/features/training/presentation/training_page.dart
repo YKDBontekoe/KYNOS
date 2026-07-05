@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
@@ -18,7 +19,12 @@ import 'package:kynos/features/nexus_lab/providers/nexus_lab_provider.dart';
 import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/shared/utils/insight_text_formatter.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
+import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
+import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
+import 'package:kynos/shared/widgets/run_card.dart';
 
 /// Training tab — weekly stats, trends, runs, and gait model.
 class TrainingPage extends ConsumerWidget {
@@ -80,25 +86,31 @@ class TrainingPage extends ConsumerWidget {
             tokens.Spacing.md,
             0,
             tokens.Spacing.md,
-            168,
+            LayoutTokens.shellBottomPadding,
           ),
           sliver: SliverList.list(
             children: [
-              const _TrainingBanner(),
+              const KynosHeroBanner(
+                accentColor: AppTheme.exercise,
+                subtitle: 'Your progress',
+                title: 'TRAINING',
+                caption: 'Trends, runs & gait model',
+                orbAlignment: Alignment.topRight,
+              ),
               const Gap(tokens.Spacing.lg),
-              const _SectionHeader(title: 'This Week'),
+              const KynosSectionHeader(title: 'This Week'),
               const Gap(tokens.Spacing.sm),
               _WeeklyStatsGrid(history: history.value ?? const []),
               const Gap(tokens.Spacing.lg),
               _TrainingInsightsCards(insightsState: insightsState),
               const Gap(tokens.Spacing.lg),
-              const _SectionHeader(title: '30-Day Trends'),
+              const KynosSectionHeader(title: '30-Day Trends'),
               const Gap(tokens.Spacing.sm),
               _TrendCards(history: history.value ?? const []),
               const Gap(tokens.Spacing.lg),
               Row(
                 children: [
-                  const Expanded(child: _SectionHeader(title: 'Recent Runs')),
+                  const Expanded(child: KynosSectionHeader(title: 'Recent Runs')),
                   TextButton(
                     onPressed: () => context.push(Routes.runHistory),
                     child: const Text('View all'),
@@ -108,7 +120,7 @@ class TrainingPage extends ConsumerWidget {
               const Gap(tokens.Spacing.sm),
               _PastRunsList(runs: recentRuns.value ?? const []),
               const Gap(tokens.Spacing.lg),
-              const _SectionHeader(title: 'Gait Model'),
+              const KynosSectionHeader(title: 'Gait Model'),
               const Gap(tokens.Spacing.sm),
               _GaitModelCard(
                 labState: labState,
@@ -119,83 +131,11 @@ class TrainingPage extends ConsumerWidget {
                           .calibrate(),
               ),
               const Gap(tokens.Spacing.lg),
-              const _PrivacyNotice(),
+              const KynosPrivacyFooter(),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Training banner ───────────────────────────────────────────────────────────
-
-class _TrainingBanner extends StatelessWidget {
-  const _TrainingBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 130,
-      decoration: BoxDecoration(
-        color: AppTheme.exercise,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -40,
-            right: -40,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.07),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Your progress',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.70),
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  'TRAINING',
-                  style: GoogleFonts.inter(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -1,
-                    height: 1,
-                  ),
-                ),
-                const Gap(6),
-                Text(
-                  'Trends, runs & gait model',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.60),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -363,7 +303,7 @@ class _TrainingInsightsCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return insightsState.when(
       loading: () => const KynosCard(
-        child: _InsightLoadingLine(label: 'Building training insights...'),
+        child: KynosLoadingLine(label: 'Building training insights...'),
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (state) {
@@ -373,7 +313,7 @@ class _TrainingInsightsCards extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SectionHeader(title: 'Session Intent'),
+            const KynosSectionHeader(title: 'Session Intent'),
             const Gap(tokens.Spacing.sm),
             _TrainingInsightTextCard(
               title: 'Session Intent',
@@ -383,7 +323,7 @@ class _TrainingInsightsCards extends StatelessWidget {
               usedModel: state.usedModel,
             ),
             const Gap(tokens.Spacing.md),
-            const _SectionHeader(title: 'Adjustment Hints'),
+            const KynosSectionHeader(title: 'Adjustment Hints'),
             const Gap(tokens.Spacing.sm),
             _TrainingInsightListCard(
               title: 'Adjustments',
@@ -391,7 +331,7 @@ class _TrainingInsightsCards extends StatelessWidget {
               lines: insights.adjustmentHints,
             ),
             const Gap(tokens.Spacing.md),
-            const _SectionHeader(title: 'Post-Session Debrief'),
+            const KynosSectionHeader(title: 'Post-Session Debrief'),
             const Gap(tokens.Spacing.sm),
             _TrainingInsightListCard(
               title: 'Debrief',
@@ -402,33 +342,6 @@ class _TrainingInsightsCards extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _InsightLoadingLine extends StatelessWidget {
-  const _InsightLoadingLine({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(
-          width: 12,
-          height: 12,
-          child: CircularProgressIndicator(
-            strokeWidth: 1.5,
-            color: AppTheme.tertiaryLabel,
-          ),
-        ),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.tertiaryLabel),
-        ),
-      ],
     );
   }
 }
@@ -834,129 +747,6 @@ class _PastRunsList extends StatelessWidget {
   }
 }
 
-/// Shared run card used by both the Training tab and RunHistoryPage.
-class RunCard extends StatelessWidget {
-  const RunCard({super.key, required this.run});
-
-  final WorkoutSession run;
-
-  @override
-  Widget build(BuildContext context) {
-    final distanceKm = run.distanceMeters == null
-        ? null
-        : run.distanceMeters! / 1000;
-    final pace = _pacePerKm(run.duration, run.distanceMeters);
-
-    return KynosCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(
-                  color: AppTheme.stand,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Gap(tokens.Spacing.sm),
-              Expanded(
-                child: Text(
-                  _runDateLabel(run.start),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Text(
-                run.sourceName,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-          const Gap(tokens.Spacing.sm),
-          Wrap(
-            spacing: tokens.Spacing.sm,
-            runSpacing: tokens.Spacing.xs,
-            children: [
-              _Chip(
-                label: 'Distance',
-                value: distanceKm == null
-                    ? '—'
-                    : '${distanceKm.toStringAsFixed(2)} km',
-              ),
-              _Chip(label: 'Duration', value: _durationLabel(run.duration)),
-              if (pace != null) _Chip(label: 'Pace', value: pace),
-              if (run.energyKcal != null)
-                _Chip(
-                  label: 'Calories',
-                  value: '${run.energyKcal!.round()} kcal',
-                ),
-            ],
-          ),
-          const Gap(tokens.Spacing.xs),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => context.push(Routes.runRoute, extra: run),
-              icon: const Icon(Icons.map_rounded, size: 16),
-              label: const Text('View Route In App'),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(0, 36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: tokens.Spacing.sm,
-        vertical: tokens.Spacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppTheme.background,
-        borderRadius: BorderRadius.circular(tokens.Radius.md),
-      ),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '$label: ',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppTheme.tertiaryLabel,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextSpan(
-              text: value,
-              style: GoogleFonts.dmMono(
-                fontSize: 12,
-                color: AppTheme.label,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ── Gait model card ───────────────────────────────────────────────────────────
 
 class _GaitModelCard extends StatelessWidget {
@@ -1092,82 +882,6 @@ class _GaitModelCard extends StatelessWidget {
   }
 }
 
-// ── Section header ────────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title.toUpperCase(),
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.secondaryLabel,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-}
-
-// ── Privacy notice ────────────────────────────────────────────────────────────
-
-class _PrivacyNotice extends StatelessWidget {
-  const _PrivacyNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.lock_rounded, size: 14, color: AppTheme.tertiaryLabel),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          'All data stays on your device',
-          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.tertiaryLabel),
-        ),
-      ],
-    );
-  }
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 double? _toKm(double? meters) => meters == null ? null : meters / 1000;
-
-String _runDateLabel(DateTime date) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day}, ${date.year}';
-}
-
-String _durationLabel(Duration duration) {
-  final h = duration.inHours;
-  final m = duration.inMinutes % 60;
-  final s = duration.inSeconds % 60;
-  if (h > 0) return '${h}h ${m}m';
-  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-}
-
-String? _pacePerKm(Duration duration, double? distanceMeters) {
-  if (distanceMeters == null || distanceMeters <= 0) return null;
-  final paceSeconds = duration.inSeconds / (distanceMeters / 1000);
-  final paceMinutes = paceSeconds ~/ 60;
-  final paceRemainderSeconds = (paceSeconds % 60).round();
-  return '$paceMinutes:${paceRemainderSeconds.toString().padLeft(2, '0')} /km';
-}
