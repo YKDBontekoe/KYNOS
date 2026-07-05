@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -5,26 +6,46 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
-/// Prompt card to connect HealthKit when no summary is available.
+/// Prompt card to connect health data when no summary is available.
 class ConnectHealthkitCard extends ConsumerWidget {
   const ConnectHealthkitCard({super.key});
+
+  String _platformLabel() {
+    if (kIsWeb) return 'health data';
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS => 'HealthKit',
+      TargetPlatform.android => 'Health Connect',
+      _ => 'health data',
+    };
+  }
+
+  String _settingsHint() {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS =>
+        'Enable access in Settings > Health > Data Access & Devices > Kynos.',
+      TargetPlatform.android =>
+        'Enable access in Settings > Apps > Kynos > Permissions > Health Connect.',
+      _ => 'Enable health permissions in system settings.',
+    };
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permissionState = ref.watch(healthPermissionsProvider);
     final isLoading = permissionState.isLoading;
+    final platform = _platformLabel();
 
     return KynosCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Connect HealthKit',
+            'Connect Health',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const Gap(tokens.Spacing.xs),
           Text(
-            'Grant access to recovery and workout data to unlock your readiness score and AI coaching insights.',
+            'Grant access via $platform to unlock your readiness score and AI coaching insights.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const Gap(tokens.Spacing.md),
@@ -41,8 +62,8 @@ class ConnectHealthkitCard extends ConsumerWidget {
                     ref.read(healthPermissionsProvider).whenOrNull(
                       data: (granted) {
                         final message = granted
-                            ? 'HealthKit connected.'
-                            : 'HealthKit permission not granted. Enable access in Settings > Health > Data Access & Devices > Kynos.';
+                            ? '$platform connected.'
+                            : '$platform permission not granted. $_settingsHint()';
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(message)),
                         );
@@ -51,20 +72,14 @@ class ConnectHealthkitCard extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'HealthKit connection failed: $error',
+                              'Health connection failed: $error',
                             ),
                           ),
                         );
                       },
                     );
                   },
-            child: isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Connect HealthKit'),
+            child: Text(isLoading ? 'Connecting…' : 'Connect $platform'),
           ),
         ],
       ),

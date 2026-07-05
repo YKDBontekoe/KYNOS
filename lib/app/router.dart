@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_history_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
 import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
@@ -13,6 +14,7 @@ abstract final class Routes {
   static const dashboard = '/';
   static const runRoute = '/run-route';
   static const runHistory = '/run-history';
+  static const coachChat = '/coach';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -47,6 +49,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (run is! WorkoutSession) return const ShellPage();
           return RunRoutePage(run: run);
         },
+      ),
+      GoRoute(
+        path: Routes.coachChat,
+        builder: (context, state) => const CoachChatPage(),
       ),
     ],
   );

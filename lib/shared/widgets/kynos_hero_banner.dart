@@ -13,6 +13,8 @@ class KynosHeroBanner extends StatelessWidget {
     this.child,
     this.height = LayoutTokens.heroBannerHeight,
     this.orbAlignment = Alignment.topLeft,
+    this.actionLabel,
+    this.onActionTap,
   });
 
   final Color accentColor;
@@ -22,6 +24,8 @@ class KynosHeroBanner extends StatelessWidget {
   final Widget? child;
   final double height;
   final Alignment orbAlignment;
+  final String? actionLabel;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +107,23 @@ class KynosHeroBanner extends StatelessWidget {
                   ],
                 ),
           ),
+          if (actionLabel != null && onActionTap != null)
+            Positioned(
+              right: Spacing.md,
+              bottom: Spacing.md,
+              child: TextButton(
+                onPressed: onActionTap,
+                style: TextButton.styleFrom(
+                  foregroundColor: KynosColors.onAccent,
+                  backgroundColor: KynosColors.onAccent.withValues(alpha: 0.15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.md,
+                    vertical: Spacing.xs,
+                  ),
+                ),
+                child: Text(actionLabel!),
+              ),
+            ),
         ],
       ),
     );

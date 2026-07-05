@@ -6,6 +6,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_ba
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/model_setup_screen.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
 
 class CoachChatPage extends ConsumerStatefulWidget {
@@ -25,9 +26,19 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final current = ref.read(modelSetupProvider);
-      if (current case AsyncData(:final value) when value) return;
+      if (current case AsyncData(:final value) when value) {
+        _applyCoachSeed();
+        return;
+      }
       ref.read(modelSetupProvider.notifier).checkAndInstall();
     });
+  }
+
+  void _applyCoachSeed() {
+    final seed = ref.read(coachChatSeedProvider.notifier).consumeSeed();
+    if (seed == null || seed.isEmpty) return;
+    _textController.text = seed;
+    _focusNode.requestFocus();
   }
 
   @override
@@ -68,6 +79,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       ),
       data: (isReady) {
         if (!isReady) return ModelSetupScreen.checking();
+        WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
         return _buildChat();
       },
     );

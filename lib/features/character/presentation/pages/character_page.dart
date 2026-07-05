@@ -12,7 +12,7 @@ import 'package:kynos/features/character/presentation/widgets/stats_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
 import 'package:kynos/features/character/providers/character_provider.dart';
-import 'package:kynos/features/character/providers/quest_provider.dart';
+import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 

@@ -37,10 +37,13 @@ class _ShellState extends State<ShellPage> {
       extendBody: true,
       body: IndexedStack(
         index: _index,
-        children: const [
-          DashboardPage(),
-          TrainingPage(),
-          CharacterPage(),
+        children: [
+          DashboardPage(
+            onViewTraining: () => setState(() => _index = 1),
+            onViewCharacter: () => setState(() => _index = 2),
+          ),
+          const TrainingPage(),
+          const CharacterPage(),
         ],
       ),
       bottomNavigationBar: _BottomBar(

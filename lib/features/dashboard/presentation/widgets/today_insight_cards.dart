@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/widgets/insight_expandable_card.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -11,22 +9,60 @@ import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 /// Today's AI insight cards — quick changes, risks, and actions.
-class TodayInsightCards extends StatelessWidget {
-  const TodayInsightCards({super.key, required this.todayInsightsState});
+class TodayInsightCards extends ConsumerWidget {
+  const TodayInsightCards({
+    super.key,
+    required this.todayInsightsState,
+    this.onAskCoach,
+  });
 
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onAskCoach;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return todayInsightsState.when(
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Generating today insights...'),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (error, _) => KynosCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Could not load today\'s insights.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const Gap(Spacing.sm),
+            TextButton(
+              onPressed: () => ref.invalidate(todayInsightsStateProvider),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
       data: (state) {
         final insights = state.insights;
         if (insights == null) {
-          return const SizedBox.shrink();
+          if (state.failureMessage == null) {
+            return const SizedBox.shrink();
+          }
+          return KynosCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.failureMessage!,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const Gap(Spacing.sm),
+                TextButton(
+                  onPressed: () => ref.invalidate(todayInsightsStateProvider),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         }
 
         return Column(
@@ -36,17 +72,18 @@ class TodayInsightCards extends StatelessWidget {
               icon: Icons.compare_arrows_rounded,
               lines: insights.whatChanged,
             ),
-            const Gap(tokens.Spacing.md),
+            const Gap(Spacing.md),
             InsightExpandableCard(
               title: 'Top Risks',
               icon: Icons.warning_amber_rounded,
               lines: insights.riskFlags,
             ),
-            const Gap(tokens.Spacing.md),
+            const Gap(Spacing.md),
             ActionCompactCard(
               actionNow: insights.actionNow,
               actionTonight: insights.actionTonight,
               evidence: insights.evidence,
+              onAskCoach: onAskCoach,
             ),
           ],
         );
@@ -62,11 +99,13 @@ class ActionCompactCard extends StatefulWidget {
     required this.actionNow,
     required this.actionTonight,
     required this.evidence,
+    this.onAskCoach,
   });
 
   final String actionNow;
   final String actionTonight;
   final List<String> evidence;
+  final VoidCallback? onAskCoach;
 
   @override
   State<ActionCompactCard> createState() => _ActionCompactCardState();
@@ -77,6 +116,8 @@ class _ActionCompactCardState extends State<ActionCompactCard> {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
     return KynosCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,38 +140,45 @@ class _ActionCompactCardState extends State<ActionCompactCard> {
               ),
             ],
           ),
-          const Gap(tokens.Spacing.sm),
+          const Gap(Spacing.sm),
           Wrap(
-            spacing: tokens.Spacing.xs,
-            runSpacing: tokens.Spacing.xs,
+            spacing: Spacing.xs,
+            runSpacing: Spacing.xs,
             children: [
               const KynosChip(label: 'Now'),
               const KynosChip(label: 'Tonight'),
               if (widget.evidence.isNotEmpty)
                 KynosChip(label: '${widget.evidence.length} signals'),
+              if (widget.onAskCoach != null)
+                GestureDetector(
+                  onTap: widget.onAskCoach,
+                  child: KynosChip.accent(
+                    label: 'Ask coach about this',
+                    color: kynos.purple,
+                  ),
+                ),
             ],
           ),
           if (_expanded) ...[
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             ActionRow(
               icon: Icons.play_arrow_rounded,
               label: 'Now',
               value: widget.actionNow,
             ),
-            const Gap(tokens.Spacing.xs),
+            const Gap(Spacing.xs),
             ActionRow(
               icon: Icons.nights_stay_rounded,
               label: 'Tonight',
               value: widget.actionTonight,
             ),
             if (widget.evidence.isNotEmpty) ...[
-              const Gap(tokens.Spacing.sm),
+              const Gap(Spacing.sm),
               Text(
                 widget.evidence.join(' • '),
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppTheme.tertiaryLabel,
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: kynos.tertiaryLabel,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -157,20 +205,21 @@ class ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: AppTheme.secondaryLabel),
-        const Gap(tokens.Spacing.xs),
+        Icon(icon, size: 14, color: kynos.secondaryLabel),
+        const Gap(Spacing.xs),
         Text(
           '$label:',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.secondaryLabel,
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: kynos.secondaryLabel,
+              ),
         ),
-        const Gap(tokens.Spacing.xs),
+        const Gap(Spacing.xs),
         Expanded(
           child: Text(
             value,

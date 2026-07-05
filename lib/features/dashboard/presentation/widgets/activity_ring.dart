@@ -2,29 +2,37 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Concentric activity rings with progress arcs.
+/// Concentric activity rings with per-ring progress arcs.
 class ActivityRing extends StatelessWidget {
   const ActivityRing({
     super.key,
-    required this.progress,
+    this.progress,
+    this.ringProgresses,
     required this.size,
     required this.strokeWidth,
     required this.colors,
   });
 
-  final double progress;
+  /// Legacy single progress applied to every ring when [ringProgresses] is null.
+  final double? progress;
+
+  /// Per-ring progress values (0–1), outer ring first.
+  final List<double>? ringProgresses;
   final double size;
   final double strokeWidth;
   final List<Color> colors;
 
   @override
   Widget build(BuildContext context) {
+    final progresses = ringProgresses ??
+        List<double>.filled(colors.length, progress ?? 0);
+
     return SizedBox(
       width: size,
       height: size,
       child: CustomPaint(
         painter: RingPainter(
-          progress: progress,
+          ringProgresses: progresses,
           strokeWidth: strokeWidth,
           colors: colors,
         ),
@@ -35,12 +43,12 @@ class ActivityRing extends StatelessWidget {
 
 class RingPainter extends CustomPainter {
   const RingPainter({
-    required this.progress,
+    required this.ringProgresses,
     required this.strokeWidth,
     required this.colors,
   });
 
-  final double progress;
+  final List<double> ringProgresses;
   final double strokeWidth;
   final List<Color> colors;
 
@@ -51,6 +59,7 @@ class RingPainter extends CustomPainter {
       final spacing = strokeWidth * 0.28;
       final radius =
           (size.width / 2) - strokeWidth / 2 - (strokeWidth + spacing) * i;
+      final ringProgress = i < ringProgresses.length ? ringProgresses[i] : 0;
 
       canvas.drawCircle(
         center,
@@ -61,11 +70,11 @@ class RingPainter extends CustomPainter {
           ..color = colors[i].withValues(alpha: 0.15),
       );
 
-      if (progress > 0) {
+      if (ringProgress > 0) {
         canvas.drawArc(
           Rect.fromCircle(center: center, radius: radius),
           -math.pi / 2,
-          2 * math.pi * progress,
+          2 * math.pi * ringProgress,
           false,
           Paint()
             ..style = PaintingStyle.stroke
@@ -78,5 +87,8 @@ class RingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(RingPainter old) => old.progress != progress;
+  bool shouldRepaint(RingPainter old) =>
+      old.ringProgresses != ringProgresses ||
+      old.strokeWidth != strokeWidth ||
+      old.colors != colors;
 }
