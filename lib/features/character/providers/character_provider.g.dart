@@ -6,27 +6,57 @@ part of 'character_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$runnerCharacterHash() => r'40ecf158e5dbf13bedb047fa4e7d1d50d9eacc24';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Loads the persisted [RunnerCharacter], creating one via class assignment
+/// if this is the athlete's first session.
+///
+/// Kept alive so the character is available app-wide without re-fetching.
+
+@ProviderFor(runnerCharacter)
+final runnerCharacterProvider = RunnerCharacterProvider._();
 
 /// Loads the persisted [RunnerCharacter], creating one via class assignment
 /// if this is the athlete's first session.
 ///
 /// Kept alive so the character is available app-wide without re-fetching.
-///
-/// Copied from [runnerCharacter].
-@ProviderFor(runnerCharacter)
-final runnerCharacterProvider = FutureProvider<RunnerCharacter?>.internal(
-  runnerCharacter,
-  name: r'runnerCharacterProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$runnerCharacterHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RunnerCharacterRef = FutureProviderRef<RunnerCharacter?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class RunnerCharacterProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<RunnerCharacter?>,
+          RunnerCharacter?,
+          FutureOr<RunnerCharacter?>
+        >
+    with $FutureModifier<RunnerCharacter?>, $FutureProvider<RunnerCharacter?> {
+  /// Loads the persisted [RunnerCharacter], creating one via class assignment
+  /// if this is the athlete's first session.
+  ///
+  /// Kept alive so the character is available app-wide without re-fetching.
+  RunnerCharacterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'runnerCharacterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$runnerCharacterHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<RunnerCharacter?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<RunnerCharacter?> create(Ref ref) {
+    return runnerCharacter(ref);
+  }
+}
+
+String _$runnerCharacterHash() => r'8572ed271e26a50f266f30585b438ba8bc4c1b4a';

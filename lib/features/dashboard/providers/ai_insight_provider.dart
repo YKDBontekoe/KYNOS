@@ -10,7 +10,7 @@ part 'ai_insight_provider.g.dart';
 ///
 /// Kept alive for the app session — only regenerates when health data changes.
 @Riverpod(keepAlive: true)
-Future<String?> aiDailyInsight(AiDailyInsightRef ref) async {
+Future<String?> aiDailyInsight(Ref ref) async {
   final summary = await ref.watch(healthSummaryProvider.future);
   if (summary == null) return null;
 

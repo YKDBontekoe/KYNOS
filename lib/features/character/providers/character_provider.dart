@@ -9,7 +9,7 @@ part 'character_provider.g.dart';
 ///
 /// Kept alive so the character is available app-wide without re-fetching.
 @Riverpod(keepAlive: true)
-Future<RunnerCharacter?> runnerCharacter(RunnerCharacterRef ref) async {
+Future<RunnerCharacter?> runnerCharacter(Ref ref) async {
   final repo = ref.read(characterRepositoryProvider);
   final loadResult = await repo.loadCharacter();
 

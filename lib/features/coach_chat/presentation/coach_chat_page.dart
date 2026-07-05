@@ -29,7 +29,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(modelSetupNotifierProvider.notifier).checkAndInstall();
+      ref.read(modelSetupProvider.notifier).checkAndInstall();
     });
   }
 
@@ -56,18 +56,18 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final text = (override ?? _textController.text).trim();
     if (text.isEmpty) return;
     _textController.clear();
-    ref.read(coachChatNotifierProvider.notifier).sendMessage(text);
+    ref.read(coachChatProvider.notifier).sendMessage(text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final setupState = ref.watch(modelSetupNotifierProvider);
+    final setupState = ref.watch(modelSetupProvider);
 
     return setupState.when(
       loading: () => _ModelSetupScreen.checking(),
       error: (e, _) => _ModelSetupScreen.error(
         message: e.toString(),
-        onRetry: () => ref.read(modelSetupNotifierProvider.notifier).checkAndInstall(),
+        onRetry: () => ref.read(modelSetupProvider.notifier).checkAndInstall(),
       ),
       data: (isReady) {
         if (!isReady) return _ModelSetupScreen.checking();
@@ -78,12 +78,12 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
   Widget _buildChat() {
     ref.listen(
-      coachChatNotifierProvider.select((s) => s.valueOrNull?.lastOrNull?.content),
+      coachChatProvider.select((s) => s.value?.lastOrNull?.content),
       (prev, next) => _scrollToBottom(),
     );
 
-    final messages = ref.watch(coachChatNotifierProvider.select((s) => s.valueOrNull ?? const []));
-    final isStreaming = ref.watch(coachChatNotifierProvider.select((s) => s.valueOrNull?.any((m) => m.isStreaming) ?? false));
+    final messages = ref.watch(coachChatProvider.select((s) => s.value ?? const []));
+    final isStreaming = ref.watch(coachChatProvider.select((s) => s.value?.any((m) => m.isStreaming) ?? false));
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -91,7 +91,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       body: Column(
         children: [
           _AppBar(
-            onClear: () => ref.read(coachChatNotifierProvider.notifier).clearConversation(),
+            onClear: () => ref.read(coachChatProvider.notifier).clearConversation(),
           ),
           Expanded(
             child: messages.isEmpty

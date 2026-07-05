@@ -6,22 +6,58 @@ part of 'model_setup_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(ModelSetupNotifier)
+final modelSetupProvider = ModelSetupNotifierProvider._();
+
+final class ModelSetupNotifierProvider
+    extends $NotifierProvider<ModelSetupNotifier, AsyncValue<bool>> {
+  ModelSetupNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'modelSetupProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$modelSetupNotifierHash();
+
+  @$internal
+  @override
+  ModelSetupNotifier create() => ModelSetupNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<bool> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
+    );
+  }
+}
+
 String _$modelSetupNotifierHash() =>
     r'3b4dfb9c5fe729612a88c0891ba778aa98bf7a80';
 
-/// See also [ModelSetupNotifier].
-@ProviderFor(ModelSetupNotifier)
-final modelSetupNotifierProvider =
-    NotifierProvider<ModelSetupNotifier, AsyncValue<bool>>.internal(
-      ModelSetupNotifier.new,
-      name: r'modelSetupNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$modelSetupNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$ModelSetupNotifier = Notifier<AsyncValue<bool>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ModelSetupNotifier extends $Notifier<AsyncValue<bool>> {
+  AsyncValue<bool> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<bool>, AsyncValue<bool>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
+              AsyncValue<bool>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

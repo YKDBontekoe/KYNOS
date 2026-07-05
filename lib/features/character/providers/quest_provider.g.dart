@@ -6,42 +6,98 @@ part of 'quest_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dailyQuestsHash() => r'48df34152a4fe57a3c5bfca8ce4c51e4175b137b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Returns today's active quests, generating new ones via AI if none exist.
+
+@ProviderFor(dailyQuests)
+final dailyQuestsProvider = DailyQuestsProvider._();
 
 /// Returns today's active quests, generating new ones via AI if none exist.
-///
-/// Copied from [dailyQuests].
-@ProviderFor(dailyQuests)
-final dailyQuestsProvider = FutureProvider<List<Quest>>.internal(
-  dailyQuests,
-  name: r'dailyQuestsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$dailyQuestsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef DailyQuestsRef = FutureProviderRef<List<Quest>>;
+final class DailyQuestsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Quest>>,
+          List<Quest>,
+          FutureOr<List<Quest>>
+        >
+    with $FutureModifier<List<Quest>>, $FutureProvider<List<Quest>> {
+  /// Returns today's active quests, generating new ones via AI if none exist.
+  DailyQuestsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dailyQuestsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dailyQuestsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Quest>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Quest>> create(Ref ref) {
+    return dailyQuests(ref);
+  }
+}
+
+String _$dailyQuestsHash() => r'f5c3fc80db98be1eabe6115ebb5ba6b536944785';
+
+/// Notifier that allows quest status mutations (complete / expire).
+
+@ProviderFor(QuestNotifier)
+final questProvider = QuestNotifierProvider._();
+
+/// Notifier that allows quest status mutations (complete / expire).
+final class QuestNotifierProvider
+    extends $AsyncNotifierProvider<QuestNotifier, List<Quest>> {
+  /// Notifier that allows quest status mutations (complete / expire).
+  QuestNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'questProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$questNotifierHash();
+
+  @$internal
+  @override
+  QuestNotifier create() => QuestNotifier();
+}
+
 String _$questNotifierHash() => r'bb016bf165b0f2404881f4d3411b8a8da823e1bf';
 
 /// Notifier that allows quest status mutations (complete / expire).
-///
-/// Copied from [QuestNotifier].
-@ProviderFor(QuestNotifier)
-final questNotifierProvider =
-    AsyncNotifierProvider<QuestNotifier, List<Quest>>.internal(
-      QuestNotifier.new,
-      name: r'questNotifierProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$questNotifierHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$QuestNotifier = AsyncNotifier<List<Quest>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$QuestNotifier extends $AsyncNotifier<List<Quest>> {
+  FutureOr<List<Quest>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Quest>>, List<Quest>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Quest>>, List<Quest>>,
+              AsyncValue<List<Quest>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

@@ -20,7 +20,7 @@ class TrainingInsightsState {
 
 @riverpod
 Future<TrainingInsightsState> trainingInsightsState(
-  TrainingInsightsStateRef ref,
+  Ref ref,
 ) async {
   if (kIsWeb) {
     return const TrainingInsightsState(
