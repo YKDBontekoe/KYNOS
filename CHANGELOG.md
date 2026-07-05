@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.1.0...v1.2.0) (2026-07-05)
+
+
+### Features
+
+* improve today dashboard with hub sections, coach integration, and ux polish ([#35](https://github.com/YKDBontekoe/KYNOS/issues/35)) ([4f4d667](https://github.com/YKDBontekoe/KYNOS/commit/4f4d6676e6d6a5a43b96baf3e88886c9ef778631))
+
 # [1.1.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.0.1...v1.1.0) (2026-07-05)
 
 
