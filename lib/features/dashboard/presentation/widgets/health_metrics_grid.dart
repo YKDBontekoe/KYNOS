@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// Two-column grid of today's health metrics.
 class HealthMetricsGrid extends StatelessWidget {
-  const HealthMetricsGrid({super.key, required this.summary});
+  const HealthMetricsGrid({
+    super.key,
+    required this.summary,
+    this.isLoading = false,
+  });
 
   final HealthSummary? summary;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+    final hasRunToday = (summary?.runningWorkoutCount ?? 0) > 0;
+
     return Column(
       children: [
         Row(
@@ -20,62 +27,74 @@ class HealthMetricsGrid extends StatelessWidget {
             Expanded(
               child: MetricTile(
                 label: 'Recovery',
-                value: _round(summary?.hrvMs),
+                value: isLoading ? null : _round(summary?.hrvMs),
                 unit: 'ms',
-                accentColor: AppTheme.exercise,
+                accentColor: kynos.exercise,
               ),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             Expanded(
               child: MetricTile(
                 label: 'Resting pulse',
-                value: _round(summary?.rhrBpm),
+                value: isLoading ? null : _round(summary?.rhrBpm),
                 unit: 'bpm',
-                accentColor: AppTheme.move,
+                accentColor: kynos.move,
               ),
             ),
           ],
         ),
-        const Gap(tokens.Spacing.sm),
+        const Gap(Spacing.sm),
         Row(
           children: [
             Expanded(
               child: MetricTile(
                 label: 'Sleep',
-                value: _fixed(summary?.sleepHours, 1),
+                value: isLoading ? null : _fixed(summary?.sleepHours, 1),
                 unit: 'h',
-                accentColor: AppTheme.stand,
+                accentColor: kynos.stand,
               ),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             Expanded(
               child: MetricTile(
                 label: 'SpO2',
-                value: _fixed(summary?.bloodOxygenPercent, 1),
+                value: isLoading ? null : _fixed(summary?.bloodOxygenPercent, 1),
                 unit: '%',
-                accentColor: AppTheme.exercise,
+                accentColor: kynos.exercise,
               ),
             ),
           ],
         ),
-        const Gap(tokens.Spacing.sm),
+        const Gap(Spacing.sm),
         Row(
           children: [
             Expanded(
               child: MetricTile(
-                label: 'Distance',
-                value: _fixed(_toKm(summary?.distanceMeters), 2),
-                unit: 'km',
-                accentColor: AppTheme.stand,
+                label: hasRunToday ? 'Run distance' : 'Active energy',
+                value: isLoading
+                    ? null
+                    : hasRunToday
+                        ? _fixed(_toKm(summary?.runningWorkoutDistanceMeters), 2)
+                        : _round(summary?.activeCalories),
+                unit: hasRunToday ? 'km' : 'kcal',
+                accentColor: kynos.stand,
               ),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             Expanded(
               child: MetricTile(
-                label: 'Steps',
-                value: summary?.steps?.toString() ?? '—',
-                unit: null,
-                accentColor: AppTheme.energy,
+                label: hasRunToday ? 'Active energy' : 'Exercise time',
+                value: isLoading
+                    ? null
+                    : hasRunToday
+                        ? _round(summary?.activeCalories)
+                        : _exerciseOrStepsValue(summary),
+                unit: hasRunToday
+                    ? 'kcal'
+                    : summary?.exerciseMinutes == null
+                        ? null
+                        : 'min',
+                accentColor: kynos.energy,
               ),
             ),
           ],
@@ -89,5 +108,15 @@ String _round(double? value) => value == null ? '—' : value.round().toString()
 
 String _fixed(double? value, int digits) =>
     value == null ? '—' : value.toStringAsFixed(digits);
+
+String _exerciseOrStepsValue(HealthSummary? summary) {
+  if (summary?.exerciseMinutes != null) {
+    return _round(summary!.exerciseMinutes);
+  }
+  if (summary?.steps != null) {
+    return summary!.steps!.toString();
+  }
+  return '—';
+}
 
 double? _toKm(double? meters) => meters == null ? null : meters / 1000;

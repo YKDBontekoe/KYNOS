@@ -22,22 +22,22 @@ double readinessScore(HealthSummary? summary) {
   var totalWeight = 0.0;
 
   if (summary.hrvMs != null) {
-    final hrvScore = (summary.hrvMs!.clamp(20, 110) - 20) / 90;
+    final hrvScore = _hrvContribution(summary.hrvMs);
     weighted += hrvScore * _hrvWeight;
     totalWeight += _hrvWeight;
   }
   if (summary.rhrBpm != null) {
-    final rhrScore = 1 - ((summary.rhrBpm!.clamp(45, 90) - 45) / 45);
+    final rhrScore = _rhrContribution(summary.rhrBpm);
     weighted += rhrScore * _rhrWeight;
     totalWeight += _rhrWeight;
   }
   if (summary.sleepHours != null) {
-    final sleepScore = (summary.sleepHours!.clamp(4, 9) - 4) / 5;
+    final sleepScore = _sleepContribution(summary.sleepHours);
     weighted += sleepScore * _sleepWeight;
     totalWeight += _sleepWeight;
   }
   if (summary.bloodOxygenPercent != null) {
-    final spo2Score = (summary.bloodOxygenPercent!.clamp(90, 100) - 90) / 10;
+    final spo2Score = _spo2Contribution(summary.bloodOxygenPercent);
     weighted += spo2Score * _spo2Weight;
     totalWeight += _spo2Weight;
   }
@@ -70,4 +70,54 @@ String readinessSummaryBrief(double score) {
   if (score >= 65) return 'Solid readiness. Tempo or aerobic work fits.';
   if (score >= 45) return 'Moderate readiness. Keep effort controlled.';
   return 'Low readiness. Prioritise recovery and easy movement.';
+}
+
+/// Per-metric readiness contributions (0–1) for activity ring arcs.
+class ReadinessDimensions {
+  const ReadinessDimensions({
+    required this.hrv,
+    required this.rhr,
+    required this.sleep,
+    required this.spo2,
+  });
+
+  final double hrv;
+  final double rhr;
+  final double sleep;
+  final double spo2;
+
+  List<double> get ringProgresses => [hrv, rhr, sleep, spo2];
+}
+
+double _hrvContribution(double? hrvMs) {
+  if (hrvMs == null) return 0;
+  return ((hrvMs.clamp(20, 110) - 20) / 90).clamp(0, 1);
+}
+
+double _rhrContribution(double? rhrBpm) {
+  if (rhrBpm == null) return 0;
+  return (1 - ((rhrBpm.clamp(45, 90) - 45) / 45)).clamp(0, 1);
+}
+
+double _sleepContribution(double? sleepHours) {
+  if (sleepHours == null) return 0;
+  return ((sleepHours.clamp(4, 9) - 4) / 5).clamp(0, 1);
+}
+
+double _spo2Contribution(double? bloodOxygenPercent) {
+  if (bloodOxygenPercent == null) return 0;
+  return ((bloodOxygenPercent.clamp(90, 100) - 90) / 10).clamp(0, 1);
+}
+
+/// Individual metric scores used to drive per-ring activity visuals.
+ReadinessDimensions readinessDimensions(HealthSummary? summary) {
+  if (summary == null) {
+    return const ReadinessDimensions(hrv: 0, rhr: 0, sleep: 0, spo2: 0);
+  }
+  return ReadinessDimensions(
+    hrv: _hrvContribution(summary.hrvMs),
+    rhr: _rhrContribution(summary.rhrBpm),
+    sleep: _sleepContribution(summary.sleepHours),
+    spo2: _spo2Contribution(summary.bloodOxygenPercent),
+  );
 }
