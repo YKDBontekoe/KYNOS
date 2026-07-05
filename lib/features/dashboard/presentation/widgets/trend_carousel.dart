@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/core/theme/theme.dart' hide Radius;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/hrv_sparkline.dart';
 import 'package:kynos/features/training/presentation/widgets/chart_placeholder.dart';
 import 'package:kynos/features/training/presentation/widgets/load_chart.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_page_dots.dart';
 
 /// Swipeable 7-day recovery and load trend cards for the Today tab.
 class TrendCarousel extends StatefulWidget {
@@ -30,14 +30,13 @@ class _TrendCarouselState extends State<TrendCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final kynos = context.kynosTheme;
     final points = List<HealthSummary>.from(widget.history)
       ..sort((a, b) => a.date.compareTo(b.date));
 
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: 220,
           child: PageView(
             controller: _controller,
             onPageChanged: (i) => setState(() => _page = i),
@@ -59,22 +58,8 @@ class _TrendCarouselState extends State<TrendCarousel> {
             ],
           ),
         ),
-        const Gap(tokens.Spacing.sm),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(2, (i) {
-            final active = i == _page;
-            return Container(
-              width: active ? 16 : 6,
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              decoration: BoxDecoration(
-                color: active ? kynos.stand : kynos.separator,
-                borderRadius: BorderRadius.circular(tokens.Radius.full),
-              ),
-            );
-          }),
-        ),
+        const Gap(tokens.Spacing.md),
+        KynosPageDots(count: 2, activeIndex: _page),
       ],
     );
   }
@@ -94,14 +79,14 @@ class _TrendPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return KynosCard(
-      padding: const EdgeInsets.all(tokens.Spacing.md),
+      padding: const EdgeInsets.all(tokens.Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const Gap(tokens.Spacing.xs),
           Text(caption, style: Theme.of(context).textTheme.bodySmall),
-          const Gap(tokens.Spacing.md),
+          const Gap(tokens.Spacing.lg),
           Expanded(child: child),
         ],
       ),

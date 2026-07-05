@@ -6,7 +6,6 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/activity_ring.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/hrv_sparkline.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -17,12 +16,10 @@ class ReadinessCard extends StatelessWidget {
     super.key,
     required this.summaryAsync,
     required this.todayInsightsState,
-    this.history = const [],
   });
 
   final AsyncValue<HealthSummary?> summaryAsync;
   final AsyncValue<TodayInsightsState> todayInsightsState;
-  final List<HealthSummary> history;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +36,6 @@ class ReadinessCard extends StatelessWidget {
       data: (summary) => _ReadinessCardContent(
         summary: summary,
         todayInsightsState: todayInsightsState,
-        history: history,
       ),
     );
   }
@@ -49,12 +45,10 @@ class _ReadinessCardContent extends StatelessWidget {
   const _ReadinessCardContent({
     required this.summary,
     required this.todayInsightsState,
-    required this.history,
   });
 
   final HealthSummary? summary;
   final AsyncValue<TodayInsightsState> todayInsightsState;
-  final List<HealthSummary> history;
 
   @override
   Widget build(BuildContext context) {
@@ -69,19 +63,20 @@ class _ReadinessCardContent extends StatelessWidget {
     ];
 
     return KynosCard(
-      padding: const EdgeInsets.all(Spacing.md),
+      padding: const EdgeInsets.all(Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ActivityRing(
                 ringProgresses: dimensions.ringProgresses,
-                size: 82,
-                strokeWidth: 8,
+                size: 110,
+                strokeWidth: 10,
                 colors: ringColors,
               ),
-              const Gap(Spacing.md),
+              const Gap(Spacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +89,7 @@ class _ReadinessCardContent extends StatelessWidget {
                     Text(
                       summary == null ? '—' : score.round().toString(),
                       style: kynos.metricValueStyle.copyWith(
-                        fontSize: 38,
+                        fontSize: 44,
                         fontWeight: FontWeight.w800,
                         color: summary == null
                             ? kynos.secondaryLabel
@@ -103,7 +98,7 @@ class _ReadinessCardContent extends StatelessWidget {
                         letterSpacing: -1,
                       ),
                     ),
-                    const Gap(Spacing.xs),
+                    const Gap(Spacing.sm),
                     Text(
                       summary == null
                           ? 'Connect health data to calculate a real readiness score.'
@@ -112,23 +107,14 @@ class _ReadinessCardContent extends StatelessWidget {
                               todayInsightsState: todayInsightsState,
                             ),
                       style: Theme.of(context).textTheme.bodyMedium,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          if (history.isNotEmpty) ...[
-            const Gap(Spacing.sm),
-            const Divider(height: 1),
-            const Gap(Spacing.sm),
-            Text(
-              '7-DAY RECOVERY',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            const Gap(Spacing.xs),
-            HrvSparkline(history: history),
-          ],
           ConfidenceBadgeRow(todayInsightsState: todayInsightsState),
         ],
       ),
@@ -163,28 +149,28 @@ class ConfidenceBadgeRow extends StatelessWidget {
       data: (state) {
         final insights = state.insights;
         if (insights == null) return const SizedBox.shrink();
-        return Column(
-          children: [
-            const Gap(Spacing.sm),
-            const Divider(height: 1),
-            const Gap(Spacing.sm),
-            Row(
-              children: [
-                Icon(
-                  Icons.verified_rounded,
-                  size: 14,
-                  color: kynos.purple.withValues(alpha: 0.75),
-                ),
-                const Gap(Spacing.sm),
-                Text(
+        return Padding(
+          padding: const EdgeInsets.only(top: Spacing.md),
+          child: Row(
+            children: [
+              Icon(
+                Icons.verified_rounded,
+                size: 14,
+                color: kynos.purple.withValues(alpha: 0.75),
+              ),
+              const Gap(Spacing.sm),
+              Expanded(
+                child: Text(
                   'Confidence: ${insights.confidence.label}${state.usedModel ? ' • Gemma refined' : ' • Rule-based'}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: kynos.tertiaryLabel,
                       ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         );
       },
     );
