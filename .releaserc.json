@@ -3,7 +3,34 @@
     "main"
   ],
   "plugins": [
-    "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "angular",
+        "releaseRules": [
+          {
+            "header": "Fixes",
+            "release": "patch"
+          },
+          {
+            "header": "Add *",
+            "release": "minor"
+          },
+          {
+            "header": "*refactor*",
+            "release": "patch"
+          },
+          {
+            "header": "*esign system*",
+            "release": "minor"
+          },
+          {
+            "header": "*SideStore*",
+            "release": "minor"
+          }
+        ]
+      }
+    ],
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/changelog",
