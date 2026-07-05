@@ -52,6 +52,8 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(healthSummaryProvider);
     final todayInsightsState = ref.watch(todayInsightsStateProvider);
+    final showConnectCard =
+        !kIsWeb && summary.value == null && !summary.isLoading;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
@@ -97,10 +99,8 @@ class DashboardPage extends ConsumerWidget {
               const Gap(tokens.Spacing.sm),
               _HealthMetricsGrid(summary: summary.value),
               const Gap(tokens.Spacing.lg),
-              if (!kIsWeb && summary.value == null && !summary.isLoading)
-                const _ConnectCard(),
-              if (!kIsWeb && summary.value == null && !summary.isLoading)
-                const Gap(tokens.Spacing.lg),
+              if (showConnectCard) const _ConnectCard(),
+              if (showConnectCard) const Gap(tokens.Spacing.lg),
               const _PrivacyNotice(),
             ],
           ),

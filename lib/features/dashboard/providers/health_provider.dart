@@ -4,9 +4,12 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_provider.g.dart';
+
+final _logger = Logger();
 
 @Riverpod(keepAlive: true)
 HealthRepository healthRepository(HealthRepositoryRef ref) {
@@ -23,7 +26,10 @@ Future<HealthSummary?> healthSummary(HealthSummaryRef ref) async {
   final result = await repository.getToday();
   // Fail closed to "no data" so the dashboard still renders and can show
   // the explicit Connect HealthKit call-to-action.
-  if (result.failure != null) return null;
+  if (result.failure != null) {
+    _logger.fine('Health summary unavailable: ${result.failure}');
+    return null;
+  }
   return result.summary;
 }
 
