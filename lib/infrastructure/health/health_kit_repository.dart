@@ -15,7 +15,12 @@ class HealthKitRepository implements HealthRepository {
   bool _isConfigured = false;
 
   /// Types of health data KYNOS uses for recovery and training insights.
-  static final List<HealthDataType> _types = [
+  ///
+  /// Filtered at runtime via [Health.isDataTypeAvailable] so Android-only
+  /// entries (e.g. [HealthDataType.TOTAL_CALORIES_BURNED]) are never sent
+  /// to HealthKit — that would map to the wrong native type and can prevent
+  /// the authorization sheet from appearing.
+  static const List<HealthDataType> _requestedTypes = [
     HealthDataType.HEART_RATE_VARIABILITY_SDNN,
     HealthDataType.RESTING_HEART_RATE,
     HealthDataType.HEART_RATE,
@@ -36,6 +41,10 @@ class HealthKitRepository implements HealthRepository {
     HealthDataType.WORKOUT,
   ];
 
+  List<HealthDataType> get _types => _requestedTypes
+      .where(_health.isDataTypeAvailable)
+      .toList(growable: false);
+
   Future<void> _ensureConfigured() async {
     if (!_isConfigured) {
       await _health.configure();
@@ -46,8 +55,13 @@ class HealthKitRepository implements HealthRepository {
   @override
   Future<bool> requestPermissions() async {
     await _ensureConfigured();
-    final permissions = _types.map((_) => HealthDataAccess.READ).toList();
-    return _health.requestAuthorization(_types, permissions: permissions);
+    final types = _types;
+    if (types.isEmpty) return false;
+
+    // Explicitly demand READ-only access. The health plugin defaults to
+    // READ_WRITE, which iOS rejects when write entitlements are absent.
+    final permissions = types.map((_) => HealthDataAccess.READ).toList();
+    return _health.requestAuthorization(types, permissions: permissions);
   }
 
   @override

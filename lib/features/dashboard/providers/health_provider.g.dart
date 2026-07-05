@@ -92,7 +92,7 @@ final class HealthSummaryProvider
   }
 }
 
-String _$healthSummaryHash() => r'7ab14cbcc7e42286995d3587e3dce81faecdb85b';
+String _$healthSummaryHash() => r'75fcc8faa1eb7494ffaf2bdfdfd5da3b069992ab';
 
 @ProviderFor(healthHistory)
 final healthHistoryProvider = HealthHistoryFamily._();
@@ -151,7 +151,7 @@ final class HealthHistoryProvider
   }
 }
 
-String _$healthHistoryHash() => r'3dc9717a6c38228f4f32b0bba128682e5b2c7c94';
+String _$healthHistoryHash() => r'2130a3fbfe1b6fe00da2509fb686a37c599c6b06';
 
 final class HealthHistoryFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<HealthSummary>>, int> {
@@ -228,7 +228,7 @@ final class RecentRunsProvider
   }
 }
 
-String _$recentRunsHash() => r'002d6637a291818a9b951cd002140dd0266d155b';
+String _$recentRunsHash() => r'fadf2055303fb7587b7080ef2d6b3175fbd01081';
 
 final class RecentRunsFamily extends $Family
     with
@@ -295,7 +295,7 @@ final class HealthPermissionsNotifierProvider
 }
 
 String _$healthPermissionsNotifierHash() =>
-    r'd3b5fb7a299c6341ef5488e78a5c5250b3b5bdb0';
+    r'd3aef4a16bf86a8eac9001821494a4603bd49df7';
 
 /// Handles the HealthKit permission request triggered from the UI.
 ///
@@ -376,7 +376,7 @@ final class RunRouteProvider
   }
 }
 
-String _$runRouteHash() => r'e4369327187f8124ada5e0ac099a52a2655d0bc9';
+String _$runRouteHash() => r'e0d5bd45c5aa5358ab7a5780f8ebcbde9cf1c32e';
 
 final class RunRouteFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<WorkoutRoutePoint>>, String> {

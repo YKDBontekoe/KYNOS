@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -51,6 +52,8 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(healthSummaryProvider);
     final todayInsightsState = ref.watch(todayInsightsStateProvider);
+    final showConnectCard =
+        !kIsWeb && summary.value == null && !summary.isLoading;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
@@ -96,10 +99,8 @@ class DashboardPage extends ConsumerWidget {
               const Gap(tokens.Spacing.sm),
               _HealthMetricsGrid(summary: summary.value),
               const Gap(tokens.Spacing.lg),
-              if (summary.value == null && !summary.isLoading)
-                const _ConnectCard(),
-              if (summary.value == null && !summary.isLoading)
-                const Gap(tokens.Spacing.lg),
+              if (showConnectCard) const _ConnectCard(),
+              if (showConnectCard) const Gap(tokens.Spacing.lg),
               const _PrivacyNotice(),
             ],
           ),
@@ -700,6 +701,9 @@ class _ConnectCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final permissionState = ref.watch(healthPermissionsProvider);
+    final isLoading = permissionState.isLoading;
+
     return KynosCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,12 +719,42 @@ class _ConnectCard extends ConsumerWidget {
           ),
           const Gap(tokens.Spacing.md),
           FilledButton(
-            onPressed: () async {
-              await ref
-                  .read(healthPermissionsProvider.notifier)
-                  .request();
-            },
-            child: const Text('Connect HealthKit'),
+            onPressed: isLoading
+                ? null
+                : () async {
+                    await ref
+                        .read(healthPermissionsProvider.notifier)
+                        .request();
+
+                    if (!context.mounted) return;
+
+                    ref.read(healthPermissionsProvider).whenOrNull(
+                      data: (granted) {
+                        final message = granted
+                            ? 'HealthKit connected.'
+                            : 'HealthKit permission not granted. Enable access in Settings > Health > Data Access & Devices > Kynos.';
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(message)),
+                        );
+                      },
+                      error: (error, _) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'HealthKit connection failed: $error',
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+            child: isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Connect HealthKit'),
           ),
         ],
       ),
