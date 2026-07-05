@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
+  bootstrap:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
 
@@ -35,14 +35,129 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           git diff --exit-code || (echo "Generated files are out of sync. Please run build_runner and commit the changes." && exit 1)
 
+      - name: Upload generated code artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-code
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            lib/**/*.g.dart
+            lib/**/*.freezed.dart
+
+  analyze:
+    needs: bootstrap
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get
+
+      - name: Download generated code
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-code
+
       - name: Analyze code
         run: flutter analyze
+
+  test:
+    needs: bootstrap
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get
+
+      - name: Download generated code
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-code
 
       - name: Run tests
         run: flutter test --coverage
 
-      - name: Verify Android release APK build
-        run: flutter build apk --release
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          retention-days: 1
+          path: coverage/lcov.info
+
+  build:
+    needs: bootstrap
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      (github.event_name == 'pull_request' || matrix.target == 'web')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: web
+            command: flutter build web
+          - target: apk
+            command: flutter build apk --release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get
+
+      - name: Download generated code
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-code
+
+      - name: Build ${{ matrix.target }}
+        run: ${{ matrix.command }}
+
+  coverage:
+    needs: test
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
 
       - name: Upload coverage results
         uses: codecov/codecov-action@v4
@@ -50,8 +165,41 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }} # Optional: Requires Codecov setup
           fail_ci_if_error: false
 
+  ci-success:
+    needs: [bootstrap, analyze, test, build]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify all required jobs passed
+        env:
+          SKIP_CI: ${{ contains(github.event.head_commit.message, '[skip ci]') }}
+          BOOTSTRAP_RESULT: ${{ needs.bootstrap.result }}
+          ANALYZE_RESULT: ${{ needs.analyze.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          if [[ "$SKIP_CI" == "true" ]]; then
+            echo "CI skipped via commit message"
+            exit 0
+          fi
+
+          if [[ "$BOOTSTRAP_RESULT" != "success" ]]; then
+            echo "bootstrap did not succeed: $BOOTSTRAP_RESULT"
+            exit 1
+          fi
+
+          for job in analyze test build; do
+            result_var="${job^^}_RESULT"
+            result="${!result_var}"
+            if [[ "$result" != "success" ]]; then
+              echo "$job did not succeed: $result"
+              exit 1
+            fi
+          done
+
   release:
-    needs: validate
+    needs: ci-success
     if: >-
       github.ref == 'refs/heads/main' &&
       github.event_name == 'push' &&
