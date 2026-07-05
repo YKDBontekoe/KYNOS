@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 
 /// LiteRT-LM / flutter_gemma implementation of [AiCoachRepository].
 ///
@@ -25,7 +26,7 @@ class OnDeviceAiCoachRepository implements AiCoachRepository {
 
   Future<void> _ensureReady() async {
     if (_chat != null) return;
-    await FlutterGemma.initialize();
+    await GemmaRuntime.initialize();
     _model ??= await FlutterGemma.getActiveModel(
       maxTokens: 1024,
       preferredBackend: PreferredBackend.gpu,

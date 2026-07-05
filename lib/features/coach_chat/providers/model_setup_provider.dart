@@ -1,5 +1,6 @@
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,7 +23,7 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
       }
 
       await repo.installFromNetwork(
-        url: AppConstants.modelDownloadUrl,
+        url: GemmaRuntime.modelDownloadUrl,
         token: AppConstants.huggingFaceToken.isEmpty
             ? null
             : AppConstants.huggingFaceToken,
