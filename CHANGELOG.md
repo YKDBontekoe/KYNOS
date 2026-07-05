@@ -1,3 +1,16 @@
+# [1.9.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.8.0...v1.9.0) (2026-07-05)
+
+
+### Bug Fixes
+
+* **ios:** stream Apple Health export.zip to avoid OOM ([#47](https://github.com/YKDBontekoe/KYNOS/issues/47)) ([0633878](https://github.com/YKDBontekoe/KYNOS/commit/06338786bc9f40fae5699798cada6831cddd633e))
+* register litert-lm engine for on-device coach chat ([#45](https://github.com/YKDBontekoe/KYNOS/issues/45)) ([c605e9c](https://github.com/YKDBontekoe/KYNOS/commit/c605e9ca542c7dda555e3571fa301114596c3571))
+
+
+### Features
+
+* **ui:** improve bottom nav icons and tab styling ([#46](https://github.com/YKDBontekoe/KYNOS/issues/46)) ([f05fd98](https://github.com/YKDBontekoe/KYNOS/commit/f05fd981387534be052342b99be9d4f8acbd62dd))
+
 # [1.8.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.7.0...v1.8.0) (2026-07-05)
 
 
