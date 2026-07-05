@@ -2,6 +2,7 @@
 library;
 
 export 'glass_card.dart';
+export 'kynos_bottom_nav.dart';
 export 'kynos_card.dart';
 export 'kynos_chip.dart';
 export 'kynos_hero_banner.dart';
