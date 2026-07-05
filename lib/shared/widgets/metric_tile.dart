@@ -5,12 +5,6 @@ import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 /// Apple Fitness–style metric tile — elevated card, bold number, coloured dot.
 class MetricTile extends StatelessWidget {
-  final String label;
-  final String? value;
-  final String? unit;
-  final IconData? icon;
-  final Color? accentColor;
-
   const MetricTile({
     super.key,
     required this.label,
@@ -18,7 +12,19 @@ class MetricTile extends StatelessWidget {
     this.unit,
     this.icon,
     this.accentColor,
+    this.sublabel,
+    this.sublabelColor,
+    this.onTap,
   });
+
+  final String label;
+  final String? value;
+  final String? unit;
+  final IconData? icon;
+  final Color? accentColor;
+  final String? sublabel;
+  final Color? sublabelColor;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +32,9 @@ class MetricTile extends StatelessWidget {
     final theme = Theme.of(context);
     final accent = accentColor ?? kynos.stand;
 
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: kynos.card,
@@ -84,8 +92,21 @@ class MetricTile extends StatelessWidget {
                 ],
               ],
             ),
+          if (sublabel != null) ...[
+            const Gap(Spacing.xs),
+            Text(
+              sublabel!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: sublabelColor ?? kynos.tertiaryLabel,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ],
       ),
+    ),
     );
   }
 }
