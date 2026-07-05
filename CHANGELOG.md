@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.0.0...v1.0.1) (2026-07-05)
+
+
+### Bug Fixes
+
+* **ci:** decouple semantic-release from cancellable CI workflow ([#32](https://github.com/YKDBontekoe/KYNOS/issues/32)) ([288b76c](https://github.com/YKDBontekoe/KYNOS/commit/288b76ce441994a3cb6e93a8927f721829756b08))
+* **ios:** Connect HealthKit button now triggers permission dialog ([#27](https://github.com/YKDBontekoe/KYNOS/issues/27)) ([9c0e589](https://github.com/YKDBontekoe/KYNOS/commit/9c0e58995c633332a852a3c0508057ef5e894ae3))
+
 # 1.0.0 (2026-07-05)
 
 
