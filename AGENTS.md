@@ -305,13 +305,39 @@ A PR is done only when **all** of the following are true:
 
 ## 14. UI Components & Design System
 
-- Use `MetricTile` and `KynosCard` from `shared/widgets/` for data display.
-- All spacing uses tokens from `core/theme/spacing.dart` — never raw numbers.
+Import tokens and theme via `package:kynos/core/theme/theme.dart`. Access semantic
+tokens with `context.kynosTheme` from `KynosThemeExtension`.
+
+### Shared widgets (`lib/shared/widgets/`)
+
+| Widget | Use for |
+|--------|---------|
+| `KynosCard` | Default content container |
+| `MetricTile` | 2-column metric grids (null `value` → shimmer) |
+| `KynosSectionHeader` | Uppercase section labels |
+| `KynosHeroBanner` | Coloured tab hero banners |
+| `KynosChip` | Badges, metric chips, accent rewards |
+| `KynosLoadingLine` | In-card async loading (shimmer, not spinners) |
+| `KynosSkeleton` | Full-page / block loading placeholders |
+| `KynosPrivacyFooter` | On-device privacy trust line |
+| `GlassCard` | Coach assistant bubbles, floating nav |
+| `KynosUserBubble` | Coach chat user messages |
+| `RunCard` | Workout session list items |
+
+Barrel import: `package:kynos/shared/widgets/widgets.dart`.
+
+### Rules
+
+- All spacing uses tokens from `core/theme/spacing.dart` — never raw numbers in `Gap()`.
 - Use `Gap` from `package:gap` instead of `SizedBox` for semantic spacing.
+- Typography: prefer `Theme.of(context).textTheme` or `context.kynosTheme` styles.
+  Inline `GoogleFonts` calls belong only in `core/theme/typography.dart`.
+- Numeric metrics use DM Mono via `kynosTheme.metricValueStyle`.
+- Loading states use `shimmer` skeleton animations (`KynosLoadingLine`, `KynosSkeleton`,
+  `MetricTile(value: null)`), not spinners inside cards.
 - Charts are built with `fl_chart` — never custom-painted unless strictly necessary.
 - SVG assets use `flutter_svg`.
-- Typography: Inter (body) + DM Mono (numeric metrics) via `google_fonts`.
-- Loading states use `shimmer` skeleton animations, not spinners inside cards.
+- Glass effects are reserved for nav bar and conversational UI — data screens use flat cards.
 
 ---
 

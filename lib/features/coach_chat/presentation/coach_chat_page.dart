@@ -5,11 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
+import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_skeleton.dart';
+import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -163,12 +167,17 @@ class _OnDeviceBadge extends StatelessWidget {
         color: AppTheme.exercise.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(tokens.Radius.full),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_rounded, size: 11, color: AppTheme.exercise),
-          Gap(4),
-          Text('On-Device', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.exercise)),
+          const Icon(Icons.lock_rounded, size: 11, color: AppTheme.exercise),
+          const Gap(tokens.Spacing.xs),
+          Text(
+            'On-Device',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.exercise,
+                ),
+          ),
         ],
       ),
     );
@@ -206,35 +215,9 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (message.role) {
-      MessageRole.user => _UserBubble(content: message.content),
+      MessageRole.user => KynosUserBubble(text: message.content),
       MessageRole.assistant => _AssistantBubble(content: message.content, isStreaming: message.isStreaming),
     };
-  }
-}
-
-class _UserBubble extends StatelessWidget {
-  final String content;
-  const _UserBubble({required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.76),
-        padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md, vertical: tokens.Spacing.sm),
-        decoration: const BoxDecoration(
-          color: AppTheme.stand,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(tokens.Radius.lg),
-            topRight: Radius.circular(tokens.Radius.lg),
-            bottomLeft: Radius.circular(tokens.Radius.lg),
-            bottomRight: Radius.circular(4),
-          ),
-        ),
-        child: Text(content, style: const TextStyle(fontSize: 15, color: Colors.white, height: 1.45)),
-      ),
-    );
   }
 }
 
@@ -253,7 +236,15 @@ class _AssistantBubble extends StatelessWidget {
         child: GlassCard(
           borderRadius: tokens.Radius.lg,
           padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md, vertical: tokens.Spacing.sm),
-          child: isStreaming && content.isEmpty ? const _TypingIndicator() : Text(content, style: const TextStyle(fontSize: 15, color: AppTheme.label, height: 1.5)),
+          child: isStreaming && content.isEmpty
+              ? const _TypingIndicator()
+              : Text(
+                  content,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.label,
+                        height: 1.5,
+                      ),
+                ),
         ),
       ),
     );
@@ -295,20 +286,43 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppTheme.stand),
-          const Gap(16),
-          const Text('Your AI Coach', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-          const Gap(8),
-          const Text('Ask about training or recovery.\nAll analysis runs on-device.', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.secondaryLabel)),
-          const Gap(24),
-          ...['How is my recovery?', 'Am I ready for a workout?'].map((s) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 4),
-            child: ListTile(title: Text(s), tileColor: AppTheme.separator, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), onTap: () => onSuggestionTap(s)),
-          )),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(tokens.Spacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.chat_bubble_outline_rounded, size: 48, color: context.kynosTheme.stand),
+            const Gap(tokens.Spacing.md),
+            Text(
+              'Your AI Coach',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+            const Gap(tokens.Spacing.sm),
+            Text(
+              'Ask about training or recovery.\nAll analysis runs on-device.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const Gap(tokens.Spacing.lg),
+            for (final suggestion in [
+              'How is my recovery?',
+              'Am I ready for a workout?',
+            ])
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: tokens.Spacing.xs),
+                child: KynosCard(
+                  onTap: () => onSuggestionTap(suggestion),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      suggestion,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -357,18 +371,35 @@ class _ModelSetupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(40),
+          padding: const EdgeInsets.all(tokens.Spacing.xl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (isLoading) const CircularProgressIndicator() else const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const Gap(24),
-              Text(title ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const Gap(8),
-              Text(subtitle ?? '', textAlign: TextAlign.center),
-              if (onRetry != null) ...[const Gap(24), ElevatedButton(onPressed: onRetry, child: const Text('Try Again'))],
+              if (isLoading)
+                const KynosSkeleton(height: 48, width: 48)
+              else
+                Icon(Icons.error_outline, size: 48, color: context.kynosTheme.move),
+              const Gap(tokens.Spacing.lg),
+              Text(
+                title ?? '',
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+              const Gap(tokens.Spacing.sm),
+              Text(
+                subtitle ?? '',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              if (onRetry != null) ...[
+                const Gap(tokens.Spacing.lg),
+                FilledButton(
+                  onPressed: onRetry,
+                  child: const Text('Try Again'),
+                ),
+              ],
             ],
           ),
         ),

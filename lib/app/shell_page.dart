@@ -1,12 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/kynos_theme_extension.dart';
+import 'package:kynos/core/theme/layout.dart';
+import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/typography.dart';
 import 'package:kynos/features/character/presentation/character_page.dart';
 import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
 import 'package:kynos/features/training/presentation/training_page.dart';
+import 'package:kynos/shared/widgets/glass_card.dart';
 
 /// Root app shell — floating bottom nav with three focused tabs.
 class ShellPage extends StatefulWidget {
@@ -72,47 +74,30 @@ class _BottomBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.93),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    width: 0.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 48,
-                      offset: const Offset(0, 16),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < labels.length; i++)
-                      Expanded(
-                        child: _BarItem(
-                          svgPath: paths[i],
-                          label: labels[i],
-                          selected: selectedIndex == i,
-                          onTap: () => onTap(i),
-                        ),
+          padding: LayoutTokens.shellNavPadding,
+          child: GlassCard(
+            borderRadius: tokens.Radius.full,
+            blurSigma: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            tintColor: context.kynosTheme.glassFill.withValues(alpha: 0.93),
+            border: Border.all(
+              color: Colors.black.withValues(alpha: 0.08),
+              width: 0.5,
+            ),
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                children: [
+                  for (var i = 0; i < labels.length; i++)
+                    Expanded(
+                      child: _BarItem(
+                        svgPath: paths[i],
+                        label: labels[i],
+                        selected: selectedIndex == i,
+                        onTap: () => onTap(i),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -137,7 +122,8 @@ class _BarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppTheme.stand : const Color(0xFF606060);
+    final kynos = context.kynosTheme;
+    final color = selected ? kynos.stand : kynos.navUnselected;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -170,14 +156,13 @@ class _BarItem extends StatelessWidget {
               ),
             ),
           ),
-          const Gap(2),
+          const Gap(tokens.Spacing.xs),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            style: KynosTypography.navLabel(
+              brightness: Theme.of(context).brightness,
+              selected: selected,
               color: color,
-              letterSpacing: selected ? -0.2 : 0.1,
             ),
             child: Text(label),
           ),

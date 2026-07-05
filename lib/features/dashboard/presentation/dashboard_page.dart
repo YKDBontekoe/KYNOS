@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
@@ -13,6 +14,11 @@ import 'package:kynos/features/dashboard/providers/health_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/utils/insight_text_formatter.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
+import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
+import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// Today tab — readiness, AI insight, and today's health metrics.
@@ -82,11 +88,16 @@ class DashboardPage extends ConsumerWidget {
             tokens.Spacing.md,
             0,
             tokens.Spacing.md,
-            168,
+            LayoutTokens.shellBottomPadding,
           ),
           sliver: SliverList.list(
             children: [
-              _HeroBanner(greeting: _greeting()),
+              KynosHeroBanner(
+                accentColor: AppTheme.stand,
+                subtitle: _greeting(),
+                title: 'KYNOS',
+                caption: 'Your AI running coach',
+              ),
               const Gap(tokens.Spacing.lg),
               _ReadinessCard(
                 summary: summary.value,
@@ -95,91 +106,17 @@ class DashboardPage extends ConsumerWidget {
               const Gap(tokens.Spacing.md),
               _TodayInsightCards(todayInsightsState: todayInsightsState),
               const Gap(tokens.Spacing.lg),
-              const _SectionHeader(title: "Today's Metrics"),
+              const KynosSectionHeader(title: "Today's Metrics"),
               const Gap(tokens.Spacing.sm),
               _HealthMetricsGrid(summary: summary.value),
               const Gap(tokens.Spacing.lg),
               if (showConnectCard) const _ConnectCard(),
               if (showConnectCard) const Gap(tokens.Spacing.lg),
-              const _PrivacyNotice(),
+              const KynosPrivacyFooter(),
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-// ── Hero banner ───────────────────────────────────────────────────────────────
-
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner({required this.greeting});
-
-  final String greeting;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 130,
-      decoration: BoxDecoration(
-        color: AppTheme.stand,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -40,
-            left: -40,
-            child: Container(
-              width: 180,
-              height: 180,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.07),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  greeting,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.70),
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                const Gap(4),
-                Text(
-                  'KYNOS',
-                  style: GoogleFonts.inter(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -1,
-                    height: 1,
-                  ),
-                ),
-                const Gap(6),
-                Text(
-                  'Your AI running coach',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white.withValues(alpha: 0.60),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -311,7 +248,7 @@ class _TodayInsightCards extends StatelessWidget {
   Widget build(BuildContext context) {
     return todayInsightsState.when(
       loading: () => const KynosCard(
-        child: _LoadingLine(label: 'Generating today insights...'),
+        child: KynosLoadingLine(label: 'Generating today insights...'),
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (state) {
@@ -342,33 +279,6 @@ class _TodayInsightCards extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _LoadingLine extends StatelessWidget {
-  const _LoadingLine({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(
-          width: 12,
-          height: 12,
-          child: CircularProgressIndicator(
-            strokeWidth: 1.5,
-            color: AppTheme.tertiaryLabel,
-          ),
-        ),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          label,
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.tertiaryLabel),
-        ),
-      ],
     );
   }
 }
@@ -424,7 +334,7 @@ class _InsightExpandableCardState extends State<_InsightExpandableCard> {
             runSpacing: tokens.Spacing.xs,
             children: [
               for (final line in widget.lines.take(2))
-                _CompactChip(
+                KynosChip(
                   label: InsightTextFormatter.compactChipLabel(line),
                 ),
             ],
@@ -507,10 +417,10 @@ class _ActionCompactCardState extends State<_ActionCompactCard> {
             spacing: tokens.Spacing.xs,
             runSpacing: tokens.Spacing.xs,
             children: [
-              const _CompactChip(label: 'Now'),
-              const _CompactChip(label: 'Tonight'),
+              const KynosChip(label: 'Now'),
+              const KynosChip(label: 'Tonight'),
               if (widget.evidence.isNotEmpty)
-                _CompactChip(label: '${widget.evidence.length} signals'),
+                KynosChip(label: '${widget.evidence.length} signals'),
             ],
           ),
           if (_expanded) ...[
@@ -540,34 +450,6 @@ class _ActionCompactCardState extends State<_ActionCompactCard> {
             ],
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _CompactChip extends StatelessWidget {
-  const _CompactChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: tokens.Spacing.sm,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: AppTheme.background,
-        borderRadius: BorderRadius.circular(tokens.Radius.md),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          color: AppTheme.secondaryLabel,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }
@@ -758,48 +640,6 @@ class _ConnectCard extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ── Section header ────────────────────────────────────────────────────────────
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title.toUpperCase(),
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.secondaryLabel,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-}
-
-// ── Privacy notice ────────────────────────────────────────────────────────────
-
-class _PrivacyNotice extends StatelessWidget {
-  const _PrivacyNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.lock_rounded, size: 14, color: AppTheme.tertiaryLabel),
-        const Gap(tokens.Spacing.sm),
-        Text(
-          'All data stays on your device',
-          style: GoogleFonts.inter(fontSize: 11, color: AppTheme.tertiaryLabel),
-        ),
-      ],
     );
   }
 }

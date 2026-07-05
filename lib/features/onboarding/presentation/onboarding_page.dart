@@ -131,16 +131,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const Gap(Spacing.xxl),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.stand,
-                        foregroundColor: AppTheme.background,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
+                    child: FilledButton(
                       onPressed: () {
                         if (isLastPage) {
                           _finishOnboarding();
@@ -151,13 +142,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           );
                         }
                       },
-                      child: Text(
-                        isLastPage ? 'Get Started' : 'Next',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: Text(isLastPage ? 'Get Started' : 'Next'),
                     ),
                   ),
                 ],

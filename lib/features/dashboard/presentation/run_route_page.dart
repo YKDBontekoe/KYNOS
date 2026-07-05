@@ -7,6 +7,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class RunRoutePage extends ConsumerWidget {
   final WorkoutSession run;
@@ -26,7 +27,10 @@ class RunRoutePage extends ConsumerWidget {
       ),
       body: routeAsync.when(
         data: (points) => _RouteContent(run: run, points: points),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(tokens.Spacing.md),
+          child: KynosSkeleton.tile(height: 300),
+        ),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(tokens.Spacing.md),

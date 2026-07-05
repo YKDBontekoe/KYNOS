@@ -1,45 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kynos/core/theme/colors.dart';
+import 'package:kynos/core/theme/kynos_theme_extension.dart';
+import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/typography.dart';
 
 /// KYNOS design system — iOS system colour palette, Apple Fitness aesthetic.
 class AppTheme {
   AppTheme._();
 
-  // ── iOS system colours ────────────────────────────────────────────────────
-  /// Move / heart — Apple Fitness red
-  static const Color move = Color(0xFFFF3B30);
-
-  /// Exercise / HRV — Apple Fitness green
-  static const Color exercise = Color(0xFF34C759);
-
-  /// Stand / sleep — Apple Fitness blue
-  static const Color stand = Color(0xFF007AFF);
-
-  /// Energy / calories — Apple Fitness orange
-  static const Color energy = Color(0xFFFF9F0A);
-
-  /// System purple (readiness)
-  static const Color purple = Color(0xFFAF52DE);
-
-  // ── Neutral surfaces ─────────────────────────────────────────────────────
-  /// iOS grouped background
-  static const Color background = Color(0xFFF2F2F7);
-
-  /// Card surface
-  static const Color card = Colors.white;
-
-  /// Primary label (black)
-  static const Color label = Color(0xFF000000);
-
-  /// Secondary label
-  static const Color secondaryLabel = Color(0xFF8E8E93);
-
-  /// Tertiary label / section header
-  static const Color tertiaryLabel = Color(0xFFAEAEB2);
-
-  /// Separator
-  static const Color separator = Color(0xFFE5E5EA);
+  // ── Colour aliases (backward compatible) ──────────────────────────────────
+  static const Color move = KynosColors.move;
+  static const Color exercise = KynosColors.exercise;
+  static const Color stand = KynosColors.stand;
+  static const Color energy = KynosColors.energy;
+  static const Color purple = KynosColors.purple;
+  static const Color willpower = KynosColors.willpower;
+  static const Color background = KynosColors.background;
+  static const Color card = KynosColors.card;
+  static const Color label = KynosColors.label;
+  static const Color secondaryLabel = KynosColors.secondaryLabel;
+  static const Color tertiaryLabel = KynosColors.tertiaryLabel;
+  static const Color separator = KynosColors.separator;
+  static const Color navUnselected = KynosColors.navUnselected;
 
   // ── System UI ─────────────────────────────────────────────────────────────
   static const SystemUiOverlayStyle lightOverlay = SystemUiOverlayStyle(
@@ -48,108 +32,140 @@ class AppTheme {
     systemNavigationBarColor: background,
   );
 
+  static const SystemUiOverlayStyle darkOverlay = SystemUiOverlayStyle(
+    statusBarBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: KynosColors.backgroundDark,
+  );
+
   // ── Theme ─────────────────────────────────────────────────────────────────
-  static ThemeData get light => ThemeData(
+  static ThemeData get light => _buildTheme(
         brightness: Brightness.light,
-        colorScheme: const ColorScheme.light(
-          primary: stand,
-          secondary: exercise,
-          error: move,
-          surface: card,
-          onSurface: label,
-        ),
-        scaffoldBackgroundColor: background,
-        textTheme: _textTheme(),
-        cardTheme: CardThemeData(
-          color: card,
-          elevation: 0,
-          shadowColor: Colors.black.withValues(alpha: 0.08),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: stand,
-            foregroundColor: Colors.white,
-            minimumSize: const Size.fromHeight(54),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-            ),
-            textStyle: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.1,
-            ),
-          ),
-        ),
-        dividerTheme: const DividerThemeData(
-          color: separator,
-          thickness: 0.5,
-        ),
-        splashFactory: InkRipple.splashFactory,
+        extension: KynosThemeExtension.light,
+        overlayStyle: lightOverlay,
       );
 
-  static TextTheme _textTheme() => TextTheme(
-        // Big metric numbers — DM Mono
-        displayLarge: GoogleFonts.dmMono(
-          fontSize: 48,
-          fontWeight: FontWeight.w700,
-          color: label,
-          height: 1,
-          letterSpacing: -2,
-        ),
-        // Section hero number
-        displayMedium: GoogleFonts.inter(
-          fontSize: 36,
-          fontWeight: FontWeight.w800,
-          color: label,
-          height: 1,
-          letterSpacing: -1.5,
-        ),
-        // Page title / card heading
-        displaySmall: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-          color: label,
-          height: 1.1,
-          letterSpacing: -0.8,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: label,
-          letterSpacing: -0.4,
-        ),
-        titleMedium: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: label,
-          letterSpacing: -0.2,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: secondaryLabel,
-          height: 1.4,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
-          color: secondaryLabel,
-          height: 1.4,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: secondaryLabel,
-          letterSpacing: 0.2,
-        ),
-        labelSmall: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.8,
-          color: tertiaryLabel,
-        ),
+  static ThemeData get dark => _buildTheme(
+        brightness: Brightness.dark,
+        extension: KynosThemeExtension.dark,
+        overlayStyle: darkOverlay,
       );
+
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required KynosThemeExtension extension,
+    required SystemUiOverlayStyle overlayStyle,
+  }) {
+    final isDark = brightness == Brightness.dark;
+    final textTheme = KynosTypography.textTheme(brightness: brightness);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: extension.stand,
+        onPrimary: Colors.white,
+        secondary: extension.exercise,
+        onSecondary: Colors.white,
+        tertiary: extension.purple,
+        onTertiary: Colors.white,
+        error: extension.move,
+        onError: Colors.white,
+        surface: extension.card,
+        onSurface: extension.label,
+        outline: extension.separator,
+        surfaceContainerHighest: extension.background,
+      ),
+      scaffoldBackgroundColor: extension.background,
+      textTheme: textTheme,
+      extensions: [extension],
+      appBarTheme: AppBarTheme(
+        backgroundColor: extension.background,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 56,
+        titleTextStyle: textTheme.titleLarge,
+        iconTheme: IconThemeData(color: extension.stand),
+      ),
+      cardTheme: CardThemeData(
+        color: extension.card,
+        elevation: 0,
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(tokens.Radius.lg)),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: extension.stand,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(54),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(14)),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.1,
+          ),
+        ),
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: extension.stand,
+        textColor: extension.label,
+        tileColor: extension.card,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: extension.background,
+        labelStyle: extension.chipLabelStyle,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.Radius.md),
+        ),
+        side: BorderSide.none,
+        padding: const EdgeInsets.symmetric(
+          horizontal: tokens.Spacing.sm,
+          vertical: tokens.Spacing.xs,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: extension.card,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.Radius.full),
+          borderSide: BorderSide(color: extension.separator),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.Radius.full),
+          borderSide: BorderSide(color: extension.separator),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(tokens.Radius.full),
+          borderSide: BorderSide(color: extension.stand),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: tokens.Spacing.md,
+          vertical: tokens.Spacing.sm,
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: extension.separator,
+        thickness: 0.5,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return extension.stand;
+          return extension.card;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return extension.stand.withValues(alpha: 0.5);
+          }
+          return extension.separator;
+        }),
+      ),
+      splashFactory: InkRipple.splashFactory,
+    );
+  }
 }
