@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
 

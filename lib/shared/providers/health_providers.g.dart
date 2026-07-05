@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'health_provider.dart';
+part of 'health_providers.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,9 +8,12 @@ part of 'health_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Canonical HealthKit repository binding for the app.
 
 @ProviderFor(healthRepository)
 final healthRepositoryProvider = HealthRepositoryProvider._();
+
+/// Canonical HealthKit repository binding for the app.
 
 final class HealthRepositoryProvider
     extends
@@ -20,6 +23,7 @@ final class HealthRepositoryProvider
           HealthRepository
         >
     with $Provider<HealthRepository> {
+  /// Canonical HealthKit repository binding for the app.
   HealthRepositoryProvider._()
     : super(
         from: null,
@@ -252,73 +256,6 @@ final class RecentRunsFamily extends $Family
   String toString() => r'recentRunsProvider';
 }
 
-/// Handles the HealthKit permission request triggered from the UI.
-///
-/// Invalidates health providers on success so dashboard sections refresh.
-
-@ProviderFor(HealthPermissionsNotifier)
-final healthPermissionsProvider = HealthPermissionsNotifierProvider._();
-
-/// Handles the HealthKit permission request triggered from the UI.
-///
-/// Invalidates health providers on success so dashboard sections refresh.
-final class HealthPermissionsNotifierProvider
-    extends $NotifierProvider<HealthPermissionsNotifier, AsyncValue<bool>> {
-  /// Handles the HealthKit permission request triggered from the UI.
-  ///
-  /// Invalidates health providers on success so dashboard sections refresh.
-  HealthPermissionsNotifierProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'healthPermissionsProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$healthPermissionsNotifierHash();
-
-  @$internal
-  @override
-  HealthPermissionsNotifier create() => HealthPermissionsNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<bool> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
-    );
-  }
-}
-
-String _$healthPermissionsNotifierHash() =>
-    r'd3aef4a16bf86a8eac9001821494a4603bd49df7';
-
-/// Handles the HealthKit permission request triggered from the UI.
-///
-/// Invalidates health providers on success so dashboard sections refresh.
-
-abstract class _$HealthPermissionsNotifier extends $Notifier<AsyncValue<bool>> {
-  AsyncValue<bool> build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<bool>, AsyncValue<bool>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
-              AsyncValue<bool>,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(runRoute)
 final runRouteProvider = RunRouteFamily._();
 
@@ -394,4 +331,63 @@ final class RunRouteFamily extends $Family
 
   @override
   String toString() => r'runRouteProvider';
+}
+
+/// Handles the HealthKit permission request triggered from the UI.
+
+@ProviderFor(HealthPermissionsNotifier)
+final healthPermissionsProvider = HealthPermissionsNotifierProvider._();
+
+/// Handles the HealthKit permission request triggered from the UI.
+final class HealthPermissionsNotifierProvider
+    extends $NotifierProvider<HealthPermissionsNotifier, AsyncValue<bool>> {
+  /// Handles the HealthKit permission request triggered from the UI.
+  HealthPermissionsNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'healthPermissionsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$healthPermissionsNotifierHash();
+
+  @$internal
+  @override
+  HealthPermissionsNotifier create() => HealthPermissionsNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<bool> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
+    );
+  }
+}
+
+String _$healthPermissionsNotifierHash() =>
+    r'd3aef4a16bf86a8eac9001821494a4603bd49df7';
+
+/// Handles the HealthKit permission request triggered from the UI.
+
+abstract class _$HealthPermissionsNotifier extends $Notifier<AsyncValue<bool>> {
+  AsyncValue<bool> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<bool>, AsyncValue<bool>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
+              AsyncValue<bool>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
 }

@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/features/dashboard/presentation/run_history_page.dart';
-import 'package:kynos/features/dashboard/presentation/run_route_page.dart';
+import 'package:kynos/features/dashboard/presentation/pages/run_history_page.dart';
+import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
 import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 

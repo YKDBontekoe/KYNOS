@@ -4,45 +4,41 @@
 KYNOS is a Flutter (iOS/Android) running coach app powered by on-device AI
 (Gemma 4 via LiteRT-LM). Privacy-first, Zero-Knowledge architecture.
 
+## Start Here
+1. **[CODEMAP.md](CODEMAP.md)** — feature index, entry points, hot files
+2. **[AGENTS.md](AGENTS.md)** — full architectural rules and PR workflow
+
 ## Architecture Rules
-See `AGENTS.md` for the full rule set. Key points:
-- Clean Architecture: `domain → data → infrastructure → features`
-- State: Riverpod only (`flutter_riverpod` + `riverpod_annotation`)
+- Clean Architecture: `domain` ← `infrastructure`, with `shared/providers/` as DI
+- Features never import `infrastructure/` — use `shared/providers/`
+- State: Riverpod (`flutter_riverpod` + `riverpod_annotation`)
 - Navigation: `go_router` only — route paths are in `lib/app/router.dart`
 - Models: `@freezed` + `@JsonSerializable` — run `build_runner` after changes
+- Keep hand-written files under ~250 lines; extract widgets to `presentation/widgets/`
 - No biometric data leaves the device
 
 ## Commands
 
 ```bash
-# Install dependencies
 cp .env.example .env
 flutter pub get
-
-# Run code generation (freezed + riverpod)
 dart run build_runner build --delete-conflicting-outputs
-
-# Static analysis (must be clean before PR)
+dart run tool/generate_codemap.dart   # refresh CODEMAP.md auto sections
 flutter analyze
-
-# Run tests
 flutter test
-
-# Run on device
 flutter run -d "iPhone 16 Pro"
-flutter run --release      # for AI inference benchmarks
 ```
 
 ## Key Files
-- `lib/app/router.dart` — all routes live here
-- `lib/core/constants/app_constants.dart` — tunable constants (RAM budgets, thresholds)
-- `lib/core/errors/failures.dart` — sealed Failure hierarchy
-- `lib/infrastructure/ai/gemma/ai_isolate_bridge.dart` — isolate message protocol
-- `AGENTS.md` — full architectural rules
+- `CODEMAP.md` — agent navigation index
+- `lib/app/router.dart` — all routes
+- `lib/shared/providers/` — repository DI bindings
+- `lib/infrastructure/ai/gemma/ai_isolate_bridge.dart` — isolate protocol
+- `AGENTS.md` — full rules
 
 ## Do Not
-- Add any package that transmits raw health/biometric data to a server
+- Import `infrastructure/` from `features/`
+- Import one feature's providers from another feature
 - Write to `.g.dart` or `.freezed.dart` files manually
 - Add `print()` — use `logger` package
-- Use `dynamic` anywhere — strict linting is enabled
 - Commit `assets/models/*.task` — model weights are gitignored (>2 GB)

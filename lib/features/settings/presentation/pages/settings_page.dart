@@ -3,13 +3,13 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:kynos/features/settings/providers/settings_controller.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:provider/provider.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

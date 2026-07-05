@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:kynos/features/settings/providers/settings_controller.dart';
 import 'package:provider/provider.dart';
 
 class KynosApp extends StatelessWidget {

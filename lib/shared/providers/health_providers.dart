@@ -7,14 +7,13 @@ import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'health_provider.g.dart';
+part 'health_providers.g.dart';
 
 final _logger = Logger();
 
+/// Canonical HealthKit repository binding for the app.
 @Riverpod(keepAlive: true)
 HealthRepository healthRepository(Ref ref) {
-  // Delegate to the infrastructure binding — feature layer stays decoupled
-  // from the concrete HealthKitRepository class.
   return ref.watch(healthKitRepositoryProvider);
 }
 
@@ -24,8 +23,6 @@ Future<HealthSummary?> healthSummary(Ref ref) async {
   final repository = ref.watch(healthRepositoryProvider);
 
   final result = await repository.getToday();
-  // Fail closed to "no data" so the dashboard still renders and can show
-  // the explicit Connect HealthKit call-to-action.
   if (result.failure != null) {
     _logger.d('Health summary unavailable: ${result.failure}');
     return null;
@@ -64,9 +61,22 @@ Future<List<WorkoutSession>> recentRuns(
   return result.runs;
 }
 
+@riverpod
+Future<List<WorkoutRoutePoint>> runRoute(
+  Ref ref, {
+  required String workoutUuid,
+}) async {
+  if (kIsWeb) return const <WorkoutRoutePoint>[];
+  final repository = ref.watch(healthRepositoryProvider);
+
+  final result = await repository.getRunRoute(workoutUuid: workoutUuid);
+  if (result.failure != null) {
+    throw result.failure!;
+  }
+  return result.points;
+}
+
 /// Handles the HealthKit permission request triggered from the UI.
-///
-/// Invalidates health providers on success so dashboard sections refresh.
 @Riverpod(keepAlive: true)
 class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
   @override
@@ -97,19 +107,4 @@ class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
       state = AsyncError(e, st);
     }
   }
-}
-
-@riverpod
-Future<List<WorkoutRoutePoint>> runRoute(
-  Ref ref, {
-  required String workoutUuid,
-}) async {
-  if (kIsWeb) return const <WorkoutRoutePoint>[];
-  final repository = ref.watch(healthRepositoryProvider);
-
-  final result = await repository.getRunRoute(workoutUuid: workoutUuid);
-  if (result.failure != null) {
-    throw result.failure!;
-  }
-  return result.points;
 }

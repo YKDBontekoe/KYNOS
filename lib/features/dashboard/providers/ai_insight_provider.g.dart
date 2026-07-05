@@ -11,8 +11,6 @@ part of 'ai_insight_provider.dart';
 /// Generates a single coaching sentence from today's health data using the
 /// on-device model. Returns null silently when the model is not installed
 /// or when insufficient health data is available.
-///
-/// Kept alive for the app session — only regenerates when health data changes.
 
 @ProviderFor(aiDailyInsight)
 final aiDailyInsightProvider = AiDailyInsightProvider._();
@@ -20,8 +18,6 @@ final aiDailyInsightProvider = AiDailyInsightProvider._();
 /// Generates a single coaching sentence from today's health data using the
 /// on-device model. Returns null silently when the model is not installed
 /// or when insufficient health data is available.
-///
-/// Kept alive for the app session — only regenerates when health data changes.
 
 final class AiDailyInsightProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
@@ -29,8 +25,6 @@ final class AiDailyInsightProvider
   /// Generates a single coaching sentence from today's health data using the
   /// on-device model. Returns null silently when the model is not installed
   /// or when insufficient health data is available.
-  ///
-  /// Kept alive for the app session — only regenerates when health data changes.
   AiDailyInsightProvider._()
     : super(
         from: null,
