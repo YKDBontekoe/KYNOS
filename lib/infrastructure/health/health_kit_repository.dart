@@ -7,6 +7,7 @@ import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/infrastructure/health/apple_workout_route_channel.dart';
 import 'package:kynos/infrastructure/health/health_data_aggregator.dart';
 import 'package:kynos/infrastructure/health/health_kit_workout_mapper.dart';
+import 'package:logger/logger.dart';
 
 /// iOS implementation of [HealthRepository] backed by Apple HealthKit.
 ///
@@ -14,14 +15,13 @@ import 'package:kynos/infrastructure/health/health_kit_workout_mapper.dart';
 /// All data remains on-device in compliance with Zero-Knowledge policy.
 class HealthKitRepository implements HealthRepository {
   final Health _health = Health();
+  final Logger _logger = Logger();
   bool _isConfigured = false;
 
   /// Types of health data KYNOS uses for recovery and training insights.
   ///
-  /// Filtered at runtime via [Health.isDataTypeAvailable] so Android-only
-  /// entries (e.g. [HealthDataType.TOTAL_CALORIES_BURNED]) are never sent
-  /// to HealthKit — that would map to the wrong native type and can prevent
-  /// the authorization sheet from appearing.
+  /// Filtered at runtime via [Health.isDataTypeAvailable], then authorized
+  /// flexibly so optional categories do not block core running metrics.
   static const List<HealthDataType> _requestedTypes = [
     HealthDataType.HEART_RATE_VARIABILITY_SDNN,
     HealthDataType.RESTING_HEART_RATE,
@@ -43,6 +43,32 @@ class HealthKitRepository implements HealthRepository {
     HealthDataType.WORKOUT,
   ];
 
+  static const List<List<HealthDataType>> _permissionGroups = [
+    [
+      HealthDataType.HEART_RATE_VARIABILITY_SDNN,
+      HealthDataType.RESTING_HEART_RATE,
+      HealthDataType.HEART_RATE,
+      HealthDataType.STEPS,
+      HealthDataType.DISTANCE_WALKING_RUNNING,
+      HealthDataType.WORKOUT,
+    ],
+    [
+      HealthDataType.SLEEP_ASLEEP,
+      HealthDataType.SLEEP_DEEP,
+      HealthDataType.SLEEP_LIGHT,
+      HealthDataType.SLEEP_REM,
+      HealthDataType.SLEEP_IN_BED,
+    ],
+    [
+      HealthDataType.ACTIVE_ENERGY_BURNED,
+      HealthDataType.BASAL_ENERGY_BURNED,
+      HealthDataType.TOTAL_CALORIES_BURNED,
+      HealthDataType.EXERCISE_TIME,
+      HealthDataType.FLIGHTS_CLIMBED,
+    ],
+    [HealthDataType.RESPIRATORY_RATE, HealthDataType.BLOOD_OXYGEN],
+  ];
+
   List<HealthDataType> get _types => _requestedTypes
       .where(_health.isDataTypeAvailable)
       .toList(growable: false);
@@ -60,10 +86,40 @@ class HealthKitRepository implements HealthRepository {
     final types = _types;
     if (types.isEmpty) return false;
 
-    // Explicitly demand READ-only access. The health plugin defaults to
-    // READ_WRITE, which iOS rejects when write entitlements are absent.
-    final permissions = types.map((_) => HealthDataAccess.READ).toList();
-    return _health.requestAuthorization(types, permissions: permissions);
+    final fullRequestGranted = await _requestReadAccess(types);
+    if (fullRequestGranted) return true;
+
+    var anyGroupGranted = false;
+    for (final group in _permissionGroups) {
+      final availableGroup = group
+          .where(types.contains)
+          .toSet()
+          .toList(growable: false);
+      if (availableGroup.isEmpty) continue;
+
+      final groupGranted = await _requestReadAccess(availableGroup);
+      anyGroupGranted = anyGroupGranted || groupGranted;
+    }
+
+    return anyGroupGranted;
+  }
+
+  Future<bool> _requestReadAccess(List<HealthDataType> types) async {
+    if (types.isEmpty) return false;
+
+    final permissions = types
+        .map((_) => HealthDataAccess.READ)
+        .toList(growable: false);
+
+    try {
+      return await _health.requestAuthorization(
+        types,
+        permissions: permissions,
+      );
+    } catch (e) {
+      _logger.w('HealthKit authorization request failed for $types: $e');
+      return false;
+    }
   }
 
   @override
@@ -105,10 +161,7 @@ class HealthKitRepository implements HealthRepository {
         endTime: now,
       );
 
-      final runs = points
-          .where(isRunningWorkout)
-          .map(toWorkoutSession)
-          .toList()
+      final runs = points.where(isRunningWorkout).map(toWorkoutSession).toList()
         ..sort((a, b) => b.start.compareTo(a.start));
 
       return (runs: runs.take(limit).toList(), failure: null);

@@ -7,15 +7,14 @@ import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
-import 'package:lottie/lottie.dart';
 
 class OnboardingItem {
-  final String lottieUrl;
+  final String imagePath;
   final String title;
   final String description;
 
   const OnboardingItem({
-    required this.lottieUrl,
+    required this.imagePath,
     required this.title,
     required this.description,
   });
@@ -34,17 +33,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   final List<OnboardingItem> items = const [
     OnboardingItem(
-      lottieUrl: 'https://lottie.host/804c2b9a-f4c0-48e0-a7b3-8a3d58a5b9e0/3Z3n78Q0jQ.json',
+      imagePath: 'assets/images/onboarding_biomechanics.png',
       title: 'Personalised Running',
       description: 'Train smarter with AI-driven insights that adapt to your unique biomechanics.',
     ),
     OnboardingItem(
-      lottieUrl: 'https://lottie.host/2a3dbcd7-08ea-4813-8a62-b91c95e1e075/j2c8P4h58q.json',
+      imagePath: 'assets/images/onboarding_privacy.png',
       title: 'Zero Knowledge Privacy',
       description: 'Your data stays on your device. Period. Powered by local AI and zk-SNARK proofs.',
     ),
     OnboardingItem(
-      lottieUrl: 'https://lottie.host/79013f9c-7c08-4131-b8ef-f15ea41b2a75/1e9qB2f43c.json',
+      imagePath: 'assets/images/onboarding_health_data.png',
       title: 'Ready to go?',
       description: 'Get started and connect your health data to build your baseline.',
     ),
@@ -169,8 +168,8 @@ class _OnboardingPageWidget extends StatelessWidget {
         children: [
           Flexible(
             flex: 3,
-            child: Lottie.network(
-              item.lottieUrl,
+            child: Image.asset(
+              item.imagePath,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stack) =>
                   const Icon(Icons.image_not_supported, size: 100, color: AppTheme.tertiaryLabel),
