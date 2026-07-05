@@ -1,4 +1,3 @@
-import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
@@ -9,7 +8,7 @@ class OnDeviceModelRepository implements AiModelRepository {
   GemmaInferenceTier? _cachedTier;
 
   @override
-  bool get hasActiveModel => FlutterGemma.hasActiveModel();
+  bool get hasActiveModel => GemmaRuntime.hasCompatibleActiveModel();
 
   @override
   Future<void> initialize({String? huggingFaceToken}) =>

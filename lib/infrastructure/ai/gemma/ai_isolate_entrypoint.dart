@@ -36,7 +36,9 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
           huggingFaceToken: message.huggingFaceToken,
         );
 
-        if (!FlutterGemma.hasActiveModel()) {
+        await GemmaRuntime.evictLegacyModelsIfNeeded();
+
+        if (!GemmaRuntime.hasCompatibleActiveModel()) {
           mainSendPort.send(
             AiIsolateError(
               'No active Gemma model is installed. Complete model setup before starting chat.',

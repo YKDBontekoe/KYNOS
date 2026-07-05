@@ -36,6 +36,13 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
         return;
       }
 
+      await GemmaRuntime.evictLegacyModelsIfNeeded();
+
+      if (repo.hasActiveModel) {
+        state = const AsyncData(true);
+        return;
+      }
+
       await repo.installFromNetwork(url: GemmaRuntime.modelDownloadUrl, token: hfToken);
       state = const AsyncData(true);
     } catch (e, st) {
