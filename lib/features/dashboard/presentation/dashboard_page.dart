@@ -701,7 +701,7 @@ class _ConnectCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final permissionState = ref.watch(healthPermissionsNotifierProvider);
+    final permissionState = ref.watch(healthPermissionsProvider);
     final isLoading = permissionState.isLoading;
 
     return KynosCard(
@@ -723,12 +723,12 @@ class _ConnectCard extends ConsumerWidget {
                 ? null
                 : () async {
                     await ref
-                        .read(healthPermissionsNotifierProvider.notifier)
+                        .read(healthPermissionsProvider.notifier)
                         .request();
 
                     if (!context.mounted) return;
 
-                    ref.read(healthPermissionsNotifierProvider).whenOrNull(
+                    ref.read(healthPermissionsProvider).whenOrNull(
                       data: (granted) {
                         final message = granted
                             ? 'HealthKit connected.'

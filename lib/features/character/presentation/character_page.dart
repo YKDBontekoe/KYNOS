@@ -551,7 +551,7 @@ class _QuestCard extends ConsumerWidget {
               if (!isCompleted)
                 GestureDetector(
                   onTap: () => ref
-                      .read(questNotifierProvider.notifier)
+                      .read(questProvider.notifier)
                       .completeQuest(quest.id),
                   child: Container(
                     padding: const EdgeInsets.symmetric(

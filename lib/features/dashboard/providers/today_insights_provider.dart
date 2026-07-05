@@ -19,7 +19,7 @@ class TodayInsightsState {
 }
 
 @riverpod
-Future<TodayInsightsState> todayInsightsState(TodayInsightsStateRef ref) async {
+Future<TodayInsightsState> todayInsightsState(Ref ref) async {
   if (kIsWeb) {
     return const TodayInsightsState(
       insights: TodayInsights(

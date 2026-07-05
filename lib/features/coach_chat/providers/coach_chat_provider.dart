@@ -19,7 +19,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
   }
 
   Future<void> sendMessage(String userMessage) async {
-    final current = state.valueOrNull ?? const [];
+    final current = state.value ?? const [];
 
     final userMsg = ChatMessage(
       id: '${DateTime.now().microsecondsSinceEpoch}_user',

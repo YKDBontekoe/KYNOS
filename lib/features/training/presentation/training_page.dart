@@ -50,7 +50,7 @@ class TrainingPage extends ConsumerWidget {
     final recentRuns = ref.watch(recentRunsProvider(days: 365, limit: 60));
     final AsyncValue<NexusLabState>? labState = kIsWeb
         ? null
-        : ref.watch(nexusLabNotifierProvider);
+        : ref.watch(nexusLabProvider);
     final insightsState = ref.watch(trainingInsightsStateProvider);
 
     return CustomScrollView(
@@ -115,7 +115,7 @@ class TrainingPage extends ConsumerWidget {
                 onCalibrate: kIsWeb
                     ? null
                     : () => ref
-                          .read(nexusLabNotifierProvider.notifier)
+                          .read(nexusLabProvider.notifier)
                           .calibrate(),
               ),
               const Gap(tokens.Spacing.lg),
