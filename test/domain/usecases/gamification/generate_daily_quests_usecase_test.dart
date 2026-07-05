@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
@@ -51,9 +53,14 @@ class _FakeAiCoachRepository implements AiCoachRepository {
   bool get isReady => false;
 
   @override
+  AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
+
+  @override
   Stream<String> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    AiTaskKind taskKind = AiTaskKind.coachChat,
+    int estimatedPromptTokens = 0,
   }) async* {}
 
   @override
