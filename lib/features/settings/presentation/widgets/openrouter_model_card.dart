@@ -55,7 +55,8 @@ class OpenRouterModelCard extends StatelessWidget {
               spacing: tokens.Spacing.xs,
               runSpacing: tokens.Spacing.xs,
               children: [
-                if (isFree) const KynosChip.accent(label: 'Free', color: Colors.green),
+                if (isFree)
+                  KynosChip.accent(label: 'Free', color: kynos.exercise),
                 KynosChip.metric(label: 'Price', value: pricing),
                 KynosChip.metric(
                   label: 'Context',
