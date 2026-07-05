@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/infrastructure/health/imported_health_store.dart';
@@ -11,6 +12,7 @@ class PrefsImportedHealthStore implements ImportedHealthStore {
 
   static const _workoutsKey = 'imported_health_workouts';
   static const _routesKey = 'imported_health_routes';
+  static const _summariesKey = 'imported_health_summaries';
 
   final SharedPreferences _prefs;
 
@@ -75,6 +77,56 @@ class PrefsImportedHealthStore implements ImportedHealthStore {
   Future<void> clearAll() async {
     await _prefs.remove(_workoutsKey);
     await _prefs.remove(_routesKey);
+    await _prefs.remove(_summariesKey);
+  }
+
+  @override
+  Future<List<HealthSummary>> getSummaries({required DateTime since}) async {
+    return _readSummaries()
+        .where((summary) => !summary.date.isBefore(since))
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  @override
+  Future<void> saveSummaries(List<HealthSummary> summaries) async {
+    if (summaries.isEmpty) {
+      return;
+    }
+
+    final stored = {
+      for (final summary in _readSummaries())
+        DateTime(summary.date.year, summary.date.month, summary.date.day):
+            summary,
+    };
+
+    for (final summary in summaries) {
+      final day = DateTime(
+        summary.date.year,
+        summary.date.month,
+        summary.date.day,
+      );
+      stored[day] = summary;
+    }
+
+    await _prefs.setString(
+      _summariesKey,
+      jsonEncode(stored.values.map(healthSummaryToJson).toList()),
+    );
+  }
+
+  List<HealthSummary> _readSummaries() {
+    final raw = _prefs.getString(_summariesKey);
+    if (raw == null) {
+      return [];
+    }
+
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded
+        .map(
+          (entry) => healthSummaryFromJson(entry as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   List<WorkoutSession> _readWorkouts() {

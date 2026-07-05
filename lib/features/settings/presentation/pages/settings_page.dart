@@ -116,7 +116,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     Divider(color: kynos.separator, height: 1),
                   ],
                   _ActionTile(
-                    title: 'Import run from GPX',
+                    title: 'Import Apple Health export',
                     icon: Icons.upload_file_outlined,
                     onTap: () => context.push(Routes.healthImport),
                   ),
@@ -149,8 +149,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   const Gap(tokens.Spacing.xs),
                   Text(
-                    'Sideloaded installs may not access HealthKit. Import GPX '
-                    'files or log runs manually as a local fallback.',
+                    'Sideloaded installs may not access HealthKit. Import your '
+                    'Apple Health export.zip, a GPX file, or log runs manually.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: kynos.secondaryLabel,
                         ),
