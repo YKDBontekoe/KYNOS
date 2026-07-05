@@ -11,15 +11,14 @@ part 'health_providers.g.dart';
 
 final _logger = Logger();
 
-/// Canonical HealthKit repository binding for the app.
+/// Canonical health repository binding — merges HealthKit and imported data.
 @Riverpod(keepAlive: true)
 HealthRepository healthRepository(Ref ref) {
-  return ref.watch(healthKitRepositoryProvider);
+  return ref.watch(compositeHealthRepositoryProvider);
 }
 
 @riverpod
 Future<HealthSummary?> healthSummary(Ref ref) async {
-  if (kIsWeb) return null;
   final repository = ref.watch(healthRepositoryProvider);
 
   final result = await repository.getToday();
@@ -35,7 +34,6 @@ Future<List<HealthSummary>> healthHistory(
   Ref ref, {
   int days = 30,
 }) async {
-  if (kIsWeb) return const <HealthSummary>[];
   final repository = ref.watch(healthRepositoryProvider);
 
   final result = await repository.getSummaries(days: days);
@@ -51,7 +49,6 @@ Future<List<WorkoutSession>> recentRuns(
   int days = 30,
   int limit = 20,
 }) async {
-  if (kIsWeb) return const <WorkoutSession>[];
   final repository = ref.watch(healthRepositoryProvider);
 
   final result = await repository.getRecentRuns(days: days, limit: limit);
@@ -66,7 +63,6 @@ Future<List<WorkoutRoutePoint>> runRoute(
   Ref ref, {
   required String workoutUuid,
 }) async {
-  if (kIsWeb) return const <WorkoutRoutePoint>[];
   final repository = ref.watch(healthRepositoryProvider);
 
   final result = await repository.getRunRoute(workoutUuid: workoutUuid);
@@ -74,6 +70,19 @@ Future<List<WorkoutRoutePoint>> runRoute(
     throw result.failure!;
   }
   return result.points;
+}
+
+@riverpod
+Future<int> importedWorkoutCount(Ref ref) async {
+  final store = ref.watch(importedHealthStoreProvider);
+  return store.workoutCount();
+}
+
+void _invalidateHealthProviders(Ref ref) {
+  ref.invalidate(healthSummaryProvider);
+  ref.invalidate(healthHistoryProvider);
+  ref.invalidate(recentRunsProvider);
+  ref.invalidate(importedWorkoutCountProvider);
 }
 
 /// Handles the HealthKit permission request triggered from the UI.
@@ -86,7 +95,7 @@ class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
     if (kIsWeb) {
       state = AsyncError(
         UnsupportedError(
-          'HealthKit is only available on iOS. Run KYNOS on a physical iPhone.',
+          'HealthKit is only available on iOS. Import runs from Settings instead.',
         ),
         StackTrace.current,
       );
@@ -99,10 +108,27 @@ class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
       final success = await repo.requestPermissions();
       state = AsyncData(success);
       if (success) {
-        ref.invalidate(healthSummaryProvider);
-        ref.invalidate(healthHistoryProvider);
-        ref.invalidate(recentRunsProvider);
+        _invalidateHealthProviders(ref);
       }
+    } on Object catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+/// Clears all imported workouts and refreshes health providers.
+@Riverpod(keepAlive: true)
+class ImportedHealthDataNotifier extends _$ImportedHealthDataNotifier {
+  @override
+  AsyncValue<void> build() => const AsyncData(null);
+
+  Future<void> clearAll() async {
+    state = const AsyncLoading();
+    try {
+      final store = ref.read(importedHealthStoreProvider);
+      await store.clearAll();
+      state = const AsyncData(null);
+      _invalidateHealthProviders(ref);
     } on Object catch (e, st) {
       state = AsyncError(e, st);
     }

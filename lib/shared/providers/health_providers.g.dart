@@ -8,12 +8,12 @@ part of 'health_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Canonical HealthKit repository binding for the app.
+/// Canonical health repository binding — merges HealthKit and imported data.
 
 @ProviderFor(healthRepository)
 final healthRepositoryProvider = HealthRepositoryProvider._();
 
-/// Canonical HealthKit repository binding for the app.
+/// Canonical health repository binding — merges HealthKit and imported data.
 
 final class HealthRepositoryProvider
     extends
@@ -23,7 +23,7 @@ final class HealthRepositoryProvider
           HealthRepository
         >
     with $Provider<HealthRepository> {
-  /// Canonical HealthKit repository binding for the app.
+  /// Canonical health repository binding — merges HealthKit and imported data.
   HealthRepositoryProvider._()
     : super(
         from: null,
@@ -57,7 +57,7 @@ final class HealthRepositoryProvider
   }
 }
 
-String _$healthRepositoryHash() => r'08f5fd3e2167cd2b5e03eae58e2bedba0d5d8bb1';
+String _$healthRepositoryHash() => r'51095aae53e7128d9e50c17c82ca68ad06078f67';
 
 @ProviderFor(healthSummary)
 final healthSummaryProvider = HealthSummaryProvider._();
@@ -96,7 +96,7 @@ final class HealthSummaryProvider
   }
 }
 
-String _$healthSummaryHash() => r'75fcc8faa1eb7494ffaf2bdfdfd5da3b069992ab';
+String _$healthSummaryHash() => r'58364b9ff70089020a9ca2aaee16fb6eea9add73';
 
 @ProviderFor(healthHistory)
 final healthHistoryProvider = HealthHistoryFamily._();
@@ -155,7 +155,7 @@ final class HealthHistoryProvider
   }
 }
 
-String _$healthHistoryHash() => r'2130a3fbfe1b6fe00da2509fb686a37c599c6b06';
+String _$healthHistoryHash() => r'2d73c0fbb99e3f824adcdd88152e6f6530254ea8';
 
 final class HealthHistoryFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<HealthSummary>>, int> {
@@ -232,7 +232,7 @@ final class RecentRunsProvider
   }
 }
 
-String _$recentRunsHash() => r'fadf2055303fb7587b7080ef2d6b3175fbd01081';
+String _$recentRunsHash() => r'fc8420c008a5e6f6cba5e37e9053134a95f67ef7';
 
 final class RecentRunsFamily extends $Family
     with
@@ -313,7 +313,7 @@ final class RunRouteProvider
   }
 }
 
-String _$runRouteHash() => r'e0d5bd45c5aa5358ab7a5780f8ebcbde9cf1c32e';
+String _$runRouteHash() => r'7fdc36366f5c9657d0004078707355964ea12bac';
 
 final class RunRouteFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<WorkoutRoutePoint>>, String> {
@@ -332,6 +332,40 @@ final class RunRouteFamily extends $Family
   @override
   String toString() => r'runRouteProvider';
 }
+
+@ProviderFor(importedWorkoutCount)
+final importedWorkoutCountProvider = ImportedWorkoutCountProvider._();
+
+final class ImportedWorkoutCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  ImportedWorkoutCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'importedWorkoutCountProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$importedWorkoutCountHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    return importedWorkoutCount(ref);
+  }
+}
+
+String _$importedWorkoutCountHash() =>
+    r'79c6f4eb66a39c14c27f60e7dacd7aba4604ba0b';
 
 /// Handles the HealthKit permission request triggered from the UI.
 
@@ -370,7 +404,7 @@ final class HealthPermissionsNotifierProvider
 }
 
 String _$healthPermissionsNotifierHash() =>
-    r'd3aef4a16bf86a8eac9001821494a4603bd49df7';
+    r'dc7ee2d1791f1111060bcaef0814ab078d439403';
 
 /// Handles the HealthKit permission request triggered from the UI.
 
@@ -385,6 +419,66 @@ abstract class _$HealthPermissionsNotifier extends $Notifier<AsyncValue<bool>> {
             as $ClassProviderElement<
               AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
               AsyncValue<bool>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+/// Clears all imported workouts and refreshes health providers.
+
+@ProviderFor(ImportedHealthDataNotifier)
+final importedHealthDataProvider = ImportedHealthDataNotifierProvider._();
+
+/// Clears all imported workouts and refreshes health providers.
+final class ImportedHealthDataNotifierProvider
+    extends $NotifierProvider<ImportedHealthDataNotifier, AsyncValue<void>> {
+  /// Clears all imported workouts and refreshes health providers.
+  ImportedHealthDataNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'importedHealthDataProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$importedHealthDataNotifierHash();
+
+  @$internal
+  @override
+  ImportedHealthDataNotifier create() => ImportedHealthDataNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<void> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<void>>(value),
+    );
+  }
+}
+
+String _$importedHealthDataNotifierHash() =>
+    r'e1dd6a744cc629eaef232ead62cfc5d716464427';
+
+/// Clears all imported workouts and refreshes health providers.
+
+abstract class _$ImportedHealthDataNotifier
+    extends $Notifier<AsyncValue<void>> {
+  AsyncValue<void> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
+              AsyncValue<void>,
               Object?,
               Object?
             >;

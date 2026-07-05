@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -8,6 +9,7 @@ import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
@@ -34,6 +36,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final settings = ref.watch(settingsProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
     final kynos = context.kynosTheme;
+    final permissionState = ref.watch(healthPermissionsProvider);
+    final importedCountAsync = ref.watch(importedWorkoutCountProvider);
 
     ref.listen(openRouterApiKeyManagerProvider, (_, next) {
       next.whenData((key) {
@@ -73,6 +77,83 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onChanged: (v) {
                       if (v != null) settingsNotifier.updateLanguage(v);
                     },
+                  ),
+                ],
+              ),
+            ),
+            const Gap(tokens.Spacing.lg),
+            const KynosSectionHeader(title: 'Health & Data'),
+            const Gap(tokens.Spacing.sm),
+            KynosCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.favorite_outline, color: kynos.stand),
+                    title: Text(
+                      'Health connection',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(_healthStatusLabel(permissionState)),
+                  ),
+                  if (!kIsWeb) ...[
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: permissionState.isLoading
+                            ? null
+                            : () => ref
+                                .read(healthPermissionsProvider.notifier)
+                                .request(),
+                        child: Text(
+                          permissionState.isLoading
+                              ? 'Connecting…'
+                              : 'Connect HealthKit',
+                        ),
+                      ),
+                    ),
+                    Divider(color: kynos.separator, height: 1),
+                  ],
+                  _ActionTile(
+                    title: 'Import run from GPX',
+                    icon: Icons.upload_file_outlined,
+                    onTap: () => context.push(Routes.healthImport),
+                  ),
+                  Divider(color: kynos.separator, height: 1),
+                  _ActionTile(
+                    title: 'Log run manually',
+                    icon: Icons.edit_outlined,
+                    onTap: () => context.push(Routes.manualRun),
+                  ),
+                  Divider(color: kynos.separator, height: 1),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.storage_outlined, color: kynos.stand),
+                    title: Text(
+                      'Imported runs',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: importedCountAsync.when(
+                      data: (count) => Text('$count stored on this device'),
+                      loading: () => const Text('Loading…'),
+                      error: (_, _) => const Text('Unavailable'),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => _confirmClearImportedData(context),
+                      child: const Text('Clear imported data'),
+                    ),
+                  ),
+                  const Gap(tokens.Spacing.xs),
+                  Text(
+                    'Sideloaded installs may not access HealthKit. Import GPX '
+                    'files or log runs manually as a local fallback.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: kynos.secondaryLabel,
+                        ),
                   ),
                 ],
               ),
@@ -207,6 +288,49 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const Gap(LayoutTokens.shellBottomPadding),
           ],
         ),
+    );
+  }
+
+  String _healthStatusLabel(AsyncValue<bool> permissionState) {
+    if (kIsWeb) {
+      return 'Web preview — import runs locally instead.';
+    }
+    return permissionState.when(
+      data: (granted) => granted
+          ? 'HealthKit connected'
+          : 'Not connected — import runs or grant access',
+      loading: () => 'Checking connection…',
+      error: (_, _) => 'Unavailable — use import or manual entry',
+    );
+  }
+
+  Future<void> _confirmClearImportedData(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear imported data?'),
+        content: const Text(
+          'This removes all imported runs and routes from this device.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    await ref.read(importedHealthDataProvider.notifier).clearAll();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Imported data cleared')),
     );
   }
 

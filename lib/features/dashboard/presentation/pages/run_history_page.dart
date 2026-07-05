@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -62,11 +64,17 @@ class RunHistoryPage extends ConsumerWidget {
                         ),
                         const Gap(tokens.Spacing.xs),
                         Text(
-                          'Complete a run and it will appear here.',
+                          'Import a GPX file or log a run manually in Settings.',
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             color: AppTheme.tertiaryLabel,
                           ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const Gap(tokens.Spacing.sm),
+                        TextButton(
+                          onPressed: () => context.push(Routes.healthImport),
+                          child: const Text('Import a run'),
                         ),
                       ],
                     ),
