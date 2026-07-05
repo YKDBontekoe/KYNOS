@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.10.0...v1.11.0) (2026-07-05)
+
+
+### Features
+
+* redesign today dashboard with Apple Health layout ([#53](https://github.com/YKDBontekoe/KYNOS/issues/53)) ([251c74e](https://github.com/YKDBontekoe/KYNOS/commit/251c74e5fc31bf0049b13b6ff0aa4a3a9c201cc1))
+
 # [1.10.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.9.0...v1.10.0) (2026-07-05)
 
 
