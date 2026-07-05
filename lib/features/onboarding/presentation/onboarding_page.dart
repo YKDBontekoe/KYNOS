@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/spacing.dart';
+import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart' hide Radius, Spacing;
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
@@ -71,8 +70,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget build(BuildContext context) {
     final isLastPage = _currentIndex == items.length - 1;
 
+    final kynos = context.kynosTheme;
+
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: kynos.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -80,7 +81,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: Spacing.md, top: Spacing.sm),
+                padding: const EdgeInsets.only(
+                  right: tokens.Spacing.md,
+                  top: tokens.Spacing.sm,
+                ),
                 child: LiquidGlassButton(
                   label: 'Skip',
                   onPressed: _finishOnboarding,
@@ -106,7 +110,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
             // Bottom: Indicators & Button
             Padding(
-              padding: const EdgeInsets.all(Spacing.xl),
+              padding: const EdgeInsets.all(tokens.Spacing.xl),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -119,7 +123,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       ),
                     ),
                   ),
-                  const Gap(Spacing.xxl),
+                  const Gap(tokens.Spacing.xxl),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
@@ -153,8 +157,10 @@ class _OnboardingPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.xl),
+      padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -163,11 +169,14 @@ class _OnboardingPageWidget extends StatelessWidget {
             child: Image.asset(
               item.imagePath,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, stack) =>
-                  const Icon(Icons.image_not_supported, size: 100, color: AppTheme.tertiaryLabel),
+              errorBuilder: (context, error, stack) => Icon(
+                Icons.image_not_supported,
+                size: tokens.Spacing.xxxl,
+                color: context.kynosTheme.tertiaryLabel,
+              ),
             ),
           ),
-          const Gap(Spacing.xxl),
+          const Gap(tokens.Spacing.xxl),
           Flexible(
             flex: 2,
             child: Column(
@@ -175,22 +184,13 @@ class _OnboardingPageWidget extends StatelessWidget {
                 Text(
                   item.title,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: AppTheme.label,
-                  ),
+                  style: kynos.onboardingTitleStyle,
                 ),
-                const Gap(Spacing.md),
+                const Gap(tokens.Spacing.md),
                 Text(
                   item.description,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    color: AppTheme.secondaryLabel,
-                    height: 1.5,
-                  ),
+                  style: kynos.onboardingBodyStyle,
                 ),
               ],
             ),
@@ -210,12 +210,14 @@ class _DotIndicator extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: isActive ? 24.0 : 8.0,
+      margin: const EdgeInsets.symmetric(horizontal: tokens.Spacing.xs),
+      height: tokens.Spacing.sm,
+      width: isActive ? tokens.Spacing.lg : tokens.Spacing.sm,
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.stand : AppTheme.tertiaryLabel,
-        borderRadius: BorderRadius.circular(4.0),
+        color: isActive
+            ? context.kynosTheme.stand
+            : context.kynosTheme.tertiaryLabel,
+        borderRadius: BorderRadius.circular(tokens.Radius.sm),
       ),
     );
   }

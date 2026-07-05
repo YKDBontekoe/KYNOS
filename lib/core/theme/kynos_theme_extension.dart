@@ -31,6 +31,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     required this.heroTitleStyle,
     required this.heroSubtitleStyle,
     required this.chipLabelStyle,
+    required this.onboardingTitleStyle,
+    required this.onboardingBodyStyle,
   });
 
   final Color move;
@@ -57,6 +59,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
   final TextStyle heroTitleStyle;
   final TextStyle heroSubtitleStyle;
   final TextStyle chipLabelStyle;
+  final TextStyle onboardingTitleStyle;
+  final TextStyle onboardingBodyStyle;
 
   static final KynosThemeExtension light = KynosThemeExtension(
     move: KynosColors.move,
@@ -83,6 +87,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     heroTitleStyle: KynosTypography.heroTitle(),
     heroSubtitleStyle: KynosTypography.heroSubtitle(),
     chipLabelStyle: KynosTypography.chipLabel(Brightness.light),
+    onboardingTitleStyle: KynosTypography.onboardingTitle(Brightness.light),
+    onboardingBodyStyle: KynosTypography.onboardingBody(Brightness.light),
   );
 
   static final KynosThemeExtension dark = KynosThemeExtension(
@@ -110,6 +116,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     heroTitleStyle: KynosTypography.heroTitle(),
     heroSubtitleStyle: KynosTypography.heroSubtitle(),
     chipLabelStyle: KynosTypography.chipLabel(Brightness.dark),
+    onboardingTitleStyle: KynosTypography.onboardingTitle(Brightness.dark),
+    onboardingBodyStyle: KynosTypography.onboardingBody(Brightness.dark),
   );
 
   Color accentForKey(String key) => KynosColors.accentForKey(key);
@@ -140,6 +148,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     TextStyle? heroTitleStyle,
     TextStyle? heroSubtitleStyle,
     TextStyle? chipLabelStyle,
+    TextStyle? onboardingTitleStyle,
+    TextStyle? onboardingBodyStyle,
   }) =>
       KynosThemeExtension(
         move: move ?? this.move,
@@ -166,6 +176,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
         heroTitleStyle: heroTitleStyle ?? this.heroTitleStyle,
         heroSubtitleStyle: heroSubtitleStyle ?? this.heroSubtitleStyle,
         chipLabelStyle: chipLabelStyle ?? this.chipLabelStyle,
+        onboardingTitleStyle: onboardingTitleStyle ?? this.onboardingTitleStyle,
+        onboardingBodyStyle: onboardingBodyStyle ?? this.onboardingBodyStyle,
       );
 
   @override
