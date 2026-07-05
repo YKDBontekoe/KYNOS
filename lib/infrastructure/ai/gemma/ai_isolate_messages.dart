@@ -4,9 +4,15 @@ import 'package:flutter/services.dart';
 sealed class AiIsolateRequest {}
 
 class AiInitRequest implements AiIsolateRequest {
-  AiInitRequest(this.rootToken);
+  AiInitRequest({
+    required this.rootToken,
+    required this.huggingFaceToken,
+  });
 
   final RootIsolateToken rootToken;
+
+  /// HF token read on the main isolate — dotenv is not available in workers.
+  final String huggingFaceToken;
 }
 
 class AiChatRequest implements AiIsolateRequest {

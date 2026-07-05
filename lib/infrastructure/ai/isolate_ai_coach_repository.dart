@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter/services.dart';
+import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
@@ -136,7 +137,12 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       if (message is SendPort) {
         _isolateSendPort = message;
         final token = RootIsolateToken.instance!;
-        _isolateSendPort!.send(AiInitRequest(token));
+        _isolateSendPort!.send(
+          AiInitRequest(
+            rootToken: token,
+            huggingFaceToken: AppConstants.huggingFaceToken,
+          ),
+        );
       } else if (message is AiIsolateResponse) {
         _responseController?.add(message);
         if (message is AiIsolateReady) {

@@ -10,13 +10,14 @@ import 'package:kynos/core/constants/app_constants.dart';
 abstract final class GemmaRuntime {
   static const _inferenceEngines = [LiteRtLmEngine()];
 
-  static Future<void> initialize() => FlutterGemma.initialize(
-        inferenceEngines: _inferenceEngines,
-        webStorageMode: WebStorageMode.streaming,
-        huggingFaceToken: AppConstants.huggingFaceToken.isEmpty
-            ? null
-            : AppConstants.huggingFaceToken,
-      );
+  static Future<void> initialize({String? huggingFaceToken}) {
+    final token = huggingFaceToken ?? AppConstants.huggingFaceToken;
+    return FlutterGemma.initialize(
+      inferenceEngines: _inferenceEngines,
+      webStorageMode: WebStorageMode.streaming,
+      huggingFaceToken: token.isEmpty ? null : token,
+    );
+  }
 
   /// Starts installing the on-device Gemma 4 E2B model (.litertlm).
   static InferenceInstallationBuilder installGemma4E2B() =>

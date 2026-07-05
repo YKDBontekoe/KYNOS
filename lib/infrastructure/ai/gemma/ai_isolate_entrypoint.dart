@@ -26,7 +26,8 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
 
         // Each isolate must initialize flutter_gemma runtime separately.
         // Do not install here; setup flow already owns installation.
-        await GemmaRuntime.initialize();
+        final hfToken = message.huggingFaceToken;
+        await GemmaRuntime.initialize(huggingFaceToken: hfToken);
 
         try {
           model ??= await FlutterGemma.getActiveModel(
@@ -45,9 +46,7 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
           // Re-running installModel() restores active selection for this isolate.
           await GemmaRuntime.installGemma4E2B().fromNetwork(
             GemmaRuntime.modelDownloadUrl,
-            token: AppConstants.huggingFaceToken.isEmpty
-                ? null
-                : AppConstants.huggingFaceToken,
+            token: hfToken.isEmpty ? null : hfToken,
           ).install();
 
           model = await FlutterGemma.getActiveModel(

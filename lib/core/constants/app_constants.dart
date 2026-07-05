@@ -41,7 +41,13 @@ abstract final class AppConstants {
 
   /// HuggingFace API token — set HF_TOKEN in your .env file.
   /// Leave empty for public/ungated model files.
-  static String get huggingFaceToken => dotenv.env['HF_TOKEN'] ?? '';
+  ///
+  /// Safe to call before [dotenv.load] (returns empty) and from background
+  /// isolates when the token was passed via [AiInitRequest] instead.
+  static String get huggingFaceToken {
+    if (!dotenv.isInitialized) return '';
+    return dotenv.env['HF_TOKEN'] ?? '';
+  }
 
   // ── Privacy ───────────────────────────────────────────────────────────────
   /// All biometric data stays on-device; this flag disables any cloud path.
