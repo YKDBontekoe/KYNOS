@@ -717,7 +717,7 @@ class _ConnectCard extends ConsumerWidget {
           FilledButton(
             onPressed: () async {
               await ref
-                  .read(healthPermissionsNotifierProvider.notifier)
+                  .read(healthPermissionsProvider.notifier)
                   .request();
             },
             child: const Text('Connect HealthKit'),

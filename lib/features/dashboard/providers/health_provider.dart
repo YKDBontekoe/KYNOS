@@ -9,14 +9,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'health_provider.g.dart';
 
 @Riverpod(keepAlive: true)
-HealthRepository healthRepository(HealthRepositoryRef ref) {
+HealthRepository healthRepository(Ref ref) {
   // Delegate to the infrastructure binding — feature layer stays decoupled
   // from the concrete HealthKitRepository class.
   return ref.watch(healthKitRepositoryProvider);
 }
 
 @riverpod
-Future<HealthSummary?> healthSummary(HealthSummaryRef ref) async {
+Future<HealthSummary?> healthSummary(Ref ref) async {
   if (kIsWeb) return null;
   final repository = ref.watch(healthRepositoryProvider);
 
@@ -33,7 +33,7 @@ Future<HealthSummary?> healthSummary(HealthSummaryRef ref) async {
 
 @riverpod
 Future<List<HealthSummary>> healthHistory(
-  HealthHistoryRef ref, {
+  Ref ref, {
   int days = 30,
 }) async {
   if (kIsWeb) return const <HealthSummary>[];
@@ -49,7 +49,7 @@ Future<List<HealthSummary>> healthHistory(
 
 @riverpod
 Future<List<WorkoutSession>> recentRuns(
-  RecentRunsRef ref, {
+  Ref ref, {
   int days = 30,
   int limit = 20,
 }) async {
@@ -67,7 +67,8 @@ Future<List<WorkoutSession>> recentRuns(
 /// Handles the HealthKit permission request triggered from the UI.
 ///
 /// Invalidates health providers on success so dashboard sections refresh.
-class HealthPermissionsNotifier extends Notifier<AsyncValue<bool>> {
+@Riverpod(keepAlive: true)
+class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
   @override
   AsyncValue<bool> build() => const AsyncData(false);
 
@@ -88,14 +89,9 @@ class HealthPermissionsNotifier extends Notifier<AsyncValue<bool>> {
   }
 }
 
-final healthPermissionsNotifierProvider =
-    NotifierProvider<HealthPermissionsNotifier, AsyncValue<bool>>(
-      HealthPermissionsNotifier.new,
-    );
-
 @riverpod
 Future<List<WorkoutRoutePoint>> runRoute(
-  RunRouteRef ref, {
+  Ref ref, {
   required String workoutUuid,
 }) async {
   if (kIsWeb) return const <WorkoutRoutePoint>[];

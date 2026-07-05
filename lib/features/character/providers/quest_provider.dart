@@ -9,7 +9,7 @@ part 'quest_provider.g.dart';
 
 /// Returns today's active quests, generating new ones via AI if none exist.
 @Riverpod(keepAlive: true)
-Future<List<Quest>> dailyQuests(DailyQuestsRef ref) async {
+Future<List<Quest>> dailyQuests(Ref ref) async {
   final repo = ref.read(characterRepositoryProvider);
 
   final loadResult = await repo.loadTodayQuests();

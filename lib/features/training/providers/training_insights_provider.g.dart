@@ -6,25 +6,47 @@ part of 'training_insights_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$trainingInsightsStateHash() =>
-    r'969a032ed9fcb94e8acd8e9622f11baa9a86e19d';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [trainingInsightsState].
 @ProviderFor(trainingInsightsState)
-final trainingInsightsStateProvider =
-    AutoDisposeFutureProvider<TrainingInsightsState>.internal(
-      trainingInsightsState,
-      name: r'trainingInsightsStateProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$trainingInsightsStateHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final trainingInsightsStateProvider = TrainingInsightsStateProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TrainingInsightsStateRef =
-    AutoDisposeFutureProviderRef<TrainingInsightsState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TrainingInsightsStateProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<TrainingInsightsState>,
+          TrainingInsightsState,
+          FutureOr<TrainingInsightsState>
+        >
+    with
+        $FutureModifier<TrainingInsightsState>,
+        $FutureProvider<TrainingInsightsState> {
+  TrainingInsightsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'trainingInsightsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$trainingInsightsStateHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<TrainingInsightsState> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TrainingInsightsState> create(Ref ref) {
+    return trainingInsightsState(ref);
+  }
+}
+
+String _$trainingInsightsStateHash() =>
+    r'f1d578f2194f9103149251dd7370d8cdc1c5211f';

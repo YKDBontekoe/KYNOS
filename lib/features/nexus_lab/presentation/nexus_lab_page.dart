@@ -14,7 +14,7 @@ class NexusLabPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(nexusLabNotifierProvider);
+    final state = ref.watch(nexusLabProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -25,12 +25,12 @@ class NexusLabPage extends ConsumerWidget {
             loading: () => const _LoadingState(),
             error: (error, _) => _ErrorState(
               message: error.toString(),
-              onRetry: () => ref.invalidate(nexusLabNotifierProvider),
+              onRetry: () => ref.invalidate(nexusLabProvider),
             ),
             data: (data) => _Content(
               state: data,
               onCalibrate: () =>
-                  ref.read(nexusLabNotifierProvider.notifier).calibrate(),
+                  ref.read(nexusLabProvider.notifier).calibrate(),
             ),
           ),
         ),

@@ -6,25 +6,47 @@ part of 'today_insights_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$todayInsightsStateHash() =>
-    r'd0d3a89bc19e83a9787f1fba1a707d3f3bde6cf8';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [todayInsightsState].
 @ProviderFor(todayInsightsState)
-final todayInsightsStateProvider =
-    AutoDisposeFutureProvider<TodayInsightsState>.internal(
-      todayInsightsState,
-      name: r'todayInsightsStateProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$todayInsightsStateHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final todayInsightsStateProvider = TodayInsightsStateProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef TodayInsightsStateRef =
-    AutoDisposeFutureProviderRef<TodayInsightsState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TodayInsightsStateProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<TodayInsightsState>,
+          TodayInsightsState,
+          FutureOr<TodayInsightsState>
+        >
+    with
+        $FutureModifier<TodayInsightsState>,
+        $FutureProvider<TodayInsightsState> {
+  TodayInsightsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'todayInsightsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$todayInsightsStateHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<TodayInsightsState> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TodayInsightsState> create(Ref ref) {
+    return todayInsightsState(ref);
+  }
+}
+
+String _$todayInsightsStateHash() =>
+    r'314e21ca3f0849466a961931813a185e684e6b96';
