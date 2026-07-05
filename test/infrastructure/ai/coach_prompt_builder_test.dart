@@ -33,7 +33,7 @@ void main() {
 
   group('AiIsolateResponse types', () {
     test('chunk carries token text', () {
-      final chunk = AiIsolateChunk('hello');
+      final chunk = AiIsolateChunk('hello', requestId: 1);
       expect(chunk.chunk, 'hello');
     });
 
