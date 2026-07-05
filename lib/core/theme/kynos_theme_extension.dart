@@ -58,7 +58,7 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
   final TextStyle heroSubtitleStyle;
   final TextStyle chipLabelStyle;
 
-  static KynosThemeExtension light = KynosThemeExtension(
+  static final KynosThemeExtension light = KynosThemeExtension(
     move: KynosColors.move,
     exercise: KynosColors.exercise,
     stand: KynosColors.stand,
@@ -80,12 +80,12 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     navBarShadow: KynosElevation.navBar(Brightness.light),
     sectionLabelStyle: KynosTypography.sectionLabel(Brightness.light),
     metricValueStyle: KynosTypography.metricValue(Brightness.light),
-    heroTitleStyle: KynosTypography.heroTitle(Brightness.light),
-    heroSubtitleStyle: KynosTypography.heroSubtitle(Brightness.light),
+    heroTitleStyle: KynosTypography.heroTitle(),
+    heroSubtitleStyle: KynosTypography.heroSubtitle(),
     chipLabelStyle: KynosTypography.chipLabel(Brightness.light),
   );
 
-  static KynosThemeExtension dark = KynosThemeExtension(
+  static final KynosThemeExtension dark = KynosThemeExtension(
     move: KynosColors.move,
     exercise: KynosColors.exercise,
     stand: KynosColors.stand,
@@ -107,8 +107,8 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     navBarShadow: KynosElevation.navBar(Brightness.dark),
     sectionLabelStyle: KynosTypography.sectionLabel(Brightness.dark),
     metricValueStyle: KynosTypography.metricValue(Brightness.dark),
-    heroTitleStyle: KynosTypography.heroTitle(Brightness.dark),
-    heroSubtitleStyle: KynosTypography.heroSubtitle(Brightness.dark),
+    heroTitleStyle: KynosTypography.heroTitle(),
+    heroSubtitleStyle: KynosTypography.heroSubtitle(),
     chipLabelStyle: KynosTypography.chipLabel(Brightness.dark),
   );
 

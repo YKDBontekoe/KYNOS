@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Generic shimmer skeleton block for full-page loading states.
@@ -9,14 +8,14 @@ class KynosSkeleton extends StatelessWidget {
     super.key,
     this.height = 16,
     this.width,
-    this.borderRadius = tokens.Radius.sm,
+    this.borderRadius = Radius.sm,
   });
 
   const KynosSkeleton.tile({
     super.key,
     this.height = 80,
     this.width,
-  }) : borderRadius = tokens.Radius.lg;
+  }) : borderRadius = Radius.lg;
 
   final double height;
   final double? width;

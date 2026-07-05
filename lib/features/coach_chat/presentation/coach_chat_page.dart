@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
@@ -90,7 +88,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final isStreaming = ref.watch(coachChatProvider.select((s) => s.value?.any((m) => m.isStreaming) ?? false));
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: context.kynosTheme.background,
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
@@ -126,7 +124,7 @@ class _AppBar extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(tokens.Spacing.md, tokens.Spacing.xs, tokens.Spacing.md, tokens.Spacing.sm),
+        padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
         child: Row(
           children: [
             Container(
@@ -134,20 +132,20 @@ class _AppBar extends StatelessWidget {
               height: 8,
               decoration: const BoxDecoration(color: AppTheme.exercise, shape: BoxShape.circle),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             Text(
               'KYNOS Coach',
               style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.label),
             ),
             const Spacer(),
             _OnDeviceBadge(),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             GestureDetector(
               onTap: onClear,
               child: Container(
                 width: 32,
                 height: 32,
-                decoration: BoxDecoration(color: AppTheme.separator, borderRadius: BorderRadius.circular(tokens.Radius.md)),
+                decoration: BoxDecoration(color: AppTheme.separator, borderRadius: BorderRadius.circular(Radius.md)),
                 child: const Icon(Icons.refresh_rounded, size: 18, color: AppTheme.secondaryLabel),
               ),
             ),
@@ -161,21 +159,22 @@ class _AppBar extends StatelessWidget {
 class _OnDeviceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.exercise.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(tokens.Radius.full),
+        color: kynos.exercise.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(Radius.full),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.lock_rounded, size: 11, color: AppTheme.exercise),
-          const Gap(tokens.Spacing.xs),
+          Icon(Icons.lock_rounded, size: 11, color: kynos.exercise),
+          const Gap(Spacing.xs),
           Text(
             'On-Device',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.exercise,
+                  color: kynos.exercise,
                 ),
           ),
         ],
@@ -196,11 +195,11 @@ class _MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(tokens.Spacing.md, tokens.Spacing.sm, tokens.Spacing.md, 96),
+      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.sm, Spacing.md, 96),
       itemCount: messages.length,
       itemBuilder: (context, index) => RepaintBoundary(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: tokens.Spacing.sm),
+          padding: const EdgeInsets.only(bottom: Spacing.sm),
           child: _MessageBubble(message: messages[index]),
         ),
       ),
@@ -234,14 +233,13 @@ class _AssistantBubble extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.84),
         child: GlassCard(
-          borderRadius: tokens.Radius.lg,
-          padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md, vertical: tokens.Spacing.sm),
+          borderRadius: Radius.lg,
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
           child: isStreaming && content.isEmpty
               ? const _TypingIndicator()
               : Text(
                   content,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.label,
                         height: 1.5,
                       ),
                 ),
@@ -287,29 +285,29 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(tokens.Spacing.xl),
+        padding: const EdgeInsets.all(Spacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.chat_bubble_outline_rounded, size: 48, color: context.kynosTheme.stand),
-            const Gap(tokens.Spacing.md),
+            const Gap(Spacing.md),
             Text(
               'Your AI Coach',
               style: Theme.of(context).textTheme.displaySmall,
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(Spacing.sm),
             Text(
               'Ask about training or recovery.\nAll analysis runs on-device.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            const Gap(tokens.Spacing.lg),
+            const Gap(Spacing.lg),
             for (final suggestion in [
               'How is my recovery?',
               'Am I ready for a workout?',
             ])
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: tokens.Spacing.xs),
+                padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
                 child: KynosCard(
                   onTap: () => onSuggestionTap(suggestion),
                   child: Align(
@@ -341,10 +339,10 @@ class _InputBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.all(tokens.Spacing.md),
+        padding: const EdgeInsets.all(Spacing.md),
         child: GlassCard(
-          padding: const EdgeInsets.symmetric(horizontal: tokens.Spacing.md),
-          borderRadius: tokens.Radius.full,
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          borderRadius: Radius.full,
           child: Row(
             children: [
               Expanded(child: TextField(controller: controller, focusNode: focusNode, enabled: !isStreaming, decoration: const InputDecoration(hintText: 'Ask your coach...', border: InputBorder.none))),
@@ -371,10 +369,10 @@ class _ModelSetupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: context.kynosTheme.background,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(tokens.Spacing.xl),
+          padding: const EdgeInsets.all(Spacing.xl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -382,19 +380,19 @@ class _ModelSetupScreen extends StatelessWidget {
                 const KynosSkeleton(height: 48, width: 48)
               else
                 Icon(Icons.error_outline, size: 48, color: context.kynosTheme.move),
-              const Gap(tokens.Spacing.lg),
+              const Gap(Spacing.lg),
               Text(
                 title ?? '',
                 style: Theme.of(context).textTheme.displaySmall,
               ),
-              const Gap(tokens.Spacing.sm),
+              const Gap(Spacing.sm),
               Text(
                 subtitle ?? '',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               if (onRetry != null) ...[
-                const Gap(tokens.Spacing.lg),
+                const Gap(Spacing.lg),
                 FilledButton(
                   onPressed: onRetry,
                   child: const Text('Try Again'),

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/earned_title.dart';
@@ -148,7 +146,7 @@ class _ClassHeroCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.20),
+                  color: KynosColors.onAccent.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(tokens.Radius.sm),
                 ),
                 child: Text(
@@ -156,29 +154,33 @@ class _ClassHeroCard extends StatelessWidget {
                   style: kynos.heroSubtitleStyle.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: KynosColors.onAccent,
                     letterSpacing: 0.5,
                   ),
                 ),
               ),
-              const Gap(tokens.Spacing.sm),
+              const Gap(Spacing.sm),
               if (character.activeTitle != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(tokens.Radius.sm),
-                  ),
-                  child: Text(
-                    '"${character.activeTitle}"',
-                    style: kynos.heroSubtitleStyle.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.90),
-                      fontStyle: FontStyle.italic,
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: KynosColors.onAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(tokens.Radius.sm),
+                    ),
+                    child: Text(
+                      '"${character.activeTitle}"',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: kynos.heroSubtitleStyle.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: KynosColors.onAccent.withValues(alpha: 0.90),
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
                 ),
@@ -195,7 +197,7 @@ class _ClassHeroCard extends StatelessWidget {
             style: kynos.heroSubtitleStyle.copyWith(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: KynosColors.onAccent.withValues(alpha: 0.75),
             ),
           ),
         ],
@@ -409,6 +411,7 @@ class _QuestCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     final isCompleted = quest.status == QuestStatus.completed;
     final diffColor = _difficultyColor(quest.difficulty);
 
@@ -508,23 +511,21 @@ class _QuestCard extends ConsumerWidget {
           ),
           const Gap(tokens.Spacing.sm),
 
-          // Rewards row
-          Row(
+          // Rewards
+          Wrap(
+            spacing: Spacing.xs,
+            runSpacing: Spacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               KynosChip.accent(
                 label: '+${quest.xpReward} XP',
-                color: AppTheme.purple,
+                color: kynos.purple,
               ),
-              const Gap(tokens.Spacing.xs),
               for (final entry in quest.statRewards.entries)
-                Padding(
-                  padding: const EdgeInsets.only(right: tokens.Spacing.xs),
-                  child: KynosChip.accent(
-                    label: '+${entry.value} ${entry.key.label}',
-                    color: context.kynosTheme.accentForKey(entry.key.colorKey),
-                  ),
+                KynosChip.accent(
+                  label: '+${entry.value} ${entry.key.label}',
+                  color: kynos.accentForKey(entry.key.colorKey),
                 ),
-              const Spacer(),
               if (!isCompleted)
                 FilledButton(
                   onPressed: () => ref
@@ -579,7 +580,7 @@ class _TitlesPanel extends StatelessWidget {
                   size: 14,
                   color: AppTheme.energy,
                 ),
-                const Gap(6),
+                const Gap(Spacing.sm),
                 Text(
                   title.name,
                   style: GoogleFonts.inter(
@@ -734,7 +735,7 @@ class _GameKitButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 16, color: AppTheme.secondaryLabel),
-            const Gap(6),
+            const Gap(Spacing.sm),
             Text(
               label,
               style: GoogleFonts.inter(

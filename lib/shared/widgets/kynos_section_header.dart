@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
+import 'package:kynos/core/theme/theme.dart';
 
 /// Uppercase section label (e.g. "HEALTH METRICS").
 class KynosSectionHeader extends StatelessWidget {

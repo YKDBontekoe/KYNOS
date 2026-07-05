@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart' hide Radius;
 
 /// User chat bubble — solid accent fill.
 class KynosUserBubble extends StatelessWidget {
@@ -22,22 +21,22 @@ class KynosUserBubble extends StatelessWidget {
           maxWidth: MediaQuery.sizeOf(context).width * 0.78,
         ),
         padding: const EdgeInsets.symmetric(
-          horizontal: tokens.Spacing.md,
-          vertical: tokens.Spacing.sm,
+          horizontal: Spacing.md,
+          vertical: Spacing.sm,
         ),
         decoration: BoxDecoration(
           color: kynos.stand,
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(tokens.Radius.lg),
-            topRight: Radius.circular(tokens.Radius.lg),
-            bottomLeft: Radius.circular(tokens.Radius.lg),
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(16),
             bottomRight: Radius.circular(4),
           ),
         ),
         child: Text(
           text,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white,
+                color: KynosColors.onAccent,
               ),
         ),
       ),

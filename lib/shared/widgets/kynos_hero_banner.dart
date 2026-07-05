@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/layout.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 
 /// Coloured hero banner with decorative orb — used on tab landing screens.
 class KynosHeroBanner extends StatelessWidget {
@@ -33,16 +31,28 @@ class KynosHeroBanner extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: accentColor,
-        borderRadius: BorderRadius.circular(tokens.Radius.hero),
+        borderRadius: BorderRadius.circular(Radius.hero),
       ),
       clipBehavior: Clip.hardEdge,
       child: Stack(
         children: [
           Positioned(
-            top: orbAlignment == Alignment.topLeft ? -40 : null,
-            left: orbAlignment == Alignment.topLeft ? -40 : null,
-            right: orbAlignment == Alignment.topRight ? -40 : null,
-            bottom: orbAlignment == Alignment.bottomLeft ? -30 : null,
+            top: orbAlignment == Alignment.topLeft ||
+                    orbAlignment == Alignment.topRight
+                ? -40
+                : null,
+            left: orbAlignment == Alignment.topLeft ||
+                    orbAlignment == Alignment.bottomLeft
+                ? -40
+                : null,
+            right: orbAlignment == Alignment.topRight ||
+                    orbAlignment == Alignment.bottomRight
+                ? -40
+                : null,
+            bottom: orbAlignment == Alignment.bottomLeft ||
+                    orbAlignment == Alignment.bottomRight
+                ? -40
+                : null,
             child: Container(
               width: height > LayoutTokens.heroBannerHeight ? 200 : 180,
               height: height > LayoutTokens.heroBannerHeight ? 200 : 180,
@@ -53,7 +63,7 @@ class KynosHeroBanner extends StatelessWidget {
             ),
           ),
           if (height > LayoutTokens.heroBannerHeight &&
-              orbAlignment != Alignment.bottomLeft)
+              orbAlignment == Alignment.topRight)
             Positioned(
               bottom: -30,
               left: -20,
@@ -76,17 +86,17 @@ class KynosHeroBanner extends StatelessWidget {
                     if (subtitle != null)
                       Text(subtitle!, style: kynos.heroSubtitleStyle),
                     if (subtitle != null && title != null)
-                      const Gap(tokens.Spacing.xs),
+                      const Gap(Spacing.xs),
                     if (title != null)
                       Text(title!, style: kynos.heroTitleStyle),
                     if (caption != null) ...[
-                      const Gap(tokens.Spacing.xs),
+                      const Gap(Spacing.xs),
                       Text(
                         caption!,
                         style: kynos.heroSubtitleStyle.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white.withValues(alpha: 0.60),
+                          color: KynosColors.onAccent.withValues(alpha: 0.60),
                         ),
                       ),
                     ],

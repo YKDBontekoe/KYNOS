@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/colors.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
@@ -65,17 +64,31 @@ class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: extension.stand,
-        onPrimary: Colors.white,
+        onPrimary: KynosColors.onAccent,
+        primaryContainer: extension.stand.withValues(alpha: 0.12),
+        onPrimaryContainer: extension.stand,
         secondary: extension.exercise,
-        onSecondary: Colors.white,
+        onSecondary: KynosColors.onAccent,
+        secondaryContainer: extension.exercise.withValues(alpha: 0.12),
+        onSecondaryContainer: extension.exercise,
         tertiary: extension.purple,
-        onTertiary: Colors.white,
+        onTertiary: KynosColors.onAccent,
+        tertiaryContainer: extension.purple.withValues(alpha: 0.12),
+        onTertiaryContainer: extension.purple,
         error: extension.move,
-        onError: Colors.white,
+        onError: KynosColors.onAccent,
+        errorContainer: extension.move.withValues(alpha: 0.12),
+        onErrorContainer: extension.move,
         surface: extension.card,
         onSurface: extension.label,
+        surfaceTint: extension.stand.withValues(alpha: 0.05),
         outline: extension.separator,
+        outlineVariant: extension.separator.withValues(alpha: 0.6),
         surfaceContainerHighest: extension.background,
+        surfaceContainerHigh: extension.background,
+        surfaceContainer: extension.card,
+        surfaceContainerLow: extension.background,
+        surfaceContainerLowest: extension.background,
       ),
       scaffoldBackgroundColor: extension.background,
       textTheme: textTheme,
@@ -105,11 +118,7 @@ class AppTheme {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(14)),
           ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.1,
-          ),
+          textStyle: KynosTypography.buttonLabel(),
         ),
       ),
       listTileTheme: ListTileThemeData(

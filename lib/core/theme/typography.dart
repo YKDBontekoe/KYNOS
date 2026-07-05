@@ -82,13 +82,14 @@ abstract final class KynosTypography {
   }
 
   /// Uppercase section label (e.g. "HEALTH METRICS").
-  static TextStyle sectionLabel(Brightness brightness) =>
-      textTheme(brightness: brightness).labelMedium!.copyWith(
-            color: brightness == Brightness.dark
-                ? KynosColors.secondaryLabelDark
-                : KynosColors.secondaryLabel,
-            letterSpacing: 0.5,
-          );
+  static TextStyle sectionLabel(Brightness brightness) => GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: brightness == Brightness.dark
+            ? KynosColors.secondaryLabelDark
+            : KynosColors.secondaryLabel,
+        letterSpacing: 0.5,
+      );
 
   /// Large numeric metric value — DM Mono.
   static TextStyle metricValue(Brightness brightness) => GoogleFonts.dmMono(
@@ -101,20 +102,28 @@ abstract final class KynosTypography {
       );
 
   /// Hero banner title (e.g. "TRAINING").
-  static TextStyle heroTitle(Brightness brightness) => GoogleFonts.inter(
+  static TextStyle heroTitle() => GoogleFonts.inter(
         fontSize: 34,
         fontWeight: FontWeight.w900,
-        color: Colors.white,
+        color: KynosColors.onAccent,
         letterSpacing: -1,
         height: 1,
       );
 
   /// Hero banner subtitle.
-  static TextStyle heroSubtitle(Brightness brightness) => GoogleFonts.inter(
+  static TextStyle heroSubtitle() => GoogleFonts.inter(
         fontSize: 13,
         fontWeight: FontWeight.w500,
-        color: Colors.white.withValues(alpha: 0.70),
+        color: KynosColors.onAccent.withValues(alpha: 0.70),
         letterSpacing: 0.2,
+      );
+
+  /// Filled button label.
+  static TextStyle buttonLabel() => GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.1,
+        color: KynosColors.onAccent,
       );
 
   /// Compact chip / badge label.
@@ -128,7 +137,6 @@ abstract final class KynosTypography {
 
   /// Nav bar item label.
   static TextStyle navLabel({
-    required Brightness brightness,
     required bool selected,
     required Color color,
   }) =>

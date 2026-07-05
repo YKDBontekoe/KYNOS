@@ -51,20 +51,23 @@ abstract final class KynosColors {
   // ── Navigation & glass ────────────────────────────────────────────────────
   static const Color navUnselected = Color(0xFF606060);
 
+  /// White text/icons on saturated accent surfaces (hero banners).
+  static const Color onAccent = Color(0xFFFFFFFF);
+
   static Color glassFillLight({double alpha = 0.65}) =>
-      Colors.white.withValues(alpha: alpha);
+      onAccent.withValues(alpha: alpha);
 
   static Color glassFillDark({double alpha = 0.07}) =>
-      Colors.white.withValues(alpha: alpha);
+      onAccent.withValues(alpha: alpha);
 
   static Color glassBorderLight({double alpha = 0.8}) =>
-      Colors.white.withValues(alpha: alpha);
+      onAccent.withValues(alpha: alpha);
 
   static Color glassBorderDark({double alpha = 0.12}) =>
-      Colors.white.withValues(alpha: alpha);
+      onAccent.withValues(alpha: alpha);
 
   static Color heroOrbOverlay({double alpha = 0.07}) =>
-      Colors.white.withValues(alpha: alpha);
+      onAccent.withValues(alpha: alpha);
 
   /// Maps a semantic colour key to the accent palette.
   static Color accentForKey(String key) => switch (key) {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 /// Apple Fitness–style metric tile — elevated card, bold number, coloured dot.
@@ -28,10 +27,10 @@ class MetricTile extends StatelessWidget {
     final accent = accentColor ?? kynos.stand;
 
     return Container(
-      padding: const EdgeInsets.all(tokens.Spacing.md),
+      padding: const EdgeInsets.all(Spacing.md),
       decoration: BoxDecoration(
         color: kynos.card,
-        borderRadius: BorderRadius.circular(tokens.Radius.lg),
+        borderRadius: BorderRadius.circular(Radius.lg),
         boxShadow: kynos.metricTileShadow,
       ),
       child: Column(
@@ -47,7 +46,7 @@ class MetricTile extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              const Gap(tokens.Spacing.xs),
+              const Gap(Spacing.xs),
               Expanded(
                 child: Text(
                   label,
@@ -57,7 +56,7 @@ class MetricTile extends StatelessWidget {
               ),
             ],
           ),
-          const Gap(tokens.Spacing.sm),
+          const Gap(Spacing.sm),
           if (value == null)
             const KynosSkeleton(height: 32, width: 70)
           else
@@ -74,7 +73,7 @@ class MetricTile extends StatelessWidget {
                   ),
                 ),
                 if (unit != null) ...[
-                  const Gap(tokens.Spacing.xs),
+                  const Gap(Spacing.xs),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: Text(

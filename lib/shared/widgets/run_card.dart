@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
@@ -35,7 +34,7 @@ class RunCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              const Gap(tokens.Spacing.sm),
+              const Gap(Spacing.sm),
               Expanded(
                 child: Text(
                   _runDateLabel(run.start),
@@ -48,10 +47,10 @@ class RunCard extends StatelessWidget {
               ),
             ],
           ),
-          const Gap(tokens.Spacing.sm),
+          const Gap(Spacing.sm),
           Wrap(
-            spacing: tokens.Spacing.sm,
-            runSpacing: tokens.Spacing.xs,
+            spacing: Spacing.sm,
+            runSpacing: Spacing.xs,
             children: [
               KynosChip.metric(
                 label: 'Distance',
@@ -71,7 +70,7 @@ class RunCard extends StatelessWidget {
                 ),
             ],
           ),
-          const Gap(tokens.Spacing.xs),
+          const Gap(Spacing.xs),
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(

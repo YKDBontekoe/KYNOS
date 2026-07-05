@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Shimmer loading line for async card content (per AGENTS.md — no spinners in cards).
@@ -29,7 +28,7 @@ class KynosLoadingLine extends StatelessWidget {
         width: MediaQuery.sizeOf(context).width * widthFactor,
         decoration: BoxDecoration(
           color: kynos.separator,
-          borderRadius: BorderRadius.circular(tokens.Radius.sm),
+          borderRadius: BorderRadius.circular(Radius.sm),
         ),
       ),
     );
@@ -40,7 +39,7 @@ class KynosLoadingLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         skeleton,
-        const Gap(tokens.Spacing.xs),
+        const Gap(Spacing.xs),
         Text(
           label!,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(

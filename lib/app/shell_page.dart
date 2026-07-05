@@ -160,7 +160,6 @@ class _BarItem extends StatelessWidget {
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: KynosTypography.navLabel(
-              brightness: Theme.of(context).brightness,
               selected: selected,
               color: color,
             ),

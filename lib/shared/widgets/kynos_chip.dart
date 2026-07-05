@@ -1,61 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
-
-/// Chip size variants for badges and metric labels.
-enum KynosChipSize { compact, standard, accent }
+import 'package:kynos/core/theme/theme.dart';
 
 /// Unified chip / badge widget.
 class KynosChip extends StatelessWidget {
   const KynosChip({
     super.key,
     required this.label,
-    this.value,
-    this.color,
-    this.size = KynosChipSize.compact,
-  });
+  })  : value = null,
+        color = null,
+        _size = _KynosChipVariant.compact;
 
   const KynosChip.metric({
     super.key,
     required this.label,
     required String this.value,
     this.color,
-  }) : size = KynosChipSize.standard;
+  }) : _size = _KynosChipVariant.metric;
 
   const KynosChip.accent({
     super.key,
     required this.label,
     required Color this.color,
   })  : value = null,
-        size = KynosChipSize.accent;
+        _size = _KynosChipVariant.accent;
 
   final String label;
   final String? value;
   final Color? color;
-  final KynosChipSize size;
+  final _KynosChipVariant _size;
 
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
-    return switch (size) {
-      KynosChipSize.accent => _AccentChip(label: label, color: color!),
-      KynosChipSize.standard => _MetricChip(label: label, value: value!),
-      KynosChipSize.compact => Container(
+    return switch (_size) {
+      _KynosChipVariant.accent => _AccentChip(label: label, color: color!),
+      _KynosChipVariant.metric => _MetricChip(label: label, value: value!),
+      _KynosChipVariant.compact => Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: tokens.Spacing.sm,
-            vertical: tokens.Spacing.xs,
+            horizontal: Spacing.sm,
+            vertical: Spacing.xs,
           ),
           decoration: BoxDecoration(
             color: kynos.background,
-            borderRadius: BorderRadius.circular(tokens.Radius.md),
+            borderRadius: BorderRadius.circular(Radius.md),
           ),
           child: Text(label, style: kynos.chipLabelStyle),
         ),
     };
   }
 }
+
+enum _KynosChipVariant { compact, metric, accent }
 
 class _MetricChip extends StatelessWidget {
   const _MetricChip({required this.label, required this.value});
@@ -69,12 +66,12 @@ class _MetricChip extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: tokens.Spacing.sm,
-        vertical: tokens.Spacing.xs,
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
         color: kynos.background,
-        borderRadius: BorderRadius.circular(tokens.Radius.md),
+        borderRadius: BorderRadius.circular(Radius.md),
       ),
       child: RichText(
         text: TextSpan(
@@ -111,12 +108,12 @@ class _AccentChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: tokens.Spacing.sm,
-        vertical: tokens.Spacing.xs,
+        horizontal: Spacing.sm,
+        vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(tokens.Radius.sm),
+        borderRadius: BorderRadius.circular(Radius.sm),
       ),
       child: Text(
         label,

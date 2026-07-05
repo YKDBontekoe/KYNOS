@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 
 /// Base card following KYNOS Apple Fitness design language.
 class KynosCard extends StatelessWidget {
@@ -13,7 +12,7 @@ class KynosCard extends StatelessWidget {
   const KynosCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(tokens.Spacing.md),
+    this.padding = const EdgeInsets.all(Spacing.md),
     this.onTap,
     this.color,
     this.elevated = false,
@@ -23,19 +22,20 @@ class KynosCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
     final cardColor = color ?? kynos.card;
+    final radius = BorderRadius.circular(Radius.lg);
 
     if (elevated) {
       return Material(
         color: cardColor,
         elevation: 0,
         shadowColor: Colors.transparent,
-        borderRadius: BorderRadius.circular(tokens.Radius.lg),
+        borderRadius: radius,
         child: InkWell(
-          borderRadius: BorderRadius.circular(tokens.Radius.lg),
+          borderRadius: radius,
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(tokens.Radius.lg),
+              borderRadius: radius,
               boxShadow: kynos.cardShadow,
             ),
             padding: padding,
@@ -48,7 +48,7 @@ class KynosCard extends StatelessWidget {
     return Card(
       color: cardColor,
       child: InkWell(
-        borderRadius: BorderRadius.circular(tokens.Radius.lg),
+        borderRadius: radius,
         onTap: onTap,
         child: Padding(padding: padding, child: child),
       ),
