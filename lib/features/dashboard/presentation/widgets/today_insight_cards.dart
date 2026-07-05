@@ -25,21 +25,9 @@ class TodayInsightCards extends ConsumerWidget {
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Generating today insights...'),
       ),
-      error: (error, _) => KynosCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Could not load today\'s insights.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const Gap(Spacing.sm),
-            TextButton(
-              onPressed: () => ref.invalidate(todayInsightsStateProvider),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      error: (_, _) => _InsightsRetryCard(
+        message: 'Could not load today\'s insights.',
+        onRetry: () => ref.invalidate(todayInsightsStateProvider),
       ),
       data: (state) {
         final insights = state.insights;
@@ -47,21 +35,9 @@ class TodayInsightCards extends ConsumerWidget {
           if (state.failureMessage == null) {
             return const SizedBox.shrink();
           }
-          return KynosCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  state.failureMessage!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const Gap(Spacing.sm),
-                TextButton(
-                  onPressed: () => ref.invalidate(todayInsightsStateProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          return _InsightsRetryCard(
+            message: state.failureMessage!,
+            onRetry: () => ref.invalidate(todayInsightsStateProvider),
           );
         }
 
@@ -88,6 +64,30 @@ class TodayInsightCards extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _InsightsRetryCard extends StatelessWidget {
+  const _InsightsRetryCard({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return KynosCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(message, style: Theme.of(context).textTheme.bodyMedium),
+          const Gap(Spacing.sm),
+          TextButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
+      ),
     );
   }
 }
@@ -150,12 +150,19 @@ class _ActionCompactCardState extends State<ActionCompactCard> {
               if (widget.evidence.isNotEmpty)
                 KynosChip(label: '${widget.evidence.length} signals'),
               if (widget.onAskCoach != null)
-                GestureDetector(
-                  onTap: widget.onAskCoach,
-                  child: KynosChip.accent(
-                    label: 'Ask coach about this',
-                    color: kynos.purple,
+                TextButton(
+                  onPressed: widget.onAskCoach,
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.sm,
+                      vertical: Spacing.xs,
+                    ),
+                    backgroundColor: kynos.purple.withValues(alpha: 0.10),
+                    foregroundColor: kynos.purple,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  child: const Text('Ask coach about this'),
                 ),
             ],
           ),

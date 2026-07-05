@@ -18,6 +18,7 @@ import 'package:kynos/features/dashboard/providers/today_insights_provider.dart'
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/utils/date_label.dart';
+import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
@@ -50,12 +51,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Future<void> _refreshDashboard() async {
     ref.invalidate(healthSummaryProvider);
     ref.invalidate(todayInsightsStateProvider);
-    ref.invalidate(healthHistoryProvider);
-    ref.invalidate(recentRunsProvider);
+    ref.invalidate(healthHistoryProvider(days: 7));
+    ref.invalidate(recentRunsProvider(days: 30, limit: 1));
     ref.invalidate(dailyQuestsProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
+      ref.read(healthHistoryProvider(days: 7).future),
+      ref.read(recentRunsProvider(days: 30, limit: 1).future),
+      ref.read(dailyQuestsProvider.future),
     ]);
   }
 
@@ -86,8 +90,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final weekHistory = ref.watch(healthHistoryProvider(days: 7));
     final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 1));
     final dailyQuests = ref.watch(dailyQuestsProvider);
-    final showConnectCard =
-        !kIsWeb && summary.value == null && !summary.isLoading;
+    final showConnectCard = !kIsWeb &&
+        summary.hasValue &&
+        summary.requireValue == null;
+    final showHealthError = !kIsWeb && summary.hasError;
 
     return RefreshIndicator(
       onRefresh: _refreshDashboard,
@@ -184,6 +190,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isLoading: summary.isLoading,
                 ),
                 const Gap(tokens.Spacing.lg),
+                if (showHealthError) ...[
+                  KynosCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Could not load health data.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const Gap(tokens.Spacing.sm),
+                        TextButton(
+                          onPressed: _refreshDashboard,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(tokens.Spacing.lg),
+                ],
                 if (showConnectCard) const ConnectHealthkitCard(),
                 if (showConnectCard) const Gap(tokens.Spacing.lg),
                 const KynosPrivacyFooter(),

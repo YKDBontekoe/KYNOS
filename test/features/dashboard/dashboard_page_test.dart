@@ -38,6 +38,8 @@ void main() {
     failureMessage: null,
   );
 
+  // Override is sealed/internal in Riverpod 3 — overrideWith return types are
+  // checked at each call site; ProviderScope accepts the inferred list.
   List<dynamic> defaultOverrides({
     required Future<HealthSummary?> Function(Ref ref) health,
     required Future<TodayInsightsState> Function(Ref ref) insights,
@@ -145,4 +147,3 @@ void main() {
     expect(loadCount, greaterThan(1));
   });
 }
-

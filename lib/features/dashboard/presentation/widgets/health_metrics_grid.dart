@@ -88,9 +88,7 @@ class HealthMetricsGrid extends StatelessWidget {
                     ? null
                     : hasRunToday
                         ? _round(summary?.activeCalories)
-                        : summary?.exerciseMinutes == null
-                            ? summary?.steps?.toString()
-                            : _round(summary?.exerciseMinutes),
+                        : _exerciseOrStepsValue(summary),
                 unit: hasRunToday
                     ? 'kcal'
                     : summary?.exerciseMinutes == null
@@ -106,9 +104,19 @@ class HealthMetricsGrid extends StatelessWidget {
   }
 }
 
-String? _round(double? value) => value == null ? '—' : value.round().toString();
+String _round(double? value) => value == null ? '—' : value.round().toString();
 
-String? _fixed(double? value, int digits) =>
+String _fixed(double? value, int digits) =>
     value == null ? '—' : value.toStringAsFixed(digits);
+
+String _exerciseOrStepsValue(HealthSummary? summary) {
+  if (summary?.exerciseMinutes != null) {
+    return _round(summary!.exerciseMinutes);
+  }
+  if (summary?.steps != null) {
+    return summary!.steps!.toString();
+  }
+  return '—';
+}
 
 double? _toKm(double? meters) => meters == null ? null : meters / 1000;

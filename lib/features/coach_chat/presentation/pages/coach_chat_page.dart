@@ -20,23 +20,22 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   final _scrollController = ScrollController();
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
+  bool _seedApplied = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final current = ref.read(modelSetupProvider);
-      if (current case AsyncData(:final value) when value) {
-        _applyCoachSeed();
-        return;
-      }
+      if (!mounted) return;
       ref.read(modelSetupProvider.notifier).checkAndInstall();
     });
   }
 
   void _applyCoachSeed() {
+    if (!mounted || _seedApplied) return;
     final seed = ref.read(coachChatSeedProvider.notifier).consumeSeed();
     if (seed == null || seed.isEmpty) return;
+    _seedApplied = true;
     _textController.text = seed;
     _focusNode.requestFocus();
   }

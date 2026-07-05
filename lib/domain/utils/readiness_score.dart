@@ -22,22 +22,22 @@ double readinessScore(HealthSummary? summary) {
   var totalWeight = 0.0;
 
   if (summary.hrvMs != null) {
-    final hrvScore = (summary.hrvMs!.clamp(20, 110) - 20) / 90;
+    final hrvScore = _hrvContribution(summary.hrvMs);
     weighted += hrvScore * _hrvWeight;
     totalWeight += _hrvWeight;
   }
   if (summary.rhrBpm != null) {
-    final rhrScore = 1 - ((summary.rhrBpm!.clamp(45, 90) - 45) / 45);
+    final rhrScore = _rhrContribution(summary.rhrBpm);
     weighted += rhrScore * _rhrWeight;
     totalWeight += _rhrWeight;
   }
   if (summary.sleepHours != null) {
-    final sleepScore = (summary.sleepHours!.clamp(4, 9) - 4) / 5;
+    final sleepScore = _sleepContribution(summary.sleepHours);
     weighted += sleepScore * _sleepWeight;
     totalWeight += _sleepWeight;
   }
   if (summary.bloodOxygenPercent != null) {
-    final spo2Score = (summary.bloodOxygenPercent!.clamp(90, 100) - 90) / 10;
+    final spo2Score = _spo2Contribution(summary.bloodOxygenPercent);
     weighted += spo2Score * _spo2Weight;
     totalWeight += _spo2Weight;
   }

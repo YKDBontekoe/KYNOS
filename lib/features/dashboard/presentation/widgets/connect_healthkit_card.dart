@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
@@ -43,12 +43,12 @@ class ConnectHealthkitCard extends ConsumerWidget {
             'Connect Health',
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          const Gap(tokens.Spacing.xs),
+          const Gap(Spacing.xs),
           Text(
             'Grant access via $platform to unlock your readiness score and AI coaching insights.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          const Gap(tokens.Spacing.md),
+          const Gap(Spacing.md),
           FilledButton(
             onPressed: isLoading
                 ? null

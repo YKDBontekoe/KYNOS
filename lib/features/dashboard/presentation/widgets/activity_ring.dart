@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Concentric activity rings with per-ring progress arcs.
@@ -88,7 +89,7 @@ class RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(RingPainter old) =>
-      old.ringProgresses != ringProgresses ||
+      !listEquals(old.ringProgresses, ringProgresses) ||
       old.strokeWidth != strokeWidth ||
       old.colors != colors;
 }
