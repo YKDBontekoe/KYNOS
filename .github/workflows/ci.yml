@@ -197,8 +197,8 @@ jobs:
           BOOTSTRAP_RESULT: ${{ needs.bootstrap.result }}
           ANALYZE_RESULT: ${{ needs.analyze.result }}
           TEST_RESULT: ${{ needs.test.result }}
-          BUILD_WEB_RESULT: ${{ needs.build-web.result }}
-          BUILD_APK_RESULT: ${{ needs.build-apk.result }}
+          BUILD_WEB_RESULT: ${{ needs['build-web'].result }}
+          BUILD_APK_RESULT: ${{ needs['build-apk'].result }}
         run: |
           if [[ "$SKIP_CI" == "true" ]]; then
             echo "CI skipped via commit message"

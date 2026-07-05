@@ -75,8 +75,8 @@ jobs:
       - name: Verify all security scans passed
         env:
           GITLEAKS_RESULT: ${{ needs.gitleaks.result }}
-          OSV_RESULT: ${{ needs.osv-scan.result }}
-          OUTDATED_RESULT: ${{ needs.pub-outdated.result }}
+          OSV_RESULT: ${{ needs['osv-scan'].result }}
+          OUTDATED_RESULT: ${{ needs['pub-outdated'].result }}
         run: |
           for result in "$GITLEAKS_RESULT" "$OSV_RESULT" "$OUTDATED_RESULT"; do
             if [[ "$result" != "success" ]]; then
