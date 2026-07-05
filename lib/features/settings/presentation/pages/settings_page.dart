@@ -10,6 +10,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/huggingface_token_provider.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
@@ -23,11 +24,14 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _apiKeyController = TextEditingController();
+  final _hfTokenController = TextEditingController();
   bool _obscureKey = true;
+  bool _obscureHfToken = true;
 
   @override
   void dispose() {
     _apiKeyController.dispose();
+    _hfTokenController.dispose();
     super.dispose();
   }
 
@@ -43,6 +47,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       next.whenData((key) {
         if (key != null && _apiKeyController.text != key) {
           _apiKeyController.text = key;
+        }
+      });
+    });
+
+    ref.listen(huggingFaceTokenManagerProvider, (_, next) {
+      next.whenData((token) {
+        if (token != null && _hfTokenController.text != token) {
+          _hfTokenController.text = token;
         }
       });
     });
@@ -167,6 +179,52 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(bottom: tokens.Spacing.sm),
+                    child: Text(
+                      'HuggingFace access token',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  TextField(
+                    controller: _hfTokenController,
+                    obscureText: _obscureHfToken,
+                    decoration: InputDecoration(
+                      hintText: 'hf_...',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureHfToken
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscureHfToken = !_obscureHfToken,
+                        ),
+                      ),
+                    ),
+                    onSubmitted: (v) => _saveHfToken(v),
+                  ),
+                  const Gap(tokens.Spacing.sm),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => _saveHfToken(_hfTokenController.text),
+                      child: const Text('Save token'),
+                    ),
+                  ),
+                  const Gap(tokens.Spacing.xs),
+                  Text(
+                    'Required to download the on-device Gemma coach model. '
+                    'Create a token at huggingface.co/settings/tokens with '
+                    'read access to gated models.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: kynos.secondaryLabel,
+                        ),
+                  ),
+                  Divider(color: kynos.separator, height: 1),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: tokens.Spacing.sm,
+                      bottom: tokens.Spacing.sm,
+                    ),
                     child: Text(
                       'OpenRouter API key',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -332,6 +390,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Imported data cleared')),
     );
+  }
+
+  Future<void> _saveHfToken(String token) async {
+    final trimmed = token.trim();
+    if (trimmed.isEmpty) {
+      await ref.read(huggingFaceTokenManagerProvider.notifier).clear();
+    } else {
+      await ref.read(huggingFaceTokenManagerProvider.notifier).save(trimmed);
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('HuggingFace token saved')),
+      );
+    }
   }
 
   Future<void> _saveApiKey(String key) async {

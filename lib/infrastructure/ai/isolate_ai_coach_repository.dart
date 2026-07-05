@@ -10,9 +10,14 @@ import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_bridge.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
+import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
 /// On-device Gemma coach running in a background isolate.
 class IsolateAiCoachRepository implements AiCoachRepository {
+  IsolateAiCoachRepository({SecureApiKeyStorage? keyStorage})
+      : _keyStorage = keyStorage ?? SecureApiKeyStorage();
+
+  final SecureApiKeyStorage _keyStorage;
   Isolate? _isolate;
   SendPort? _isolateSendPort;
   ReceivePort? _receivePort;
@@ -127,6 +132,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   Future<void> _spawnIsolate() async {
     await _tearDownIsolate();
 
+    final hfToken = await _keyStorage.readHuggingFaceToken();
+
     _receivePort = ReceivePort();
     _responseController = StreamController<AiIsolateResponse>.broadcast();
 
@@ -136,7 +143,9 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       if (message is SendPort) {
         _isolateSendPort = message;
         final token = RootIsolateToken.instance!;
-        _isolateSendPort!.send(AiInitRequest(token));
+        _isolateSendPort!.send(
+          AiInitRequest(token, huggingFaceToken: hfToken),
+        );
       } else if (message is AiIsolateResponse) {
         _responseController?.add(message);
         if (message is AiIsolateReady) {
