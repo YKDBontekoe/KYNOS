@@ -5,9 +5,9 @@ import 'package:kynos/core/constants/imported_workout_ids.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/infrastructure/health/import/apple_health_date_parser.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_record_aggregator.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_workout_builder.dart';
+import 'package:kynos/infrastructure/health/import/apple_health_xml_event_stream.dart';
 import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
 import 'package:xml/xml_events.dart';
 
@@ -38,6 +38,9 @@ class AppleHealthExportParseResult {
 }
 
 /// Parses Apple Health `export.zip` into daily summaries and running workouts.
+///
+/// Uses streaming I/O so large `export.xml` files do not need to fit fully in
+/// memory. On native platforms prefer [parseZipFile] with a file path.
 class AppleHealthExportParser {
   const AppleHealthExportParser({
     GpxWorkoutParser? gpxParser,
@@ -45,25 +48,41 @@ class AppleHealthExportParser {
 
   final GpxWorkoutParser _gpxParser;
 
-  AppleHealthExportParseResult parseZip(List<int> zipBytes) {
-    final archive = ZipDecoder().decodeBytes(zipBytes);
-    final files = _indexArchive(archive);
+  /// Parses a zip archive from an on-disk path without loading the zip bytes.
+  Future<AppleHealthExportParseResult> parseZipFile(String zipPath) async {
+    final input = InputFileStream(zipPath);
+    try {
+      final archive = ZipDecoder().decodeStream(input);
+      return _parseArchive(archive);
+    } finally {
+      input.closeSync();
+    }
+  }
 
-    final exportXml = _findExportXml(files);
-    if (exportXml == null) {
+  /// Parses a zip archive held in memory (web and tests).
+  Future<AppleHealthExportParseResult> parseZip(List<int> zipBytes) async {
+    final input = InputMemoryStream(zipBytes);
+    final archive = ZipDecoder().decodeStream(input);
+    return _parseArchive(archive);
+  }
+
+  Future<AppleHealthExportParseResult> _parseArchive(Archive archive) async {
+    final files = _indexArchive(archive);
+    final exportXmlFile = _findExportXmlFile(files);
+    if (exportXmlFile == null) {
       throw const FormatException(
         'Could not find export.xml inside the archive',
       );
     }
 
-    return _parseExportXml(exportXml, files);
+    return _parseExportXmlStream(exportXmlFile, files);
   }
 
-  Map<String, List<int>> _indexArchive(Archive archive) {
-    final files = <String, List<int>>{};
+  Map<String, ArchiveFile> _indexArchive(Archive archive) {
+    final files = <String, ArchiveFile>{};
     for (final file in archive) {
       if (file.isFile) {
-        files[_normalizePath(file.name)] = List<int>.from(file.content as List);
+        files[_normalizePath(file.name)] = file;
       }
     }
     return files;
@@ -73,21 +92,40 @@ class AppleHealthExportParser {
     return path.replaceAll('\\', '/').replaceFirst(RegExp(r'^\.?/'), '');
   }
 
-  String? _findExportXml(Map<String, List<int>> files) {
+  ArchiveFile? _findExportXmlFile(Map<String, ArchiveFile> files) {
     for (final entry in files.entries) {
       final name = entry.key.toLowerCase();
       if (name.endsWith('export.xml') && !name.endsWith('export_cda.xml')) {
-        return utf8.decode(entry.value, allowMalformed: true);
+        return entry.value;
       }
     }
     return null;
   }
 
-  AppleHealthExportParseResult _parseExportXml(
-    String rawXml,
-    Map<String, List<int>> files,
-  ) {
-    final xml = sanitizeAppleHealthXml(rawXml);
+  Future<AppleHealthExportParseResult> _parseExportXmlStream(
+    ArchiveFile exportXmlFile,
+    Map<String, ArchiveFile> files,
+  ) async {
+    final content = exportXmlFile.getContent();
+    if (content == null) {
+      throw const FormatException('Could not read export.xml from the archive');
+    }
+
+    try {
+      return await _consumeXmlEvents(
+        streamAppleHealthXmlEvents(content),
+        files,
+      );
+    } finally {
+      content.closeSync();
+      exportXmlFile.clear();
+    }
+  }
+
+  Future<AppleHealthExportParseResult> _consumeXmlEvents(
+    Stream<XmlEvent> events,
+    Map<String, ArchiveFile> files,
+  ) async {
     final aggregator = AppleHealthRecordAggregator();
     final workouts = <AppleHealthWorkoutImport>[];
     var recordCount = 0;
@@ -96,7 +134,7 @@ class AppleHealthExportParser {
     AppleHealthWorkoutBuilder? currentWorkout;
     var workoutDepth = 0;
 
-    for (final event in parseEvents(xml, validateNesting: true)) {
+    await for (final event in events) {
       if (event is XmlStartElementEvent) {
         switch (event.name) {
           case 'Record':
@@ -153,7 +191,7 @@ class AppleHealthExportParser {
 
   AppleHealthWorkoutImport? _finalizeWorkout(
     AppleHealthWorkoutBuilder builder,
-    Map<String, List<int>> files,
+    Map<String, ArchiveFile> files,
   ) {
     if (!builder.isRunning) {
       return null;
@@ -169,14 +207,14 @@ class AppleHealthExportParser {
     var routePoints = const <WorkoutRoutePoint>[];
 
     for (final path in builder.routePaths) {
-      final gpxBytes = _lookupFile(files, path);
-      if (gpxBytes == null) {
+      final gpxText = _readArchiveFileAsString(files, path);
+      if (gpxText == null) {
         continue;
       }
 
       try {
         final parsed = _gpxParser.parse(
-          utf8.decode(gpxBytes, allowMalformed: true),
+          gpxText,
           sourceName: builder.sourceName ?? 'Apple Health',
         );
         routePoints = parsed.routePoints;
@@ -214,10 +252,28 @@ class AppleHealthExportParser {
     return '${ImportedWorkoutIds.prefix}apple:${start.toUtc().millisecondsSinceEpoch}:${end.toUtc().millisecondsSinceEpoch}';
   }
 
-  List<int>? _lookupFile(Map<String, List<int>> files, String path) {
+  String? _readArchiveFileAsString(Map<String, ArchiveFile> files, String path) {
+    final file = _lookupArchiveFile(files, path);
+    if (file == null) {
+      return null;
+    }
+
+    try {
+      final bytes = file.readBytes();
+      if (bytes == null || bytes.isEmpty) {
+        return null;
+      }
+      return utf8.decode(bytes, allowMalformed: true);
+    } finally {
+      file.clear();
+    }
+  }
+
+  ArchiveFile? _lookupArchiveFile(Map<String, ArchiveFile> files, String path) {
     final normalized = _normalizePath(path);
-    if (files.containsKey(normalized)) {
-      return files[normalized];
+    final direct = files[normalized];
+    if (direct != null) {
+      return direct;
     }
 
     final lower = normalized.toLowerCase();

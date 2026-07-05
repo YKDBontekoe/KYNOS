@@ -9,7 +9,14 @@ DateTime? parseAppleHealthDate(String? raw) {
   return DateTime.tryParse(normalized);
 }
 
+final _appleHealthXmlControlChars = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]');
+
 /// Strips control characters that break XML parsers in some exports.
 String sanitizeAppleHealthXml(String input) {
-  return input.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+  return input.replaceAll(_appleHealthXmlControlChars, '');
+}
+
+/// Chunk-safe variant for streaming parsers.
+String sanitizeAppleHealthXmlChunk(String input) {
+  return input.replaceAll(_appleHealthXmlControlChars, '');
 }

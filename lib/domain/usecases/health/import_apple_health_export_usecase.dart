@@ -32,11 +32,15 @@ class ImportAppleHealthExportUseCase {
   final ImportWorkoutUseCase _importWorkout;
 
   Future<ImportAppleHealthExportResult> call({
-    required List<int> zipBytes,
+    List<int>? zipBytes,
+    String? zipPath,
     DateTime? now,
   }) async {
     try {
-      final parsed = await parseAppleHealthZipAsync(zipBytes);
+      final parsed = await parseAppleHealthZipAsync(
+        zipPath: zipPath,
+        zipBytes: zipBytes,
+      );
       await _store.saveSummaries(parsed.summaries);
 
       var importedWorkouts = 0;
@@ -68,6 +72,17 @@ class ImportAppleHealthExportUseCase {
         importedDays: 0,
         recordCount: 0,
         failure: HealthDataFailure(e.message),
+      );
+    } on OutOfMemoryError {
+      return const ImportAppleHealthExportResult(
+        importedWorkouts: 0,
+        skippedWorkouts: 0,
+        importedDays: 0,
+        recordCount: 0,
+        failure: HealthDataFailure(
+          'This export is too large for available memory. '
+          'Try exporting a shorter date range from the Health app.',
+        ),
       );
     } on Object catch (e) {
       return ImportAppleHealthExportResult(
