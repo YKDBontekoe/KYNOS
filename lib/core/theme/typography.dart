@@ -141,9 +141,10 @@ abstract final class KynosTypography {
     required Color color,
   }) =>
       GoogleFonts.inter(
-        fontSize: 10,
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+        fontSize: selected ? 11 : 10,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
         color: color,
-        letterSpacing: selected ? -0.2 : 0.1,
+        letterSpacing: selected ? -0.15 : 0.05,
+        height: 1.1,
       );
 }

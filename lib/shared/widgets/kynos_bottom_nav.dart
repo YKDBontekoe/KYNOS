@@ -14,11 +14,11 @@ import 'package:kynos/shared/widgets/nav_icon.dart';
 class KynosBottomNavItem {
   const KynosBottomNavItem({
     required this.label,
-    required this.iconPath,
+    required this.icon,
   });
 
   final String label;
-  final String iconPath;
+  final NavIconDefinition icon;
 }
 
 /// Floating Liquid Glass bottom navigation bar with a sliding glass pill indicator.
@@ -34,8 +34,8 @@ class KynosBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  static const _indicatorDuration = Duration(milliseconds: 280);
-  static const _itemAnimDuration = Duration(milliseconds: 200);
+  static const _indicatorDuration = Duration(milliseconds: 320);
+  static const _itemAnimDuration = Duration(milliseconds: 220);
 
   void _handleTap(int index) {
     if (index == selectedIndex) return;
@@ -68,9 +68,12 @@ class KynosBottomNav extends StatelessWidget {
               child: LiquidGlassSurface(
                 borderRadius: tokens.Radius.full,
                 blurSigma: LiquidGlassTokens.navBlurSigma,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: tokens.Spacing.xs,
+                  vertical: tokens.Spacing.xs,
+                ),
                 child: SizedBox(
-                  height: 64,
+                  height: 60,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -81,13 +84,17 @@ class KynosBottomNav extends StatelessWidget {
                             _alignmentFor(selectedIndex, items.length),
                         child: FractionallySizedBox(
                           widthFactor: 1 / items.length,
-                          child: const Align(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: tokens.Spacing.xs,
+                            ),
                             child: LiquidGlassSurface(
-                              borderRadius: tokens.Radius.md + 2,
+                              borderRadius: tokens.Radius.full,
                               blurSigma: LiquidGlassTokens.indicatorBlurSigma,
                               padding: EdgeInsets.zero,
                               applyVibrancy: false,
-                              child: SizedBox(width: 52, height: 40),
+                              tintColor: kynos.stand.withValues(alpha: 0.14),
+                              child: const SizedBox(height: 44),
                             ),
                           ),
                         ),
@@ -97,7 +104,7 @@ class KynosBottomNav extends StatelessWidget {
                           for (var i = 0; i < items.length; i++)
                             Expanded(
                               child: _NavBarItem(
-                                svgPath: items[i].iconPath,
+                                icon: items[i].icon,
                                 label: items[i].label,
                                 selected: selectedIndex == i,
                                 onTap: () => _handleTap(i),
@@ -119,13 +126,13 @@ class KynosBottomNav extends StatelessWidget {
 
 class _NavBarItem extends StatelessWidget {
   const _NavBarItem({
-    required this.svgPath,
+    required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
-  final String svgPath;
+  final NavIconDefinition icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -145,19 +152,25 @@ class _NavBarItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 34,
-              height: 34,
-              child: Center(
+            AnimatedScale(
+              scale: selected ? 1.05 : 1.0,
+              duration: KynosBottomNav._itemAnimDuration,
+              curve: Curves.easeOutCubic,
+              child: SizedBox(
+                width: 28,
+                height: 28,
                 child: AnimatedSwitcher(
                   duration: KynosBottomNav._itemAnimDuration,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
                   child: CustomPaint(
-                    key: ValueKey('$svgPath-$selected'),
-                    size: const Size(22, 22),
+                    key: ValueKey('$label-$selected'),
+                    size: const Size(24, 24),
                     painter: NavIconPainter(
-                      pathData: svgPath,
+                      pathData: selected ? icon.filled : icon.outline,
                       color: color,
-                      strokeWidth: selected ? 2.0 : 1.8,
+                      strokeWidth: 2.0,
+                      filled: selected,
                     ),
                   ),
                 ),
@@ -166,6 +179,7 @@ class _NavBarItem extends StatelessWidget {
             const Gap(tokens.Spacing.xs),
             AnimatedDefaultTextStyle(
               duration: KynosBottomNav._itemAnimDuration,
+              curve: Curves.easeOutCubic,
               style: KynosTypography.navLabel(
                 selected: selected,
                 color: color,

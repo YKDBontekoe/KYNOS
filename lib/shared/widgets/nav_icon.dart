@@ -2,29 +2,81 @@ import 'package:flutter/material.dart';
 
 /// Lucide-style SVG path icons for bottom navigation.
 abstract final class NavIconPaths {
-  static const home =
-      'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10';
-  static const activity = 'M22 12H18L15 21 9 3 6 12H2';
-  static const character =
-      'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z';
+  /// Daily dashboard — four-panel grid.
+  static const today = NavIconDefinition(
+    outline:
+        'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
+    filled:
+        'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
+  );
+
+  /// Running route — winding path with finish pin.
+  static const training = NavIconDefinition(
+    outline:
+        'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M4 22v-7',
+    filled:
+        'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M4 22v-7',
+  );
+
+  /// RPG character — heraldic shield.
+  static const character = NavIconDefinition(
+    outline: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+    filled: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  );
+
+  // Legacy aliases kept for tests and gradual migration.
+  static const home = today;
+  static const activity = training;
 }
 
-/// Paints a stroke SVG path for navigation icons (24×24 viewBox).
+/// Outline and filled SVG paths for a single nav icon.
+@immutable
+class NavIconDefinition {
+  const NavIconDefinition({
+    required this.outline,
+    String? filled,
+  }) : filled = filled ?? outline;
+
+  final String outline;
+  final String filled;
+}
+
+/// Paints a stroke or filled SVG path for navigation icons (24×24 viewBox).
 class NavIconPainter extends CustomPainter {
   const NavIconPainter({
     required this.pathData,
     required this.color,
     required this.strokeWidth,
+    this.filled = false,
   });
 
   final String pathData;
   final Color color;
   final double strokeWidth;
+  final bool filled;
 
   @override
   void paint(Canvas canvas, Size size) {
     final scale = size.width / 24.0;
     canvas.scale(scale, scale);
+
+    final path = parseSvgPath(pathData);
+
+    if (filled) {
+      final fillPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+      canvas.drawPath(path, fillPaint);
+
+      final strokePaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5 / scale
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+      canvas.drawPath(path, strokePaint);
+      return;
+    }
 
     final paint = Paint()
       ..color = color
@@ -32,16 +84,15 @@ class NavIconPainter extends CustomPainter {
       ..strokeWidth = strokeWidth / scale
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-
-    final pathData = parseSvgPath(this.pathData);
-    canvas.drawPath(pathData, paint);
+    canvas.drawPath(path, paint);
   }
 
   @override
   bool shouldRepaint(NavIconPainter old) =>
       old.pathData != pathData ||
       old.color != color ||
-      old.strokeWidth != strokeWidth;
+      old.strokeWidth != strokeWidth ||
+      old.filled != filled;
 
   /// Minimal SVG path parser for Lucide stroke icons.
   static Path parseSvgPath(String d) {
