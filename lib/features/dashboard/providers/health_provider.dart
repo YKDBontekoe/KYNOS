@@ -27,7 +27,7 @@ Future<HealthSummary?> healthSummary(HealthSummaryRef ref) async {
   // Fail closed to "no data" so the dashboard still renders and can show
   // the explicit Connect HealthKit call-to-action.
   if (result.failure != null) {
-    _logger.fine('Health summary unavailable: ${result.failure}');
+    _logger.d('Health summary unavailable: ${result.failure}');
     return null;
   }
   return result.summary;
