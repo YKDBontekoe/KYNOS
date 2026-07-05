@@ -1,32 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/features/settings/presentation/controllers/settings_controller.dart';
-import 'package:provider/provider.dart';
+import 'package:kynos/features/settings/providers/settings_provider.dart';
 
-class KynosApp extends StatelessWidget {
+class KynosApp extends ConsumerWidget {
   const KynosApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => SettingsController(),
-      child: riverpod.Consumer(
-        builder: (context, ref, _) {
-          final router = ref.watch(routerProvider);
-          final settingsController = context.watch<SettingsController>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    final settings = ref.watch(settingsProvider);
 
-          return MaterialApp.router(
-            title: 'KYNOS',
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            themeMode: settingsController.themeMode,
-            routerConfig: router,
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      ),
+    return MaterialApp.router(
+      title: 'KYNOS',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: settings.themeMode,
+      routerConfig: router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

@@ -5,10 +5,11 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/typography.dart';
-import 'package:kynos/features/character/presentation/character_page.dart';
-import 'package:kynos/features/dashboard/presentation/dashboard_page.dart';
-import 'package:kynos/features/training/presentation/training_page.dart';
+import 'package:kynos/features/character/presentation/pages/character_page.dart';
+import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kynos/features/training/presentation/pages/training_page.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
+import 'package:kynos/shared/widgets/nav_icon.dart';
 
 /// Root app shell — floating bottom nav with three focused tabs.
 class ShellPage extends StatefulWidget {
@@ -24,9 +25,9 @@ class _ShellState extends State<ShellPage> {
   static const _labels = ['Today', 'Training', 'Character'];
 
   static const _navPaths = [
-    _NavPaths.home,
-    _NavPaths.activity,
-    _NavPaths.character,
+    NavIconPaths.home,
+    NavIconPaths.activity,
+    NavIconPaths.character,
   ];
 
   @override
@@ -51,8 +52,6 @@ class _ShellState extends State<ShellPage> {
     );
   }
 }
-
-// ── Bottom bar ────────────────────────────────────────────────────────────────
 
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
@@ -147,7 +146,7 @@ class _BarItem extends StatelessWidget {
                 child: CustomPaint(
                   key: ValueKey('$svgPath-$selected'),
                   size: const Size(22, 22),
-                  painter: _NavIconPainter(
+                  painter: NavIconPainter(
                     pathData: svgPath,
                     color: color,
                     strokeWidth: selected ? 2.0 : 1.8,
@@ -170,155 +169,3 @@ class _BarItem extends StatelessWidget {
     );
   }
 }
-
-// ── Nav icon SVG path painter ──────────────────────────────────────────────────
-
-class _NavIconPainter extends CustomPainter {
-  const _NavIconPainter({
-    required this.pathData,
-    required this.color,
-    required this.strokeWidth,
-  });
-
-  final String pathData;
-  final Color color;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scale = size.width / 24.0;
-    canvas.scale(scale, scale);
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth / scale
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final path = _parseSvgPath(pathData);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_NavIconPainter old) =>
-      old.pathData != pathData ||
-      old.color != color ||
-      old.strokeWidth != strokeWidth;
-
-  static Path _parseSvgPath(String d) {
-    final path = Path();
-    final tokens = RegExp(
-      r'[MLHVCSQTAZmlhvcsqtaz]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?',
-    ).allMatches(d).map((m) => m.group(0)!).toList();
-
-    var i = 0;
-    double cx = 0, cy = 0;
-    String cmd = 'M';
-
-    double next() => double.parse(tokens[i++]);
-
-    while (i < tokens.length) {
-      final t = tokens[i];
-      if (RegExp(r'^[A-Za-z]$').hasMatch(t)) {
-        cmd = t;
-        i++;
-      }
-      switch (cmd) {
-        case 'M':
-          cx = next(); cy = next();
-          path.moveTo(cx, cy);
-          cmd = 'L';
-        case 'L':
-          cx = next(); cy = next();
-          path.lineTo(cx, cy);
-        case 'H':
-          cx = next();
-          path.lineTo(cx, cy);
-        case 'V':
-          cy = next();
-          path.lineTo(cx, cy);
-        case 'C':
-          final x1 = next(), y1 = next();
-          final x2 = next(), y2 = next();
-          cx = next(); cy = next();
-          path.cubicTo(x1, y1, x2, y2, cx, cy);
-        case 'Q':
-          final x1 = next(), y1 = next();
-          cx = next(); cy = next();
-          path.quadraticBezierTo(x1, y1, cx, cy);
-        case 'A':
-          final rx = next(), ry = next();
-          final rot = next();
-          final largeArc = next() == 1;
-          final sweep = next() == 1;
-          cx = next(); cy = next();
-          path.arcToPoint(
-            Offset(cx, cy),
-            radius: Radius.elliptical(rx, ry),
-            rotation: rot,
-            largeArc: largeArc,
-            clockwise: sweep,
-          );
-        case 'Z': case 'z':
-          path.close();
-        case 'l':
-          cx += next(); cy += next();
-          path.lineTo(cx, cy);
-        case 'm':
-          cx += next(); cy += next();
-          path.moveTo(cx, cy);
-          cmd = 'l';
-        case 'h':
-          cx += next();
-          path.lineTo(cx, cy);
-        case 'v':
-          cy += next();
-          path.lineTo(cx, cy);
-        case 'c':
-          final dx1 = next(), dy1 = next();
-          final dx2 = next(), dy2 = next();
-          final dx = next(), dy = next();
-          path.cubicTo(
-            cx + dx1, cy + dy1,
-            cx + dx2, cy + dy2,
-            cx + dx, cy + dy,
-          );
-          cx += dx; cy += dy;
-        case 'a':
-          final rx = next(), ry = next();
-          final rot = next();
-          final largeArc = next() == 1;
-          final sweep = next() == 1;
-          final ex = cx + next(), ey = cy + next();
-          path.arcToPoint(
-            Offset(ex, ey),
-            radius: Radius.elliptical(rx, ry),
-            rotation: rot,
-            largeArc: largeArc,
-            clockwise: sweep,
-          );
-          cx = ex; cy = ey;
-        default:
-          i++;
-      }
-    }
-    return path;
-  }
-}
-
-// ── Nav icon paths (24×24 viewBox, Lucide stroke icons) ──────────────────────
-
-abstract final class _NavPaths {
-  /// Lucide "home" — house outline
-  static const home =
-      'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10';
-
-  /// Lucide "activity" — EKG waveform
-  static const activity = 'M22 12H18L15 21 9 3 6 12H2';
-
-  /// Lucide "shield" — character class icon
-  static const character =
-      'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z';
-}
-

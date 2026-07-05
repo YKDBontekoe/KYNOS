@@ -50,7 +50,7 @@ final class DailyQuestsProvider
   }
 }
 
-String _$dailyQuestsHash() => r'f5c3fc80db98be1eabe6115ebb5ba6b536944785';
+String _$dailyQuestsHash() => r'23a2afa81424df60116a928eb212ca6c1c9d866b';
 
 /// Notifier that allows quest status mutations (complete / expire).
 
@@ -80,7 +80,7 @@ final class QuestNotifierProvider
   QuestNotifier create() => QuestNotifier();
 }
 
-String _$questNotifierHash() => r'bb016bf165b0f2404881f4d3411b8a8da823e1bf';
+String _$questNotifierHash() => r'9045d3dfe22f044948c2b6e2b11a012150f41e6f';
 
 /// Notifier that allows quest status mutations (complete / expire).
 

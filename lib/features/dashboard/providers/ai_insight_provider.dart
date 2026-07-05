@@ -1,5 +1,5 @@
-import 'package:kynos/features/dashboard/providers/health_provider.dart';
-import 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart';
+import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ai_insight_provider.g.dart';
@@ -7,8 +7,6 @@ part 'ai_insight_provider.g.dart';
 /// Generates a single coaching sentence from today's health data using the
 /// on-device model. Returns null silently when the model is not installed
 /// or when insufficient health data is available.
-///
-/// Kept alive for the app session — only regenerates when health data changes.
 @Riverpod(keepAlive: true)
 Future<String?> aiDailyInsight(Ref ref) async {
   final summary = await ref.watch(healthSummaryProvider.future);

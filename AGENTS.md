@@ -52,6 +52,8 @@ biometric data off the device.
 
 ## 2. Repository Map
 
+**Read [CODEMAP.md](CODEMAP.md) first** — machine-navigable index of features, entry points, and hot files.
+
 ```
 lib/
 ├── app/                  # App shell, router, theme wiring
@@ -59,9 +61,9 @@ lib/
 ├── domain/               # Entities, repository interfaces, use-cases (pure Dart)
 │   ├── entities/
 │   ├── repositories/
-│   └── usecases/
-├── data/                 # DTOs / models (when present)
-├── infrastructure/       # Platform & AI implementations
+│   ├── usecases/
+│   └── utils/            # Pure domain helpers (e.g. readiness_score)
+├── infrastructure/       # Platform integrations — implements domain repos
 │   ├── ai/
 │   ├── gamification/
 │   ├── health/
@@ -69,18 +71,28 @@ lib/
 ├── features/             # UI + feature-scoped providers
 │   └── <feature>/
 │       ├── presentation/
+│       │   ├── pages/    # Top-level screens
+│       │   └── widgets/  # Feature-scoped widgets
 │       └── providers/
-└── shared/               # Cross-feature widgets & providers
-    ├── providers/
+└── shared/               # Cross-feature widgets & DI composition
+    ├── providers/        # Binds infrastructure → Riverpod (DI layer)
+    ├── utils/
     └── widgets/
 ```
+
+**Note:** There is no separate `data/` layer yet. Repository implementations live in
+`infrastructure/`; `shared/providers/` is the DI composition root.
 
 **Layer dependency direction (never invert):**
 
 ```
-features/  ──►  domain/  ◄──  data/  ◄──  infrastructure/
-shared/    ──►  (any layer below shared)
+features/  ──►  domain/  ◄──  infrastructure/
+shared/providers/  ──►  domain/ + infrastructure/  (DI composition only)
+shared/widgets/    ──►  domain/  (no infrastructure)
+shared/utils/      ──►  domain/  (no infrastructure)
 ```
+
+Features must **never** import `infrastructure/` directly — use `shared/providers/`.
 
 ---
 
