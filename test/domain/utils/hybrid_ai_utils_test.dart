@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/openrouter_model.dart';
 import 'package:kynos/domain/utils/acwr.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
@@ -23,6 +24,13 @@ void main() {
       expect(
         GemmaDeviceCapabilitySelector.tierForDeviceRam(8 * 1024 * 1024 * 1024),
         GemmaInferenceTier.full,
+      );
+    });
+
+    test('uses constrained tier when RAM is unknown', () {
+      expect(
+        GemmaDeviceCapabilitySelector.tierForDeviceRam(null),
+        GemmaInferenceTier.constrained,
       );
     });
   });
@@ -53,6 +61,31 @@ void main() {
   group('computeAcwr', () {
     test('returns null with insufficient history', () {
       expect(computeAcwr(const []), isNull);
+      expect(
+        computeAcwr(
+          List.generate(
+            14,
+            (i) => HealthSummary(
+              date: DateTime(2026, 1, i + 1),
+              runningWorkoutDistanceMeters: 5000,
+            ),
+          ),
+        ),
+        isNull,
+      );
+    });
+
+    test('returns ratio with 28 days of history', () {
+      final history = List.generate(
+        28,
+        (i) => HealthSummary(
+          date: DateTime(2026, 1, i + 1),
+          runningWorkoutDistanceMeters: i >= 21 ? 10000 : 5000,
+        ),
+      );
+      final acwr = computeAcwr(history);
+      expect(acwr, isNotNull);
+      expect(acwr, greaterThan(1.0));
     });
   });
 }

@@ -48,7 +48,7 @@ final class PostRunDebriefNotifierProvider
 }
 
 String _$postRunDebriefNotifierHash() =>
-    r'1a452ed0ac07bd417dc857ac69fb6243cd3bbb0a';
+    r'1b3dbd8e7a51b7434589e7b1b011be9320f5308d';
 
 abstract class _$PostRunDebriefNotifier
     extends $Notifier<AsyncValue<PostRunDebriefState?>> {

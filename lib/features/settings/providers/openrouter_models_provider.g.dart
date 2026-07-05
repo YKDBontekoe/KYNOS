@@ -41,7 +41,7 @@ final class OpenRouterCatalogProvider
   }
 }
 
-String _$openRouterCatalogHash() => r'769eb8817af844f5fae29c81e704588268d2b8e0';
+String _$openRouterCatalogHash() => r'6008d2dd712889b8718da7359ff2e1036a39ae7d';
 
 abstract class _$OpenRouterCatalog extends $Notifier<OpenRouterCatalogState> {
   OpenRouterCatalogState build();
@@ -101,4 +101,4 @@ final class OpenRouterCatalogDataProvider
 }
 
 String _$openRouterCatalogDataHash() =>
-    r'7d1c835dcec80e4d09c284053fe4b321cea806f2';
+    r'2b9405aca7c01fc25e8169ac5f71198a8ff62cac';

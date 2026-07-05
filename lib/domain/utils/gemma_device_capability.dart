@@ -23,7 +23,7 @@ abstract final class GemmaDeviceCapabilitySelector {
   static const int preferredRamBytesForGpu = 6 * 1024 * 1024 * 1024;
 
   static GemmaInferenceTier tierForDeviceRam(int? totalRamBytes) {
-    if (totalRamBytes == null) return GemmaInferenceTier.full;
+    if (totalRamBytes == null) return GemmaInferenceTier.constrained;
     if (totalRamBytes < minRamBytesForLlm) return GemmaInferenceTier.disabled;
     if (totalRamBytes < preferredRamBytesForGpu) {
       return GemmaInferenceTier.constrained;
@@ -55,12 +55,7 @@ abstract final class GemmaDeviceCapabilitySelector {
     return GemmaInferenceTier.full;
   }
 
-  static String modelIdForTier(GemmaInferenceTier tier) {
-    return switch (tier) {
-      GemmaInferenceTier.full || GemmaInferenceTier.constrained => gemma4E2bModelId,
-      GemmaInferenceTier.disabled => gemma4E2bModelId,
-    };
-  }
+  static String modelIdForTier(GemmaInferenceTier tier) => gemma4E2bModelId;
 
   static bool canRunOnDeviceLlm(GemmaInferenceTier tier) =>
       tier != GemmaInferenceTier.disabled;

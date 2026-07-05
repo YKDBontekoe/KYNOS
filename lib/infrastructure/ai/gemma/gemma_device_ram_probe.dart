@@ -1,6 +1,9 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 /// Probes device RAM for [GemmaDeviceCapabilitySelector].
 abstract final class GemmaDeviceRamProbe {
@@ -11,7 +14,6 @@ abstract final class GemmaDeviceRamProbe {
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         final ios = await plugin.iosInfo;
-        // iOS does not expose RAM directly; map machine id heuristics.
         return _iosRamFromMachine(ios.utsname.machine);
       }
       if (defaultTargetPlatform == TargetPlatform.android) {
@@ -20,14 +22,14 @@ abstract final class GemmaDeviceRamProbe {
           return android.physicalRamSize * 1024 * 1024;
         }
       }
-    } on Object {
+    } on Object catch (e, st) {
+      _logger.w('RAM probe failed', error: e, stackTrace: st);
       return null;
     }
     return null;
   }
 
   static int? _iosRamFromMachine(String machine) {
-    // Common iPhone RAM tiers (approximate).
     const sixGbMachines = {
       'iPhone14,2', 'iPhone14,3', 'iPhone15,2', 'iPhone15,3',
       'iPhone16,1', 'iPhone16,2',
@@ -43,9 +45,8 @@ abstract final class GemmaDeviceRamProbe {
     if (fourGbMachines.contains(machine)) {
       return 4 * 1024 * 1024 * 1024;
     }
-    // Default assume 6 GB for recent unknown iPhones.
     if (machine.startsWith('iPhone')) {
-      return 6 * 1024 * 1024 * 1024;
+      return null;
     }
     return null;
   }

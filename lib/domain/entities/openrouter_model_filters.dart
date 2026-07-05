@@ -32,6 +32,8 @@ class OpenRouterModelFilters {
     this.freeOnly = false,
   });
 
+  static const defaultCategory = 'programming';
+
   final OpenRouterModelSort sort;
   final String? query;
   final double? minPricePerM;
@@ -74,4 +76,37 @@ class OpenRouterModelFilters {
       freeOnly: freeOnly ?? this.freeOnly,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OpenRouterModelFilters &&
+          sort == other.sort &&
+          query == other.query &&
+          minPricePerM == other.minPricePerM &&
+          maxPricePerM == other.maxPricePerM &&
+          minContextTokens == other.minContextTokens &&
+          architecture == other.architecture &&
+          modelAuthors == other.modelAuthors &&
+          providers == other.providers &&
+          category == other.category &&
+          zeroDataRetention == other.zeroDataRetention &&
+          region == other.region &&
+          freeOnly == other.freeOnly;
+
+  @override
+  int get hashCode => Object.hash(
+        sort,
+        query,
+        minPricePerM,
+        maxPricePerM,
+        minContextTokens,
+        architecture,
+        modelAuthors,
+        providers,
+        category,
+        zeroDataRetention,
+        region,
+        freeOnly,
+      );
 }

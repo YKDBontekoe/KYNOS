@@ -36,9 +36,6 @@ class OpenRouterApiClient {
         if (filters.architecture != null) 'arch': filters.architecture,
         if (filters.modelAuthors != null) 'model_authors': filters.modelAuthors,
         if (filters.providers != null) 'providers': filters.providers,
-        if (filters.category != null) 'category': filters.category,
-        if (filters.zeroDataRetention) 'zdr': 'true',
-        if (filters.region != null) 'region': filters.region,
       };
 
       if (filters.freeOnly) {

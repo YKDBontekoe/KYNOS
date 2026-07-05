@@ -22,21 +22,11 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _apiKeyController = TextEditingController();
   bool _obscureKey = true;
-  bool _keyLoaded = false;
 
   @override
   void dispose() {
     _apiKeyController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadApiKey() async {
-    if (_keyLoaded) return;
-    final key = await ref.read(secureApiKeyStorageProvider).readOpenRouterKey();
-    if (key != null) {
-      _apiKeyController.text = key;
-    }
-    _keyLoaded = true;
   }
 
   @override
@@ -45,12 +35,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final settingsNotifier = ref.read(settingsProvider.notifier);
     final kynos = context.kynosTheme;
 
+    ref.listen(openRouterApiKeyManagerProvider, (_, next) {
+      next.whenData((key) {
+        if (key != null && _apiKeyController.text != key) {
+          _apiKeyController.text = key;
+        }
+      });
+    });
+
     return Scaffold(
       backgroundColor: kynos.background,
       appBar: AppBar(title: const Text('Settings')),
-      body: FutureBuilder<void>(
-        future: _loadApiKey(),
-        builder: (context, _) => ListView(
+      body: ListView(
           padding: const EdgeInsets.all(tokens.Spacing.md),
           children: [
             const KynosSectionHeader(title: 'Appearance'),
@@ -211,7 +207,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const Gap(LayoutTokens.shellBottomPadding),
           ],
         ),
-      ),
     );
   }
 

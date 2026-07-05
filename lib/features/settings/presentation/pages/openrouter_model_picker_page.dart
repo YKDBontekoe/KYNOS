@@ -76,7 +76,14 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
               loading: () => const Center(
                 child: KynosLoadingLine(label: 'Loading models...'),
               ),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (_, _) => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(tokens.Spacing.md),
+                  child: Text(
+                    'Could not load models. Check your API key and try again.',
+                  ),
+                ),
+              ),
               data: (result) {
                 if (result.error != null) {
                   return Center(
@@ -185,6 +192,8 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
                     );
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
+                }
+                if (context.mounted) {
                   context.pop();
                 }
               },

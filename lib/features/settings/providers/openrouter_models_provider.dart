@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:kynos/domain/entities/openrouter_model.dart';
 import 'package:kynos/domain/entities/openrouter_model_filters.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
@@ -26,14 +28,16 @@ class OpenRouterCatalog extends _$OpenRouterCatalog {
   static const _sortKey = 'openrouter_sort';
   static const _freeKey = 'openrouter_free_only';
   static const _categoryKey = 'openrouter_category';
+  Timer? _searchDebounce;
 
   @override
   OpenRouterCatalogState build() {
+    ref.onDispose(() => _searchDebounce?.cancel());
     _loadFilterPrefs();
     return const OpenRouterCatalogState(
       filters: OpenRouterModelFilters(
         sort: OpenRouterModelSort.mostPopular,
-        category: 'programming',
+        category: OpenRouterModelFilters.defaultCategory,
       ),
     );
   }
@@ -46,7 +50,8 @@ class OpenRouterCatalog extends _$OpenRouterCatalog {
       orElse: () => OpenRouterModelSort.mostPopular,
     );
     final freeOnly = prefs.getBool(_freeKey) ?? false;
-    final category = prefs.getString(_categoryKey);
+    final category =
+        prefs.getString(_categoryKey) ?? OpenRouterModelFilters.defaultCategory;
 
     state = OpenRouterCatalogState(
       filters: OpenRouterModelFilters(
@@ -63,7 +68,10 @@ class OpenRouterCatalog extends _$OpenRouterCatalog {
       filters: state.filters,
       searchQuery: query,
     );
-    ref.invalidate(openRouterCatalogDataProvider);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), () {
+      ref.invalidate(openRouterCatalogDataProvider);
+    });
   }
 
   Future<void> updateFilters(OpenRouterModelFilters filters) async {
@@ -98,7 +106,7 @@ class OpenRouterCatalog extends _$OpenRouterCatalog {
 Future<({List<OpenRouterModel>? models, String? error})> openRouterCatalogData(
   Ref ref,
 ) async {
-  final apiKey = await ref.watch(readOpenRouterApiKeyProvider.future);
+  final apiKey = await ref.watch(openRouterApiKeyManagerProvider.future);
   if (apiKey == null || apiKey.isEmpty) {
     return (models: null, error: 'Add your OpenRouter API key in Settings first.');
   }

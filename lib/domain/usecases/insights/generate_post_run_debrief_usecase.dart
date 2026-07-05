@@ -22,6 +22,8 @@ class PostRunDebrief {
 class GeneratePostRunDebriefUseCase {
   const GeneratePostRunDebriefUseCase({required this.aiCoach});
 
+  static const _refinementTimeout = Duration(seconds: 30);
+
   final AiCoachRepository aiCoach;
 
   Future<PostRunDebrief> call({
@@ -65,10 +67,12 @@ class GeneratePostRunDebriefUseCase {
     try {
       await aiCoach.resetSession();
       final buffer = StringBuffer();
-      await for (final chunk in aiCoach.chat(
-        userMessage: prompt.toString(),
-        taskKind: AiTaskKind.runDebrief,
-      )) {
+      await for (final chunk in aiCoach
+          .chat(
+            userMessage: prompt.toString(),
+            taskKind: AiTaskKind.runDebrief,
+          )
+          .timeout(_refinementTimeout)) {
         buffer.write(chunk);
       }
 
@@ -84,8 +88,10 @@ class GeneratePostRunDebriefUseCase {
     }
   }
 
-  String? _extract(String text, String key) {
-    final pattern = RegExp('$key:\\s*(.+)', caseSensitive: false);
+  static String? extractField(String text, String key) => _extract(text, key);
+
+  static String? _extract(String text, String key) {
+    final pattern = RegExp('^$key:\\s*(.+)\$', caseSensitive: false, multiLine: true);
     final match = pattern.firstMatch(text);
     return match?.group(1)?.trim();
   }

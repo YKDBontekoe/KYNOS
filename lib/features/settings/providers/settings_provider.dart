@@ -112,8 +112,11 @@ class Settings extends _$Settings {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_cloudModelIdKey);
     await prefs.remove(_cloudModelNameKey);
-    state = _copy(
-      state,
+    state = SettingsState(
+      isDarkMode: state.isDarkMode,
+      languageCode: state.languageCode,
+      cloudTasksEnabled: state.cloudTasksEnabled,
+      cloudDataLevel: state.cloudDataLevel,
       selectedCloudModelId: null,
       selectedCloudModelName: null,
     );

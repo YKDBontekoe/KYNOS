@@ -63,16 +63,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Future<void> _refreshDashboard() async {
     ref.invalidate(healthSummaryProvider);
     ref.invalidate(todayInsightsStateProvider);
-    ref.invalidate(healthHistoryProvider(days: 7));
+    ref.invalidate(healthHistoryProvider(days: 28));
     ref.invalidate(recentRunsProvider(days: 30, limit: 1));
     ref.invalidate(dailyQuestsProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
-      ref.read(healthHistoryProvider(days: 7).future),
+      ref.read(healthHistoryProvider(days: 28).future),
       ref.read(recentRunsProvider(days: 30, limit: 1).future),
       ref.read(dailyQuestsProvider.future),
     ]);
+  }
+
+  List<HealthSummary> _last7Days(List<HealthSummary> history) {
+    final sorted = List<HealthSummary>.from(history)
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return sorted.take(7).toList();
   }
 
   void _openCoachChat({String? seedMessage}) {
@@ -99,11 +105,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final kynos = context.kynosTheme;
     final summary = ref.watch(healthSummaryProvider);
     final todayInsightsState = ref.watch(todayInsightsStateProvider);
-    final weekHistory = ref.watch(healthHistoryProvider(days: 7));
+    final loadHistory = ref.watch(healthHistoryProvider(days: 28));
+    final weekHistory = _last7Days(loadHistory.value ?? const []);
     final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 1));
     final dailyQuests = ref.watch(dailyQuestsProvider);
-    final loadHistory = ref.watch(healthHistoryProvider(days: 28));
-    ref.watch(postRunDebriefProvider);
     final showConnectCard = !kIsWeb &&
         summary.hasValue &&
         summary.requireValue == null;
@@ -177,7 +182,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ReadinessCard(
                   summaryAsync: summary,
                   todayInsightsState: todayInsightsState,
-                  history: weekHistory.value ?? const [],
+                  history: weekHistory,
                 ),
                 const Gap(tokens.Spacing.md),
                 AcwrGuardrailCard(
@@ -203,8 +208,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const Gap(tokens.Spacing.sm),
                 WeeklySnapshotRow(
-                  history: weekHistory.value ?? const [],
-                  isLoading: weekHistory.isLoading,
+                  history: weekHistory,
+                  isLoading: loadHistory.isLoading,
                 ),
                 const Gap(tokens.Spacing.lg),
                 TodayInsightCards(

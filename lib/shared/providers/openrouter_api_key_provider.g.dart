@@ -89,7 +89,7 @@ final class ReadOpenRouterApiKeyProvider
 }
 
 String _$readOpenRouterApiKeyHash() =>
-    r'4e5b6c487cf0cfe3f7b7b8d3783eac84be284e66';
+    r'24ea89be059f5536f6e00e74a918b3192dc958fe';
 
 @ProviderFor(OpenRouterApiKeyManager)
 final openRouterApiKeyManagerProvider = OpenRouterApiKeyManagerProvider._();
@@ -116,7 +116,7 @@ final class OpenRouterApiKeyManagerProvider
 }
 
 String _$openRouterApiKeyManagerHash() =>
-    r'f0a464d6ac5caa9a40509755b33e4536f77e7434';
+    r'f7753c25dc5f47ac6fbe24c1697c88d3928ae4f7';
 
 abstract class _$OpenRouterApiKeyManager extends $AsyncNotifier<String?> {
   FutureOr<String?> build();

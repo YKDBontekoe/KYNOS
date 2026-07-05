@@ -46,7 +46,7 @@ class AcwrGuardrailCard extends StatelessWidget {
                   const Gap(tokens.Spacing.sm),
                   Text(
                     'ACWR ${acwr.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: kynos.metricValueStyle,
                   ),
                 ],
               ),

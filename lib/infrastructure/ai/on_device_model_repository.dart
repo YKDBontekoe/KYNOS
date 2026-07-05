@@ -1,7 +1,7 @@
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
-import 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 
 /// flutter_gemma implementation of [AiModelRepository].
 class OnDeviceModelRepository implements AiModelRepository {
@@ -15,19 +15,21 @@ class OnDeviceModelRepository implements AiModelRepository {
 
   @override
   Future<void> installFromNetwork({required String url, String? token}) async {
-    final ram = await GemmaDeviceRamProbe.totalRamBytes();
-    _cachedTier = GemmaDeviceCapabilitySelector.select(
-      totalRamBytes: ram,
-      isThermallyThrottled: false,
-    );
+    _cachedTier = await GemmaRuntimeTier.resolve();
 
     if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(_cachedTier!)) {
-      return;
+      throw StateError(
+        'This device cannot run the on-device Gemma model (insufficient RAM).',
+      );
     }
 
     await FlutterGemma.installModel(modelType: ModelType.gemmaIt)
         .fromNetwork(url, token: token)
         .install();
+
+    if (!hasActiveModel) {
+      throw StateError('Gemma model install completed but model is not active.');
+    }
   }
 
   GemmaInferenceTier get inferenceTier =>

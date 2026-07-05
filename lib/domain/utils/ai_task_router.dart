@@ -30,7 +30,6 @@ abstract final class AiTaskRouter {
     return switch (kind) {
       AiTaskKind.coachChat =>
         estimatedPromptTokens >= coachChatCloudTokenThreshold,
-      AiTaskKind.quickRefine => false,
       _ => true,
     };
   }

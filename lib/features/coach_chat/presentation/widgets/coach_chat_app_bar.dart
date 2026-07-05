@@ -80,12 +80,3 @@ class _InferenceBadge extends StatelessWidget {
     );
   }
 }
-
-class OnDeviceBadge extends StatelessWidget {
-  const OnDeviceBadge({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _InferenceBadge(backend: AiInferenceBackend.onDevice);
-  }
-}

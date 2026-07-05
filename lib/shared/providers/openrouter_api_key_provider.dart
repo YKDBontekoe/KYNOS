@@ -7,9 +7,8 @@ part 'openrouter_api_key_provider.g.dart';
 SecureApiKeyStorage secureApiKeyStorage(Ref ref) => SecureApiKeyStorage();
 
 @riverpod
-Future<String?> readOpenRouterApiKey(Ref ref) {
-  return ref.watch(secureApiKeyStorageProvider).readOpenRouterKey();
-}
+Future<String?> readOpenRouterApiKey(Ref ref) =>
+    ref.watch(openRouterApiKeyManagerProvider.future);
 
 @Riverpod(keepAlive: true)
 class OpenRouterApiKeyManager extends _$OpenRouterApiKeyManager {
@@ -20,12 +19,10 @@ class OpenRouterApiKeyManager extends _$OpenRouterApiKeyManager {
   Future<void> save(String key) async {
     await ref.read(secureApiKeyStorageProvider).writeOpenRouterKey(key);
     state = AsyncData(key);
-    ref.invalidate(readOpenRouterApiKeyProvider);
   }
 
   Future<void> clear() async {
     await ref.read(secureApiKeyStorageProvider).deleteOpenRouterKey();
     state = const AsyncData(null);
-    ref.invalidate(readOpenRouterApiKeyProvider);
   }
 }

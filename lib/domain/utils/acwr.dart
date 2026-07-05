@@ -4,8 +4,9 @@ import 'package:kynos/domain/entities/health_summary.dart';
 /// Acute:chronic workload ratio from daily running distance.
 ///
 /// Acute = mean daily km over last 7 days; chronic = mean over last 28 days.
+/// Returns null until at least 28 days of history are available.
 double? computeAcwr(List<HealthSummary> history) {
-  if (history.length < 7) return null;
+  if (history.length < 28) return null;
 
   final sorted = List<HealthSummary>.from(history)
     ..sort((a, b) => b.date.compareTo(a.date));

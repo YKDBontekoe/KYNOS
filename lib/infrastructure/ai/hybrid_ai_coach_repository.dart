@@ -4,8 +4,8 @@ import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
+import 'package:kynos/domain/utils/ai_task_router.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
-import 'package:kynos/infrastructure/ai/ai_task_router.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
 /// Configuration for hybrid local/cloud coach routing.
