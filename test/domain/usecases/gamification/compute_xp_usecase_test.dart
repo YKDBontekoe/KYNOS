@@ -11,7 +11,7 @@ void main() {
     const useCase = ComputeXpUseCase();
 
     final character = RunnerCharacter(
-      characterClass: Surge(),
+      characterClass: const Surge(),
       level: 1,
       xp: 0,
       stats: const CharacterStats(),
