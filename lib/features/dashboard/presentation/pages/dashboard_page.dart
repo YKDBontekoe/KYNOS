@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/acwr_guardrail_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/health_metrics_grid.dart';
@@ -14,6 +16,7 @@ import 'package:kynos/features/dashboard/presentation/widgets/last_run_preview.d
 import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/today_insight_cards.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/weekly_snapshot_row.dart';
+import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -39,6 +42,15 @@ class DashboardPage extends ConsumerStatefulWidget {
 }
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(postRunDebriefProvider.notifier).checkLatestRun();
+    });
+  }
+
   String _greeting() {
     final h = DateTime.now().hour;
     if (h < 5) return 'Good night';
@@ -51,16 +63,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Future<void> _refreshDashboard() async {
     ref.invalidate(healthSummaryProvider);
     ref.invalidate(todayInsightsStateProvider);
-    ref.invalidate(healthHistoryProvider(days: 7));
+    ref.invalidate(healthHistoryProvider(days: 28));
     ref.invalidate(recentRunsProvider(days: 30, limit: 1));
     ref.invalidate(dailyQuestsProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
-      ref.read(healthHistoryProvider(days: 7).future),
+      ref.read(healthHistoryProvider(days: 28).future),
       ref.read(recentRunsProvider(days: 30, limit: 1).future),
       ref.read(dailyQuestsProvider.future),
     ]);
+  }
+
+  List<HealthSummary> _last7Days(List<HealthSummary> history) {
+    final sorted = List<HealthSummary>.from(history)
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return sorted.take(7).toList();
   }
 
   void _openCoachChat({String? seedMessage}) {
@@ -87,13 +105,32 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final kynos = context.kynosTheme;
     final summary = ref.watch(healthSummaryProvider);
     final todayInsightsState = ref.watch(todayInsightsStateProvider);
-    final weekHistory = ref.watch(healthHistoryProvider(days: 7));
+    final loadHistory = ref.watch(healthHistoryProvider(days: 28));
+    final weekHistory = _last7Days(loadHistory.value ?? const []);
     final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 1));
     final dailyQuests = ref.watch(dailyQuestsProvider);
     final showConnectCard = !kIsWeb &&
         summary.hasValue &&
         summary.requireValue == null;
     final showHealthError = !kIsWeb && summary.hasError;
+
+    ref.listen(postRunDebriefProvider, (prev, next) {
+      final data = next.value;
+      if (data == null || !mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Run debrief: ${data.debrief.highlight} (+${data.xpAmount} XP)',
+          ),
+          action: SnackBarAction(
+            label: 'Dismiss',
+            onPressed: () =>
+                ref.read(postRunDebriefProvider.notifier).dismiss(),
+          ),
+          duration: const Duration(seconds: 8),
+        ),
+      );
+    });
 
     return RefreshIndicator(
       onRefresh: _refreshDashboard,
@@ -116,6 +153,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     letterSpacing: 0.2,
                   ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => context.push(Routes.settings),
+                tooltip: 'Settings',
+              ),
+            ],
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
@@ -138,7 +182,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ReadinessCard(
                   summaryAsync: summary,
                   todayInsightsState: todayInsightsState,
-                  history: weekHistory.value ?? const [],
+                  history: weekHistory,
+                ),
+                const Gap(tokens.Spacing.md),
+                AcwrGuardrailCard(
+                  history: loadHistory.value ?? const <HealthSummary>[],
                 ),
                 const Gap(tokens.Spacing.md),
                 Row(
@@ -160,8 +208,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const Gap(tokens.Spacing.sm),
                 WeeklySnapshotRow(
-                  history: weekHistory.value ?? const [],
-                  isLoading: weekHistory.isLoading,
+                  history: weekHistory,
+                  isLoading: loadHistory.isLoading,
                 ),
                 const Gap(tokens.Spacing.lg),
                 TodayInsightCards(

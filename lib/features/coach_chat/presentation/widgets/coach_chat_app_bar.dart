@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
-class CoachChatAppBar extends StatelessWidget {
+class CoachChatAppBar extends ConsumerWidget {
   const CoachChatAppBar({super.key, required this.onClear});
 
   final VoidCallback onClear;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final backend = ref.watch(lastAiInferenceBackendProvider);
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -28,7 +32,7 @@ class CoachChatAppBar extends StatelessWidget {
               style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.label),
             ),
             const Spacer(),
-            const OnDeviceBadge(),
+            _InferenceBadge(backend: backend),
             const Gap(Spacing.sm),
             Semantics(
               label: 'Clear conversation',
@@ -53,21 +57,25 @@ class CoachChatAppBar extends StatelessWidget {
   }
 }
 
-class OnDeviceBadge extends StatelessWidget {
-  const OnDeviceBadge({super.key});
+class _InferenceBadge extends StatelessWidget {
+  const _InferenceBadge({required this.backend});
+
+  final AiInferenceBackend backend;
 
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
+    final isCloud = backend == AiInferenceBackend.openRouter;
+    final color = isCloud ? kynos.stand : kynos.exercise;
+    final label = isCloud ? 'Cloud' : 'On-Device';
+    final icon = isCloud ? Icons.cloud_outlined : Icons.lock_rounded;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.lock_rounded, size: 11, color: kynos.exercise),
+        Icon(icon, size: 11, color: color),
         const Gap(Spacing.xs),
-        KynosChip.accent(
-          label: 'On-Device',
-          color: kynos.exercise,
-        ),
+        KynosChip.accent(label: label, color: color),
       ],
     );
   }

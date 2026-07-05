@@ -1,28 +1,30 @@
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 
-/// Streaming response chunk from the on-device LLM.
+/// Streaming response chunk from the on-device or cloud LLM.
 typedef AiChunk = String;
 
-/// Contract for the on-device AI coaching engine.
-///
-/// The implementation runs entirely via on-device inference (flutter_gemma /
-/// MediaPipe) to preserve 120 Hz ProMotion rendering on the UI thread.
+/// Contract for the AI coaching engine (local Gemma + optional OpenRouter).
 abstract interface class AiCoachRepository {
-  /// Whether the on-device model is loaded and ready.
+  /// Whether a local on-device model is loaded and ready.
   bool get isReady;
+
+  /// Backend used for the most recent [chat] call.
+  AiInferenceBackend get lastBackend;
 
   /// Sends [userMessage] with optional [healthContext] and returns a stream
   /// of response chunks (streaming token-by-token output).
   Stream<AiChunk> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    AiTaskKind taskKind = AiTaskKind.coachChat,
+    int estimatedPromptTokens = 0,
   });
 
   /// Discards the current chat session and starts a fresh one.
-  ///
-  /// Keeps the model weights loaded — cheaper than a full [dispose] + reload.
   Future<void> resetSession();
 
-  /// Releases the model from memory (e.g., when the app backgrounds).
+  /// Releases model resources (e.g., when the app backgrounds).
   Future<void> dispose();
 }

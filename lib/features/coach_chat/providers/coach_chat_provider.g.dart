@@ -33,7 +33,7 @@ final class CoachChatNotifierProvider
   CoachChatNotifier create() => CoachChatNotifier();
 }
 
-String _$coachChatNotifierHash() => r'3d9ee050b81804a63c6b078520d42a4f8b0b7699';
+String _$coachChatNotifierHash() => r'ea6b2f89740500d8fd9919bce05c50a0d5a5133a';
 
 abstract class _$CoachChatNotifier extends $AsyncNotifier<List<ChatMessage>> {
   FutureOr<List<ChatMessage>> build();
@@ -47,6 +47,59 @@ abstract class _$CoachChatNotifier extends $AsyncNotifier<List<ChatMessage>> {
             as $ClassProviderElement<
               AnyNotifier<AsyncValue<List<ChatMessage>>, List<ChatMessage>>,
               AsyncValue<List<ChatMessage>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(LastAiInferenceBackend)
+final lastAiInferenceBackendProvider = LastAiInferenceBackendProvider._();
+
+final class LastAiInferenceBackendProvider
+    extends $NotifierProvider<LastAiInferenceBackend, AiInferenceBackend> {
+  LastAiInferenceBackendProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'lastAiInferenceBackendProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$lastAiInferenceBackendHash();
+
+  @$internal
+  @override
+  LastAiInferenceBackend create() => LastAiInferenceBackend();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AiInferenceBackend value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AiInferenceBackend>(value),
+    );
+  }
+}
+
+String _$lastAiInferenceBackendHash() =>
+    r'b75f67dd2b67661cd8608d88e3615c7e92a3be9e';
+
+abstract class _$LastAiInferenceBackend extends $Notifier<AiInferenceBackend> {
+  AiInferenceBackend build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AiInferenceBackend, AiInferenceBackend>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AiInferenceBackend, AiInferenceBackend>,
+              AiInferenceBackend,
               Object?,
               Object?
             >;

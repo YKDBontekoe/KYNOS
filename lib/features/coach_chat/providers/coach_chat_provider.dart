@@ -1,6 +1,8 @@
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
-import 'package:kynos/domain/repositories/ai_coach_repository.dart';
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,9 +14,6 @@ class CoachChatNotifier extends _$CoachChatNotifier {
 
   @override
   Future<List<ChatMessage>> build() async {
-    ref.onDispose(() async {
-      await ref.read(aiCoachRepositoryProvider).dispose();
-    });
     return const [];
   }
 
@@ -40,8 +39,22 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     state = AsyncData([...state.value!, placeholder]);
 
     try {
-      final AiCoachRepository repository = ref.read(aiCoachRepositoryProvider);
-      await for (final chunk in repository.chat(userMessage: userMessage)) {
+      final repository = ref.read(aiCoachRepositoryProvider);
+      final healthContext = await ref.read(
+        healthHistoryProvider(days: 14).future,
+      );
+
+      final estimatedTokens = _estimateTokens(userMessage, healthContext);
+
+      await for (final chunk in repository.chat(
+        userMessage: userMessage,
+        healthContext: healthContext,
+        estimatedPromptTokens: estimatedTokens,
+      )) {
+        ref.read(lastAiInferenceBackendProvider.notifier).set(
+              repository.lastBackend,
+            );
+
         final msgs = state.value!;
         final idx = msgs.indexWhere((m) => m.id == assistantId);
         if (idx == -1) break;
@@ -56,6 +69,11 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       _logger.e('Inference error', error: e, stackTrace: st);
       _finaliseMessage(assistantId, streaming: false, content: 'Error: $e');
     }
+  }
+
+  int _estimateTokens(String message, List<HealthSummary> healthContext) {
+    final chars = message.length + healthContext.length * 80;
+    return (chars / 4).round();
   }
 
   Future<void> clearConversation() async {
@@ -76,4 +94,12 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     );
     state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
   }
+}
+
+@Riverpod(keepAlive: true)
+class LastAiInferenceBackend extends _$LastAiInferenceBackend {
+  @override
+  AiInferenceBackend build() => AiInferenceBackend.onDevice;
+
+  void set(AiInferenceBackend backend) => state = backend;
 }
