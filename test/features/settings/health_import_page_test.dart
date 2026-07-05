@@ -16,5 +16,6 @@ void main() {
     expect(find.text('Import Health Data'), findsOneWidget);
     expect(find.text('Choose export.zip or GPX'), findsOneWidget);
     expect(find.textContaining('Sideloaded apps'), findsOneWidget);
+    expect(find.text('Processing file…'), findsNothing);
   });
 }
