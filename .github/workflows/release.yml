@@ -29,6 +29,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
+          fetch-tags: true
           persist-credentials: true
 
       - name: Setup Node.js
@@ -81,7 +82,41 @@ jobs:
         run: npm ci
 
       - name: Semantic release (APK + unsigned IPA)
+        id: semantic_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          set -o pipefail
+          npx semantic-release 2>&1 | tee semantic-release.log
+
+      - name: Publish release summary
+        if: always()
+        run: |
+          {
+            echo "## Semantic release"
+            echo
+            if grep -q "no new version is released" semantic-release.log; then
+              echo "No GitHub release was published for this run."
+              echo
+              echo "Commits since the last tag did not match [Conventional Commits](https://www.conventionalcommits.org/)."
+              echo "Use PR titles like \`feat: add dashboard widgets\` or \`fix(ios): restore HealthKit prompt\`."
+              echo
+              echo "Recent analyzer output:"
+              echo '```'
+              rg "Analyzing commit|The release type|The commit should not|Analysis of" semantic-release.log 2>/dev/null \
+                || grep -E "Analyzing commit|The release type|The commit should not|Analysis of" semantic-release.log \
+                || true
+              echo '```'
+            elif grep -q "Published release" semantic-release.log; then
+              echo "A new release was published."
+              echo
+              echo '```'
+              rg "Published release|The next release version is" semantic-release.log 2>/dev/null \
+                || grep -E "Published release|The next release version is" semantic-release.log \
+                || true
+              echo '```'
+            else
+              echo "See the semantic-release step log for details."
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
