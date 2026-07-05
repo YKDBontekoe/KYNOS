@@ -38,7 +38,7 @@ void main() {
             gpx.codeUnits,
           ),
         );
-      zipBytes = ZipEncoder().encode(archive)!;
+      zipBytes = ZipEncoder().encode(archive);
     });
 
     tearDown(() async {

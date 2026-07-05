@@ -30,7 +30,7 @@ void main() {
           ),
         );
 
-      zipBytes = ZipEncoder().encode(archive)!;
+      zipBytes = ZipEncoder().encode(archive);
     });
 
     test('parses metrics, summaries, and running workouts with routes', () {
@@ -55,7 +55,7 @@ void main() {
 
     test('throws when export.xml is missing', () {
       const parser = AppleHealthExportParser();
-      final emptyZip = ZipEncoder().encode(Archive())!;
+      final emptyZip = ZipEncoder().encode(Archive());
 
       expect(
         () => parser.parseZip(emptyZip),
