@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.9.0...v1.10.0) (2026-07-05)
+
+
+### Bug Fixes
+
+* store huggingface token in settings instead of dotenv ([#50](https://github.com/YKDBontekoe/KYNOS/issues/50)) ([5255ab7](https://github.com/YKDBontekoe/KYNOS/commit/5255ab71ead35e674a91dbe4d482ca2cdd7f177f))
+
+
+### Features
+
+* **settings:** add loading feedback for health data import ([#49](https://github.com/YKDBontekoe/KYNOS/issues/49)) ([19bb383](https://github.com/YKDBontekoe/KYNOS/commit/19bb3839461f6e3f46520088bc2c328b241a77a1))
+
 # [1.9.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.8.0...v1.9.0) (2026-07-05)
 
 
