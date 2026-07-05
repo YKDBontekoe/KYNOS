@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.5.0...v1.6.0) (2026-07-05)
+
+
+### Features
+
+* enrich Today dashboard with trends, deltas, and gamification glance ([#41](https://github.com/YKDBontekoe/KYNOS/issues/41)) ([26e3481](https://github.com/YKDBontekoe/KYNOS/commit/26e34814e705b1dcc7e5d485dacfe9f067f596c3))
+
 # [1.5.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.4.0...v1.5.0) (2026-07-05)
 
 
