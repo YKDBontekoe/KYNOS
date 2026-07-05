@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.4.0...v1.5.0) (2026-07-05)
+
+
+### Features
+
+* add GPX import and manual run logging for sideloaded HealthKit workaround ([#40](https://github.com/YKDBontekoe/KYNOS/issues/40)) ([e57ed09](https://github.com/YKDBontekoe/KYNOS/commit/e57ed097984739f671e8689f85dd9c12a1e7cfb4))
+
 # [1.4.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.3.0...v1.4.0) (2026-07-05)
 
 
