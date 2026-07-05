@@ -76,8 +76,8 @@ class EncounterState {
 
   factory EncounterState.fromJson(Map<String, dynamic> json) => EncounterState(
         enemyId: json['enemy_id'] as String? ?? 'trail_grunt',
-        enemyMaxHp: (json['enemy_max_hp'] as num).toInt(),
-        enemyHp: (json['enemy_hp'] as num).toInt(),
+        enemyMaxHp: (json['enemy_max_hp'] as num?)?.toInt() ?? 40,
+        enemyHp: (json['enemy_hp'] as num?)?.toInt() ?? 40,
         turnCount: (json['turn_count'] as num?)?.toInt() ?? 0,
         outcome: EncounterOutcome.values.firstWhere(
           (o) => o.name == json['outcome'],

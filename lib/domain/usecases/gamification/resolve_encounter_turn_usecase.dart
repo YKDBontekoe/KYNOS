@@ -3,6 +3,7 @@ import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/encounter_state.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
+import 'package:kynos/domain/utils/seeded_roll.dart';
 
 /// Result of a single combat turn.
 class EncounterTurnResult {
@@ -74,7 +75,7 @@ class ResolveEncounterTurnUseCase {
         state = _applyPlayerDamage(state, damage, log, 'Strike');
         state = state.copyWith(focusedNextTurn: false);
       case CombatAction.rush:
-        final accuracy = _roll(
+        final accuracy = seededRoll(
               encounter.enemyId.hashCode + state.turnCount * 3,
             ) %
             100;
@@ -165,7 +166,7 @@ class ResolveEncounterTurnUseCase {
     required double multiplier,
     required int seed,
   }) {
-    final variance = (_roll(seed) % 5) - 2;
+    final variance = (seededRoll(seed) % 5) - 2;
     return ((stat / 10) * 12 * multiplier + variance).round().clamp(3, 80);
   }
 
@@ -213,6 +214,4 @@ class ResolveEncounterTurnUseCase {
     log.add('Enemy hit for $mitigated.');
     return state;
   }
-
-  int _roll(int seed) => (seed * 1103515245 + 12345) & 0x7fffffff;
 }

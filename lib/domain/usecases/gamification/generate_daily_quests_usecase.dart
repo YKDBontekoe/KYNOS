@@ -18,10 +18,12 @@ class GenerateDailyQuestsUseCase {
   Future<({List<Quest> quests, Failure? failure, bool usedModel})> call({
     required RunnerCharacter character,
     required double readinessScore,
+    DateTime? referenceTime,
   }) async {
     final base = _buildDeterministicQuests(
       character: character,
       readiness: readinessScore,
+      referenceTime: referenceTime,
     );
     final refined =
         await _tryRefineWithModel(character: character, readiness: readinessScore, baseQuests: base);
@@ -31,9 +33,10 @@ class GenerateDailyQuestsUseCase {
   List<Quest> _buildDeterministicQuests({
     required RunnerCharacter character,
     required double readiness,
+    DateTime? referenceTime,
   }) {
     final weakStat = character.stats.weakest;
-    final now = DateTime.now();
+    final now = referenceTime ?? DateTime.now();
     final expires =
         DateTime(now.year, now.month, now.day, 23, 59, 59);
 

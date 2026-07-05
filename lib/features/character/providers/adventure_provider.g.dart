@@ -35,7 +35,7 @@ final class AdventureSessionNotifierProvider
 }
 
 String _$adventureSessionNotifierHash() =>
-    r'83b369c8e9842d65ae7452b19da2501c2dbecfdc';
+    r'7c2f859e87eedee6fe2c285c1da94f4633e5e6f7';
 
 abstract class _$AdventureSessionNotifier
     extends $AsyncNotifier<AdventureViewState?> {

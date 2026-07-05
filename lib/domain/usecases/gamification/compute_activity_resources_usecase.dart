@@ -21,18 +21,22 @@ class ComputeActivityResourcesUseCase {
       );
     }
 
-    final steps = summary.steps ?? 0;
-    final calories = summary.activeCalories ?? 0;
+    final int steps = summary.steps ?? 0;
+    final double calories = summary.activeCalories ?? 0;
 
     var movePoints = (steps ~/ GamificationConstants.stepsPerMovePoint)
-        .clamp(0, GamificationConstants.maxMovePoints);
+        .clamp(0, GamificationConstants.maxMovePoints)
+        .toInt();
 
     if ((summary.runningWorkoutCount ?? 0) >= 1 && !bonusMoveUsed) {
-      movePoints = (movePoints + 1).clamp(0, GamificationConstants.maxMovePoints);
+      movePoints = (movePoints + 1)
+          .clamp(0, GamificationConstants.maxMovePoints)
+          .toInt();
     }
 
     final stamina = (calories ~/ GamificationConstants.caloriesPerStamina)
-        .clamp(0, GamificationConstants.maxStamina);
+        .clamp(0, GamificationConstants.maxStamina)
+        .toInt();
 
     return ActivityResources(
       totalMovePoints: movePoints,

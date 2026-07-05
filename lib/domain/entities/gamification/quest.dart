@@ -30,13 +30,21 @@ class QuestObjective {
         'target': target,
       };
 
-  factory QuestObjective.fromJson(Map<String, dynamic> json) => QuestObjective(
-        kind: QuestObjectiveKind.values.firstWhere(
-          (k) => k.name == json['kind'],
-          orElse: () => QuestObjectiveKind.manual,
-        ),
-        target: (json['target'] as num?)?.toDouble() ?? 0,
-      );
+  factory QuestObjective.fromJson(Map<String, dynamic> json) {
+    final kind = QuestObjectiveKind.values.firstWhere(
+      (k) => k.name == json['kind'],
+      orElse: () => QuestObjectiveKind.manual,
+    );
+    if (kind == QuestObjectiveKind.manual) {
+      return const QuestObjective(kind: QuestObjectiveKind.manual, target: 0);
+    }
+    final target = (json['target'] as num?)?.toDouble();
+    if (target == null || target <= 0) {
+      // Corrupt measurable payload must not auto-complete via a zero target.
+      return const QuestObjective(kind: QuestObjectiveKind.manual, target: 0);
+    }
+    return QuestObjective(kind: kind, target: target);
+  }
 }
 
 extension QuestTypeLabel on QuestType {

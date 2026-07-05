@@ -51,7 +51,9 @@ class EvaluateQuestProgressUseCase {
     List<WorkoutSession> todayRuns = const [],
   }) {
     final objective = quest.measurableObjective;
-    if (objective == null || objective.target <= 0) return 0;
+    if (objective == null || !objective.isMeasurable || objective.target <= 0) {
+      return 0;
+    }
     return (progress(
               quest: quest,
               summary: summary,
