@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.2.0...v1.3.0) (2026-07-05)
+
+
+### Bug Fixes
+
+* **release:** commit SideStore source metadata on each release ([21dada8](https://github.com/YKDBontekoe/KYNOS/commit/21dada86acde2937e971339b06269577a3fd9365))
+
 # [1.2.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.1.0...v1.2.0) (2026-07-05)
 
 
