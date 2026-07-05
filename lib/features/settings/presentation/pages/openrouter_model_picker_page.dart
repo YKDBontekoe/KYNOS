@@ -165,41 +165,67 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
   void _showDetail(BuildContext context, WidgetRef ref, OpenRouterModel model) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(tokens.Spacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(model.name, style: Theme.of(ctx).textTheme.titleLarge),
-            const Gap(tokens.Spacing.sm),
-            Text(model.id),
-            const Gap(tokens.Spacing.sm),
-            KynosChip.metric(
-              label: 'Pricing',
-              value: formatOpenRouterPricing(model),
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.75,
+          minChildSize: 0.35,
+          maxChildSize: 0.9,
+          builder: (sheetContext, scrollController) => Padding(
+            padding: const EdgeInsets.all(tokens.Spacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          model.name,
+                          style: Theme.of(sheetContext).textTheme.titleLarge,
+                        ),
+                        const Gap(tokens.Spacing.sm),
+                        Text(model.id),
+                        const Gap(tokens.Spacing.sm),
+                        KynosChip.metric(
+                          label: 'Pricing',
+                          value: formatOpenRouterPricing(model),
+                        ),
+                        if (model.description != null &&
+                            model.description!.isNotEmpty) ...[
+                          const Gap(tokens.Spacing.md),
+                          const KynosSectionHeader(title: 'Description'),
+                          const Gap(tokens.Spacing.xs),
+                          Text(model.description!),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const Gap(tokens.Spacing.md),
+                FilledButton(
+                  onPressed: () async {
+                    await ref
+                        .read(settingsProvider.notifier)
+                        .updateSelectedCloudModel(
+                          id: model.id,
+                          name: model.name,
+                        );
+                    if (ctx.mounted) {
+                      Navigator.pop(ctx);
+                    }
+                    if (context.mounted) {
+                      context.pop();
+                    }
+                  },
+                  child: const Text('Select model'),
+                ),
+              ],
             ),
-            if (model.description != null) ...[
-              const Gap(tokens.Spacing.sm),
-              Text(model.description!),
-            ],
-            const Gap(tokens.Spacing.md),
-            FilledButton(
-              onPressed: () async {
-                await ref.read(settingsProvider.notifier).updateSelectedCloudModel(
-                      id: model.id,
-                      name: model.name,
-                    );
-                if (ctx.mounted) {
-                  Navigator.pop(ctx);
-                }
-                if (context.mounted) {
-                  context.pop();
-                }
-              },
-              child: const Text('Select model'),
-            ),
-          ],
+          ),
         ),
       ),
     );
