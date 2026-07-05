@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/earned_title.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
 
 class TitlesPanel extends StatelessWidget {
   const TitlesPanel({super.key, required this.titles});
@@ -16,35 +16,20 @@ class TitlesPanel extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final title in titles)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: AppTheme.card,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: AppTheme.separator,
-                width: 0.5,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.workspace_premium_rounded,
+                size: 14,
+                color: AppTheme.energy,
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.workspace_premium_rounded,
-                  size: 14,
-                  color: AppTheme.energy,
-                ),
-                const Gap(Spacing.sm),
-                Text(
-                  title.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.label,
-                  ),
-                ),
-              ],
-            ),
+              const Gap(Spacing.xs),
+              KynosChip.accent(
+                label: title.name,
+                color: AppTheme.energy,
+              ),
+            ],
           ),
       ],
     );

@@ -18,7 +18,7 @@ class AssistantBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.84),
+        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.84),
         child: GlassCard(
           borderRadius: Radius.lg,
           padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),

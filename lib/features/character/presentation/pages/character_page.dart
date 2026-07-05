@@ -71,8 +71,8 @@ class CharacterPage extends ConsumerWidget {
           ),
           data: (character) {
             if (character == null) {
-              return SliverFillRemaining(
-                child: EmptyCharacterState(ref: ref),
+              return const SliverFillRemaining(
+                child: EmptyCharacterState(),
               );
             }
             return SliverPadding(
@@ -115,13 +115,11 @@ class CharacterPage extends ConsumerWidget {
   }
 }
 
-class EmptyCharacterState extends StatelessWidget {
-  const EmptyCharacterState({super.key, required this.ref});
-
-  final WidgetRef ref;
+class EmptyCharacterState extends ConsumerWidget {
+  const EmptyCharacterState({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.all(tokens.Spacing.lg),
       child: Column(

@@ -52,9 +52,16 @@ class NavIconPainter extends CustomPainter {
 
     var i = 0;
     double cx = 0, cy = 0;
+    double? lastCubicCtrlX;
+    double? lastCubicCtrlY;
     String cmd = 'M';
 
     double next() => double.parse(tokens[i++]);
+
+    void recordCubicCtrl(double x2, double y2) {
+      lastCubicCtrlX = x2;
+      lastCubicCtrlY = y2;
+    }
 
     while (i < tokens.length) {
       final t = tokens[i];
@@ -84,6 +91,16 @@ class NavIconPainter extends CustomPainter {
           cx = next();
           cy = next();
           path.cubicTo(x1, y1, x2, y2, cx, cy);
+          recordCubicCtrl(x2, y2);
+        case 'S':
+          final x2 = next(), y2 = next();
+          final ex = next(), ey = next();
+          final x1 = lastCubicCtrlX != null ? 2 * cx - lastCubicCtrlX! : cx;
+          final y1 = lastCubicCtrlY != null ? 2 * cy - lastCubicCtrlY! : cy;
+          path.cubicTo(x1, y1, x2, y2, ex, ey);
+          recordCubicCtrl(x2, y2);
+          cx = ex;
+          cy = ey;
         case 'Q':
           final x1 = next(), y1 = next();
           cx = next();
@@ -125,16 +142,30 @@ class NavIconPainter extends CustomPainter {
           final dx1 = next(), dy1 = next();
           final dx2 = next(), dy2 = next();
           final dx = next(), dy = next();
+          final x2 = cx + dx2;
+          final y2 = cy + dy2;
           path.cubicTo(
             cx + dx1,
             cy + dy1,
-            cx + dx2,
-            cy + dy2,
+            x2,
+            y2,
             cx + dx,
             cy + dy,
           );
           cx += dx;
           cy += dy;
+          recordCubicCtrl(x2, y2);
+        case 's':
+          final dx2 = next(), dy2 = next();
+          final dx = next(), dy = next();
+          final x1 = lastCubicCtrlX != null ? 2 * cx - lastCubicCtrlX! : cx;
+          final y1 = lastCubicCtrlY != null ? 2 * cy - lastCubicCtrlY! : cy;
+          final x2 = cx + dx2;
+          final y2 = cy + dy2;
+          cx += dx;
+          cy += dy;
+          path.cubicTo(x1, y1, x2, y2, cx, cy);
+          recordCubicCtrl(x2, y2);
         case 'a':
           final rx = next(), ry = next();
           final rot = next();

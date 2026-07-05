@@ -9,10 +9,13 @@ import 'package:kynos/features/training/providers/training_insights_provider.dar
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
+import 'package:logger/logger.dart';
 
 /// AI-generated session intent, adjustments, and debrief cards.
 class TrainingInsightsCards extends StatelessWidget {
   const TrainingInsightsCards({super.key, required this.insightsState});
+
+  static final _logger = Logger();
 
   final AsyncValue<TrainingInsightsState> insightsState;
 
@@ -22,7 +25,14 @@ class TrainingInsightsCards extends StatelessWidget {
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Building training insights...'),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (error, stackTrace) {
+        _logger.w(
+          'Training insights unavailable',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return const SizedBox.shrink();
+      },
       data: (state) {
         final insights = state.insights;
         if (insights == null) return const SizedBox.shrink();

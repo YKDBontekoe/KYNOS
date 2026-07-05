@@ -17,7 +17,9 @@ import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/gait_model_card.dart';
+import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
@@ -73,13 +75,25 @@ class TrainingPage extends ConsumerWidget {
               const Gap(tokens.Spacing.lg),
               const KynosSectionHeader(title: 'This Week'),
               const Gap(tokens.Spacing.sm),
-              WeeklyStatsGrid(history: history.value ?? const []),
+              history.when(
+                loading: () => const KynosCard(
+                  child: KynosLoadingLine(label: 'Loading weekly stats...'),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (items) => WeeklyStatsGrid(history: items),
+              ),
               const Gap(tokens.Spacing.lg),
               TrainingInsightsCards(insightsState: insightsState),
               const Gap(tokens.Spacing.lg),
               const KynosSectionHeader(title: '30-Day Trends'),
               const Gap(tokens.Spacing.sm),
-              TrendCards(history: history.value ?? const []),
+              history.when(
+                loading: () => const KynosCard(
+                  child: KynosLoadingLine(label: 'Loading trends...'),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (items) => TrendCards(history: items),
+              ),
               const Gap(tokens.Spacing.lg),
               Row(
                 children: [
@@ -91,7 +105,13 @@ class TrainingPage extends ConsumerWidget {
                 ],
               ),
               const Gap(tokens.Spacing.sm),
-              PastRunsList(runs: recentRuns.value ?? const []),
+              recentRuns.when(
+                loading: () => const KynosCard(
+                  child: KynosLoadingLine(label: 'Loading recent runs...'),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (runs) => PastRunsList(runs: runs),
+              ),
               const Gap(tokens.Spacing.lg),
               const KynosSectionHeader(title: 'Gait Model'),
               const Gap(tokens.Spacing.sm),

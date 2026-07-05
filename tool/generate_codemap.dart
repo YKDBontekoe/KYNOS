@@ -3,10 +3,12 @@
 library;
 
 /// Usage: dart run tool/generate_codemap.dart
+import 'dart:convert';
 import 'dart:io';
 
 const _beginMarker = '<!-- CODEMAP_AUTO_BEGIN -->';
 const _endMarker = '<!-- CODEMAP_AUTO_END -->';
+const _hotFileLineThreshold = 250;
 
 void main() {
   final libDir = Directory('lib');
@@ -30,8 +32,8 @@ void main() {
   for (final file in files) {
     final rel = file.path.replaceAll('\\', '/');
     final content = file.readAsStringSync();
-    final lineCount = content.split('\n').length;
-    if (lineCount >= 200) {
+    final lineCount = const LineSplitter().convert(content).length;
+    if (lineCount > _hotFileLineThreshold) {
       hotFiles.add((path: rel, lines: lineCount));
     }
 
@@ -66,7 +68,7 @@ void main() {
           .take(20)
           .map(
             (f) =>
-                '| `${f.path}` | ${f.lines} | Split if > 250 lines |',
+                '| `${f.path}` | ${f.lines} | Split if > $_hotFileLineThreshold lines |',
           )
           .join('\n'),
     )

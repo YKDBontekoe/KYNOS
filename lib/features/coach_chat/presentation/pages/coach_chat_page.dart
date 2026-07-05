@@ -24,6 +24,8 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final current = ref.read(modelSetupProvider);
+      if (current case AsyncData(:final value) when value) return;
       ref.read(modelSetupProvider.notifier).checkAndInstall();
     });
   }

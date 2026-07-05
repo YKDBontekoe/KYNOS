@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/features/settings/providers/settings_controller.dart';
+import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
-import 'package:provider/provider.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = context.watch<SettingsController>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
     final kynos = context.kynosTheme;
 
     return Scaffold(
@@ -32,14 +33,14 @@ class SettingsPage extends StatelessWidget {
                 _SwitchTile(
                   title: 'Dark Mode',
                   icon: Icons.dark_mode_outlined,
-                  value: controller.isDarkMode,
-                  onChanged: controller.updateThemeMode,
+                  value: settings.isDarkMode,
+                  onChanged: settingsNotifier.updateThemeMode,
                 ),
                 Divider(color: kynos.separator, height: 1),
                 _DropdownTile(
                   title: 'Language',
                   icon: Icons.language,
-                  value: controller.languageCode,
+                  value: settings.languageCode,
                   items: const [
                     DropdownMenuItem(value: 'en', child: Text('English')),
                     DropdownMenuItem(value: 'es', child: Text('Spanish')),
@@ -47,7 +48,7 @@ class SettingsPage extends StatelessWidget {
                   ],
                   onChanged: (String? newValue) {
                     if (newValue != null) {
-                      controller.updateLanguage(newValue);
+                      settingsNotifier.updateLanguage(newValue);
                     }
                   },
                 ),

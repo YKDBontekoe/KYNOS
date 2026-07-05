@@ -87,7 +87,9 @@ lib/
 
 ```
 features/  ──►  domain/  ◄──  infrastructure/
-shared/    ──►  domain/ + infrastructure/  (DI only)
+shared/providers/  ──►  domain/ + infrastructure/  (DI composition only)
+shared/widgets/    ──►  domain/  (no infrastructure)
+shared/utils/      ──►  domain/  (no infrastructure)
 ```
 
 Features must **never** import `infrastructure/` directly — use `shared/providers/`.

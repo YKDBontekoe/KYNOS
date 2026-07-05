@@ -9,6 +9,7 @@ export 'package:kynos/shared/providers/health_providers.dart'
     show healthRepositoryProvider;
 
 /// @deprecated Use [healthRepositoryProvider] instead.
+@Deprecated('Use healthRepositoryProvider from health_providers.dart instead.')
 final sharedHealthRepositoryProvider = Provider<HealthRepository>((ref) {
   return ref.watch(healthRepositoryProvider);
 });

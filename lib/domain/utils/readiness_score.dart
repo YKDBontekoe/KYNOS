@@ -1,26 +1,54 @@
 import 'package:kynos/domain/entities/health_summary.dart';
 
-/// Composite recovery readiness score (0–100) from daily health metrics.
+const _hrvWeight = 0.35;
+const _rhrWeight = 0.25;
+const _sleepWeight = 0.25;
+const _spo2Weight = 0.15;
+
+bool _hasReadinessMetrics(HealthSummary summary) =>
+    summary.hrvMs != null ||
+    summary.rhrBpm != null ||
+    summary.sleepHours != null ||
+    summary.bloodOxygenPercent != null;
+
+/// Composite recovery readiness score (0–100) from available daily metrics.
+///
+/// Null metrics are excluded from the weighted average rather than treated as
+/// unhealthy sentinel values.
 double readinessScore(HealthSummary? summary) {
-  if (summary == null) return 0;
+  if (summary == null || !_hasReadinessMetrics(summary)) return 0;
 
-  final hrvScore = ((summary.hrvMs ?? 20).clamp(20, 110) - 20) / 90;
-  final rhrScore = 1 - (((summary.rhrBpm ?? 75).clamp(45, 90) - 45) / 45);
-  final sleepScore = ((summary.sleepHours ?? 5).clamp(4, 9) - 4) / 5;
-  final spo2Score =
-      ((summary.bloodOxygenPercent ?? 95).clamp(90, 100) - 90) / 10;
+  var weighted = 0.0;
+  var totalWeight = 0.0;
 
-  return ((hrvScore * 0.35 +
-              rhrScore * 0.25 +
-              sleepScore * 0.25 +
-              spo2Score * 0.15) *
-          100)
-      .clamp(0, 100);
+  if (summary.hrvMs != null) {
+    final hrvScore = (summary.hrvMs!.clamp(20, 110) - 20) / 90;
+    weighted += hrvScore * _hrvWeight;
+    totalWeight += _hrvWeight;
+  }
+  if (summary.rhrBpm != null) {
+    final rhrScore = 1 - ((summary.rhrBpm!.clamp(45, 90) - 45) / 45);
+    weighted += rhrScore * _rhrWeight;
+    totalWeight += _rhrWeight;
+  }
+  if (summary.sleepHours != null) {
+    final sleepScore = (summary.sleepHours!.clamp(4, 9) - 4) / 5;
+    weighted += sleepScore * _sleepWeight;
+    totalWeight += _sleepWeight;
+  }
+  if (summary.bloodOxygenPercent != null) {
+    final spo2Score = (summary.bloodOxygenPercent!.clamp(90, 100) - 90) / 10;
+    weighted += spo2Score * _spo2Weight;
+    totalWeight += _spo2Weight;
+  }
+
+  if (totalWeight == 0) return 0;
+  return ((weighted / totalWeight) * 100).clamp(0, 100);
 }
 
-/// Readiness score for quest generation when summary may be absent.
+/// Readiness score for quest generation when summary may be absent or sparse.
 double readinessScoreOrDefault(HealthSummary? summary, {double fallback = 60}) {
-  if (summary == null) return fallback;
+  if (summary == null || !_hasReadinessMetrics(summary)) return fallback;
   return readinessScore(summary);
 }
 

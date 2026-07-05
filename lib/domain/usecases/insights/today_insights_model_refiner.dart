@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
@@ -60,9 +62,9 @@ class TodayInsightsModelRefiner {
 
       await _aiCoachRepository.resetSession();
       final buffer = StringBuffer();
-      await for (final chunk in _aiCoachRepository.chat(
-        userMessage: prompt.toString(),
-      )) {
+      await for (final chunk in _aiCoachRepository
+          .chat(userMessage: prompt.toString())
+          .timeout(const Duration(seconds: 30))) {
         buffer.write(chunk);
       }
 
@@ -92,7 +94,7 @@ class TodayInsightsModelRefiner {
 })?
 parseInsightModelText(String raw) {
   String? take(String key) {
-    final match = RegExp('$key\\s*:(.*)', multiLine: true).firstMatch(raw);
+    final match = RegExp('^$key\\s*:(.*)', multiLine: true).firstMatch(raw);
     return match?.group(1)?.trim();
   }
 

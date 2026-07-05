@@ -74,22 +74,14 @@ void _addWorkoutContribution(HealthDataPoint point, _DailyAccumulator acc) {
   acc.runningWorkoutCount += 1;
   acc.runningWorkoutMinutes += point.dateTo.difference(point.dateFrom).inMinutes.toDouble();
 
-  final summary = point.workoutSummary;
-  if (summary?.totalDistance != null) {
-    acc.runningWorkoutDistanceMeters += summary!.totalDistance.toDouble();
-  }
-  if (summary?.totalEnergyBurned != null) {
-    acc.runningWorkoutCalories += summary!.totalEnergyBurned.toDouble();
+  final distance = distanceMeters(point);
+  if (distance != null) {
+    acc.runningWorkoutDistanceMeters += distance;
   }
 
-  if (point.value is WorkoutHealthValue) {
-    final value = point.value as WorkoutHealthValue;
-    if (value.totalDistance != null) {
-      acc.runningWorkoutDistanceMeters += value.totalDistance!;
-    }
-    if (value.totalEnergyBurned != null) {
-      acc.runningWorkoutCalories += value.totalEnergyBurned!;
-    }
+  final energy = energyKcal(point);
+  if (energy != null) {
+    acc.runningWorkoutCalories += energy;
   }
 }
 

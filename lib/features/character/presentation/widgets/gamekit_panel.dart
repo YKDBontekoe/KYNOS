@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/repositories/gamekit_repository.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
@@ -34,7 +35,7 @@ class GameKitPanel extends ConsumerWidget {
                   onTap: () => ref
                       .read(gameKitRepositoryProvider)
                       .showLeaderboard(
-                        leaderboardId: 'kynos.leaderboard.athlete_score',
+                        leaderboardId: LeaderboardIds.athleteScore,
                       ),
                 ),
               ),
@@ -81,7 +82,7 @@ class GameKitButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 16, color: AppTheme.secondaryLabel),
-            const Gap(Spacing.sm),
+            const Gap(tokens.Spacing.sm),
             Text(
               label,
               style: GoogleFonts.inter(

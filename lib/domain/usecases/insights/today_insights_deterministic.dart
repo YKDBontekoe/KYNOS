@@ -36,13 +36,13 @@ TodayInsights buildTodayInsightsDeterministic({
   ];
 
   final riskFlags = <String>[];
-  if ((today.sleepHours ?? 0) < 6) {
+  if (today.sleepHours != null && today.sleepHours! < 6) {
     riskFlags.add('Sleep debt: keep intensity lower today.');
   }
-  if ((today.hrvMs ?? 0) < 35) {
+  if (today.hrvMs != null && today.hrvMs! < 35) {
     riskFlags.add('Low recovery score (HRV): strain is elevated.');
   }
-  if ((today.rhrBpm ?? 999) > 70) {
+  if (today.rhrBpm != null && today.rhrBpm! > 70) {
     riskFlags.add('High resting pulse: possible fatigue signal.');
   }
   if (readiness < 45) {
@@ -58,7 +58,7 @@ TodayInsights buildTodayInsightsDeterministic({
       ? 'Keep it aerobic. Cap effort at RPE 6-7.'
       : 'Switch to easy run or brisk walk. Cut volume ~20%.';
 
-  final actionTonight = (today.sleepHours ?? 0) < 7
+  final actionTonight = today.sleepHours != null && today.sleepHours! < 7
       ? 'Wind down early. Target 8+ hours in bed.'
       : 'Hydrate and hit protein to support tomorrow.';
 

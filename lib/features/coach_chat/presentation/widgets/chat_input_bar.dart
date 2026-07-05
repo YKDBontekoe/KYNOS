@@ -32,6 +32,8 @@ class ChatInputBar extends StatelessWidget {
                   controller: controller,
                   focusNode: focusNode,
                   enabled: !isStreaming,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: isStreaming ? null : onSend,
                   decoration: const InputDecoration(
                     hintText: 'Ask your coach...',
                     border: InputBorder.none,
