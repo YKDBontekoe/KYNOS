@@ -1,3 +1,15 @@
+# [1.12.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.11.0...v1.12.0) (2026-07-05)
+
+
+### Bug Fixes
+
+* **ai:** migrate legacy .task models to litertlm for coach chat ([#56](https://github.com/YKDBontekoe/KYNOS/issues/56)) ([9ac1149](https://github.com/YKDBontekoe/KYNOS/commit/9ac1149180348bd81809f93126e38b76e408d873))
+
+
+### Features
+
+* add playable trail run game to character tab ([#55](https://github.com/YKDBontekoe/KYNOS/issues/55)) ([07b066a](https://github.com/YKDBontekoe/KYNOS/commit/07b066ac3769d26ae4d3a78a5e520e78ec6645d8))
+
 # [1.11.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.10.0...v1.11.0) (2026-07-05)
 
 
