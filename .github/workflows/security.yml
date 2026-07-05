@@ -37,7 +37,8 @@ jobs:
       - name: Dependency Vulnerability Audit (osv-scanner)
         uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
         with:
-          scan-args: --recursive ./
+          # Scan Flutter runtime deps only; npm lockfile is release-tooling only.
+          scan-args: --lockfile=pubspec.lock
 
   pub-outdated:
     runs-on: ubuntu-latest
