@@ -18,10 +18,12 @@ class GenerateDailyQuestsUseCase {
   Future<({List<Quest> quests, Failure? failure, bool usedModel})> call({
     required RunnerCharacter character,
     required double readinessScore,
+    DateTime? referenceTime,
   }) async {
     final base = _buildDeterministicQuests(
       character: character,
       readiness: readinessScore,
+      referenceTime: referenceTime,
     );
     final refined =
         await _tryRefineWithModel(character: character, readiness: readinessScore, baseQuests: base);
@@ -31,9 +33,10 @@ class GenerateDailyQuestsUseCase {
   List<Quest> _buildDeterministicQuests({
     required RunnerCharacter character,
     required double readiness,
+    DateTime? referenceTime,
   }) {
     final weakStat = character.stats.weakest;
-    final now = DateTime.now();
+    final now = referenceTime ?? DateTime.now();
     final expires =
         DateTime(now.year, now.month, now.day, 23, 59, 59);
 
@@ -45,7 +48,61 @@ class GenerateDailyQuestsUseCase {
         now: now,
         expires: expires,
       ),
+      _healthMetricQuest(readiness: readiness, now: now, expires: expires),
     ];
+  }
+
+  Quest _healthMetricQuest({
+    required double readiness,
+    required DateTime now,
+    required DateTime expires,
+  }) {
+    final id = 'daily_health_${now.millisecondsSinceEpoch}';
+    final useSteps = now.day.isEven;
+    final difficulty = readiness >= 60
+        ? QuestDifficulty.normal
+        : QuestDifficulty.easy;
+    final xp = difficulty == QuestDifficulty.normal ? 150 : 100;
+
+    if (useSteps) {
+      final target = readiness >= 60 ? 8000.0 : 6000.0;
+      return Quest(
+        id: id,
+        type: QuestType.daily,
+        difficulty: difficulty,
+        title: 'Step Patrol',
+        narrative: 'Every step fuels the trail. Walk the path today.',
+        objective: 'Reach ${target.toInt()} steps today.',
+        status: QuestStatus.active,
+        xpReward: xp,
+        statRewards: {CharacterStatId.endurance: 2, CharacterStatId.willpower: 1},
+        generatedAt: now,
+        expiresAt: expires,
+        measurableObjective: QuestObjective(
+          kind: QuestObjectiveKind.steps,
+          target: target,
+        ),
+      );
+    }
+
+    final target = readiness >= 60 ? 400.0 : 300.0;
+    return Quest(
+      id: id,
+      type: QuestType.daily,
+      difficulty: difficulty,
+      title: 'Calorie Forge',
+      narrative: 'Burn energy. Build stamina for the fights ahead.',
+      objective: 'Burn ${target.toInt()} active calories today.',
+      status: QuestStatus.active,
+      xpReward: xp,
+      statRewards: {CharacterStatId.strength: 2, CharacterStatId.recovery: 1},
+      generatedAt: now,
+      expiresAt: expires,
+      measurableObjective: QuestObjective(
+        kind: QuestObjectiveKind.activeCalories,
+        target: target,
+      ),
+    );
   }
 
   Quest _questForStat({

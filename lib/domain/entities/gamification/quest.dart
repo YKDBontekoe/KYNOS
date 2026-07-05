@@ -6,6 +6,47 @@ enum QuestStatus { active, completed, failed, expired }
 
 enum QuestDifficulty { easy, normal, hard, legendary }
 
+enum QuestObjectiveKind {
+  steps,
+  activeCalories,
+  runMinutes,
+  runDistanceKm,
+  manual,
+}
+
+class QuestObjective {
+  const QuestObjective({
+    required this.kind,
+    required this.target,
+  });
+
+  final QuestObjectiveKind kind;
+  final double target;
+
+  bool get isMeasurable => kind != QuestObjectiveKind.manual;
+
+  Map<String, dynamic> toJson() => {
+        'kind': kind.name,
+        'target': target,
+      };
+
+  factory QuestObjective.fromJson(Map<String, dynamic> json) {
+    final kind = QuestObjectiveKind.values.firstWhere(
+      (k) => k.name == json['kind'],
+      orElse: () => QuestObjectiveKind.manual,
+    );
+    if (kind == QuestObjectiveKind.manual) {
+      return const QuestObjective(kind: QuestObjectiveKind.manual, target: 0);
+    }
+    final target = (json['target'] as num?)?.toDouble();
+    if (target == null || target <= 0) {
+      // Corrupt measurable payload must not auto-complete via a zero target.
+      return const QuestObjective(kind: QuestObjectiveKind.manual, target: 0);
+    }
+    return QuestObjective(kind: kind, target: target);
+  }
+}
+
 extension QuestTypeLabel on QuestType {
   String get label => switch (this) {
         QuestType.daily => 'DAILY',
@@ -39,6 +80,7 @@ class Quest {
     required this.expiresAt,
     this.titleReward,
     this.completedAt,
+    this.measurableObjective,
   });
 
   final String id;
@@ -64,6 +106,9 @@ class Quest {
   final String? titleReward;
   final DateTime? completedAt;
 
+  /// When set, progress is computed from health data instead of manual completion.
+  final QuestObjective? measurableObjective;
+
   bool get isExpired =>
       DateTime.now().isAfter(expiresAt) && status == QuestStatus.active;
 
@@ -73,6 +118,7 @@ class Quest {
     String? objective,
     QuestStatus? status,
     DateTime? completedAt,
+    QuestObjective? measurableObjective,
   }) =>
       Quest(
         id: id,
@@ -88,6 +134,7 @@ class Quest {
         expiresAt: expiresAt,
         titleReward: titleReward,
         completedAt: completedAt ?? this.completedAt,
+        measurableObjective: measurableObjective ?? this.measurableObjective,
       );
 
   Map<String, dynamic> toJson() => {
@@ -104,6 +151,8 @@ class Quest {
         'expires_at': expiresAt.toIso8601String(),
         'title_reward': titleReward,
         'completed_at': completedAt?.toIso8601String(),
+        if (measurableObjective != null)
+          'measurable_objective': measurableObjective!.toJson(),
       };
 
   factory Quest.fromJson(Map<String, dynamic> json) {
@@ -141,6 +190,11 @@ class Quest {
       titleReward: json['title_reward'] as String?,
       completedAt: json['completed_at'] != null
           ? DateTime.tryParse(json['completed_at'] as String)
+          : null,
+      measurableObjective: json['measurable_objective'] != null
+          ? QuestObjective.fromJson(
+              json['measurable_objective'] as Map<String, dynamic>,
+            )
           : null,
     );
   }

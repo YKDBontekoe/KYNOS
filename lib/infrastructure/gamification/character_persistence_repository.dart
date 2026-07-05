@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:kynos/core/errors/failures.dart';
+import 'package:kynos/domain/entities/gamification/adventure_session.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/repositories/character_repository.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CharacterPersistenceRepository implements CharacterRepository {
   static const _characterKey = 'kynos_runner_character_v1';
   static const _questsKey = 'kynos_daily_quests_v1';
+  static const _adventureKey = 'kynos_adventure_session_v1';
 
   @override
   Future<({RunnerCharacter? character, Failure? failure})>
@@ -81,6 +83,36 @@ class CharacterPersistenceRepository implements CharacterRepository {
       return null;
     } catch (e) {
       return StorageFailure('Failed to save quests: $e');
+    }
+  }
+
+  @override
+  Future<({AdventureSession? session, Failure? failure})>
+      loadAdventureSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_adventureKey);
+      if (json == null) return (session: null, failure: null);
+      final session = AdventureSession.fromJson(
+        jsonDecode(json) as Map<String, dynamic>,
+      );
+      return (session: session, failure: null);
+    } catch (e) {
+      return (
+        session: null,
+        failure: StorageFailure('Failed to load adventure session: $e'),
+      );
+    }
+  }
+
+  @override
+  Future<Failure?> saveAdventureSession(AdventureSession session) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_adventureKey, jsonEncode(session.toJson()));
+      return null;
+    } catch (e) {
+      return StorageFailure('Failed to save adventure session: $e');
     }
   }
 }
