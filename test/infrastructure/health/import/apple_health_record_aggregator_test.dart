@@ -44,5 +44,35 @@ void main() {
       expect(summary.activeCalories, 400);
       expect(summary.exerciseMinutes, 30);
     });
+
+    test('does not double-count active calories or exercise minutes', () {
+      final aggregator = AppleHealthRecordAggregator();
+
+      aggregator
+        ..addRecord(
+          type: 'HKQuantityTypeIdentifierActiveEnergyBurned',
+          value: '200',
+          unit: 'kcal',
+          startDate: '2026-04-20 08:00:00 +0000',
+          endDate: '2026-04-20 08:05:00 +0000',
+        )
+        ..addRecord(
+          type: 'HKQuantityTypeIdentifierAppleExerciseTime',
+          value: '15',
+          unit: 'min',
+          startDate: '2026-04-20 08:00:00 +0000',
+          endDate: '2026-04-20 08:05:00 +0000',
+        )
+        ..addActivitySummary(
+          dateComponents: '2026-04-20',
+          activeEnergyBurned: '400',
+          activeEnergyBurnedUnit: 'kcal',
+          appleExerciseTime: '30',
+        );
+
+      final summary = aggregator.finalize().first;
+      expect(summary.activeCalories, 400);
+      expect(summary.exerciseMinutes, 30);
+    });
   });
 }

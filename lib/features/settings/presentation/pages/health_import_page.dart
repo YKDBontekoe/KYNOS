@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -6,11 +9,14 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/features/settings/presentation/widgets/apple_health_export_preview_card.dart';
+import 'package:kynos/features/settings/presentation/widgets/gpx_import_preview_card.dart';
 import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:kynos/infrastructure/health/import/apple_health_export_isolate.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
 import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
-import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/utils/picked_file_bytes.dart';
 
 class HealthImportPage extends ConsumerStatefulWidget {
   const HealthImportPage({super.key});
@@ -22,7 +28,7 @@ class HealthImportPage extends ConsumerStatefulWidget {
 class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   GpxParseResult? _gpxPreview;
   AppleHealthExportParseResult? _zipPreview;
-  List<int>? _zipBytes;
+  PlatformFile? _pickedFile;
   String? _error;
   bool _isImporting = false;
 
@@ -30,37 +36,39 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
     setState(() {
       _gpxPreview = null;
       _zipPreview = null;
-      _zipBytes = null;
+      _pickedFile = null;
       _error = null;
     });
 
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['gpx', 'zip'],
-      withData: true,
+      withData: kIsWeb,
     );
 
     if (!mounted || result == null || result.files.isEmpty) return;
 
     final file = result.files.single;
-    final bytes = file.bytes;
-    if (bytes == null) {
-      setState(() => _error = 'Could not read the selected file.');
-      return;
-    }
-
     final extension = file.extension?.toLowerCase();
+
     try {
+      final bytes = await readPickedFileBytes(file);
       if (extension == 'zip') {
-        final parsed = const AppleHealthExportParser().parseZip(bytes);
+        final parsed = await parseAppleHealthZipAsync(bytes);
+        if (!mounted) return;
         setState(() {
           _zipPreview = parsed;
-          _zipBytes = bytes;
+          _pickedFile = file;
         });
       } else {
-        final content = String.fromCharCodes(bytes);
-        final parsed = const GpxWorkoutParser().parse(content);
-        setState(() => _gpxPreview = parsed);
+        final parsed = const GpxWorkoutParser().parse(
+          utf8.decode(bytes, allowMalformed: true),
+        );
+        if (!mounted) return;
+        setState(() {
+          _gpxPreview = parsed;
+          _pickedFile = file;
+        });
       }
     } on FormatException catch (e) {
       setState(() => _error = e.message);
@@ -72,8 +80,8 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   Future<void> _confirmImport() async {
     setState(() => _isImporting = true);
 
-    if (_zipPreview != null && _zipBytes != null) {
-      await _importZip(_zipBytes!);
+    if (_zipPreview != null && _pickedFile != null) {
+      await _importZip(_pickedFile!);
     } else if (_gpxPreview != null) {
       await _importGpx();
     }
@@ -113,7 +121,8 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
     }
   }
 
-  Future<void> _importZip(List<int> bytes) async {
+  Future<void> _importZip(PlatformFile file) async {
+    final bytes = await readPickedFileBytes(file);
     final useCase = ref.read(importAppleHealthExportUseCaseProvider);
     final result = await useCase(zipBytes: bytes);
 
@@ -148,8 +157,6 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    final zipPreview = _zipPreview;
-    final gpxPreview = _gpxPreview;
 
     return Scaffold(
       backgroundColor: kynos.background,
@@ -184,117 +191,22 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
                   ),
             ),
           ],
-          if (zipPreview != null) ...[
+          if (_zipPreview != null) ...[
             const Gap(tokens.Spacing.lg),
-            KynosCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Apple Health export preview',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const Gap(tokens.Spacing.sm),
-                  _PreviewRow(
-                    label: 'Health records',
-                    value: '${zipPreview.recordCount}',
-                  ),
-                  _PreviewRow(
-                    label: 'Daily summaries',
-                    value: '${zipPreview.summaries.length}',
-                  ),
-                  _PreviewRow(
-                    label: 'Running workouts',
-                    value: '${zipPreview.workouts.length}',
-                  ),
-                  _PreviewRow(
-                    label: 'Runs with GPS routes',
-                    value:
-                        '${zipPreview.workouts.where((w) => w.routePoints.isNotEmpty).length}',
-                  ),
-                  if (zipPreview.skippedWorkouts > 0)
-                    _PreviewRow(
-                      label: 'Skipped workouts',
-                      value: '${zipPreview.skippedWorkouts}',
-                    ),
-                ],
-              ),
-            ),
-            const Gap(tokens.Spacing.md),
-            FilledButton(
-              onPressed: _isImporting ? null : _confirmImport,
-              child: Text(_isImporting ? 'Importing…' : 'Import all data'),
+            AppleHealthExportPreviewCard(
+              preview: _zipPreview!,
+              isImporting: _isImporting,
+              onImport: _confirmImport,
             ),
           ],
-          if (gpxPreview != null) ...[
+          if (_gpxPreview != null) ...[
             const Gap(tokens.Spacing.lg),
-            KynosCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'GPX preview',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const Gap(tokens.Spacing.sm),
-                  _PreviewRow(
-                    label: 'Date',
-                    value: _formatDate(gpxPreview.workout.start),
-                  ),
-                  _PreviewRow(
-                    label: 'Duration',
-                    value: _formatDuration(gpxPreview.workout.duration),
-                  ),
-                  _PreviewRow(
-                    label: 'Distance',
-                    value:
-                        '${((gpxPreview.workout.distanceMeters ?? 0) / 1000).toStringAsFixed(2)} km',
-                  ),
-                  _PreviewRow(
-                    label: 'Route points',
-                    value: '${gpxPreview.routePoints.length}',
-                  ),
-                ],
-              ),
-            ),
-            const Gap(tokens.Spacing.md),
-            FilledButton(
-              onPressed: _isImporting ? null : _confirmImport,
-              child: Text(_isImporting ? 'Importing…' : 'Confirm import'),
+            GpxImportPreviewCard(
+              preview: _gpxPreview!,
+              isImporting: _isImporting,
+              onImport: _confirmImport,
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
-        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds % 60;
-    return '${minutes}m ${seconds}s';
-  }
-}
-
-class _PreviewRow extends StatelessWidget {
-  const _PreviewRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: tokens.Spacing.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          Text(value, style: Theme.of(context).textTheme.titleSmall),
         ],
       ),
     );

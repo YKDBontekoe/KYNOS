@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:archive/archive.dart';
 import 'package:kynos/core/constants/imported_workout_ids.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
@@ -5,7 +7,7 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_date_parser.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_record_aggregator.dart';
-import 'package:kynos/infrastructure/health/import/apple_health_unit_converter.dart';
+import 'package:kynos/infrastructure/health/import/apple_health_workout_builder.dart';
 import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
 import 'package:xml/xml_events.dart';
 
@@ -75,7 +77,7 @@ class AppleHealthExportParser {
     for (final entry in files.entries) {
       final name = entry.key.toLowerCase();
       if (name.endsWith('export.xml') && !name.endsWith('export_cda.xml')) {
-        return String.fromCharCodes(entry.value);
+        return utf8.decode(entry.value, allowMalformed: true);
       }
     }
     return null;
@@ -91,7 +93,7 @@ class AppleHealthExportParser {
     var recordCount = 0;
     var skippedWorkouts = 0;
 
-    _WorkoutBuilder? currentWorkout;
+    AppleHealthWorkoutBuilder? currentWorkout;
     var workoutDepth = 0;
 
     for (final event in parseEvents(xml, validateNesting: true)) {
@@ -100,27 +102,28 @@ class AppleHealthExportParser {
           case 'Record':
             recordCount += 1;
             aggregator.addRecord(
-              type: _attr(event, 'type') ?? '',
-              value: _attr(event, 'value'),
-              unit: _attr(event, 'unit'),
-              startDate: _attr(event, 'startDate') ?? '',
-              endDate: _attr(event, 'endDate') ?? '',
+              type: xmlEventAttr(event, 'type') ?? '',
+              value: xmlEventAttr(event, 'value'),
+              unit: xmlEventAttr(event, 'unit'),
+              startDate: xmlEventAttr(event, 'startDate') ?? '',
+              endDate: xmlEventAttr(event, 'endDate') ?? '',
             );
           case 'ActivitySummary':
             aggregator.addActivitySummary(
-              dateComponents: _attr(event, 'dateComponents') ?? '',
-              activeEnergyBurned: _attr(event, 'activeEnergyBurned'),
-              activeEnergyBurnedUnit: _attr(event, 'activeEnergyBurnedUnit'),
-              appleExerciseTime: _attr(event, 'appleExerciseTime'),
+              dateComponents: xmlEventAttr(event, 'dateComponents') ?? '',
+              activeEnergyBurned: xmlEventAttr(event, 'activeEnergyBurned'),
+              activeEnergyBurnedUnit:
+                  xmlEventAttr(event, 'activeEnergyBurnedUnit'),
+              appleExerciseTime: xmlEventAttr(event, 'appleExerciseTime'),
             );
           case 'Workout':
             workoutDepth += 1;
             if (workoutDepth == 1) {
-              currentWorkout = _WorkoutBuilder.fromAttributes(event);
+              currentWorkout = AppleHealthWorkoutBuilder.fromAttributes(event);
             }
           case 'FileReference':
             if (currentWorkout != null && workoutDepth > 0) {
-              final path = _attr(event, 'path');
+              final path = xmlEventAttr(event, 'path');
               if (path != null) {
                 currentWorkout.routePaths.add(path);
               }
@@ -149,7 +152,7 @@ class AppleHealthExportParser {
   }
 
   AppleHealthWorkoutImport? _finalizeWorkout(
-    _WorkoutBuilder builder,
+    AppleHealthWorkoutBuilder builder,
     Map<String, List<int>> files,
   ) {
     if (!builder.isRunning) {
@@ -173,7 +176,7 @@ class AppleHealthExportParser {
 
       try {
         final parsed = _gpxParser.parse(
-          String.fromCharCodes(gpxBytes),
+          utf8.decode(gpxBytes, allowMalformed: true),
           sourceName: builder.sourceName ?? 'Apple Health',
         );
         routePoints = parsed.routePoints;
@@ -234,59 +237,4 @@ class AppleHealthExportParser {
 
     return null;
   }
-
-  String? _attr(XmlStartElementEvent event, String name) {
-    for (final attribute in event.attributes) {
-      if (attribute.name == name) {
-        return attribute.value;
-      }
-    }
-    return null;
-  }
-}
-
-class _WorkoutBuilder {
-  _WorkoutBuilder({
-    required this.activityType,
-    this.start,
-    this.end,
-    this.distanceMeters,
-    this.energyKcal,
-    this.sourceName,
-    this.routePaths = const <String>[],
-  });
-
-  factory _WorkoutBuilder.fromAttributes(XmlStartElementEvent event) {
-    String? read(String name) {
-      for (final attribute in event.attributes) {
-        if (attribute.name == name) {
-          return attribute.value;
-        }
-      }
-      return null;
-    }
-
-    final distance = double.tryParse(read('totalDistance') ?? '');
-    final energy = double.tryParse(read('totalEnergyBurned') ?? '');
-
-    return _WorkoutBuilder(
-      activityType: read('workoutActivityType') ?? '',
-      start: parseAppleHealthDate(read('startDate')),
-      end: parseAppleHealthDate(read('endDate')),
-      distanceMeters: toMeters(distance, read('totalDistanceUnit')),
-      energyKcal: toKilocalories(energy, read('totalEnergyBurnedUnit')),
-      sourceName: read('sourceName'),
-      routePaths: <String>[],
-    );
-  }
-
-  final String activityType;
-  final DateTime? start;
-  final DateTime? end;
-  final double? distanceMeters;
-  final double? energyKcal;
-  final String? sourceName;
-  final List<String> routePaths;
-
-  bool get isRunning => activityType.toUpperCase().contains('RUNNING');
 }

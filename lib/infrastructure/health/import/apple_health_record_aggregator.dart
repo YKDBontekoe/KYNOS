@@ -37,7 +37,9 @@ class AppleHealthRecordAggregator {
       case 'HKCategoryTypeIdentifierSleepAnalysis':
         _addSleep(acc, value, startDate, endDate);
       case 'HKQuantityTypeIdentifierActiveEnergyBurned':
-        if (numeric != null) acc.activeCalories += toKilocalories(numeric, unit)!;
+        if (!acc.hasActivitySummary && numeric != null) {
+          acc.activeCalories += toKilocalories(numeric, unit)!;
+        }
       case 'HKQuantityTypeIdentifierBasalEnergyBurned':
         if (numeric != null) acc.basalCalories += toKilocalories(numeric, unit)!;
       case 'HKQuantityTypeIdentifierStepCount':
@@ -49,7 +51,7 @@ class AppleHealthRecordAggregator {
       case 'HKQuantityTypeIdentifierFlightsClimbed':
         if (numeric != null) acc.flightsClimbed += numeric;
       case 'HKQuantityTypeIdentifierAppleExerciseTime':
-        if (numeric != null) {
+        if (!acc.hasActivitySummary && numeric != null) {
           acc.exerciseMinutes += toMinutes(numeric, unit) ?? numeric;
         }
       case 'HKQuantityTypeIdentifierRunningPower':
@@ -77,15 +79,16 @@ class AppleHealthRecordAggregator {
     }
 
     final acc = _byDay.putIfAbsent(day, () => _DailyAccumulator(date: day));
+    acc.hasActivitySummary = true;
 
     final energy = double.tryParse(activeEnergyBurned ?? '');
     if (energy != null) {
-      acc.activeCalories += toKilocalories(energy, activeEnergyBurnedUnit) ?? energy;
+      acc.activeCalories = toKilocalories(energy, activeEnergyBurnedUnit) ?? energy;
     }
 
     final exercise = double.tryParse(appleExerciseTime ?? '');
     if (exercise != null) {
-      acc.exerciseMinutes += exercise;
+      acc.exerciseMinutes = exercise;
     }
   }
 
@@ -147,6 +150,8 @@ class _DailyAccumulator {
   _DailyAccumulator({required this.date});
 
   final DateTime date;
+
+  bool hasActivitySummary = false;
 
   double _hrvSum = 0;
   int _hrvCount = 0;

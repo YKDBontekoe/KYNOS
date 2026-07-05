@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
@@ -18,15 +19,15 @@ void main() {
         ..addFile(
           ArchiveFile(
             'apple_health_export/export.xml',
-            xml.length,
-            xml.codeUnits,
+            utf8.encode(xml).length,
+            utf8.encode(xml),
           ),
         )
         ..addFile(
           ArchiveFile(
             'apple_health_export/workout-routes/route_2026-04-20.gpx',
-            gpx.length,
-            gpx.codeUnits,
+            utf8.encode(gpx).length,
+            utf8.encode(gpx),
           ),
         );
 
@@ -50,7 +51,25 @@ void main() {
       final workout = result.workouts.first.workout;
       expect(workout.distanceMeters, closeTo(5200, 1));
       expect(workout.energyKcal, 310);
+      expect(workout.sourceName, 'Apple Watch');
       expect(result.workouts.first.routePoints, isNotEmpty);
+    });
+
+    test('preserves non-ASCII metadata in export.xml', () {
+      const parser = AppleHealthExportParser();
+      final xml = utf8.encode(
+        '''<?xml version="1.0" encoding="UTF-8"?>
+<HealthData locale="en_US">
+  <Record type="HKQuantityTypeIdentifierStepCount" unit="count" value="10"
+    sourceName="Café Watch" startDate="2026-04-20 08:00:00 +0000"
+    endDate="2026-04-20 08:05:00 +0000"/>
+</HealthData>''',
+      );
+      final archive = Archive()
+        ..addFile(ArchiveFile('export.xml', xml.length, xml));
+      final result = parser.parseZip(ZipEncoder().encode(archive));
+
+      expect(result.summaries.first.steps, 10);
     });
 
     test('throws when export.xml is missing', () {
