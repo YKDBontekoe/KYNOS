@@ -9,12 +9,16 @@ class ModelSetupScreen extends StatelessWidget {
     this.title,
     this.subtitle,
     this.onRetry,
+    this.onSecondaryAction,
+    this.secondaryActionLabel,
     this.isLoading = false,
   });
 
   final String? title;
   final String? subtitle;
   final VoidCallback? onRetry;
+  final VoidCallback? onSecondaryAction;
+  final String? secondaryActionLabel;
   final bool isLoading;
 
   factory ModelSetupScreen.checking() => const ModelSetupScreen(
@@ -26,11 +30,15 @@ class ModelSetupScreen extends StatelessWidget {
   factory ModelSetupScreen.error({
     required String message,
     required VoidCallback onRetry,
+    VoidCallback? onSecondaryAction,
+    String? secondaryActionLabel,
   }) =>
       ModelSetupScreen(
         title: 'Setup Failed',
         subtitle: message,
         onRetry: onRetry,
+        onSecondaryAction: onSecondaryAction,
+        secondaryActionLabel: secondaryActionLabel,
       );
 
   @override
@@ -63,6 +71,13 @@ class ModelSetupScreen extends StatelessWidget {
                 FilledButton(
                   onPressed: onRetry,
                   child: const Text('Try Again'),
+                ),
+              ],
+              if (onSecondaryAction != null && secondaryActionLabel != null) ...[
+                const Gap(Spacing.sm),
+                TextButton(
+                  onPressed: onSecondaryAction,
+                  child: Text(secondaryActionLabel!),
                 ),
               ],
             ],

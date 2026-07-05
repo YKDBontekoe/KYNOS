@@ -42,7 +42,7 @@ final class ModelSetupNotifierProvider
 }
 
 String _$modelSetupNotifierHash() =>
-    r'f503eaa3dbe6e85e1d0d9f6c0f6dc0f529d2a79e';
+    r'1a6e760e5e2a8069755c88438621c907a18daade';
 
 abstract class _$ModelSetupNotifier extends $Notifier<AsyncValue<bool>> {
   AsyncValue<bool> build();

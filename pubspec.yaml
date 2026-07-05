@@ -26,7 +26,6 @@ dependencies:
   path: ^1.9.1
   health: ^13.3.1
   dio: ^5.10.0
-  flutter_dotenv: ^6.0.1
   meta: ^1.18.0
   logger: ^2.5.0
   flutter_gemma: ^1.2.0
@@ -55,7 +54,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - .env
     - assets/images/
     - assets/models/
 dependency_overrides:

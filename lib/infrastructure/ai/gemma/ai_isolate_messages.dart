@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 sealed class AiIsolateRequest {}
 
 class AiInitRequest implements AiIsolateRequest {
-  AiInitRequest(this.rootToken);
+  AiInitRequest(this.rootToken, {this.huggingFaceToken});
 
   final RootIsolateToken rootToken;
+  final String? huggingFaceToken;
 }
 
 class AiChatRequest implements AiIsolateRequest {

@@ -12,7 +12,8 @@ class OnDeviceModelRepository implements AiModelRepository {
   bool get hasActiveModel => FlutterGemma.hasActiveModel();
 
   @override
-  Future<void> initialize() => GemmaRuntime.initialize();
+  Future<void> initialize({String? huggingFaceToken}) =>
+      GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
 
   @override
   Future<void> installFromNetwork({required String url, String? token}) async {

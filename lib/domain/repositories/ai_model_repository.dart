@@ -7,7 +7,9 @@ abstract interface class AiModelRepository {
   bool get hasActiveModel;
 
   /// Initialises the underlying inference runtime (must be called before use).
-  Future<void> initialize();
+  ///
+  /// Pass [huggingFaceToken] for gated HuggingFace model downloads.
+  Future<void> initialize({String? huggingFaceToken});
 
   /// Downloads and installs the model from [url].
   ///

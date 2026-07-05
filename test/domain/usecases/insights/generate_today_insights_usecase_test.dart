@@ -137,7 +137,7 @@ class _FakeAiModelRepository implements AiModelRepository {
   final bool hasActiveModel;
 
   @override
-  Future<void> initialize() async {}
+  Future<void> initialize({String? huggingFaceToken}) async {}
 
   @override
   Future<void> installFromNetwork({required String url, String? token}) async {}

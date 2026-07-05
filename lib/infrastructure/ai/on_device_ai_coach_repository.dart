@@ -24,9 +24,9 @@ class OnDeviceAiCoachRepository implements AiCoachRepository {
       'Give concise, biomechanics-aware advice. '
       'Never reveal you are an AI model or reference any training data.';
 
-  Future<void> _ensureReady() async {
+  Future<void> _ensureReady({String? huggingFaceToken}) async {
     if (_chat != null) return;
-    await GemmaRuntime.initialize();
+    await GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
     _model ??= await FlutterGemma.getActiveModel(
       maxTokens: 1024,
       preferredBackend: PreferredBackend.gpu,

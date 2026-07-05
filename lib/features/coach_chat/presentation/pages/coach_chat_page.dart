@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
@@ -72,10 +74,16 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
     return setupState.when(
       loading: () => ModelSetupScreen.checking(),
-      error: (e, _) => ModelSetupScreen.error(
-        message: e.toString(),
-        onRetry: () => ref.read(modelSetupProvider.notifier).checkAndInstall(),
-      ),
+      error: (e, _) {
+        final missingToken = e is MissingHuggingFaceTokenException;
+        return ModelSetupScreen.error(
+          message: e.toString(),
+          onRetry: () => ref.read(modelSetupProvider.notifier).checkAndInstall(),
+          onSecondaryAction:
+              missingToken ? () => context.push(Routes.settings) : null,
+          secondaryActionLabel: missingToken ? 'Open Settings' : null,
+        );
+      },
       data: (isReady) {
         if (!isReady) return ModelSetupScreen.checking();
         WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());

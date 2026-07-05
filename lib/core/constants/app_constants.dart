@@ -1,5 +1,3 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 /// Compile-time constants for KYNOS.
 abstract final class AppConstants {
   // ── AI Model ──────────────────────────────────────────────────────────────
@@ -38,10 +36,6 @@ abstract final class AppConstants {
   static const String modelDownloadUrl =
       'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm'
       '/resolve/main/gemma-4-E2B-it.litertlm?download=true';
-
-  /// HuggingFace API token — set HF_TOKEN in your .env file.
-  /// Leave empty for public/ungated model files.
-  static String get huggingFaceToken => dotenv.env['HF_TOKEN'] ?? '';
 
   // ── Privacy ───────────────────────────────────────────────────────────────
   /// All biometric data stays on-device; this flag disables any cloud path.
