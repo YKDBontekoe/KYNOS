@@ -95,8 +95,9 @@ abstract final class KynosTypography {
   static TextStyle metricValue(Brightness brightness) => GoogleFonts.dmMono(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        color:
-            brightness == Brightness.dark ? KynosColors.labelDark : KynosColors.label,
+        color: brightness == Brightness.dark
+            ? KynosColors.labelDark
+            : KynosColors.label,
         height: 1,
         letterSpacing: -1,
       );
@@ -116,6 +117,26 @@ abstract final class KynosTypography {
         fontWeight: FontWeight.w500,
         color: KynosColors.onAccent.withValues(alpha: 0.70),
         letterSpacing: 0.2,
+      );
+
+  /// Onboarding page headline.
+  static TextStyle onboardingTitle(Brightness brightness) => GoogleFonts.inter(
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+        color: brightness == Brightness.dark
+            ? KynosColors.labelDark
+            : KynosColors.label,
+      );
+
+  /// Onboarding page explanatory body copy.
+  static TextStyle onboardingBody(Brightness brightness) => GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: brightness == Brightness.dark
+            ? KynosColors.secondaryLabelDark
+            : KynosColors.secondaryLabel,
+        height: 1.5,
       );
 
   /// Filled button label.
