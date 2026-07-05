@@ -4,6 +4,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/features/settings/presentation/widgets/health_import_preview_row.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 class AppleHealthExportPreviewCard extends StatelessWidget {
   const AppleHealthExportPreviewCard({
@@ -56,6 +57,14 @@ class AppleHealthExportPreviewCard extends StatelessWidget {
             ],
           ),
         ),
+        if (isImporting) ...[
+          const Gap(tokens.Spacing.md),
+          const KynosLoadingLine(
+            height: 16,
+            widthFactor: 1,
+            label: 'Importing metrics and runs…',
+          ),
+        ],
         const Gap(tokens.Spacing.md),
         FilledButton(
           onPressed: isImporting ? null : onImport,

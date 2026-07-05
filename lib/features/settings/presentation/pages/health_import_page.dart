@@ -11,6 +11,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/settings/presentation/widgets/apple_health_export_preview_card.dart';
 import 'package:kynos/features/settings/presentation/widgets/gpx_import_preview_card.dart';
+import 'package:kynos/features/settings/presentation/widgets/health_import_progress_card.dart';
 import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_export_isolate.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
@@ -30,7 +31,12 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   AppleHealthExportParseResult? _zipPreview;
   PlatformFile? _pickedFile;
   String? _error;
+  bool _isParsing = false;
   bool _isImporting = false;
+  String? _processingFileName;
+  String? _progressMessage;
+
+  bool get _isBusy => _isParsing || _isImporting;
 
   Future<void> _pickFile() async {
     setState(() {
@@ -38,6 +44,9 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
       _zipPreview = null;
       _pickedFile = null;
       _error = null;
+      _isParsing = false;
+      _processingFileName = null;
+      _progressMessage = null;
     });
 
     final result = await FilePicker.platform.pickFiles(
@@ -50,9 +59,19 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
 
     final file = result.files.single;
     final extension = file.extension?.toLowerCase();
+    final isZip = extension == 'zip';
+
+    setState(() {
+      _isParsing = true;
+      _processingFileName = file.name;
+      _progressMessage = isZip
+          ? 'Reading and parsing your Apple Health export. '
+              'Large archives can take a minute.'
+          : 'Reading GPX route file…';
+    });
 
     try {
-      if (extension == 'zip') {
+      if (isZip) {
         final bytes = file.path == null ? await readPickedFileBytes(file) : null;
         final parsed = await parseAppleHealthZipAsync(
           zipPath: file.path,
@@ -62,6 +81,9 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
         setState(() {
           _zipPreview = parsed;
           _pickedFile = file;
+          _isParsing = false;
+          _processingFileName = null;
+          _progressMessage = null;
         });
       } else {
         final bytes = await readPickedFileBytes(file);
@@ -72,18 +94,37 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
         setState(() {
           _gpxPreview = parsed;
           _pickedFile = file;
+          _isParsing = false;
+          _processingFileName = null;
+          _progressMessage = null;
         });
       }
     } on OutOfMemoryError {
-      setState(
-        () => _error =
+      if (!mounted) return;
+      setState(() {
+        _error =
             'This export is too large for available memory. '
-            'Try exporting a shorter date range from the Health app.',
-      );
+            'Try exporting a shorter date range from the Health app.';
+        _isParsing = false;
+        _processingFileName = null;
+        _progressMessage = null;
+      });
     } on FormatException catch (e) {
-      setState(() => _error = e.message);
+      if (!mounted) return;
+      setState(() {
+        _error = e.message;
+        _isParsing = false;
+        _processingFileName = null;
+        _progressMessage = null;
+      });
     } on Object catch (e) {
-      setState(() => _error = 'Failed to parse file: $e');
+      if (!mounted) return;
+      setState(() {
+        _error = 'Failed to parse file: $e';
+        _isParsing = false;
+        _processingFileName = null;
+        _progressMessage = null;
+      });
     }
   }
 
@@ -191,10 +232,21 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
           ),
           const Gap(tokens.Spacing.lg),
           FilledButton.icon(
-            onPressed: _isImporting ? null : _pickFile,
+            onPressed: _isBusy ? null : _pickFile,
             icon: const Icon(Icons.upload_file_outlined),
-            label: const Text('Choose export.zip or GPX'),
+            label: Text(
+              _isParsing ? 'Processing file…' : 'Choose export.zip or GPX',
+            ),
           ),
+          if (_isParsing &&
+              _processingFileName != null &&
+              _progressMessage != null) ...[
+            const Gap(tokens.Spacing.lg),
+            HealthImportProgressCard(
+              fileName: _processingFileName!,
+              message: _progressMessage!,
+            ),
+          ],
           if (_error != null) ...[
             const Gap(tokens.Spacing.md),
             Text(
