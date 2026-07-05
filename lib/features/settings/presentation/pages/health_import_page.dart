@@ -52,15 +52,19 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
     final extension = file.extension?.toLowerCase();
 
     try {
-      final bytes = await readPickedFileBytes(file);
       if (extension == 'zip') {
-        final parsed = await parseAppleHealthZipAsync(bytes);
+        final bytes = file.path == null ? await readPickedFileBytes(file) : null;
+        final parsed = await parseAppleHealthZipAsync(
+          zipPath: file.path,
+          zipBytes: bytes,
+        );
         if (!mounted) return;
         setState(() {
           _zipPreview = parsed;
           _pickedFile = file;
         });
       } else {
+        final bytes = await readPickedFileBytes(file);
         final parsed = const GpxWorkoutParser().parse(
           utf8.decode(bytes, allowMalformed: true),
         );
@@ -70,6 +74,12 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
           _pickedFile = file;
         });
       }
+    } on OutOfMemoryError {
+      setState(
+        () => _error =
+            'This export is too large for available memory. '
+            'Try exporting a shorter date range from the Health app.',
+      );
     } on FormatException catch (e) {
       setState(() => _error = e.message);
     } on Object catch (e) {
@@ -122,9 +132,12 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   }
 
   Future<void> _importZip(PlatformFile file) async {
-    final bytes = await readPickedFileBytes(file);
+    final bytes = file.path == null ? await readPickedFileBytes(file) : null;
     final useCase = ref.read(importAppleHealthExportUseCaseProvider);
-    final result = await useCase(zipBytes: bytes);
+    final result = await useCase(
+      zipPath: file.path,
+      zipBytes: bytes,
+    );
 
     if (!mounted) return;
 

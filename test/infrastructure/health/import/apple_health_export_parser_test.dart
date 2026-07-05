@@ -34,9 +34,9 @@ void main() {
       zipBytes = ZipEncoder().encode(archive);
     });
 
-    test('parses metrics, summaries, and running workouts with routes', () {
+    test('parses metrics, summaries, and running workouts with routes', () async {
       const parser = AppleHealthExportParser();
-      final result = parser.parseZip(zipBytes);
+      final result = await parser.parseZip(zipBytes);
 
       expect(result.recordCount, 4);
       expect(result.summaries, isNotEmpty);
@@ -55,7 +55,7 @@ void main() {
       expect(result.workouts.first.routePoints, isNotEmpty);
     });
 
-    test('preserves non-ASCII metadata in export.xml', () {
+    test('preserves non-ASCII metadata in export.xml', () async {
       const parser = AppleHealthExportParser();
       final xml = utf8.encode(
         '''<?xml version="1.0" encoding="UTF-8"?>
@@ -67,17 +67,17 @@ void main() {
       );
       final archive = Archive()
         ..addFile(ArchiveFile('export.xml', xml.length, xml));
-      final result = parser.parseZip(ZipEncoder().encode(archive));
+      final result = await parser.parseZip(ZipEncoder().encode(archive));
 
       expect(result.summaries.first.steps, 10);
     });
 
-    test('throws when export.xml is missing', () {
+    test('throws when export.xml is missing', () async {
       const parser = AppleHealthExportParser();
       final emptyZip = ZipEncoder().encode(Archive());
 
-      expect(
-        () => parser.parseZip(emptyZip),
+      await expectLater(
+        parser.parseZip(emptyZip),
         throwsA(isA<FormatException>()),
       );
     });
