@@ -108,11 +108,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('KYNOS'), findsOneWidget);
+    expect(find.text('Summary'), findsWidgets);
     expect(find.text('READINESS'), findsOneWidget);
     expect(find.text('Solid readiness. Tempo work fits today.'), findsOneWidget);
     expect(find.text('THIS WEEK'), findsOneWidget);
-    expect(find.text('Ask Coach'), findsOneWidget);
+    expect(find.text('Ask Coach'), findsWidgets);
+
+    await tester.scrollUntilVisible(
+      find.text('Run quality as planned. Start controlled.'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text('Run quality as planned. Start controlled.'),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(
       find.text('LEVEL 4'),
@@ -122,11 +132,11 @@ void main() {
     expect(find.text('LEVEL 4'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Quick Changes'),
+      find.text('PROGRESS'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Quick Changes'), findsOneWidget);
+    expect(find.text('PROGRESS'), findsOneWidget);
   });
 
   testWidgets('DashboardPage shows loading shimmer for metrics', (tester) async {

@@ -8,33 +8,28 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/domain/utils/acwr.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/acwr_guardrail_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/character_glance_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/dashboard_header_sliver.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/gait_teaser_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/health_metrics_grid.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/last_run_preview.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/today_insight_cards.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/trend_carousel.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/what_changed_chips.dart';
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
-import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
-import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
-import 'package:kynos/shared/widgets/kynos_section_header.dart';
-import 'package:kynos/shared/widgets/liquid_glass_button.dart';
+import 'package:kynos/shared/widgets/kynos_section_row.dart';
 
 /// Today tab — readiness, AI insight, and today's health metrics.
 class DashboardPage extends ConsumerStatefulWidget {
@@ -113,21 +108,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'What should I prioritise in training today?';
   }
 
-  Color _heroAccentColor({
-    required KynosThemeExtension kynos,
-    required HealthSummary? summary,
-    required List<HealthSummary> history,
-  }) {
-    final acwr = computeAcwr(history);
-    if (isAcwrElevated(acwr)) return kynos.move;
-
-    final score = readinessScore(summary);
-    if (score >= 65) return kynos.exercise;
-    if (score >= 45) return kynos.stand;
-    return kynos.move;
-  }
-
-  String _statusStrip({
+  String _statusSubtitle({
     required HealthSummary? summary,
     required DashboardSummary? dash,
   }) {
@@ -189,108 +170,73 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           parent: BouncingScrollPhysics(),
         ),
         slivers: [
-          SliverAppBar(
-            backgroundColor: kynos.background,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            pinned: true,
-            toolbarHeight: 56,
-            titleSpacing: 20,
-            title: Text(
-              formatDateLabel(),
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: kynos.tertiaryLabel,
-                    letterSpacing: 0.2,
-                  ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: tokens.Spacing.sm),
-                child: LiquidGlassIconButton(
-                  icon: Icons.settings_outlined,
-                  onPressed: () => context.push(Routes.settings),
-                  tooltip: 'Settings',
-                ),
-              ),
-            ],
+          DashboardHeaderSliver(
+            greeting: _greeting(),
+            subtitle: _statusSubtitle(summary: summary.value, dash: dash),
+            onAskCoach: () => _openCoachChat(),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               tokens.Spacing.md,
-              0,
+              tokens.Spacing.lg,
               tokens.Spacing.md,
               LayoutTokens.shellBottomPadding,
             ),
             sliver: SliverList.list(
               children: [
-                KynosHeroBanner(
-                  accentColor: _heroAccentColor(
-                    kynos: kynos,
-                    summary: summary.value,
-                    history: loadHistory.value ?? const [],
-                  ),
-                  subtitle: _greeting(),
-                  title: 'KYNOS',
-                  caption: _statusStrip(summary: summary.value, dash: dash),
-                  actionLabel: 'Ask Coach',
-                  onActionTap: () => _openCoachChat(),
-                ),
-                const Gap(tokens.Spacing.lg),
                 ReadinessCard(
                   summaryAsync: summary,
                   todayInsightsState: todayInsightsState,
-                  history: weekHistory,
                 ),
-                const Gap(tokens.Spacing.sm),
-                WhatChangedChips(
-                  insights: todayInsightsState.value?.insights,
-                ),
-                if (todayInsightsState.value?.insights != null)
-                  const Gap(tokens.Spacing.md),
-                AcwrGuardrailCard(
-                  history: loadHistory.value ?? const <HealthSummary>[],
+                const Gap(tokens.Spacing.xl),
+                KynosSectionRow(
+                  title: 'This Week',
+                  actionLabel: widget.onViewTraining != null ? 'See all' : null,
+                  onAction: widget.onViewTraining,
                 ),
                 const Gap(tokens.Spacing.md),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: KynosSectionHeader(title: 'This Week'),
-                    ),
-                    if (widget.onViewTraining != null)
-                      TextButton(
-                        onPressed: widget.onViewTraining,
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: EdgeInsets.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text('See all'),
-                      ),
-                  ],
-                ),
-                const Gap(tokens.Spacing.sm),
                 WeekMomentumCard(
                   momentum: dash?.weeklyMomentum,
                   isLoading:
                       loadHistory.isLoading || dashboardSummaryAsync.isLoading,
                 ),
-                const Gap(tokens.Spacing.lg),
-                const KynosSectionHeader(title: 'Trends'),
-                const Gap(tokens.Spacing.sm),
+                const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Highlights'),
+                const Gap(tokens.Spacing.md),
+                HealthMetricsGrid(
+                  summary: summary.value,
+                  dashboardSummary: dash,
+                  isLoading: summary.isLoading,
+                  onViewTraining: widget.onViewTraining,
+                  onAskCoach: (seed) => _openCoachChat(seedMessage: seed),
+                  section: HealthMetricsSection.highlights,
+                ),
+                const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Trends'),
+                const Gap(tokens.Spacing.md),
                 TrendCarousel(history: weekHistory),
-                const Gap(tokens.Spacing.lg),
-                TodayInsightCards(
+                const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Coach Insight'),
+                const Gap(tokens.Spacing.md),
+                CoachInsightCard(
                   todayInsightsState: todayInsightsState,
+                  history: loadHistory.value ?? const <HealthSummary>[],
                   onAskCoach: () => _openCoachChat(
                     seedMessage: _coachSeedFromInsights(
                       todayInsightsState.value,
                     ),
                   ),
                 ),
-                const Gap(tokens.Spacing.lg),
+                const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Recent Runs'),
+                const Gap(tokens.Spacing.md),
+                LastRunPreview(runsAsync: recentRuns),
+                const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Progress'),
+                const Gap(tokens.Spacing.md),
                 if (dash?.streakNudge != null) ...[
                   KynosCard(
-                    padding: const EdgeInsets.all(tokens.Spacing.md),
+                    padding: const EdgeInsets.all(tokens.Spacing.lg),
                     child: Row(
                       children: [
                         Icon(Icons.local_fire_department, color: kynos.energy),
@@ -304,7 +250,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ],
                     ),
                   ),
-                  const Gap(tokens.Spacing.lg),
+                  const Gap(tokens.Spacing.md),
                 ],
                 if (dash?.character != null) ...[
                   CharacterGlanceCard(
@@ -317,37 +263,34 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   questsAsync: dailyQuests,
                   onViewCharacter: widget.onViewCharacter,
                 ),
-                if (dailyQuests.value?.isNotEmpty ?? false)
-                  const Gap(tokens.Spacing.lg),
                 if (dash != null && dash.personalBestCallouts.isNotEmpty) ...[
-                  SizedBox(
-                    height: 32,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: dash.personalBestCallouts.length,
-                      separatorBuilder: (_, _) => const Gap(tokens.Spacing.sm),
-                      itemBuilder: (context, index) => KynosChip.accent(
-                        label: dash.personalBestCallouts[index],
-                        color: kynos.willpower,
-                      ),
-                    ),
+                  const Gap(tokens.Spacing.md),
+                  Wrap(
+                    spacing: tokens.Spacing.sm,
+                    runSpacing: tokens.Spacing.sm,
+                    children: dash.personalBestCallouts
+                        .map(
+                          (callout) => KynosChip.accent(
+                            label: callout,
+                            color: kynos.willpower,
+                          ),
+                        )
+                        .toList(),
                   ),
-                  const Gap(tokens.Spacing.lg),
                 ],
-                const KynosSectionHeader(title: 'Recent Runs'),
-                const Gap(tokens.Spacing.sm),
-                LastRunPreview(runsAsync: recentRuns),
-                const Gap(tokens.Spacing.lg),
-                const KynosSectionHeader(title: "Today's Metrics"),
-                const Gap(tokens.Spacing.sm),
+                if (dailyQuests.value?.isNotEmpty ?? false)
+                  const Gap(tokens.Spacing.xl),
+                const KynosSectionRow(title: 'Activity'),
+                const Gap(tokens.Spacing.md),
                 HealthMetricsGrid(
                   summary: summary.value,
                   dashboardSummary: dash,
                   isLoading: summary.isLoading,
                   onViewTraining: widget.onViewTraining,
                   onAskCoach: (seed) => _openCoachChat(seedMessage: seed),
+                  section: HealthMetricsSection.activity,
                 ),
-                const Gap(tokens.Spacing.lg),
+                const Gap(tokens.Spacing.xl),
                 if (!kIsWeb && dash?.isGaitCalibrated == true) ...[
                   GaitTeaserCard(
                     coefficients: dash!.gaitCoefficients,
@@ -355,7 +298,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     calibratedAt: dash.gaitCalibratedAt,
                     onViewTraining: widget.onViewTraining,
                   ),
-                  const Gap(tokens.Spacing.lg),
+                  const Gap(tokens.Spacing.xl),
                 ],
                 if (showHealthError) ...[
                   KynosCard(
@@ -374,10 +317,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ],
                     ),
                   ),
-                  const Gap(tokens.Spacing.lg),
+                  const Gap(tokens.Spacing.xl),
                 ],
                 if (showConnectCard) const ConnectHealthkitCard(),
-                if (showConnectCard) const Gap(tokens.Spacing.lg),
+                if (showConnectCard) const Gap(tokens.Spacing.xl),
                 const KynosPrivacyFooter(),
               ],
             ),

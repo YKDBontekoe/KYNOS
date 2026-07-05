@@ -4,6 +4,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart' hide Radius;
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// Weekly snapshot with week-over-week deltas and distance goal progress.
@@ -23,7 +24,7 @@ class WeekMomentumCard extends StatelessWidget {
     final m = momentum;
 
     return KynosCard(
-      padding: const EdgeInsets.all(tokens.Spacing.md),
+      padding: const EdgeInsets.all(tokens.Spacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +43,7 @@ class WeekMomentumCard extends StatelessWidget {
                 ),
             ],
           ),
-          const Gap(tokens.Spacing.sm),
+          const Gap(tokens.Spacing.md),
           if (isLoading)
             const LinearProgressIndicator()
           else
@@ -50,12 +51,12 @@ class WeekMomentumCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(tokens.Radius.sm),
               child: LinearProgressIndicator(
                 value: m?.distanceGoalProgress ?? 0,
-                minHeight: 8,
+                minHeight: 10,
                 backgroundColor: kynos.separator,
                 valueColor: AlwaysStoppedAnimation(kynos.stand),
               ),
             ),
-          const Gap(tokens.Spacing.md),
+          const Gap(tokens.Spacing.lg),
           Row(
             children: [
               Expanded(
@@ -72,7 +73,7 @@ class WeekMomentumCard extends StatelessWidget {
                   sublabelColor: _wowColor(kynos, m?.distanceDeltaPct),
                 ),
               ),
-              const Gap(tokens.Spacing.sm),
+              const Gap(tokens.Spacing.md),
               Expanded(
                 child: MetricTile(
                   label: 'Runs',
@@ -86,7 +87,11 @@ class WeekMomentumCard extends StatelessWidget {
                   sublabelColor: _wowColor(kynos, m?.runsDeltaPct),
                 ),
               ),
-              const Gap(tokens.Spacing.sm),
+            ],
+          ),
+          const Gap(tokens.Spacing.md),
+          Row(
+            children: [
               Expanded(
                 child: MetricTile(
                   label: 'Active kcal',
@@ -101,7 +106,62 @@ class WeekMomentumCard extends StatelessWidget {
                   sublabelColor: _wowColor(kynos, m?.kcalDeltaPct),
                 ),
               ),
+              const Gap(tokens.Spacing.md),
+              Expanded(
+                child: _wowSummaryTile(context, kynos, m, isLoading),
+              ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _wowSummaryTile(
+    BuildContext context,
+    KynosThemeExtension kynos,
+    WeeklyMomentum? m,
+    bool isLoading,
+  ) {
+    if (isLoading || m == null) {
+      return MetricTile(
+        label: 'Week trend',
+        value: isLoading ? null : '—',
+        accentColor: kynos.purple,
+      );
+    }
+
+    final bestDelta = [
+      m.distanceDeltaPct,
+      m.runsDeltaPct,
+      m.kcalDeltaPct,
+    ].whereType<double>().fold<double?>(
+      null,
+      (best, pct) =>
+          best == null || pct.abs() > best.abs() ? pct : best,
+    );
+
+    if (bestDelta == null) {
+      return MetricTile(
+        label: 'Week trend',
+        value: '—',
+        accentColor: kynos.purple,
+      );
+    }
+
+    return KynosCard(
+      padding: const EdgeInsets.all(tokens.Spacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Week trend',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const Gap(tokens.Spacing.sm),
+          KynosChip.accent(
+            label: formatWowBadge(bestDelta) ?? '—',
+            color: _wowColor(kynos, bestDelta) ?? kynos.purple,
           ),
         ],
       ),

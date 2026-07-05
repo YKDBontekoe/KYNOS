@@ -5,7 +5,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 abstract final class LayoutTokens {
   /// Bottom scroll padding to clear the floating shell nav bar.
   static const double shellBottomPadding =
-      tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.sm;
+      tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.lg;
 
   static const double heroBannerHeight =
       tokens.Spacing.xxxl * 2 + tokens.Spacing.sm - tokens.Spacing.xs;

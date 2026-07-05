@@ -7,7 +7,7 @@ import 'package:kynos/domain/utils/metric_trends.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/metric_detail_sheet.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
-/// Two-column grid of today's health metrics with delta sublabels.
+/// Health metric grids split into Highlights (2×2) and Activity (1×2).
 class HealthMetricsGrid extends StatelessWidget {
   const HealthMetricsGrid({
     super.key,
@@ -16,6 +16,7 @@ class HealthMetricsGrid extends StatelessWidget {
     this.isLoading = false,
     this.onViewTraining,
     this.onAskCoach,
+    this.section = HealthMetricsSection.highlights,
   });
 
   final HealthSummary? summary;
@@ -23,11 +24,18 @@ class HealthMetricsGrid extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onViewTraining;
   final void Function(String seedMessage)? onAskCoach;
+  final HealthMetricsSection section;
 
   @override
   Widget build(BuildContext context) {
+    return switch (section) {
+      HealthMetricsSection.highlights => _buildHighlights(context),
+      HealthMetricsSection.activity => _buildActivity(context),
+    };
+  }
+
+  Widget _buildHighlights(BuildContext context) {
     final kynos = context.kynosTheme;
-    final hasRunToday = (summary?.runningWorkoutCount ?? 0) > 0;
 
     return Column(
       children: [
@@ -48,7 +56,7 @@ class HealthMetricsGrid extends StatelessWidget {
                 metricKey: MetricDetailKey.hrv,
               ),
             ),
-            const Gap(Spacing.sm),
+            const Gap(Spacing.md),
             Expanded(
               child: _metric(
                 context,
@@ -66,7 +74,7 @@ class HealthMetricsGrid extends StatelessWidget {
             ),
           ],
         ),
-        const Gap(Spacing.sm),
+        const Gap(Spacing.md),
         Row(
           children: [
             Expanded(
@@ -84,7 +92,7 @@ class HealthMetricsGrid extends StatelessWidget {
                 metricKey: MetricDetailKey.sleep,
               ),
             ),
-            const Gap(Spacing.sm),
+            const Gap(Spacing.md),
             Expanded(
               child: _metric(
                 context,
@@ -102,65 +110,70 @@ class HealthMetricsGrid extends StatelessWidget {
             ),
           ],
         ),
-        const Gap(Spacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: _metric(
-                context,
-                kynos: kynos,
-                label: hasRunToday ? 'Run distance' : 'Active energy',
-                value: isLoading
-                    ? null
-                    : hasRunToday
-                    ? _fixed(_toKm(summary?.runningWorkoutDistanceMeters), 2)
-                    : _round(summary?.activeCalories),
-                unit: hasRunToday ? 'km' : 'kcal',
-                accentColor: kynos.stand,
-                today: hasRunToday
-                    ? _toKm(summary?.runningWorkoutDistanceMeters)
-                    : summary?.activeCalories,
-                selector: (s) => hasRunToday
-                    ? _toKm(s.runningWorkoutDistanceMeters)
-                    : s.activeCalories,
-                higherIsBetter: true,
-                digits: hasRunToday ? 2 : 0,
-                metricKey: hasRunToday
-                    ? MetricDetailKey.distance
-                    : MetricDetailKey.activeCalories,
-              ),
-            ),
-            const Gap(Spacing.sm),
-            Expanded(
-              child: _metric(
-                context,
-                kynos: kynos,
-                label: hasRunToday ? 'Active energy' : 'Exercise time',
-                value: isLoading
-                    ? null
-                    : hasRunToday
-                    ? _round(summary?.activeCalories)
-                    : _exerciseOrStepsValue(summary),
-                unit: hasRunToday
-                    ? 'kcal'
-                    : summary?.exerciseMinutes == null
-                    ? null
-                    : 'min',
-                accentColor: kynos.energy,
-                today: hasRunToday
-                    ? summary?.activeCalories
-                    : summary?.exerciseMinutes?.toDouble(),
-                selector: (s) => hasRunToday
-                    ? s.activeCalories
-                    : s.exerciseMinutes?.toDouble(),
-                higherIsBetter: true,
-                digits: 0,
-                metricKey: hasRunToday
-                    ? MetricDetailKey.activeCalories
-                    : MetricDetailKey.exercise,
-              ),
-            ),
-          ],
+      ],
+    );
+  }
+
+  Widget _buildActivity(BuildContext context) {
+    final kynos = context.kynosTheme;
+    final hasRunToday = (summary?.runningWorkoutCount ?? 0) > 0;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _metric(
+            context,
+            kynos: kynos,
+            label: hasRunToday ? 'Run distance' : 'Active energy',
+            value: isLoading
+                ? null
+                : hasRunToday
+                ? _fixed(_toKm(summary?.runningWorkoutDistanceMeters), 2)
+                : _round(summary?.activeCalories),
+            unit: hasRunToday ? 'km' : 'kcal',
+            accentColor: kynos.stand,
+            today: hasRunToday
+                ? _toKm(summary?.runningWorkoutDistanceMeters)
+                : summary?.activeCalories,
+            selector: (s) => hasRunToday
+                ? _toKm(s.runningWorkoutDistanceMeters)
+                : s.activeCalories,
+            higherIsBetter: true,
+            digits: hasRunToday ? 2 : 0,
+            metricKey: hasRunToday
+                ? MetricDetailKey.distance
+                : MetricDetailKey.activeCalories,
+          ),
+        ),
+        const Gap(Spacing.md),
+        Expanded(
+          child: _metric(
+            context,
+            kynos: kynos,
+            label: hasRunToday ? 'Active energy' : 'Exercise time',
+            value: isLoading
+                ? null
+                : hasRunToday
+                ? _round(summary?.activeCalories)
+                : _exerciseOrStepsValue(summary),
+            unit: hasRunToday
+                ? 'kcal'
+                : summary?.exerciseMinutes == null
+                ? null
+                : 'min',
+            accentColor: kynos.energy,
+            today: hasRunToday
+                ? summary?.activeCalories
+                : summary?.exerciseMinutes?.toDouble(),
+            selector: (s) => hasRunToday
+                ? s.activeCalories
+                : s.exerciseMinutes?.toDouble(),
+            higherIsBetter: true,
+            digits: 0,
+            metricKey: hasRunToday
+                ? MetricDetailKey.activeCalories
+                : MetricDetailKey.exercise,
+          ),
         ),
       ],
     );
@@ -220,6 +233,8 @@ class HealthMetricsGrid extends StatelessWidget {
     );
   }
 }
+
+enum HealthMetricsSection { highlights, activity }
 
 String _round(double? value) => value == null ? '—' : value.round().toString();
 

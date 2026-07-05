@@ -15,6 +15,7 @@ class MetricTile extends StatelessWidget {
     this.sublabel,
     this.sublabelColor,
     this.onTap,
+    this.compact = false,
   });
 
   final String label;
@@ -25,6 +26,7 @@ class MetricTile extends StatelessWidget {
   final String? sublabel;
   final Color? sublabelColor;
   final VoidCallback? onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,7 @@ class MetricTile extends StatelessWidget {
                 child: Text(
                   label,
                   style: theme.textTheme.labelLarge,
+                  maxLines: compact ? 1 : 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
