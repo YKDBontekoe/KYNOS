@@ -25,8 +25,9 @@ class OnDeviceModelPickerPage extends ConsumerStatefulWidget {
 
 class _OnDeviceModelPickerPageState
     extends ConsumerState<OnDeviceModelPickerPage> {
-  List<OnDeviceModel>? _models;
+  int? _totalRamBytes;
   bool _loading = true;
+  final Set<OnDeviceModelCapability> _activeFilters = {};
 
   @override
   void initState() {
@@ -38,13 +39,21 @@ class _OnDeviceModelPickerPageState
     final ramBytes = await GemmaDeviceRamProbe.totalRamBytes();
     if (!mounted) return;
     setState(() {
-      _models = OnDeviceModelCatalog.forDevice(
-        isWeb: kIsWeb,
-        totalRamBytes: ramBytes,
-      );
+      _totalRamBytes = ramBytes;
       _loading = false;
     });
   }
+
+  Map<OnDeviceModelTier, List<OnDeviceModel>> get _groupedModels =>
+      OnDeviceModelCatalog.modelsGroupedByTier(
+        isWeb: kIsWeb,
+        totalRamBytes: _totalRamBytes,
+        requiredCapabilities:
+            _activeFilters.isEmpty ? null : _activeFilters,
+      );
+
+  bool get _hasVisibleModels =>
+      _groupedModels.values.any((models) => models.isNotEmpty);
 
   Future<void> _selectModel(OnDeviceModel model) async {
     final settings = ref.read(settingsProvider);
@@ -69,10 +78,21 @@ class _OnDeviceModelPickerPageState
     );
   }
 
+  void _toggleFilter(OnDeviceModelCapability capability) {
+    setState(() {
+      if (_activeFilters.contains(capability)) {
+        _activeFilters.remove(capability);
+      } else {
+        _activeFilters.add(capability);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final kynos = context.kynosTheme;
+    final groupedModels = _groupedModels;
 
     return Scaffold(
       backgroundColor: kynos.background,
@@ -84,24 +104,135 @@ class _OnDeviceModelPickerPageState
               children: [
                 Text(
                   'Lightweight models run entirely on your phone. '
-                  'Smaller models use less memory but may give shorter answers.',
+                  'Check capabilities like thinking, vision, and tool use '
+                  'before downloading — larger models need more RAM.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: kynos.secondaryLabel,
                       ),
                 ),
                 const Gap(tokens.Spacing.md),
-                const KynosSectionHeader(title: 'Available models'),
+                const KynosSectionHeader(title: 'Filter by capability'),
                 const Gap(tokens.Spacing.sm),
-                ...?_models?.map(
-                  (model) => OnDeviceModelCard(
-                    model: model,
-                    isSelected: settings.selectedLocalModelId == model.id,
-                    isInstalled: settings.installedLocalModelId == model.id,
-                    onTap: () => _selectModel(model),
-                  ),
+                Wrap(
+                  spacing: tokens.Spacing.xs,
+                  runSpacing: tokens.Spacing.xs,
+                  children: [
+                    _FilterChip(
+                      label: 'Tools',
+                      isSelected: _activeFilters.contains(
+                        OnDeviceModelCapability.functionCalling,
+                      ),
+                      color: kynos.stand,
+                      onTap: () => _toggleFilter(
+                        OnDeviceModelCapability.functionCalling,
+                      ),
+                    ),
+                    _FilterChip(
+                      label: 'Thinking',
+                      isSelected: _activeFilters.contains(
+                        OnDeviceModelCapability.thinkingMode,
+                      ),
+                      color: kynos.move,
+                      onTap: () => _toggleFilter(
+                        OnDeviceModelCapability.thinkingMode,
+                      ),
+                    ),
+                    _FilterChip(
+                      label: 'Vision',
+                      isSelected: _activeFilters.contains(
+                        OnDeviceModelCapability.vision,
+                      ),
+                      color: kynos.exercise,
+                      onTap: () => _toggleFilter(
+                        OnDeviceModelCapability.vision,
+                      ),
+                    ),
+                  ],
                 ),
+                const Gap(tokens.Spacing.md),
+                if (!_hasVisibleModels)
+                  Text(
+                    'No models match your filters on this device. '
+                    'Try clearing a filter or check available RAM.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: kynos.secondaryLabel,
+                        ),
+                  )
+                else ...[
+                  for (final tier in OnDeviceModelTier.values)
+                    ..._buildTierSection(
+                      context: context,
+                      tier: tier,
+                      models: groupedModels[tier] ?? const [],
+                      settings: settings,
+                    ),
+                ],
               ],
             ),
+    );
+  }
+
+  List<Widget> _buildTierSection({
+    required BuildContext context,
+    required OnDeviceModelTier tier,
+    required List<OnDeviceModel> models,
+    required SettingsState settings,
+  }) {
+    if (models.isEmpty) return const [];
+
+    return [
+      const Gap(tokens.Spacing.sm),
+      KynosSectionHeader(title: _tierLabel(tier)),
+      const Gap(tokens.Spacing.sm),
+      ...models.map(
+        (model) => OnDeviceModelCard(
+          model: model,
+          isSelected: settings.selectedLocalModelId == model.id,
+          isInstalled: settings.installedLocalModelId == model.id,
+          onTap: () => _selectModel(model),
+        ),
+      ),
+    ];
+  }
+
+  String _tierLabel(OnDeviceModelTier tier) {
+    return switch (tier) {
+      OnDeviceModelTier.lightweight => 'Lightweight',
+      OnDeviceModelTier.balanced => 'Balanced',
+      OnDeviceModelTier.flagship => 'Flagship',
+    };
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onTap(),
+      selectedColor: color.withValues(alpha: 0.2),
+      checkmarkColor: color,
+      labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: isSelected ? color : kynos.secondaryLabel,
+          ),
+      side: BorderSide(
+        color: isSelected ? color : kynos.separator,
+      ),
     );
   }
 }

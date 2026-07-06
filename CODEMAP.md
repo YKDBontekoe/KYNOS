@@ -111,7 +111,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/core/theme/spacing.dart` | 20 | Design token: spacing scale (4-point grid). |
 | `lib/core/theme/theme.dart` | 12 | KYNOS design system — barrel export. |
 | `lib/core/theme/typography.dart` | 171 | Named text styles for the KYNOS design system. |
-| `lib/domain/catalog/on_device_model_catalog.dart` | 100 | Curated catalog of LiteRT-LM models supported by KYNOS on-device coach. |
+| `lib/domain/catalog/on_device_model_catalog.dart` | 274 | Curated catalog of LiteRT-LM models supported by KYNOS on-device coach. |
 | `lib/domain/entities/ai_inference_backend.dart` | 6 | Where the last coach inference ran. |
 | `lib/domain/entities/ai_task_kind.dart` | 9 | Classification for hybrid local/cloud AI routing. |
 | `lib/domain/entities/athlete_profile.dart` | 55 | AthleteProfile |
@@ -136,7 +136,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/entities/insights/insight_confidence.dart` | 14 | Dart module |
 | `lib/domain/entities/insights/today_insights.dart` | 41 | TodayInsights |
 | `lib/domain/entities/insights/training_insights.dart` | 33 | TrainingInsights |
-| `lib/domain/entities/on_device_model.dart` | 39 | OnDeviceModel |
+| `lib/domain/entities/on_device_model.dart` | 68 | OnDeviceModel |
 | `lib/domain/entities/openrouter_model.dart` | 51 | OpenRouterModelPricing, OpenRouterModel |
 | `lib/domain/entities/openrouter_model_filters.dart` | 112 | OpenRouterModelFilters |
 | `lib/domain/entities/workout_route_point.dart` | 27 | WorkoutRoutePoint |
@@ -255,14 +255,14 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/on_device_model_selection_result.dart` | 10 | OnDeviceModelSelectionResult |
 | `lib/features/settings/presentation/pages/health_import_page.dart` | 118 | HealthImportPage |
 | `lib/features/settings/presentation/pages/manual_run_page.dart` | 167 | ManualRunPage, _ManualRunPageState |
-| `lib/features/settings/presentation/pages/on_device_model_picker_page.dart` | 107 | OnDeviceModelPickerPage, _OnDeviceModelPickerPageState |
+| `lib/features/settings/presentation/pages/on_device_model_picker_page.dart` | 238 | OnDeviceModelPickerPage, _OnDeviceModelPickerPageState, _FilterChip |
 | `lib/features/settings/presentation/pages/openrouter_model_picker_page.dart` | 215 | OpenRouterModelPickerPage |
-| `lib/features/settings/presentation/pages/settings_page.dart` | 600 | SettingsPage, _SettingsPageState, _SwitchTile, … |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 629 | SettingsPage, _SettingsPageState, _SwitchTile, … |
 | `lib/features/settings/presentation/widgets/apple_health_export_preview_card.dart` | 104 | AppleHealthExportPreviewCard |
 | `lib/features/settings/presentation/widgets/gpx_import_preview_card.dart` | 82 | GpxImportPreviewCard |
 | `lib/features/settings/presentation/widgets/health_import_preview_row.dart` | 27 | HealthImportPreviewRow |
 | `lib/features/settings/presentation/widgets/health_import_progress_card.dart` | 58 | HealthImportProgressCard |
-| `lib/features/settings/presentation/widgets/on_device_model_card.dart` | 98 | OnDeviceModelCard |
+| `lib/features/settings/presentation/widgets/on_device_model_card.dart` | 138 | OnDeviceModelCard |
 | `lib/features/settings/presentation/widgets/openrouter_model_card.dart` | 80 | OpenRouterModelCard |
 | `lib/features/settings/presentation/widgets/settings_appearance_section.dart` | 39 | SettingsAppearanceSection |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | HealthImportState, HealthImport |
@@ -291,7 +291,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/gemma/gemma_runtime.dart` | 80 | Central bootstrap for flutter_gemma 1.x opt-in inference engines. |
 | `lib/infrastructure/ai/gemma/gemma_runtime_tier.dart` | 18 | Resolves the current on-device Gemma tier from platform RAM and thermal probes. |
 | `lib/infrastructure/ai/gemma/gemma_thermal_probe.dart` | 19 | Reads platform thermal / power-save signals for conservative Gemma routing. |
-| `lib/infrastructure/ai/gemma/on_device_model_installer.dart` | 20 | Maps domain [OnDeviceModel] specs to flutter_gemma install APIs. |
+| `lib/infrastructure/ai/gemma/on_device_model_installer.dart` | 24 | Maps domain [OnDeviceModel] specs to flutter_gemma install APIs. |
 | `lib/infrastructure/ai/gemma/regression_isolate_entrypoint.dart` | 42 | Lightweight background worker for gait regression math (no LLM deps). |
 | `lib/infrastructure/ai/hybrid_ai_coach_repository.dart` | 181 | HybridAiCoachConfig, HybridAiCoachRepository |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 364 | IsolateAiCoachRepository |
@@ -402,7 +402,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 
 | File | Lines | Target |
 |------|------:|--------|
-| `lib/features/settings/presentation/pages/settings_page.dart` | 600 | Split if > 250 lines |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 629 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 381 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 364 | Split if > 250 lines |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 342 | Split if > 250 lines |
@@ -411,6 +411,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/presentation/pages/character_page.dart` | 280 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | Split if > 250 lines |
+| `lib/domain/catalog/on_device_model_catalog.dart` | 274 | Split if > 250 lines |
 | `lib/domain/utils/run_route_analytics.dart` | 274 | Split if > 250 lines |
 | `lib/features/character/presentation/widgets/quest_card.dart` | 269 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |

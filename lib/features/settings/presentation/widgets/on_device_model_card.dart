@@ -50,6 +50,13 @@ class OnDeviceModelCard extends StatelessWidget {
                     color: kynos.secondaryLabel,
                   ),
             ),
+            const Gap(tokens.Spacing.xs),
+            Text(
+              model.bestFor,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.tertiaryLabel,
+                  ),
+            ),
             const Gap(tokens.Spacing.sm),
             Wrap(
               spacing: tokens.Spacing.xs,
@@ -66,6 +73,12 @@ class OnDeviceModelCard extends StatelessWidget {
                 KynosChip.accent(
                   label: _familyLabel(model.family),
                   color: kynos.purple,
+                ),
+                ...model.capabilities.map(
+                  (capability) => KynosChip.accent(
+                    label: _capabilityLabel(capability),
+                    color: _capabilityColor(capability, kynos),
+                  ),
                 ),
                 if (model.requiresHuggingFaceToken)
                   KynosChip.accent(label: 'HF token', color: kynos.move)
@@ -92,7 +105,34 @@ class OnDeviceModelCard extends StatelessWidget {
     return switch (family) {
       OnDeviceModelFamily.gemma4 => 'Gemma 4',
       OnDeviceModelFamily.gemma3 => 'Gemma 3',
+      OnDeviceModelFamily.gemma3n => 'Gemma3n',
       OnDeviceModelFamily.qwen3 => 'Qwen3',
+      OnDeviceModelFamily.qwen2 => 'Qwen 2.5',
+      OnDeviceModelFamily.phi => 'Phi-4',
+      OnDeviceModelFamily.functionGemma => 'FunctionGemma',
+    };
+  }
+
+  String _capabilityLabel(OnDeviceModelCapability capability) {
+    return switch (capability) {
+      OnDeviceModelCapability.functionCalling => 'Tools',
+      OnDeviceModelCapability.thinkingMode => 'Thinking',
+      OnDeviceModelCapability.vision => 'Vision',
+      OnDeviceModelCapability.audio => 'Audio',
+      OnDeviceModelCapability.multilingual => 'Multilingual',
+    };
+  }
+
+  Color _capabilityColor(
+    OnDeviceModelCapability capability,
+    KynosThemeExtension kynos,
+  ) {
+    return switch (capability) {
+      OnDeviceModelCapability.functionCalling => kynos.stand,
+      OnDeviceModelCapability.thinkingMode => kynos.move,
+      OnDeviceModelCapability.vision => kynos.exercise,
+      OnDeviceModelCapability.audio => kynos.purple,
+      OnDeviceModelCapability.multilingual => kynos.secondaryLabel,
     };
   }
 }
