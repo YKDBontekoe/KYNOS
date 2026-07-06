@@ -91,7 +91,7 @@ final class CoachConversationsProvider
 }
 
 String _$coachConversationsHash() =>
-    r'd3c41e8f648c42a89272f462c3606e311ee7ea52';
+    r'f3596fdbd51064beb2ef93b4793bfbd2eb4ae151';
 
 abstract class _$CoachConversations
     extends $AsyncNotifier<List<CoachConversationSummary>> {
