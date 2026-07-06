@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.14.0...v1.14.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* **coach:** remove false error badge and improve bubble text contrast ([#69](https://github.com/YKDBontekoe/KYNOS/issues/69)) ([378f1be](https://github.com/YKDBontekoe/KYNOS/commit/378f1bee33a0e1b5bbeee41551aa86339b38e21e))
+
 # [1.14.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.13.0...v1.14.0) (2026-07-06)
 
 

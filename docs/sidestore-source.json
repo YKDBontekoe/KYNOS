@@ -11,8 +11,15 @@
       "localizedDescription": "KYNOS is a privacy-first running coach built with on-device AI, HealthKit insights, and biomechanical analysis. No raw biometric data leaves the device.",
       "iconURL": "https://raw.githubusercontent.com/YKDBontekoe/KYNOS/main/web/icons/Icon-512.png",
       "tintColor": "#0F766E",
-      "downloadURL": "https://github.com/YKDBontekoe/KYNOS/releases/download/v1.14.0/kynos-ios-unsigned.ipa",
+      "downloadURL": "https://github.com/YKDBontekoe/KYNOS/releases/download/v1.14.1/kynos-ios-unsigned.ipa",
       "versions": [
+        {
+          "version": "1.14.1",
+          "date": "2026-07-06",
+          "downloadURL": "https://github.com/YKDBontekoe/KYNOS/releases/download/v1.14.1/kynos-ios-unsigned.ipa",
+          "size": 24818188,
+          "minOSVersion": "16.0"
+        },
         {
           "version": "1.14.0",
           "date": "2026-07-06",
