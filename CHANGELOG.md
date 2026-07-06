@@ -1,3 +1,15 @@
+# [1.14.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.13.0...v1.14.0) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ci:** build only unsigned ipa in release ([#68](https://github.com/YKDBontekoe/KYNOS/issues/68)) ([72e6e06](https://github.com/YKDBontekoe/KYNOS/commit/72e6e06ae654be7a26e4079abd8a610a9760de05))
+
+
+### Features
+
+* **settings:** add on-device model picker with Gemma and Qwen options ([#67](https://github.com/YKDBontekoe/KYNOS/issues/67)) ([d4c3f0c](https://github.com/YKDBontekoe/KYNOS/commit/d4c3f0c08e9fbc52b25d78c2f39fc13de0582564))
+
 # [1.13.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.2...v1.13.0) (2026-07-06)
 
 
