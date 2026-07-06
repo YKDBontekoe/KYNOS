@@ -40,8 +40,10 @@ void main() {
         totalRamBytes: 8 * 1024 * 1024 * 1024,
       );
 
-      expect(models.map((m) => m.id), isNot(contains('gemma3-270m')));
-      expect(models.map((m) => m.id), contains('qwen3-0.6b'));
+      final ids = models.map((m) => m.id).toList();
+      expect(ids, isNot(contains('gemma3-270m')));
+      expect(ids, isNot(contains('gemma3-1b')));
+      expect(ids, contains('qwen3-0.6b'));
     });
   });
 }

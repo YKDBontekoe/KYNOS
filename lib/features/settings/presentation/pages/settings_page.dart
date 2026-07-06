@@ -9,6 +9,7 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/settings_appearance_section.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -236,7 +237,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     subtitle: Text(settings.selectedLocalModelName),
                     trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
                     onTap: () async {
-                      await context.push<String>(Routes.onDeviceModels);
+                      final result = await context
+                          .push<OnDeviceModelSelectionResult>(
+                        Routes.onDeviceModels,
+                      );
+                      if (result != null && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result.needsDownload
+                                  ? 'Selected ${result.modelName}. '
+                                      'It will download when you open Coach.'
+                                  : 'Selected ${result.modelName}',
+                            ),
+                          ),
+                        );
+                      }
                     },
                     contentPadding: EdgeInsets.zero,
                   ),

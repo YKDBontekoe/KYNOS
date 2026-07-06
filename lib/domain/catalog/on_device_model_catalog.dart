@@ -89,7 +89,7 @@ abstract final class OnDeviceModelCatalog {
         ? null
         : (totalRamBytes / (1024 * 1024 * 1024)).floor();
 
-    const webLitertLmIds = {'gemma4-e2b', 'qwen3-0.6b', 'gemma3-1b'};
+    const webLitertLmIds = {'gemma4-e2b', 'qwen3-0.6b'};
 
     return models.where((model) {
       if (isWeb && !webLitertLmIds.contains(model.id)) return false;

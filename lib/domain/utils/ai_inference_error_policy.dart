@@ -2,18 +2,21 @@ import 'dart:async';
 
 /// Classifies on-device LLM failures and maps them to user-facing copy.
 abstract final class AiInferenceErrorPolicy {
-  static const _recoverablePatterns = [
+  static const _resourceLimitQualifiers = [
+    'out_of_memory',
+    'out of memory',
+    'resource_exhausted',
+    'resource exhausted',
+    'too many resources',
+    'too much memory',
+    'resource limit',
+  ];
+
+  static const _otherRecoverablePatterns = [
     'Failed to invoke the compiled model',
     'Stream error',
     'INTERNAL',
-    'OUT_OF_MEMORY',
-    'OUT OF MEMORY',
-    'RESOURCE_EXHAUSTED',
-    'RESOURCE EXHAUSTED',
     'Chat not initialized',
-    'Resource limit',
-    'too many resources',
-    'too much memory',
     'litert',
     'compiled model',
     'timed out',
@@ -25,7 +28,10 @@ abstract final class AiInferenceErrorPolicy {
 
     final message = _messageFor(error).toLowerCase();
     if (message.isEmpty) return false;
-    for (final pattern in _recoverablePatterns) {
+    for (final pattern in [
+      ..._resourceLimitQualifiers,
+      ..._otherRecoverablePatterns,
+    ]) {
       if (message.contains(pattern.toLowerCase())) return true;
     }
     return false;
@@ -33,12 +39,11 @@ abstract final class AiInferenceErrorPolicy {
 
   static bool isResourceLimitError(Object error) {
     final message = _messageFor(error).toLowerCase();
-    return message.contains('resource') ||
-        message.contains('out_of_memory') ||
-        message.contains('out of memory') ||
-        message.contains('resource_exhausted') ||
-        message.contains('too many resources') ||
-        message.contains('too much memory');
+    if (_resourceLimitQualifiers.any(message.contains)) return true;
+    return message.contains('resource') &&
+        (message.contains('exhaust') ||
+            message.contains('limit') ||
+            message.contains('too many'));
   }
 
   static String userFriendlyMessage(
@@ -80,9 +85,14 @@ abstract final class AiInferenceErrorPolicy {
             ? 'The on-device model took too long to respond. Retry on-device, or try cloud coaching instead.'
             : 'The on-device model took too long to respond. Tap Retry to try again.';
       }
+      if (_isChatInitError(message)) {
+        return canSwitchToCloud
+            ? 'The on-device coach session is not ready. Open Coach to finish setup, or try cloud coaching instead.'
+            : 'The on-device coach session is not ready. Open Coach to finish model setup, then tap Retry.';
+      }
       return canSwitchToCloud
-          ? 'The on-device model hit a resource limit. Retry on-device, or try cloud coaching instead.'
-          : 'The on-device model hit a resource limit. Tap Retry to try a safer on-device mode.';
+          ? 'The on-device model hit a temporary issue. Retry on-device, or try cloud coaching instead.'
+          : 'The on-device model hit a temporary issue. Tap Retry to try again.';
     }
     if (message.contains('No active Gemma model')) {
       return canSwitchToCloud
@@ -95,6 +105,11 @@ abstract final class AiInferenceErrorPolicy {
     return canSwitchToCloud
         ? 'On-device coaching is temporarily unavailable. Retry on-device, or try cloud coaching instead.'
         : 'On-device coaching is temporarily unavailable. Tap Retry or ask again in a moment.';
+  }
+
+  static bool _isChatInitError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('chat not initialized');
   }
 
   static bool _isCloudError(String message) {

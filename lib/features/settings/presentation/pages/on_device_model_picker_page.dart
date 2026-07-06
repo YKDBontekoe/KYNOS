@@ -8,6 +8,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/on_device_model_card.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart';
@@ -47,8 +48,7 @@ class _OnDeviceModelPickerPageState
 
   Future<void> _selectModel(OnDeviceModel model) async {
     final settings = ref.read(settingsProvider);
-    final wasInstalled = settings.installedLocalModelId == model.id &&
-        settings.isSelectedLocalModelInstalled;
+    final wasInstalled = settings.installedLocalModelId == model.id;
 
     await ref.read(settingsProvider.notifier).updateSelectedLocalModel(
           id: model.id,
@@ -61,15 +61,10 @@ class _OnDeviceModelPickerPageState
     }
 
     if (!mounted) return;
-    context.pop(model.id);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          wasInstalled
-              ? 'Selected ${model.name}'
-              : 'Selected ${model.name}. It will download when you open Coach.',
-        ),
+    context.pop(
+      OnDeviceModelSelectionResult(
+        modelName: model.name,
+        needsDownload: !wasInstalled,
       ),
     );
   }

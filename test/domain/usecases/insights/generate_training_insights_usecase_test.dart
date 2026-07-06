@@ -1,15 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/core/errors/failures.dart';
-import 'package:kynos/domain/entities/ai_inference_backend.dart';
-import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/domain/repositories/ai_coach_repository.dart';
-import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/domain/usecases/insights/generate_training_insights_usecase.dart';
+
+import '../../../support/fake_ai_repositories.dart';
 
 void main() {
   group('GenerateTrainingInsightsUseCase', () {
@@ -56,8 +53,8 @@ void main() {
             history: history,
             runs: runs,
           ),
-          aiCoachRepository: _FakeAiCoachRepository(),
-          aiModelRepository: _FakeAiModelRepository(hasActiveModel: false),
+          aiCoachRepository: FakeAiCoachRepository(),
+          aiModelRepository: FakeAiModelRepository(hasActiveModel: false),
         );
 
         final result = await useCase();
@@ -79,8 +76,8 @@ void main() {
           runs: const <WorkoutSession>[],
           summariesFailure: const HealthDataFailure('history error'),
         ),
-        aiCoachRepository: _FakeAiCoachRepository(),
-        aiModelRepository: _FakeAiModelRepository(hasActiveModel: false),
+        aiCoachRepository: FakeAiCoachRepository(),
+        aiModelRepository: FakeAiModelRepository(hasActiveModel: false),
       );
 
       final result = await useCase();
@@ -148,46 +145,4 @@ class _FakeHealthRepository implements HealthRepository {
   }) async {
     return (points: const <WorkoutRoutePoint>[], failure: null);
   }
-}
-
-class _FakeAiCoachRepository implements AiCoachRepository {
-  @override
-  bool get isReady => true;
-
-  @override
-  AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
-
-  @override
-  Stream<AiChunk> chat({
-    required String userMessage,
-    List<HealthSummary>? healthContext,
-    AiTaskKind taskKind = AiTaskKind.coachChat,
-    int estimatedPromptTokens = 0,
-    AiInferenceBackend? preferredBackend,
-  }) async* {}
-
-  @override
-  Future<void> dispose() async {}
-
-  @override
-  Future<void> resetSession() async {}
-}
-
-class _FakeAiModelRepository implements AiModelRepository {
-  _FakeAiModelRepository({required this.hasActiveModel});
-
-  @override
-  final bool hasActiveModel;
-
-  @override
-  String? get installedModelId => null;
-
-  @override
-  Future<void> initialize({String? huggingFaceToken}) async {}
-
-  @override
-  Future<void> install(OnDeviceModel model, {String? token}) async {}
-
-  @override
-  bool isActiveModel(String catalogId) => false;
 }

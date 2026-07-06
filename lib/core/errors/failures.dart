@@ -27,3 +27,7 @@ final class PrivacyConstraintFailure extends Failure {
   const PrivacyConstraintFailure(
       [super.message = 'Operation blocked by Zero-Knowledge policy']);
 }
+
+final class AiModelFailure extends Failure {
+  const AiModelFailure([super.message = 'On-device model error']);
+}

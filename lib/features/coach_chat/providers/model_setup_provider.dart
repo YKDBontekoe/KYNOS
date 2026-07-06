@@ -67,7 +67,11 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
       );
 
       final AiModelRepository repo = ref.read(aiModelRepositoryProvider);
-      await repo.initialize(huggingFaceToken: hfToken);
+      final initResult = await repo.initialize(huggingFaceToken: hfToken);
+      if (initResult.failure != null) {
+        state = AsyncError(initResult.failure!, StackTrace.current);
+        return;
+      }
 
       final installedId = settings.installedLocalModelId;
       if (installedId != null) {
@@ -94,7 +98,20 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
         ),
       );
 
-      await repo.install(model, token: hfToken);
+      final installResult = await repo.install(model, token: hfToken);
+      if (installResult.failure != null) {
+        state = AsyncError(installResult.failure!, StackTrace.current);
+        return;
+      }
+      if (!repo.hasActiveModel) {
+        state = AsyncError(
+          StateError(
+            '${model.name} install completed but model is not active.',
+          ),
+          StackTrace.current,
+        );
+        return;
+      }
       await ref.read(settingsProvider.notifier).markLocalModelInstalled(model.id);
       state = const AsyncData(ModelSetupState(phase: ModelSetupPhase.ready));
     } catch (e, st) {

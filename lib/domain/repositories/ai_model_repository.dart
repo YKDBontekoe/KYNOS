@@ -1,3 +1,4 @@
+import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
 
 /// Contract for managing the lifecycle of the on-device AI model file.
@@ -14,10 +15,10 @@ abstract interface class AiModelRepository {
   /// Initialises the underlying inference runtime (must be called before use).
   ///
   /// Pass [huggingFaceToken] for gated HuggingFace model downloads.
-  Future<void> initialize({String? huggingFaceToken});
+  Future<({Failure? failure})> initialize({String? huggingFaceToken});
 
   /// Downloads and installs [model] from its configured HuggingFace URL.
-  Future<void> install(OnDeviceModel model, {String? token});
+  Future<({Failure? failure})> install(OnDeviceModel model, {String? token});
 
   /// Whether the active on-device model matches [catalogId].
   bool isActiveModel(String catalogId);

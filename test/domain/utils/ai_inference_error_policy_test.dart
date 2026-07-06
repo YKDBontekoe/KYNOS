@@ -51,6 +51,24 @@ void main() {
       expect(message, contains('too long'));
     });
 
+    test('maps chat init failures to setup guidance', () {
+      final message = AiInferenceErrorPolicy.userFriendlyMessage(
+        StateError('Chat not initialized'),
+        canSwitchToCloud: true,
+      );
+      expect(message, contains('session is not ready'));
+      expect(message, contains('cloud coaching'));
+    });
+
+    test('does not treat resource-not-found as resource limit', () {
+      expect(
+        AiInferenceErrorPolicy.isResourceLimitError(
+          StateError('RESOURCE_NOT_FOUND: model missing'),
+        ),
+        isFalse,
+      );
+    });
+
     test('maps resource limit errors with cloud switch hint', () {
       final message = AiInferenceErrorPolicy.userFriendlyMessage(
         StateError('RESOURCE_EXHAUSTED: too many resources'),

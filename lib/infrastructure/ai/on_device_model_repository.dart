@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
@@ -24,49 +25,68 @@ class OnDeviceModelRepository implements AiModelRepository {
       hasActiveModel && installedModelId == catalogId;
 
   @override
-  Future<void> initialize({String? huggingFaceToken}) =>
-      GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
+  Future<({Failure? failure})> initialize({String? huggingFaceToken}) async {
+    try {
+      await GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
+      return (failure: null);
+    } on Object catch (error) {
+      return (failure: AiModelFailure(error.toString()));
+    }
+  }
 
   @override
-  Future<void> install(OnDeviceModel model, {String? token}) async {
-    _cachedTier = await GemmaRuntimeTier.resolve();
+  Future<({Failure? failure})> install(OnDeviceModel model, {String? token}) async {
+    try {
+      _cachedTier = await GemmaRuntimeTier.resolve();
 
-    if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(_cachedTier!)) {
-      throw StateError(
-        'This device cannot run on-device models (insufficient RAM).',
-      );
-    }
-
-    final ramBytes = await GemmaDeviceRamProbe.totalRamBytes();
-    if (ramBytes != null) {
-      final ramGb = ramBytes / (1024 * 1024 * 1024);
-      if (ramGb < model.minRamGb) {
-        throw StateError(
-          'This device does not have enough RAM for ${model.name}. '
-          'Try a lighter model such as ${OnDeviceModelCatalog.gemma3_270m.name}.',
+      if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(_cachedTier!)) {
+        return (
+          failure: const AiModelFailure(
+            'This device cannot run on-device models (insufficient RAM).',
+          ),
         );
       }
+
+      final ramBytes = await GemmaDeviceRamProbe.totalRamBytes();
+      if (ramBytes != null) {
+        final ramGb = ramBytes / (1024 * 1024 * 1024);
+        if (ramGb < model.minRamGb) {
+          return (
+            failure: AiModelFailure(
+              'This device does not have enough RAM for ${model.name}. '
+              'Try a lighter model such as ${OnDeviceModelCatalog.gemma3_270m.name}.',
+            ),
+          );
+        }
+      }
+
+      if (model.requiresHuggingFaceToken && (token == null || token.isEmpty)) {
+        return (
+          failure: AiModelFailure(
+            'A HuggingFace access token is required for ${model.name}.',
+          ),
+        );
+      }
+
+      final url = model.downloadUrl(isWeb: kIsWeb);
+      await GemmaRuntime.installModel(model)
+          .fromNetwork(url, token: token)
+          .install();
+
+      if (!hasActiveModel) {
+        return (
+          failure: AiModelFailure(
+            '${model.name} install completed but model is not active.',
+          ),
+        );
+      }
+
+      _installedModelId = model.id;
+      GemmaRuntime.markInstalled(model.id);
+      return (failure: null);
+    } on Object catch (error) {
+      return (failure: AiModelFailure(error.toString()));
     }
-
-    if (model.requiresHuggingFaceToken && (token == null || token.isEmpty)) {
-      throw StateError(
-        'A HuggingFace access token is required for ${model.name}.',
-      );
-    }
-
-    final url = model.downloadUrl(isWeb: kIsWeb);
-    await GemmaRuntime.installModel(model)
-        .fromNetwork(url, token: token)
-        .install();
-
-    if (!hasActiveModel) {
-      throw StateError(
-        '${model.name} install completed but model is not active.',
-      );
-    }
-
-    _installedModelId = model.id;
-    GemmaRuntime.markInstalled(model.id);
   }
 
   GemmaInferenceTier get inferenceTier =>

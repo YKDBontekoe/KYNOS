@@ -55,6 +55,8 @@ class Settings extends _$Settings {
   SettingsState build() {
     final prefs = ref.watch(sharedPreferencesProvider);
     final levelName = prefs.getString(_cloudDataLevelKey);
+    final defaultModel =
+        OnDeviceModelCatalog.byId(OnDeviceModelCatalog.defaultModelId);
     return SettingsState(
       isDarkMode: prefs.getBool(_themeKey) ?? false,
       languageCode: prefs.getString(_languageKey) ?? 'en',
@@ -66,9 +68,9 @@ class Settings extends _$Settings {
       selectedCloudModelId: prefs.getString(_cloudModelIdKey),
       selectedCloudModelName: prefs.getString(_cloudModelNameKey),
       selectedLocalModelId:
-          prefs.getString(_localModelIdKey) ?? OnDeviceModelCatalog.defaultModelId,
-      selectedLocalModelName: prefs.getString(_localModelNameKey) ??
-          OnDeviceModelCatalog.gemma4E2b.name,
+          prefs.getString(_localModelIdKey) ?? defaultModel.id,
+      selectedLocalModelName:
+          prefs.getString(_localModelNameKey) ?? defaultModel.name,
       installedLocalModelId: prefs.getString(_installedLocalModelIdKey),
     );
   }

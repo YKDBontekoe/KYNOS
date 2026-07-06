@@ -17,6 +17,7 @@ class AssistantBubble extends StatelessWidget {
     this.attemptedBackend,
     this.onRetry,
     this.onTryAlternateBackend,
+    this.alternateBackend,
     this.alternateBackendLabel,
   });
 
@@ -26,6 +27,7 @@ class AssistantBubble extends StatelessWidget {
   final AiInferenceBackend? attemptedBackend;
   final VoidCallback? onRetry;
   final VoidCallback? onTryAlternateBackend;
+  final AiInferenceBackend? alternateBackend;
   final String? alternateBackendLabel;
 
   Future<void> _copyMessage(BuildContext context) async {
@@ -112,7 +114,7 @@ class AssistantBubble extends StatelessWidget {
                       TextButton.icon(
                         onPressed: onTryAlternateBackend,
                         icon: Icon(
-                          alternateBackendLabel == 'Try cloud coach'
+                          alternateBackend == AiInferenceBackend.openRouter
                               ? Icons.cloud_outlined
                               : Icons.memory_rounded,
                           size: 18,

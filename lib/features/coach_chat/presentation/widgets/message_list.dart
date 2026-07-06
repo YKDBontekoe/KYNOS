@@ -91,6 +91,10 @@ class MessageBubble extends ConsumerWidget {
             message: message,
             cloudConfigured: cloudConfigured,
           ),
+          alternateBackend: _alternateBackend(
+            message: message,
+            cloudConfigured: cloudConfigured,
+          ),
         ),
     };
   }
@@ -126,6 +130,20 @@ class MessageBubble extends ConsumerWidget {
       AiInferenceBackend.rulesOnly when cloudConfigured =>
         'Try cloud coach',
       AiInferenceBackend.openRouter => 'Try on-device',
+      _ => null,
+    };
+  }
+
+  AiInferenceBackend? _alternateBackend({
+    required ChatMessage message,
+    required bool cloudConfigured,
+  }) {
+    if (!message.hasError) return null;
+    return switch (message.attemptedBackend) {
+      AiInferenceBackend.onDevice ||
+      AiInferenceBackend.rulesOnly when cloudConfigured =>
+        AiInferenceBackend.openRouter,
+      AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
       _ => null,
     };
   }
