@@ -17,7 +17,7 @@ description: Regenerate CODEMAP.md after structural changes under lib/. Use when
 dart run tool/generate_codemap.dart
 ```
 
-This updates the auto-generated sections between `<!-- CODEMAP_AUTO_BEGIN/END -->` in [CODEMAP.md](../../CODEMAP.md):
+This updates the auto-generated sections between `<!-- CODEMAP_AUTO_BEGIN/END -->` in [CODEMAP.md](../../../CODEMAP.md):
 - Layer map (per-file line counts and class summaries)
 - Hot files (>250 lines)
 

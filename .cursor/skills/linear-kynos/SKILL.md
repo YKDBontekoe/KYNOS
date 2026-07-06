@@ -20,4 +20,4 @@ description: Manage Linear issues for the KYNOS project. Use when creating issue
 
 ## Canonical Docs
 
-For code changes triggered by Linear issues, follow [docs/agents/README.md](../../docs/agents/README.md) and use `/add-feature` or `/validate-change` as appropriate.
+For code changes triggered by Linear issues, follow [docs/agents/README.md](../../../docs/agents/README.md) and use `/add-feature` or `/validate-change` as appropriate.

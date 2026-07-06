@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit Performance
 
-**Reference:** [docs/workflow_prompts.md §2](../../docs/workflow_prompts.md) · AGENTS.md §14
+**Reference:** [docs/workflow_prompts.md §2](../../../../docs/workflow_prompts.md) · AGENTS.md §14
 
 ## Instructions
 

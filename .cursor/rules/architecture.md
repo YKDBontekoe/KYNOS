@@ -2,7 +2,7 @@
 
 Layer dependency direction — **never invert**:
 
-```
+```text
 features/ → domain/ ← infrastructure/
 features/ → shared/providers/ → domain + infrastructure
 ```

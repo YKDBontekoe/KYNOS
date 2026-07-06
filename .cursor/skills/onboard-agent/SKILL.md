@@ -13,9 +13,9 @@ description: Onboard to the KYNOS repository. Use when starting your first task,
 
 ## Read Order
 
-1. [docs/agents/README.md](../../docs/agents/README.md) — hub
-2. [CODEMAP.md](../../CODEMAP.md) — file locations, feature index
-3. [AGENTS.md](../../AGENTS.md) — full rules and PR lifecycle
+1. [docs/agents/README.md](../../../docs/agents/README.md) — hub
+2. [CODEMAP.md](../../../CODEMAP.md) — file locations, feature index
+3. [AGENTS.md](../../../AGENTS.md) — full rules and PR lifecycle
 
 ## Bootstrap
 

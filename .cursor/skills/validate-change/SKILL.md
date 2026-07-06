@@ -35,4 +35,4 @@ Attach visual proof: screen recording or screenshots of changed screens.
 
 ## Definition of Done
 
-All commands pass with zero errors. See [AGENTS.md §4.7](../../AGENTS.md#47-definition-of-done-for-a-pr).
+All commands pass with zero errors. See [AGENTS.md §4.7](../../../AGENTS.md#47-definition-of-done-for-a-pr).

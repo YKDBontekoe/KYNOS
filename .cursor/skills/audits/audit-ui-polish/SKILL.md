@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit UI Polish
 
-**Reference:** [docs/workflow_prompts.md §5](../../docs/workflow_prompts.md) · AGENTS.md §14
+**Reference:** [docs/workflow_prompts.md §5](../../../../docs/workflow_prompts.md) · AGENTS.md §14
 
 ## Instructions
 

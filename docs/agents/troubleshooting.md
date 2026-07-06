@@ -8,7 +8,7 @@ Common issues agents hit in KYNOS and how to fix them.
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
-git add lib/**/*.g.dart lib/**/*.freezed.dart
+git add 'lib/**/*.g.dart' 'lib/**/*.freezed.dart'
 git commit -m "chore: regenerate build_runner outputs"
 ```
 

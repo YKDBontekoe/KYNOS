@@ -11,7 +11,7 @@ Thank you for contributing! This document is a short guide for human contributor
 
 ## Architecture
 
-```
+```text
 features/ → domain/ ← infrastructure/
 features/ → shared/providers/ → domain + infrastructure
 ```

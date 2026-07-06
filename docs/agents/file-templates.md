@@ -42,6 +42,8 @@ class <Name>Page extends ConsumerWidget {
 `lib/features/<name>/providers/<name>_provider.dart`
 
 ```dart
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part '<name>_provider.g.dart';
@@ -156,8 +158,9 @@ void main() {
 `test/features/<name>/presentation/pages/<name>_page_test.dart`
 
 ```dart
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/features/<name>/presentation/pages/<name>_page.dart';
 
 void main() {

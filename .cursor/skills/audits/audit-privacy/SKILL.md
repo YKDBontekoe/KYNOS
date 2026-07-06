@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit Privacy
 
-**Reference:** [docs/workflow_prompts.md §3](../../docs/workflow_prompts.md) · AGENTS.md §11
+**Reference:** [docs/workflow_prompts.md §3](../../../../docs/workflow_prompts.md) · AGENTS.md §11
 
 ## Instructions
 
@@ -19,7 +19,12 @@ disable-model-invocation: true
 ## Commands
 
 ```bash
+# Single-line logger calls with sensitive payloads
 rg 'logger\.(d|i|w|e|f)\(.*(HealthSummary|hrvMs|rhrBpm)' lib/
+
+# Multi-line logger calls (e.g. named arguments split across lines)
+rg -U 'logger\.(d|i|w|e|f)\([\s\S]*?(HealthSummary|hrvMs|rhrBpm)' lib/
+
 rg 'print\(|debugPrint\(' lib/
 ```
 

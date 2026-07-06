@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Audit Test Coverage
 
-**Reference:** [docs/workflow_prompts.md §6](../../docs/workflow_prompts.md) · AGENTS.md §13
+**Reference:** [docs/workflow_prompts.md §6](../../../../docs/workflow_prompts.md) · AGENTS.md §13
 
 ## Instructions
 
@@ -23,5 +23,5 @@ disable-model-invocation: true
 
 ## Proof of Work
 
-- `flutter test` — 0 failures
-- Coverage summary showing improvement in target area
+- `flutter test --coverage` — 0 failures; attach `coverage/lcov.info` or an HTML/summary report for the target area
+- Coverage summary showing measurable improvement in the target area (not just a green test run)

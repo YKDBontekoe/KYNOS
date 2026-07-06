@@ -35,7 +35,7 @@ Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `buil
 
 ## PR Body
 
-Use the [.github/pull_request_template.md](../../.github/pull_request_template.md) checklist.
+Use the [.github/pull_request_template.md](../../../.github/pull_request_template.md) checklist.
 
 ## After Opening — Mandatory Monitoring
 
@@ -45,4 +45,4 @@ Use the [.github/pull_request_template.md](../../.github/pull_request_template.m
 4. React 👍 on every addressed comment
 5. Do **not** abandon the PR until merged or explicitly closed
 
-See [AGENTS.md §4](../../AGENTS.md#4-pull-request--review-process).
+See [AGENTS.md §4](../../../AGENTS.md#4-pull-request--review-process).

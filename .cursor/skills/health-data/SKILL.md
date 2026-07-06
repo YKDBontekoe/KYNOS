@@ -5,6 +5,8 @@ paths:
   - "lib/infrastructure/health/**"
   - "lib/shared/providers/health*.dart"
   - "lib/domain/entities/health*.dart"
+  - "lib/domain/repositories/health*.dart"
+  - "lib/domain/usecases/health/**"
 ---
 
 # Health Data
