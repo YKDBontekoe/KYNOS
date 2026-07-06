@@ -36,8 +36,14 @@ class MetricTile extends StatelessWidget {
     final theme = Theme.of(context);
     final accent = accentColor ?? kynos.stand;
 
+    final valueLabel = value == null
+        ? '$label, loading'
+        : unit != null
+            ? '$label, $value $unit'
+            : '$label, $value';
+
     return Semantics(
-      label: onTap != null ? '$label metric' : null,
+      label: valueLabel,
       button: onTap != null,
       child: GestureDetector(
         onTap: onTap,

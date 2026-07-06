@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/measurable_quest_sync_provider.dart';
+import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:logger/logger.dart';
 
@@ -34,6 +38,8 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _disposeLocalAi();
+    } else if (state == AppLifecycleState.resumed) {
+      _onAppResumed();
     }
   }
 
@@ -49,6 +55,17 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
     }
   }
 
+  void _onAppResumed() {
+    if (!kIsWeb) {
+      invalidateHealthProviders(ref as Ref);
+      ref.invalidate(healthPermissionsProvider);
+    }
+    ref.read(aiReconnectStateProvider.notifier).markNeedsReconnect();
+  }
+
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    ref.watch(measurableQuestSyncProvider);
+    return widget.child;
+  }
 }

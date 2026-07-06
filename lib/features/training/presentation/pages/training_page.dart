@@ -26,6 +26,18 @@ import 'package:kynos/shared/widgets/kynos_section_header.dart';
 class TrainingPage extends ConsumerWidget {
   const TrainingPage({super.key});
 
+  Future<void> _refreshTraining(WidgetRef ref) async {
+    ref.invalidate(healthHistoryProvider(days: 30));
+    ref.invalidate(recentRunsProvider(days: 365, limit: 60));
+    ref.invalidate(trainingInsightsStateProvider);
+    ref.invalidate(nexusLabProvider);
+    await Future.wait([
+      ref.read(healthHistoryProvider(days: 30).future),
+      ref.read(recentRunsProvider(days: 365, limit: 60).future),
+      ref.read(trainingInsightsStateProvider.future),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(healthHistoryProvider(days: 30));
@@ -35,7 +47,9 @@ class TrainingPage extends ConsumerWidget {
 
     final kynos = context.kynosTheme;
 
-    return CustomScrollView(
+    return RefreshIndicator(
+      onRefresh: () => _refreshTraining(ref),
+      child: CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),
@@ -151,6 +165,7 @@ class TrainingPage extends ConsumerWidget {
           ),
         ),
       ],
+    ),
     );
   }
 }

@@ -48,9 +48,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_health_data.png',
-      title: 'Ready to go?',
+      title: 'Connect Your Health',
       description:
-          'Get started and connect your health data to build your baseline.',
+          'Grant HealthKit access or import runs so KYNOS can build your readiness baseline.',
+    ),
+    OnboardingItem(
+      imagePath: 'assets/images/onboarding_health_data.png',
+      title: 'Set Up AI Coach',
+      description:
+          'Add a HuggingFace token in Settings to download the on-device Gemma coach model. '
+          'You can also enable cloud coaching with OpenRouter later.',
     ),
   ];
 
@@ -73,17 +80,38 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _skipOnboarding() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skip setup?'),
+        content: const Text(
+          'You can connect health data and set up the AI coach anytime in Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Continue setup'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Skip for now'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
     await _finishOnboarding();
   }
 
   Future<void> _getStarted() async {
-    if (!mounted) return;
-    context.go(Routes.healthImport);
     if (!kIsWeb) {
       await ref.read(healthPermissionsProvider.notifier).request();
     }
     if (!mounted) return;
     await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+    if (!mounted) return;
+    context.go(Routes.healthImport);
   }
 
   @override

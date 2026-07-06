@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
 
 /// Shows up to three recent runs on the Today tab.
-class LastRunPreview extends StatelessWidget {
+class LastRunPreview extends ConsumerWidget {
   const LastRunPreview({
     super.key,
     required this.runsAsync,
@@ -19,16 +21,14 @@ class LastRunPreview extends StatelessWidget {
   final AsyncValue<List<WorkoutSession>> runsAsync;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return runsAsync.when(
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Loading recent runs...'),
       ),
-      error: (_, _) => KynosCard(
-        child: Text(
-          'Could not load recent runs.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+      error: (_, _) => KynosInlineErrorCard(
+        message: 'Could not load recent runs.',
+        onRetry: () => ref.invalidate(recentRunsProvider(days: 30, limit: 3)),
       ),
       data: (runs) {
         if (runs.isEmpty) {

@@ -103,9 +103,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.runRoute,
         builder: (context, state) {
           final run = state.extra;
-          if (run is! WorkoutSession) return const RunRouteMissingPage();
-          return RunRoutePage(run: run);
+          if (run is WorkoutSession) return RunRoutePage(run: run);
+          return const RunRouteMissingPage();
         },
+        routes: [
+          GoRoute(
+            path: ':runId',
+            builder: (context, state) {
+              final runId = state.pathParameters['runId'];
+              if (runId == null || runId.isEmpty) {
+                return const RunRouteMissingPage();
+              }
+              return RunRoutePage(runId: runId);
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.coachChat,

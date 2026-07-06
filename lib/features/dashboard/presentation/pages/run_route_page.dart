@@ -10,11 +10,75 @@ import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/workout_session_lookup_provider.dart';
 import 'package:kynos/shared/utils/url_opener.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class RunRoutePage extends ConsumerWidget {
-  const RunRoutePage({super.key, required this.run});
+  const RunRoutePage({super.key, this.run, this.runId})
+      : assert(run != null || runId != null);
+
+  final WorkoutSession? run;
+  final String? runId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
+    final resolvedRun = run;
+    if (resolvedRun != null) {
+      return _RunRouteScaffold(run: resolvedRun);
+    }
+
+    final lookup = ref.watch(workoutSessionByIdProvider(runId!));
+    return lookup.when(
+      loading: () => Scaffold(
+        backgroundColor: kynos.background,
+        appBar: AppBar(
+          title: const Text('Run Route'),
+          backgroundColor: kynos.background,
+          surfaceTintColor: Colors.transparent,
+        ),
+        body: const Padding(
+          padding: EdgeInsets.all(tokens.Spacing.md),
+          child: KynosSkeleton.tile(height: 300),
+        ),
+      ),
+      error: (_, _) => Scaffold(
+        backgroundColor: kynos.background,
+        appBar: AppBar(
+          title: const Text('Run Route'),
+          backgroundColor: kynos.background,
+          surfaceTintColor: Colors.transparent,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(tokens.Spacing.md),
+          child: KynosInlineErrorCard(
+            message: 'Could not load this run.',
+            onRetry: () => ref.invalidate(workoutSessionByIdProvider(runId!)),
+          ),
+        ),
+      ),
+      data: (session) {
+        if (session == null) {
+          return Scaffold(
+            backgroundColor: kynos.background,
+            appBar: AppBar(
+              title: const Text('Run Route'),
+              backgroundColor: kynos.background,
+              surfaceTintColor: Colors.transparent,
+            ),
+            body: const Center(child: Text('Run not found on this device.')),
+          );
+        }
+        return _RunRouteScaffold(run: session);
+      },
+    );
+  }
+}
+
+class _RunRouteScaffold extends ConsumerWidget {
+  const _RunRouteScaffold({required this.run});
 
   final WorkoutSession run;
 
@@ -46,28 +110,11 @@ class RunRoutePage extends ConsumerWidget {
           padding: EdgeInsets.all(tokens.Spacing.md),
           child: KynosSkeleton.tile(height: 300),
         ),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(tokens.Spacing.md),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Could not load workout route: $error',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: kynos.move,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const Gap(tokens.Spacing.md),
-                FilledButton(
-                  onPressed: () => ref.invalidate(
-                    runRouteProvider(workoutUuid: run.id),
-                  ),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(tokens.Spacing.md),
+          child: KynosInlineErrorCard(
+            message: 'Could not load the workout route. Try again in a moment.',
+            onRetry: () => ref.invalidate(runRouteProvider(workoutUuid: run.id)),
           ),
         ),
       ),

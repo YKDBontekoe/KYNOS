@@ -18,6 +18,34 @@ class AppleHealthExportPreviewCard extends StatelessWidget {
   final bool isImporting;
   final VoidCallback onImport;
 
+  Future<void> _confirmImport(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import all health data?'),
+        content: Text(
+          'This will import ${preview.recordCount} health records, '
+          '${preview.summaries.length} daily summaries, and '
+          '${preview.workouts.length} running workouts onto this device.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Import'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      onImport();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -67,7 +95,7 @@ class AppleHealthExportPreviewCard extends StatelessWidget {
         ],
         const Gap(tokens.Spacing.md),
         FilledButton(
-          onPressed: isImporting ? null : onImport,
+          onPressed: isImporting ? null : () => _confirmImport(context),
           child: Text(isImporting ? 'Importing…' : 'Import all data'),
         ),
       ],

@@ -13,6 +13,10 @@ class RunCard extends StatelessWidget {
 
   final WorkoutSession run;
 
+  void _openRoute(BuildContext context) {
+    context.push('${Routes.runRoute}/${run.id}', extra: run);
+  }
+
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
@@ -21,6 +25,7 @@ class RunCard extends StatelessWidget {
     final pace = _pacePerKm(run.duration, run.distanceMeters);
 
     return KynosCard(
+      onTap: () => _openRoute(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,7 +84,7 @@ class RunCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
-              onPressed: () => context.push(Routes.runRoute, extra: run),
+              onPressed: () => _openRoute(context),
               icon: const Icon(Icons.map_rounded, size: 16),
               label: const Text('View Route In App'),
               style: TextButton.styleFrom(

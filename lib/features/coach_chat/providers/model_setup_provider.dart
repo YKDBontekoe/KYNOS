@@ -1,4 +1,5 @@
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
+import 'package:kynos/features/coach_chat/providers/model_setup_state.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/huggingface_token_provider.dart';
@@ -18,7 +19,8 @@ class MissingHuggingFaceTokenException implements Exception {
 @Riverpod(keepAlive: true)
 class ModelSetupNotifier extends _$ModelSetupNotifier {
   @override
-  AsyncValue<bool> build() => const AsyncData(false);
+  AsyncValue<ModelSetupState> build() =>
+      const AsyncData(ModelSetupState(phase: ModelSetupPhase.checking));
 
   Future<void> checkAndInstall() async {
     state = const AsyncLoading();
@@ -28,23 +30,38 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
         throw MissingHuggingFaceTokenException();
       }
 
+      state = const AsyncData(
+        ModelSetupState(
+          phase: ModelSetupPhase.checking,
+          progressMessage: 'Initialising on-device runtime…',
+        ),
+      );
+
       final AiModelRepository repo = ref.read(aiModelRepositoryProvider);
       await repo.initialize(huggingFaceToken: hfToken);
 
       if (repo.hasActiveModel) {
-        state = const AsyncData(true);
+        state = const AsyncData(ModelSetupState(phase: ModelSetupPhase.ready));
         return;
       }
 
       await GemmaRuntime.evictLegacyModelsIfNeeded();
 
       if (repo.hasActiveModel) {
-        state = const AsyncData(true);
+        state = const AsyncData(ModelSetupState(phase: ModelSetupPhase.ready));
         return;
       }
 
+      state = const AsyncData(
+        ModelSetupState(
+          phase: ModelSetupPhase.downloading,
+          progressMessage:
+              'Downloading coach model — this may take several minutes on Wi‑Fi.',
+        ),
+      );
+
       await repo.installFromNetwork(url: GemmaRuntime.modelDownloadUrl, token: hfToken);
-      state = const AsyncData(true);
+      state = const AsyncData(ModelSetupState(phase: ModelSetupPhase.ready));
     } catch (e, st) {
       state = AsyncError(e, st);
     }

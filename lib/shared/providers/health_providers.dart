@@ -85,7 +85,16 @@ void invalidateHealthProviders(Ref ref) {
 @Riverpod(keepAlive: true)
 class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
   @override
-  AsyncValue<bool> build() => const AsyncData(false);
+  Future<bool> build() async {
+    if (kIsWeb) return false;
+    try {
+      final repo = ref.read(healthRepositoryProvider);
+      final result = await repo.getToday();
+      return result.failure == null;
+    } on Object {
+      return false;
+    }
+  }
 
   Future<void> request() async {
     if (kIsWeb) {

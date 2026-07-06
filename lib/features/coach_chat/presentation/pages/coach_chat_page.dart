@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
@@ -11,6 +12,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/model_setup_scree
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
+import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 
 class CoachChatPage extends ConsumerStatefulWidget {
   const CoachChatPage({super.key});
@@ -69,8 +71,52 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     ref.read(coachChatProvider.notifier).sendMessage(text);
   }
 
+  Future<void> _confirmClearConversation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear conversation?'),
+        content: const Text(
+          'This removes all messages in the current coach chat session.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+    await ref.read(coachChatProvider.notifier).clearConversation();
+  }
+
+  String _setupErrorMessage(Object error) {
+    if (error is MissingHuggingFaceTokenException) {
+      return error.toString();
+    }
+    return AiInferenceErrorPolicy.userFriendlyMessage(error);
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(aiReconnectStateProvider, (previous, next) {
+      if (!next || !mounted) return;
+      ref.read(aiReconnectStateProvider.notifier).clear();
+      ref.read(modelSetupProvider.notifier).checkAndInstall();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Reconnecting on-device coach…'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    });
+
     final setupState = ref.watch(modelSetupProvider);
 
     return setupState.when(
@@ -78,15 +124,19 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       error: (e, _) {
         final missingToken = e is MissingHuggingFaceTokenException;
         return ModelSetupScreen.error(
-          message: e.toString(),
+          message: _setupErrorMessage(e),
           onRetry: () => ref.read(modelSetupProvider.notifier).checkAndInstall(),
           onSecondaryAction:
               missingToken ? () => context.push(Routes.settings) : null,
           secondaryActionLabel: missingToken ? 'Open Settings' : null,
         );
       },
-      data: (isReady) {
-        if (!isReady) return ModelSetupScreen.checking();
+      data: (setup) {
+        if (!setup.isReady) {
+          return ModelSetupScreen.checking(
+            progressMessage: setup.progressMessage,
+          );
+        }
         WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
         return _buildChat();
       },
@@ -106,10 +156,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
         backgroundColor: context.kynosTheme.background,
         body: Column(
           children: [
-            CoachChatAppBar(
-              onClear: () =>
-                  ref.read(coachChatProvider.notifier).clearConversation(),
-            ),
+            CoachChatAppBar(onClear: _confirmClearConversation),
             Expanded(
               child: Center(
                 child: Padding(
@@ -123,14 +170,13 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
                       ),
                       const Gap(Spacing.sm),
                       Text(
-                        '${chatState.error}',
+                        'Your chat history could not be restored.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const Gap(Spacing.lg),
                       FilledButton(
-                        onPressed: () =>
-                            ref.invalidate(coachChatProvider),
+                        onPressed: () => ref.invalidate(coachChatProvider),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -153,9 +199,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
-          CoachChatAppBar(
-            onClear: () => ref.read(coachChatProvider.notifier).clearConversation(),
-          ),
+          CoachChatAppBar(onClear: _confirmClearConversation),
           Expanded(
             child: messages.isEmpty
                 ? CoachChatEmptyState(onSuggestionTap: _handleSend)
@@ -166,6 +210,9 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             focusNode: _focusNode,
             isStreaming: isStreaming,
             onSend: _handleSend,
+            onCancel: isStreaming
+                ? () => ref.read(coachChatProvider.notifier).cancelGeneration()
+                : null,
           ),
         ],
       ),

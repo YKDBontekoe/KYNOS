@@ -7,12 +7,13 @@ import 'package:kynos/features/training/presentation/widgets/training_insight_li
 import 'package:kynos/features/training/presentation/widgets/training_insight_text_card.dart';
 import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:logger/logger.dart';
 
 /// AI-generated session intent, adjustments, and debrief cards.
-class TrainingInsightsCards extends StatelessWidget {
+class TrainingInsightsCards extends ConsumerWidget {
   const TrainingInsightsCards({super.key, required this.insightsState});
 
   static final _logger = Logger();
@@ -20,7 +21,7 @@ class TrainingInsightsCards extends StatelessWidget {
   final AsyncValue<TrainingInsightsState> insightsState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return insightsState.when(
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Building training insights...'),
@@ -31,7 +32,10 @@ class TrainingInsightsCards extends StatelessWidget {
           error: error,
           stackTrace: stackTrace,
         );
-        return const SizedBox.shrink();
+        return KynosInlineErrorCard(
+          message: 'Could not load training insights.',
+          onRetry: () => ref.invalidate(trainingInsightsStateProvider),
+        );
       },
       data: (state) {
         final insights = state.insights;

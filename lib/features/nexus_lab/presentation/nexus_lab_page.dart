@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
@@ -18,7 +20,15 @@ class NexusLabPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      appBar: AppBar(
+        title: const Text('KYNOS Lab'),
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => popOrGo(context, Routes.training),
+        ),
+      ),
       body: SafeArea(
+        top: false,
         child: Padding(
           padding: const EdgeInsets.all(tokens.Spacing.md),
           child: state.when(
@@ -51,8 +61,6 @@ class _Content extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('KYNOS Lab', style: Theme.of(context).textTheme.displaySmall),
-          const Gap(tokens.Spacing.xs),
           Text(
             'On-device continual calibration for your gait coefficients.',
             style: Theme.of(context).textTheme.bodyMedium,
