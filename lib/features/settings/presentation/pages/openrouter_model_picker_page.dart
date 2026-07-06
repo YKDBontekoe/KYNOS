@@ -167,25 +167,24 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       builder: (ctx) => SafeArea(
-        child: DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.75,
-          minChildSize: 0.35,
-          maxChildSize: 0.9,
-          builder: (sheetContext, scrollController) => Padding(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+          ),
+          child: Padding(
             padding: const EdgeInsets.all(tokens.Spacing.md),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
-                    controller: scrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
                           model.name,
-                          style: Theme.of(sheetContext).textTheme.titleLarge,
+                          style: Theme.of(ctx).textTheme.titleLarge,
                         ),
                         const Gap(tokens.Spacing.sm),
                         Text(model.id),
