@@ -7,7 +7,7 @@ import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/features/coach_chat/utils/chat_history_codec.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
-import 'package:kynos/features/coach_chat/providers/coach_context_provider.dart';
+import 'package:kynos/shared/providers/coach_context_provider.dart';
 import 'package:kynos/features/coach_chat/providers/last_coach_context_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';

@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
-import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
-import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
-import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/providers/post_run_debrief_provider.dart';
+import 'package:kynos/shared/providers/today_insights_provider.dart';
+import 'package:kynos/shared/providers/training_insights_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_context_provider.g.dart';
