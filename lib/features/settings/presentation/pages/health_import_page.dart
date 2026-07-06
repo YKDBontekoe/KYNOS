@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,12 +10,7 @@ import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/settings/presentation/widgets/apple_health_export_preview_card.dart';
 import 'package:kynos/features/settings/presentation/widgets/gpx_import_preview_card.dart';
 import 'package:kynos/features/settings/presentation/widgets/health_import_progress_card.dart';
-import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
-import 'package:kynos/infrastructure/health/import/apple_health_export_isolate.dart';
-import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
-import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
-import 'package:kynos/shared/utils/picked_file_bytes.dart';
 
 class HealthImportPage extends ConsumerStatefulWidget {
   const HealthImportPage({super.key});
@@ -27,27 +20,10 @@ class HealthImportPage extends ConsumerStatefulWidget {
 }
 
 class _HealthImportPageState extends ConsumerState<HealthImportPage> {
-  GpxParseResult? _gpxPreview;
-  AppleHealthExportParseResult? _zipPreview;
   PlatformFile? _pickedFile;
-  String? _error;
-  bool _isParsing = false;
-  bool _isImporting = false;
-  String? _processingFileName;
-  String? _progressMessage;
-
-  bool get _isBusy => _isParsing || _isImporting;
 
   Future<void> _pickFile() async {
-    setState(() {
-      _gpxPreview = null;
-      _zipPreview = null;
-      _pickedFile = null;
-      _error = null;
-      _isParsing = false;
-      _processingFileName = null;
-      _progressMessage = null;
-    });
+    setState(() => _pickedFile = null);
 
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -58,159 +34,40 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
     if (!mounted || result == null || result.files.isEmpty) return;
 
     final file = result.files.single;
-    final extension = file.extension?.toLowerCase();
-    final isZip = extension == 'zip';
-
-    setState(() {
-      _isParsing = true;
-      _processingFileName = file.name;
-      _progressMessage = isZip
-          ? 'Reading and parsing your Apple Health export. '
-              'Large archives can take a minute.'
-          : 'Reading GPX route file…';
-    });
-
-    try {
-      if (isZip) {
-        final bytes = file.path == null ? await readPickedFileBytes(file) : null;
-        final parsed = await parseAppleHealthZipAsync(
-          zipPath: file.path,
-          zipBytes: bytes,
-        );
-        if (!mounted) return;
-        setState(() {
-          _zipPreview = parsed;
-          _pickedFile = file;
-          _isParsing = false;
-          _processingFileName = null;
-          _progressMessage = null;
-        });
-      } else {
-        final bytes = await readPickedFileBytes(file);
-        final parsed = const GpxWorkoutParser().parse(
-          utf8.decode(bytes, allowMalformed: true),
-        );
-        if (!mounted) return;
-        setState(() {
-          _gpxPreview = parsed;
-          _pickedFile = file;
-          _isParsing = false;
-          _processingFileName = null;
-          _progressMessage = null;
-        });
-      }
-    } on OutOfMemoryError {
-      if (!mounted) return;
-      setState(() {
-        _error =
-            'This export is too large for available memory. '
-            'Try exporting a shorter date range from the Health app.';
-        _isParsing = false;
-        _processingFileName = null;
-        _progressMessage = null;
-      });
-    } on FormatException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = e.message;
-        _isParsing = false;
-        _processingFileName = null;
-        _progressMessage = null;
-      });
-    } on Object catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = 'Failed to parse file: $e';
-        _isParsing = false;
-        _processingFileName = null;
-        _progressMessage = null;
-      });
-    }
+    setState(() => _pickedFile = file);
+    await ref.read(healthImportNotifierProvider.notifier).previewFile(file);
   }
 
   Future<void> _confirmImport() async {
-    setState(() => _isImporting = true);
+    try {
+      final result = await ref
+          .read(healthImportNotifierProvider.notifier)
+          .importSelected(_pickedFile);
 
-    if (_zipPreview != null && _pickedFile != null) {
-      await _importZip(_pickedFile!);
-    } else if (_gpxPreview != null) {
-      await _importGpx();
-    }
+      if (!mounted || result == null) return;
 
-    if (mounted) {
-      setState(() => _isImporting = false);
-    }
-  }
-
-  Future<void> _importGpx() async {
-    final preview = _gpxPreview;
-    if (preview == null) return;
-
-    final useCase = ref.read(importWorkoutUseCaseProvider);
-    final result = await useCase(
-      workout: preview.workout,
-      routePoints: preview.routePoints,
-    );
-
-    if (!mounted) return;
-
-    if (result.failure != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.failure!.message)),
+        SnackBar(content: Text(result.message)),
       );
-      return;
-    }
 
-    _invalidateHealthProviders();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Run imported successfully.')),
-    );
-
-    if (result.workout != null && mounted) {
-      await context.push(Routes.runRoute, extra: result.workout);
-    }
-  }
-
-  Future<void> _importZip(PlatformFile file) async {
-    final bytes = file.path == null ? await readPickedFileBytes(file) : null;
-    final useCase = ref.read(importAppleHealthExportUseCaseProvider);
-    final result = await useCase(
-      zipPath: file.path,
-      zipBytes: bytes,
-    );
-
-    if (!mounted) return;
-
-    if (result.failure != null) {
+      final workout = result.importedWorkout;
+      if (workout != null && mounted) {
+        await context.push(Routes.runRoute, extra: workout);
+      }
+    } on Object catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.failure!.message)),
+        SnackBar(content: Text(_formatImportError(e))),
       );
-      return;
     }
-
-    _invalidateHealthProviders();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Imported ${result.importedDays} days of metrics and '
-          '${result.importedWorkouts} runs.',
-        ),
-      ),
-    );
   }
 
-  void _invalidateHealthProviders() {
-    ref.invalidate(healthSummaryProvider);
-    ref.invalidate(healthHistoryProvider);
-    ref.invalidate(recentRunsProvider);
-    ref.invalidate(importedWorkoutCountProvider);
-  }
+  String _formatImportError(Object error) => error.toString();
 
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
+    final importState = ref.watch(healthImportNotifierProvider);
 
     return Scaffold(
       backgroundColor: kynos.background,
@@ -232,43 +89,45 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
           ),
           const Gap(tokens.Spacing.lg),
           FilledButton.icon(
-            onPressed: _isBusy ? null : _pickFile,
+            onPressed: importState.isBusy ? null : _pickFile,
             icon: const Icon(Icons.upload_file_outlined),
             label: Text(
-              _isParsing ? 'Processing file…' : 'Choose export.zip or GPX',
+              importState.isParsing
+                  ? 'Processing file…'
+                  : 'Choose export.zip or GPX',
             ),
           ),
-          if (_isParsing &&
-              _processingFileName != null &&
-              _progressMessage != null) ...[
+          if (importState.isParsing &&
+              importState.processingFileName != null &&
+              importState.progressMessage != null) ...[
             const Gap(tokens.Spacing.lg),
             HealthImportProgressCard(
-              fileName: _processingFileName!,
-              message: _progressMessage!,
+              fileName: importState.processingFileName!,
+              message: importState.progressMessage!,
             ),
           ],
-          if (_error != null) ...[
+          if (importState.errorMessage != null) ...[
             const Gap(tokens.Spacing.md),
             Text(
-              _error!,
+              importState.errorMessage!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: kynos.move,
                   ),
             ),
           ],
-          if (_zipPreview != null) ...[
+          if (importState.appleHealthPreview != null) ...[
             const Gap(tokens.Spacing.lg),
             AppleHealthExportPreviewCard(
-              preview: _zipPreview!,
-              isImporting: _isImporting,
+              preview: importState.appleHealthPreview!,
+              isImporting: importState.isImporting,
               onImport: _confirmImport,
             ),
           ],
-          if (_gpxPreview != null) ...[
+          if (importState.gpxPreview != null) ...[
             const Gap(tokens.Spacing.lg),
             GpxImportPreviewCard(
-              preview: _gpxPreview!,
-              isImporting: _isImporting,
+              preview: importState.gpxPreview!,
+              isImporting: importState.isImporting,
               onImport: _confirmImport,
             ),
           ],
