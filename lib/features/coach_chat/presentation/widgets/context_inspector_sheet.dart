@@ -129,7 +129,11 @@ class _ContextInspectorSheetState extends ConsumerState<ContextInspectorSheet> {
                   ),
                 const Gap(Spacing.sm),
                 DropdownButtonFormField<CloudDataLevel>(
-                  value: settings.contextPreferences.cloudLevelOverride ??
+                  key: ValueKey(
+                    settings.contextPreferences.cloudLevelOverride ??
+                        globalSettings.cloudDataLevel,
+                  ),
+                  initialValue: settings.contextPreferences.cloudLevelOverride ??
                       globalSettings.cloudDataLevel,
                   decoration: const InputDecoration(
                     labelText: 'Cloud data level (this chat)',

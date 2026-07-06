@@ -10,11 +10,11 @@ import 'package:kynos/domain/utils/coach_follow_up_suggestions.dart';
 void main() {
   group('FilterCoachContextUseCase', () {
     const useCase = FilterCoachContextUseCase();
-    final context = CoachContext(
+    const context = CoachContext(
       readinessScore: 72,
       readinessSummary: 'Good',
-      healthHistory: const [],
-      recentRuns: const [],
+      healthHistory: [],
+      recentRuns: [],
       postRunDebriefSummary: 'Strong finish',
     );
 
