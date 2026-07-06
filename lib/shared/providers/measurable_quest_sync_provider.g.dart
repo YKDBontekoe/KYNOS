@@ -45,7 +45,7 @@ final class MeasurableQuestSyncProvider
 }
 
 String _$measurableQuestSyncHash() =>
-    r'be5c80f827a1b46a3ed2de4fe942178cca33c6a5';
+    r'26839fc34592a3663175715a22492962ad34c217';
 
 /// Keeps measurable daily quests in sync with health data app-wide.
 
