@@ -11,6 +11,8 @@ abstract interface class ImportedHealthStore {
     int? limit,
   });
 
+  Future<WorkoutSession?> getWorkoutById(String workoutId);
+
   Future<List<WorkoutRoutePoint>> getRoutePoints(String workoutId);
 
   Future<void> saveWorkout({

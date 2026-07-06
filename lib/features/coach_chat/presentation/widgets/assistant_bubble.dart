@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
@@ -19,8 +20,22 @@ class AssistantBubble extends StatelessWidget {
   final bool hasError;
   final VoidCallback? onRetry;
 
+  Future<void> _copyMessage(BuildContext context) async {
+    if (content.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: content));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Message copied')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          height: 1.5,
+          color: hasError ? Theme.of(context).colorScheme.error : null,
+        );
+
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
@@ -41,14 +56,27 @@ class AssistantBubble extends StatelessWidget {
                 ),
               isStreaming && content.isEmpty
                   ? const TypingIndicator()
-                  : Text(
+                  : SelectableText(
                       content,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            height: 1.5,
-                            color: hasError
-                                ? Theme.of(context).colorScheme.error
-                                : null,
-                          ),
+                      style: textStyle,
+                      contextMenuBuilder: content.isEmpty
+                          ? null
+                          : (menuContext, editableTextState) {
+                              final items = editableTextState.contextMenuButtonItems;
+                              return AdaptiveTextSelectionToolbar.buttonItems(
+                                anchors: editableTextState.contextMenuAnchors,
+                                buttonItems: [
+                                  ...items,
+                                  ContextMenuButtonItem(
+                                    onPressed: () {
+                                      ContextMenuController.removeAny();
+                                      _copyMessage(menuContext);
+                                    },
+                                    label: 'Copy message',
+                                  ),
+                                ],
+                              );
+                            },
                     ),
               if (hasError && onRetry != null) ...[
                 const Gap(Spacing.sm),

@@ -24,8 +24,11 @@ import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/providers/training_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
@@ -68,14 +71,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Future<void> _refreshDashboard() async {
     ref.invalidate(healthSummaryProvider);
     ref.invalidate(todayInsightsStateProvider);
+    ref.invalidate(trainingInsightsStateProvider);
     ref.invalidate(healthHistoryProvider(days: 28));
     ref.invalidate(healthHistoryProvider(days: 30));
     ref.invalidate(recentRunsProvider(days: 30, limit: 3));
     ref.invalidate(dailyQuestsProvider);
     ref.invalidate(dashboardSummaryProvider);
+    ref.invalidate(runnerCharacterProvider);
+    ref.invalidate(nexusLabProvider);
+    ref.invalidate(postRunDebriefProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
+      ref.read(trainingInsightsStateProvider.future),
       ref.read(healthHistoryProvider(days: 28).future),
       ref.read(recentRunsProvider(days: 30, limit: 3).future),
       ref.read(dailyQuestsProvider.future),
@@ -145,20 +153,45 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         summary.requireValue == null;
 
     ref.listen(postRunDebriefProvider, (prev, next) {
-      final data = next.value;
-      if (data == null || !mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Run debrief: ${data.debrief.highlight} (+${data.xpAmount} XP)',
-          ),
-          action: SnackBarAction(
-            label: 'Dismiss',
-            onPressed: () =>
-                ref.read(postRunDebriefProvider.notifier).dismiss(),
-          ),
-          duration: const Duration(seconds: 8),
-        ),
+      next.whenOrNull(
+        data: (data) {
+          if (data == null || !mounted) return;
+          final debriefText =
+              'Run debrief: ${data.debrief.highlight} (+${data.xpAmount} XP)';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(debriefText),
+              action: SnackBarAction(
+                label: 'Read debrief',
+                onPressed: () {
+                  if (!mounted || !context.mounted) return;
+                  ref.read(coachChatSeedProvider.notifier).setSeed(
+                        'Here is my post-run debrief: ${data.debrief.highlight}. '
+                        'What should I focus on in recovery?',
+                      );
+                  context.push(Routes.coachChat);
+                  ref.read(postRunDebriefProvider.notifier).dismiss();
+                },
+              ),
+              duration: const Duration(seconds: 8),
+            ),
+          );
+        },
+        error: (error, _) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Could not generate your post-run debrief. Pull to refresh to retry.',
+              ),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                onPressed: () =>
+                    ref.read(postRunDebriefProvider.notifier).dismiss(),
+              ),
+            ),
+          );
+        },
       );
     });
 
@@ -199,6 +232,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   momentum: dash?.weeklyMomentum,
                   isLoading:
                       loadHistory.isLoading || dashboardSummaryAsync.isLoading,
+                  onImportRun: () => context.push(Routes.healthImport),
                 ),
                 const Gap(tokens.Spacing.xl),
                 const KynosSectionRow(title: 'Highlights'),

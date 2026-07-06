@@ -14,15 +14,18 @@ class WeekMomentumCard extends StatelessWidget {
     super.key,
     required this.momentum,
     this.isLoading = false,
+    this.onImportRun,
   });
 
   final WeeklyMomentum? momentum;
   final bool isLoading;
+  final VoidCallback? onImportRun;
 
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
     final m = momentum;
+    final hasNoData = !isLoading && m == null;
 
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.lg),
@@ -57,62 +60,76 @@ class WeekMomentumCard extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation(kynos.stand),
               ),
             ),
-          const Gap(tokens.Spacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'Week distance',
-                  value: isLoading
-                      ? null
-                      : m != null && m.thisWeekDistanceKm > 0
-                      ? m.thisWeekDistanceKm.toStringAsFixed(1)
-                      : '—',
-                  unit: 'km',
-                  accentColor: kynos.stand,
-                  sublabel: formatWowBadge(m?.distanceDeltaPct),
-                  sublabelColor: _wowColor(kynos, m?.distanceDeltaPct),
-                ),
-              ),
-              const Gap(tokens.Spacing.md),
-              Expanded(
-                child: MetricTile(
-                  label: 'Runs',
-                  value: isLoading
-                      ? null
-                      : m != null && m.thisWeekRuns > 0
-                      ? '${m.thisWeekRuns}'
-                      : '—',
-                  accentColor: kynos.exercise,
-                  sublabel: formatWowBadge(m?.runsDeltaPct),
-                  sublabelColor: _wowColor(kynos, m?.runsDeltaPct),
-                ),
-              ),
+          if (hasNoData) ...[
+            const Gap(tokens.Spacing.md),
+            Text(
+              'Connect health data or import a run to track weekly momentum.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.secondaryLabel,
+                  ),
+            ),
+            if (onImportRun != null) ...[
+              const Gap(tokens.Spacing.sm),
+              TextButton(onPressed: onImportRun, child: const Text('Import a run')),
             ],
-          ),
-          const Gap(tokens.Spacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'Active kcal',
-                  value: isLoading
-                      ? null
-                      : m != null && m.thisWeekActiveKcal > 0
-                      ? '${m.thisWeekActiveKcal.round()}'
-                      : '—',
-                  unit: 'kcal',
-                  accentColor: kynos.energy,
-                  sublabel: formatWowBadge(m?.kcalDeltaPct),
-                  sublabelColor: _wowColor(kynos, m?.kcalDeltaPct),
+          ] else ...[
+            const Gap(tokens.Spacing.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: MetricTile(
+                    label: 'Week distance',
+                    value: isLoading
+                        ? null
+                        : m != null && m.thisWeekDistanceKm > 0
+                            ? m.thisWeekDistanceKm.toStringAsFixed(1)
+                            : '—',
+                    unit: 'km',
+                    accentColor: kynos.stand,
+                    sublabel: formatWowBadge(m?.distanceDeltaPct),
+                    sublabelColor: _wowColor(kynos, m?.distanceDeltaPct),
+                  ),
                 ),
-              ),
-              const Gap(tokens.Spacing.md),
-              Expanded(
-                child: _wowSummaryTile(context, kynos, m, isLoading),
-              ),
-            ],
-          ),
+                const Gap(tokens.Spacing.md),
+                Expanded(
+                  child: MetricTile(
+                    label: 'Runs',
+                    value: isLoading
+                        ? null
+                        : m != null && m.thisWeekRuns > 0
+                            ? '${m.thisWeekRuns}'
+                            : '—',
+                    accentColor: kynos.exercise,
+                    sublabel: formatWowBadge(m?.runsDeltaPct),
+                    sublabelColor: _wowColor(kynos, m?.runsDeltaPct),
+                  ),
+                ),
+              ],
+            ),
+            const Gap(tokens.Spacing.md),
+            Row(
+              children: [
+                Expanded(
+                  child: MetricTile(
+                    label: 'Active kcal',
+                    value: isLoading
+                        ? null
+                        : m != null && m.thisWeekActiveKcal > 0
+                            ? '${m.thisWeekActiveKcal.round()}'
+                            : '—',
+                    unit: 'kcal',
+                    accentColor: kynos.energy,
+                    sublabel: formatWowBadge(m?.kcalDeltaPct),
+                    sublabelColor: _wowColor(kynos, m?.kcalDeltaPct),
+                  ),
+                ),
+                const Gap(tokens.Spacing.md),
+                Expanded(
+                  child: _wowSummaryTile(context, kynos, m, isLoading),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

@@ -10,12 +10,14 @@ class ChatInputBar extends StatelessWidget {
     required this.focusNode,
     required this.isStreaming,
     required this.onSend,
+    this.onCancel,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool isStreaming;
   final ValueChanged<String> onSend;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +43,15 @@ class ChatInputBar extends StatelessWidget {
                   ),
                 ),
               ),
+              if (isStreaming && onCancel != null)
+                TextButton(
+                  onPressed: onCancel,
+                  child: const Text('Stop'),
+                ),
               LiquidGlassIconButton(
                 icon: isStreaming ? Icons.hourglass_empty : Icons.send_rounded,
-                onPressed:
-                    isStreaming ? null : () => onSend(controller.text),
+                tooltip: isStreaming ? 'Sending message' : 'Send message',
+                onPressed: isStreaming ? null : () => onSend(controller.text),
                 size: 36,
                 iconSize: 20,
               ),

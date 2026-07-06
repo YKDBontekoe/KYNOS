@@ -1,16 +1,11 @@
-import 'dart:async';
-
 import 'package:kynos/core/constants/gamification_constants.dart';
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/gamification/activity_resources.dart';
 import 'package:kynos/domain/entities/gamification/adventure_session.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/encounter_state.dart';
-import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/trail_node.dart';
 import 'package:kynos/features/character/providers/character_provider.dart';
-import 'package:kynos/features/character/providers/quest_provider.dart';
-import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -36,11 +31,6 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
 
   @override
   Future<AdventureViewState?> build() async {
-    ref.listen(
-      healthSummaryProvider,
-      (_, _) => unawaited(_syncMeasurableQuests()),
-    );
-
     final character = await ref.read(runnerCharacterProvider.future);
     if (character == null) return null;
 
@@ -73,8 +63,6 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
         throw saveFailure;
       }
     }
-
-    unawaited(_syncMeasurableQuests());
 
     return _viewState(session);
   }
@@ -140,7 +128,6 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
       }
 
       await _persist(session);
-      unawaited(_syncMeasurableQuests());
     } on Failure catch (failure, stackTrace) {
       state = AsyncError(failure, stackTrace);
     } finally {
@@ -212,7 +199,6 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
       }
 
       await _persist(session);
-      unawaited(_syncMeasurableQuests());
     } on Failure catch (failure, stackTrace) {
       state = AsyncError(failure, stackTrace);
     } finally {
@@ -261,29 +247,5 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
     final saveFailure = await repo.saveCharacter(updated);
     if (saveFailure != null) return;
     ref.invalidate(runnerCharacterProvider);
-  }
-
-  Future<void> _syncMeasurableQuests() async {
-    final quests = await ref.read(dailyQuestsProvider.future);
-    if (quests.isEmpty) return;
-
-    final evaluator = ref.read(evaluateQuestProgressUseCaseProvider);
-    final summary = ref.read(healthSummaryProvider).value;
-    final runs = await ref.read(recentRunsProvider(days: 1, limit: 20).future);
-    final today = DateTime.now();
-    final todayRuns = runs.where((r) => _isSameDay(r.start, today)).toList();
-
-    for (final quest in quests) {
-      if (quest.status != QuestStatus.active) continue;
-      if (quest.measurableObjective == null) continue;
-      if (!evaluator.isComplete(
-        quest: quest,
-        summary: summary,
-        todayRuns: todayRuns,
-      )) {
-        continue;
-      }
-      await ref.read(questProvider.notifier).completeQuest(quest.id);
-    }
   }
 }

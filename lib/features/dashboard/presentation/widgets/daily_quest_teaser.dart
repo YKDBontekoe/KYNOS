@@ -33,7 +33,34 @@ class DailyQuestTeaser extends ConsumerWidget {
         onRetry: () => ref.invalidate(dailyQuestsProvider),
       ),
       data: (quests) {
-        if (quests.isEmpty) return const SizedBox.shrink();
+        if (quests.isEmpty) {
+          return KynosCard(
+            padding: const EdgeInsets.all(Spacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'No daily quest yet.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Gap(Spacing.xs),
+                Text(
+                  'Open Character to generate today\'s quest.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: kynos.secondaryLabel,
+                      ),
+                ),
+                if (onViewCharacter != null) ...[
+                  const Gap(Spacing.sm),
+                  TextButton(
+                    onPressed: onViewCharacter,
+                    child: const Text('View Character'),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }
 
         final quest = quests.first;
         final isCompleted = quest.status == QuestStatus.completed;

@@ -10,6 +10,14 @@ abstract interface class HealthRepository {
   /// Requests platform permission to read health data.
   Future<bool> requestPermissions();
 
+  /// Returns whether read permission has been granted for core health types.
+  Future<bool> hasPermissions();
+
+  /// Returns a single workout by platform or imported id, without a recency window.
+  Future<({WorkoutSession? workout, Failure? failure})> getWorkoutById({
+    required String workoutId,
+  });
+
   /// Returns aggregated daily summaries for the past [days] days.
   Future<({List<HealthSummary> summaries, Failure? failure})> getSummaries({
     required int days,

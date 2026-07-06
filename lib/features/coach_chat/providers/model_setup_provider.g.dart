@@ -13,7 +13,7 @@ part of 'model_setup_provider.dart';
 final modelSetupProvider = ModelSetupNotifierProvider._();
 
 final class ModelSetupNotifierProvider
-    extends $NotifierProvider<ModelSetupNotifier, AsyncValue<bool>> {
+    extends $NotifierProvider<ModelSetupNotifier, AsyncValue<ModelSetupState>> {
   ModelSetupNotifierProvider._()
     : super(
         from: null,
@@ -33,28 +33,34 @@ final class ModelSetupNotifierProvider
   ModelSetupNotifier create() => ModelSetupNotifier();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<bool> value) {
+  Override overrideWithValue(AsyncValue<ModelSetupState> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<ModelSetupState>>(value),
     );
   }
 }
 
 String _$modelSetupNotifierHash() =>
-    r'f39bac7d86cd6dc2f119dec56255edeea53969cc';
+    r'16bfc4cb80ea3d3a84977ca00fee347fbd55664e';
 
-abstract class _$ModelSetupNotifier extends $Notifier<AsyncValue<bool>> {
-  AsyncValue<bool> build();
+abstract class _$ModelSetupNotifier
+    extends $Notifier<AsyncValue<ModelSetupState>> {
+  AsyncValue<ModelSetupState> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<bool>, AsyncValue<bool>>;
+    final ref =
+        this.ref
+            as $Ref<AsyncValue<ModelSetupState>, AsyncValue<ModelSetupState>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
-              AsyncValue<bool>,
+              AnyNotifier<
+                AsyncValue<ModelSetupState>,
+                AsyncValue<ModelSetupState>
+              >,
+              AsyncValue<ModelSetupState>,
               Object?,
               Object?
             >;

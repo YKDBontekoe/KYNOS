@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
@@ -13,8 +14,6 @@ class ConnectHealthkitCard extends ConsumerWidget {
   const ConnectHealthkitCard({super.key});
 
   String _platformLabel() => HealthPlatformLabels.platformName();
-
-  String _settingsHint() => HealthPlatformLabels.settingsHint();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,17 +49,19 @@ class ConnectHealthkitCard extends ConsumerWidget {
                     ref.read(healthPermissionsProvider).whenOrNull(
                       data: (granted) {
                         final message = granted
-                            ? '$platform connected.'
-                            : '$platform permission not granted. ${_settingsHint()}';
+                            ? HealthPermissionFeedback.connectedMessage(platform)
+                            : HealthPermissionFeedback.permissionDeniedMessage(
+                                platform,
+                              );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(message)),
                         );
                       },
-                      error: (error, _) {
+                      error: (_, _) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Health connection failed: $error',
+                              HealthPermissionFeedback.connectionFailedMessage(),
                             ),
                           ),
                         );

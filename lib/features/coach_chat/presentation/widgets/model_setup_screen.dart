@@ -25,9 +25,10 @@ class ModelSetupScreen extends StatelessWidget {
   final bool isLoading;
   final bool showClose;
 
-  factory ModelSetupScreen.checking() => const ModelSetupScreen(
+  factory ModelSetupScreen.checking({String? progressMessage}) =>
+      ModelSetupScreen(
         title: 'Preparing AI Coach',
-        subtitle: 'Checking for model...',
+        subtitle: progressMessage ?? 'Checking for model…',
         isLoading: true,
       );
 

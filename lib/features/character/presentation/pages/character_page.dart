@@ -17,12 +17,26 @@ import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class CharacterPage extends ConsumerWidget {
   const CharacterPage({super.key});
+
+  Future<void> _refreshCharacter(WidgetRef ref) async {
+    ref.invalidate(runnerCharacterProvider);
+    ref.invalidate(dailyQuestsProvider);
+    ref.invalidate(nexusLabProvider);
+    await Future.wait([
+      ref.read(runnerCharacterProvider.future),
+      ref.read(dailyQuestsProvider.future),
+      ref.read(nexusLabProvider.future),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +44,9 @@ class CharacterPage extends ConsumerWidget {
     final characterAsync = ref.watch(runnerCharacterProvider);
     final questsAsync = ref.watch(dailyQuestsProvider);
 
-    return CustomScrollView(
+    return RefreshIndicator(
+      onRefresh: () => _refreshCharacter(ref),
+      child: CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),
@@ -67,12 +83,11 @@ class CharacterPage extends ConsumerWidget {
             ),
           ),
           error: (_, _) => SliverFillRemaining(
-            child: Center(
-              child: Text(
-                'Could not load character',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: kynos.secondaryLabel,
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(tokens.Spacing.md),
+              child: KynosInlineErrorCard(
+                message: 'Could not load character.',
+                onRetry: () => ref.invalidate(runnerCharacterProvider),
               ),
             ),
           ),
@@ -120,6 +135,7 @@ class CharacterPage extends ConsumerWidget {
           },
         ),
       ],
+      ),
     );
   }
 }
@@ -170,17 +186,21 @@ class EmptyCharacterState extends ConsumerWidget {
                       ref.read(healthPermissionsProvider).whenOrNull(
                         data: (granted) {
                           final message = granted
-                              ? '$platform connected.'
-                              : '$platform permission not granted. ${HealthPlatformLabels.settingsHint()}';
+                              ? HealthPermissionFeedback.connectedMessage(
+                                  platform,
+                                )
+                              : HealthPermissionFeedback.permissionDeniedMessage(
+                                  platform,
+                                );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(message)),
                           );
                         },
-                        error: (error, _) {
+                        error: (_, _) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Health connection failed: $error',
+                                HealthPermissionFeedback.connectionFailedMessage(),
                               ),
                             ),
                           );

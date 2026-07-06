@@ -14,6 +14,7 @@ import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/huggingface_token_provider.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
+import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -95,9 +96,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       child: TextButton(
                         onPressed: permissionState.isLoading
                             ? null
-                            : () => ref
-                                .read(healthPermissionsProvider.notifier)
-                                .request(),
+                            : () async {
+                                await ref
+                                    .read(healthPermissionsProvider.notifier)
+                                    .request();
+                                if (!context.mounted) return;
+                                ref.read(healthPermissionsProvider).whenOrNull(
+                                  data: (granted) {
+                                    final platform =
+                                        HealthPlatformLabels.platformName();
+                                    final message = granted
+                                        ? HealthPermissionFeedback.connectedMessage(
+                                            platform,
+                                          )
+                                        : HealthPermissionFeedback
+                                            .permissionDeniedMessage(platform);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(message)),
+                                    );
+                                  },
+                                  error: (_, _) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          HealthPermissionFeedback
+                                              .connectionFailedMessage(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                         child: Text(
                           permissionState.isLoading
                               ? 'Connecting…'
@@ -275,7 +304,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           : 'Choose a model',
                     ),
                     trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
-                    onTap: () => context.push(Routes.openRouterModels),
+                    onTap: () async {
+                      final selected =
+                          await context.push<String>(Routes.openRouterModels);
+                      if (selected != null && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Selected $selected')),
+                        );
+                      }
+                    },
                     contentPadding: EdgeInsets.zero,
                   ),
                   const Gap(tokens.Spacing.xs),
@@ -345,6 +382,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _replayOnboarding(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Replay onboarding?'),
+        content: const Text(
+          'This resets onboarding and returns you to the welcome flow.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Replay'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
     await ref.read(onboardingCompletedProvider.notifier).resetOnboarding();
     if (!context.mounted) return;
     context.go(Routes.onboarding);

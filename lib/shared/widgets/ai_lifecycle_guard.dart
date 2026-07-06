@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/measurable_quest_sync_provider.dart';
 import 'package:logger/logger.dart';
 
 /// Disposes the on-device AI isolate when the app backgrounds to avoid stale LiteRT state.
@@ -34,6 +38,8 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       _disposeLocalAi();
+    } else if (state == AppLifecycleState.resumed) {
+      _onAppResumed();
     }
   }
 
@@ -49,6 +55,20 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
     }
   }
 
+  void _onAppResumed() {
+    if (!kIsWeb) {
+      ref.invalidate(healthSummaryProvider);
+      ref.invalidate(healthHistoryProvider);
+      ref.invalidate(recentRunsProvider);
+      ref.invalidate(importedWorkoutCountProvider);
+      ref.invalidate(healthPermissionsProvider);
+    }
+    ref.read(aiReconnectStateProvider.notifier).markNeedsReconnect();
+  }
+
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    ref.watch(measurableQuestSyncProvider);
+    return widget.child;
+  }
 }

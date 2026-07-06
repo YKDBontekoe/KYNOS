@@ -28,17 +28,29 @@ class ActivityRing extends StatelessWidget {
     final progresses = ringProgresses ??
         List<double>.filled(colors.length, progress ?? 0);
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: RingPainter(
-          ringProgresses: progresses,
-          strokeWidth: strokeWidth,
-          colors: colors,
+    return Semantics(
+      label: _semanticsLabel(progresses),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: RingPainter(
+            ringProgresses: progresses,
+            strokeWidth: strokeWidth,
+            colors: colors,
+          ),
         ),
       ),
     );
+  }
+
+  String _semanticsLabel(List<double> progresses) {
+    final parts = <String>[];
+    for (var i = 0; i < progresses.length; i++) {
+      final pct = (progresses[i] * 100).round();
+      parts.add('Ring ${i + 1} $pct percent');
+    }
+    return parts.isEmpty ? 'Activity rings' : 'Activity rings: ${parts.join(', ')}';
   }
 }
 

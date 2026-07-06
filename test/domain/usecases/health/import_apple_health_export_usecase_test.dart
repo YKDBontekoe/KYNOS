@@ -151,4 +151,8 @@ class _FailingImportedHealthStore implements ImportedHealthStore {
 
   @override
   Future<int> workoutCount() => throw UnimplementedError();
+
+  @override
+  Future<WorkoutSession?> getWorkoutById(String workoutId) =>
+      throw UnimplementedError();
 }

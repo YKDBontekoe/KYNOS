@@ -374,7 +374,7 @@ final healthPermissionsProvider = HealthPermissionsNotifierProvider._();
 
 /// Handles the HealthKit permission request triggered from the UI.
 final class HealthPermissionsNotifierProvider
-    extends $NotifierProvider<HealthPermissionsNotifier, AsyncValue<bool>> {
+    extends $AsyncNotifierProvider<HealthPermissionsNotifier, bool> {
   /// Handles the HealthKit permission request triggered from the UI.
   HealthPermissionsNotifierProvider._()
     : super(
@@ -393,31 +393,23 @@ final class HealthPermissionsNotifierProvider
   @$internal
   @override
   HealthPermissionsNotifier create() => HealthPermissionsNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<bool> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
-    );
-  }
 }
 
 String _$healthPermissionsNotifierHash() =>
-    r'c7c62087fa89c33cd0be87f706a7384a246f886f';
+    r'9032f26135d27f6225bc8d8d0d91935411293e7e';
 
 /// Handles the HealthKit permission request triggered from the UI.
 
-abstract class _$HealthPermissionsNotifier extends $Notifier<AsyncValue<bool>> {
-  AsyncValue<bool> build();
+abstract class _$HealthPermissionsNotifier extends $AsyncNotifier<bool> {
+  FutureOr<bool> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<bool>, AsyncValue<bool>>;
+    final ref = this.ref as $Ref<AsyncValue<bool>, bool>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<bool>, AsyncValue<bool>>,
+              AnyNotifier<AsyncValue<bool>, bool>,
               AsyncValue<bool>,
               Object?,
               Object?

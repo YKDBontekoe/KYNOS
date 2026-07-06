@@ -37,6 +37,14 @@ class DriftImportedHealthStore implements ImportedHealthStore {
   }
 
   @override
+  Future<WorkoutSession?> getWorkoutById(String workoutId) async {
+    final row = await (_db.select(_db.importedWorkouts)
+          ..where((r) => r.id.equals(workoutId)))
+        .getSingleOrNull();
+    return row == null ? null : _toWorkoutSession(row);
+  }
+
+  @override
   Future<List<WorkoutRoutePoint>> getRoutePoints(String workoutId) async {
     final rows = await (_db.select(_db.importedRoutePoints)
           ..where((row) => row.workoutId.equals(workoutId))

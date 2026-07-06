@@ -10,6 +10,7 @@ import 'package:kynos/features/settings/presentation/widgets/openrouter_model_ca
 import 'package:kynos/features/settings/providers/openrouter_models_provider.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
@@ -76,11 +77,13 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
               loading: () => const Center(
                 child: KynosLoadingLine(label: 'Loading models...'),
               ),
-              error: (_, _) => const Center(
+              error: (_, _) => Center(
                 child: Padding(
-                  padding: EdgeInsets.all(tokens.Spacing.md),
-                  child: Text(
-                    'Could not load models. Check your API key and try again.',
+                  padding: const EdgeInsets.all(tokens.Spacing.md),
+                  child: KynosInlineErrorCard(
+                    message:
+                        'Could not load models. Check your API key and try again.',
+                    onRetry: () => ref.invalidate(openRouterCatalogDataProvider),
                   ),
                 ),
               ),
@@ -89,7 +92,12 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(tokens.Spacing.md),
-                      child: Text(result.error!),
+                      child: KynosInlineErrorCard(
+                        message:
+                            'Could not load models. Check your API key and try again.',
+                        onRetry: () =>
+                            ref.invalidate(openRouterCatalogDataProvider),
+                      ),
                     ),
                   );
                 }
@@ -194,7 +202,7 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
                   Navigator.pop(ctx);
                 }
                 if (context.mounted) {
-                  context.pop();
+                  context.pop(model.name);
                 }
               },
               child: const Text('Select model'),

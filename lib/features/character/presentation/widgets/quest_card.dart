@@ -87,7 +87,7 @@ class QuestCard extends ConsumerWidget {
               )
               .toList() ??
           const [];
-      progress = ref.read(evaluateQuestProgressUseCaseProvider).progressFraction(
+      progress = ref.watch(evaluateQuestProgressUseCaseProvider).progressFraction(
             quest: quest,
             summary: summary,
             todayRuns: todayRuns,

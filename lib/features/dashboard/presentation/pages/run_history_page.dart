@@ -24,7 +24,12 @@ class RunHistoryPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: kynos.background,
-      body: CustomScrollView(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(recentRunsProvider(days: 365, limit: 200));
+          await ref.read(recentRunsProvider(days: 365, limit: 200).future);
+        },
+        child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
@@ -126,6 +131,7 @@ class RunHistoryPage extends ConsumerWidget {
             },
           ),
         ],
+      ),
       ),
     );
   }
