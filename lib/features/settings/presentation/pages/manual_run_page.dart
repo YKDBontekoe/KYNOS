@@ -6,7 +6,6 @@ import 'package:kynos/core/constants/imported_workout_ids.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
@@ -84,8 +83,8 @@ class _ManualRunPageState extends ConsumerState<ManualRunPage> {
       sourceName: 'Manual entry',
     );
 
-    final useCase = ref.read(importWorkoutUseCaseProvider);
-    final result = await useCase(workout: workout);
+    final useCase = ref.read(manualRunImportProvider);
+    final result = await useCase.importWorkout(workout: workout);
 
     if (!mounted) return;
     setState(() => _isSaving = false);
@@ -94,11 +93,6 @@ class _ManualRunPageState extends ConsumerState<ManualRunPage> {
       _showError(result.failure!.message);
       return;
     }
-
-    ref.invalidate(healthSummaryProvider);
-    ref.invalidate(healthHistoryProvider);
-    ref.invalidate(recentRunsProvider);
-    ref.invalidate(importedWorkoutCountProvider);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Run saved successfully.')),
