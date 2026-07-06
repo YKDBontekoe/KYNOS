@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/utils/pace_format.dart';
 import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/utils/run_date_label.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -24,7 +25,10 @@ class RunCard extends StatelessWidget {
     final kynos = context.kynosTheme;
     final distanceKm =
         run.distanceMeters == null ? null : run.distanceMeters! / 1000;
-    final pace = _pacePerKm(run.duration, run.distanceMeters);
+    final pace = formatPaceFromSession(
+      duration: run.duration,
+      distanceMeters: run.distanceMeters,
+    );
 
     return KynosCard(
       onTap: () => _openRoute(context),
@@ -78,7 +82,7 @@ class RunCard extends StatelessWidget {
               ),
               KynosChip.metric(
                 label: 'Duration',
-                value: _durationLabel(run.duration),
+                value: formatRunDuration(run.duration),
               ),
               if (pace != null) KynosChip.metric(label: 'Pace', value: pace),
               if (run.energyKcal != null)
@@ -106,20 +110,4 @@ class RunCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _durationLabel(Duration duration) {
-  final h = duration.inHours;
-  final m = duration.inMinutes % 60;
-  final s = duration.inSeconds % 60;
-  if (h > 0) return '${h}h ${m}m';
-  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-}
-
-String? _pacePerKm(Duration duration, double? distanceMeters) {
-  if (distanceMeters == null || distanceMeters <= 0) return null;
-  final paceSeconds = duration.inSeconds / (distanceMeters / 1000);
-  final paceMin = paceSeconds ~/ 60;
-  final paceSec = (paceSeconds % 60).round();
-  return '$paceMin:${paceSec.toString().padLeft(2, '0')} /km';
 }

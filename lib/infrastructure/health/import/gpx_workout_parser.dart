@@ -1,8 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:kynos/core/constants/imported_workout_ids.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/utils/geo_distance.dart';
 import 'package:xml/xml.dart';
 
 /// Result of parsing a GPX file into a workout and optional route.
@@ -59,7 +58,7 @@ class GpxWorkoutParser {
 
     final start = firstTime ?? DateTime.now();
     final end = lastTime ?? start.add(const Duration(minutes: 30));
-    final distanceMeters = _haversineDistance(routePoints);
+    final distanceMeters = routeDistanceMeters(routePoints);
 
     final workout = WorkoutSession(
       id: ImportedWorkoutIds.generate(),
@@ -76,39 +75,4 @@ class GpxWorkoutParser {
 
     return GpxParseResult(workout: workout, routePoints: routePoints);
   }
-
-  double _haversineDistance(List<WorkoutRoutePoint> points) {
-    if (points.length < 2) return 0;
-
-    var total = 0.0;
-    for (var i = 1; i < points.length; i++) {
-      total += _segmentMeters(
-        points[i - 1].latitude,
-        points[i - 1].longitude,
-        points[i].latitude,
-        points[i].longitude,
-      );
-    }
-    return total;
-  }
-
-  double _segmentMeters(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    const earthRadius = 6371000.0;
-    final dLat = _toRadians(lat2 - lat1);
-    final dLon = _toRadians(lon2 - lon1);
-    final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(_toRadians(lat1)) *
-            math.cos(_toRadians(lat2)) *
-            math.sin(dLon / 2) *
-            math.sin(dLon / 2);
-    final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    return earthRadius * c;
-  }
-
-  double _toRadians(double degrees) => degrees * math.pi / 180;
 }
