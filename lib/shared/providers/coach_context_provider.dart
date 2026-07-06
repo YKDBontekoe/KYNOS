@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
-import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -17,7 +17,14 @@ part 'coach_context_provider.g.dart';
 /// Builds unified runner context for coach inference.
 @riverpod
 Future<CoachContext> coachContext(Ref ref) async {
-  final seed = ref.watch(coachChatSeedProvider);
+  return ref.watch(coachContextForConversationProvider(seed: null).future);
+}
+
+@riverpod
+Future<CoachContext> coachContextForConversation(
+  Ref ref, {
+  CoachChatSeedData? seed,
+}) async {
   final healthHistory =
       await ref.watch(healthHistoryProvider(days: 14).future);
   final recentRuns =

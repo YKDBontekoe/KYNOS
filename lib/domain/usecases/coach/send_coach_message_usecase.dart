@@ -1,8 +1,11 @@
+import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/coach_backend_mode.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
+import 'package:kynos/domain/utils/coach_backend_mode_mapper.dart';
 
 /// Streams a coach reply with unified runner context and optional history.
 class SendCoachMessageUseCase {
@@ -18,6 +21,9 @@ class SendCoachMessageUseCase {
     CoachContext? coachContext,
     List<ChatMessage>? conversationHistory,
     AiInferenceBackend? preferredBackend,
+    CoachBackendMode backendMode = CoachBackendMode.auto,
+    String? cloudModelIdOverride,
+    CloudDataLevel? cloudDataLevelOverride,
   }) {
     final history = _trimHistory(conversationHistory);
     final estimatedTokens = _estimateTokens(
@@ -26,6 +32,9 @@ class SendCoachMessageUseCase {
       history,
     );
 
+    final resolvedBackend =
+        preferredBackend ?? CoachBackendModeMapper.toPreferredBackend(backendMode);
+
     return _aiCoachRepository.chat(
       userMessage: userMessage,
       healthContext: coachContext?.healthHistory,
@@ -33,7 +42,9 @@ class SendCoachMessageUseCase {
       conversationHistory: history,
       taskKind: AiTaskKind.coachChat,
       estimatedPromptTokens: estimatedTokens,
-      preferredBackend: preferredBackend,
+      preferredBackend: resolvedBackend,
+      cloudModelIdOverride: cloudModelIdOverride,
+      cloudDataLevelOverride: cloudDataLevelOverride,
     );
   }
 

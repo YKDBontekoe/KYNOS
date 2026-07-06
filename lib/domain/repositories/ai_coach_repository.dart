@@ -1,3 +1,4 @@
+import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
@@ -25,6 +26,8 @@ abstract interface class AiCoachRepository {
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
+    String? cloudModelIdOverride,
+    CloudDataLevel? cloudDataLevelOverride,
   });
 
   /// Discards the current chat session and starts a fresh one.

@@ -69,6 +69,8 @@ class HybridAiCoachRepository implements AiCoachRepository {
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
+    String? cloudModelIdOverride,
+    CloudDataLevel? cloudDataLevelOverride,
   }) async* {
     final config = await _configReader();
     final apiKey = await _keyStorage.readOpenRouterKey();
@@ -99,12 +101,12 @@ class HybridAiCoachRepository implements AiCoachRepository {
       lastBackend = AiInferenceBackend.openRouter;
       yield* _streamCloud(
         apiKey: apiKey,
-        modelId: config.selectedModelId!,
+        modelId: cloudModelIdOverride ?? config.selectedModelId!,
         userMessage: userMessage,
         healthContext: healthContext,
         coachContext: coachContext,
         conversationHistory: conversationHistory,
-        cloudDataLevel: config.cloudDataLevel,
+        cloudDataLevel: cloudDataLevelOverride ?? config.cloudDataLevel,
       );
       return;
     }
@@ -118,6 +120,8 @@ class HybridAiCoachRepository implements AiCoachRepository {
       taskKind: taskKind,
       estimatedPromptTokens: estimatedPromptTokens,
       preferredBackend: preferredBackend,
+      cloudModelIdOverride: cloudModelIdOverride,
+      cloudDataLevelOverride: cloudDataLevelOverride,
     );
     lastBackend = _local.lastBackend;
   }

@@ -9,12 +9,12 @@ part of 'coach_chat_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CoachChatNotifier)
-final coachChatProvider = CoachChatNotifierProvider._();
+@ProviderFor(CoachChat)
+final coachChatProvider = CoachChatProvider._();
 
-final class CoachChatNotifierProvider
-    extends $AsyncNotifierProvider<CoachChatNotifier, List<ChatMessage>> {
-  CoachChatNotifierProvider._()
+final class CoachChatProvider
+    extends $AsyncNotifierProvider<CoachChat, List<ChatMessage>> {
+  CoachChatProvider._()
     : super(
         from: null,
         argument: null,
@@ -26,16 +26,16 @@ final class CoachChatNotifierProvider
       );
 
   @override
-  String debugGetCreateSourceHash() => _$coachChatNotifierHash();
+  String debugGetCreateSourceHash() => _$coachChatHash();
 
   @$internal
   @override
-  CoachChatNotifier create() => CoachChatNotifier();
+  CoachChat create() => CoachChat();
 }
 
-String _$coachChatNotifierHash() => r'397c99b8f34fee5e06fbefab221c47c194d2fa3d';
+String _$coachChatHash() => r'0c95b8300507043d9e4cf168182eea9a6961b591';
 
-abstract class _$CoachChatNotifier extends $AsyncNotifier<List<ChatMessage>> {
+abstract class _$CoachChat extends $AsyncNotifier<List<ChatMessage>> {
   FutureOr<List<ChatMessage>> build();
   @$mustCallSuper
   @override
