@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.15.0...v1.16.0) (2026-07-06)
+
+
+### Features
+
+* deepen ai coach context and app integration ([#72](https://github.com/YKDBontekoe/KYNOS/issues/72)) ([a01cc1b](https://github.com/YKDBontekoe/KYNOS/commit/a01cc1b1f828b32d0e6cf94218b3cdf33ba2cdfe))
+
 # [1.15.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.14.1...v1.15.0) (2026-07-06)
 
 
