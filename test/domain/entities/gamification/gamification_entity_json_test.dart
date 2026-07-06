@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kynos/domain/entities/gamification/encounter_state.dart';
+import 'package:kynos/domain/entities/gamification/camp_state.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 
 void main() {
@@ -23,18 +23,28 @@ void main() {
       expect(objective.target, 400);
       expect(objective.isMeasurable, isTrue);
     });
-  });
 
-  group('EncounterState.fromJson', () {
-    test('uses defaults when hp fields are missing', () {
-      final state = EncounterState.fromJson({
-        'enemy_id': 'trail_grunt_0',
-        'turn_count': 0,
-        'outcome': EncounterOutcome.inProgress.name,
+    test('supports sleep and exercise minute kinds', () {
+      final sleep = QuestObjective.fromJson({
+        'kind': QuestObjectiveKind.sleepHours.name,
+        'target': 7.5,
+      });
+      final exercise = QuestObjective.fromJson({
+        'kind': QuestObjectiveKind.exerciseMinutes.name,
+        'target': 30,
       });
 
-      expect(state.enemyMaxHp, 40);
-      expect(state.enemyHp, 40);
+      expect(sleep.kind, QuestObjectiveKind.sleepHours);
+      expect(exercise.kind, QuestObjectiveKind.exerciseMinutes);
+    });
+  });
+
+  group('CampState.fromJson', () {
+    test('creates initial grid when tiles missing', () {
+      final camp = CampState.fromJson({'weekly_altitude': 12});
+
+      expect(camp.tiles.length, CampState.defaultGridSize * CampState.defaultGridSize);
+      expect(camp.weeklyAltitude, 12);
     });
   });
 }

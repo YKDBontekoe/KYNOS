@@ -6,31 +6,41 @@ import 'package:kynos/domain/usecases/gamification/evaluate_quest_progress_useca
 void main() {
   const useCase = EvaluateQuestProgressUseCase();
 
-  test('reports partial progress for active calories', () {
-    final quest = Quest(
-      id: 'q1',
+  test('tracks sleep hours and exercise minutes objectives', () {
+    final sleepQuest = Quest(
+      id: 'sleep',
       type: QuestType.daily,
       difficulty: QuestDifficulty.easy,
-      title: 'Burn',
-      narrative: 'Move',
-      objective: '400 kcal',
+      title: 'Rest',
+      narrative: 'Sleep',
+      objective: '7h',
       status: QuestStatus.active,
       xpReward: 80,
       statRewards: const {},
-      generatedAt: DateTime(2026, 7, 5),
-      expiresAt: DateTime(2026, 7, 5, 23, 59),
+      generatedAt: DateTime(2026, 7, 6),
+      expiresAt: DateTime(2026, 7, 6, 23, 59),
       measurableObjective: const QuestObjective(
-        kind: QuestObjectiveKind.activeCalories,
-        target: 400,
+        kind: QuestObjectiveKind.sleepHours,
+        target: 7,
       ),
     );
 
     final summary = HealthSummary(
-      date: DateTime(2026, 7, 5),
-      activeCalories: 200,
+      date: DateTime(2026, 7, 6),
+      sleepHours: 7.5,
+      exerciseMinutes: 25,
     );
 
-    expect(useCase.progressFraction(quest: quest, summary: summary), 0.5);
-    expect(useCase.isComplete(quest: quest, summary: summary), isFalse);
+    expect(useCase.isComplete(quest: sleepQuest, summary: summary), isTrue);
+
+    final moveQuest = sleepQuest.copyWith(
+      measurableObjective: const QuestObjective(
+        kind: QuestObjectiveKind.exerciseMinutes,
+        target: 30,
+      ),
+    );
+
+    expect(useCase.progressFraction(quest: moveQuest, summary: summary),
+        closeTo(25 / 30, 0.01));
   });
 }

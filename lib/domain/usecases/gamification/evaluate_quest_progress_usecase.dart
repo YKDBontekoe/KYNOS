@@ -26,6 +26,9 @@ class EvaluateQuestProgressUseCase {
           0,
           (sum, run) => sum + (run.distanceMeters ?? 0) / 1000,
         ),
+      QuestObjectiveKind.exerciseMinutes =>
+        summary?.exerciseMinutes ?? 0,
+      QuestObjectiveKind.sleepHours => summary?.sleepHours ?? 0,
       QuestObjectiveKind.manual => 0,
     };
   }

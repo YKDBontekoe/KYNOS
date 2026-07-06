@@ -23,6 +23,7 @@ import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -80,6 +81,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     ref.invalidate(runnerCharacterProvider);
     ref.invalidate(nexusLabProvider);
     ref.invalidate(postRunDebriefProvider);
+    ref.invalidate(campSessionProvider);
     await Future.wait([
       ref.read(healthSummaryProvider.future),
       ref.read(todayInsightsStateProvider.future),
@@ -87,6 +89,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       ref.read(healthHistoryProvider(days: 28).future),
       ref.read(recentRunsProvider(days: 30, limit: 3).future),
       ref.read(dailyQuestsProvider.future),
+      ref.read(campSessionProvider.future),
       ref.read(dashboardSummaryProvider.future),
     ]);
   }
@@ -146,6 +149,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final weekHistory = _last7Days(loadHistory.value ?? const []);
     final recentRuns = ref.watch(recentRunsProvider(days: 30, limit: 3));
     final dailyQuests = ref.watch(dailyQuestsProvider);
+    final campSession = ref.watch(campSessionProvider);
     final dashboardSummaryAsync = ref.watch(dashboardSummaryProvider);
     final dash = dashboardSummaryAsync.value;
     final showConnectCard = !kIsWeb &&
@@ -289,6 +293,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 if (dash?.character != null) ...[
                   CharacterGlanceCard(
                     character: dash!.character!,
+                    camp: campSession.value?.camp,
+                    resources: campSession.value?.resources,
                     onViewCharacter: widget.onViewCharacter,
                   ),
                   const Gap(tokens.Spacing.md),
