@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
