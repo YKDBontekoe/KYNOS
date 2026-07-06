@@ -44,6 +44,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('TRAIL RUN'), findsOneWidget);
+    expect(find.text('Node 1/7 · START'), findsOneWidget);
     expect(find.text('Advance'), findsOneWidget);
     expect(find.text('MOVES'), findsOneWidget);
     expect(find.text('STAMINA'), findsOneWidget);
