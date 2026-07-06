@@ -57,6 +57,8 @@ final class DeviceThermalChannel: NSObject {
     case "isThermallyThrottled":
       let state = ProcessInfo.processInfo.thermalState
       result(state == .serious || state == .critical)
+    case "physicalMemoryBytes":
+      result(Int(ProcessInfo.processInfo.physicalMemory))
     default:
       result(FlutterMethodNotImplemented)
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
@@ -13,13 +14,21 @@ class AssistantBubble extends StatelessWidget {
     required this.content,
     required this.isStreaming,
     this.hasError = false,
+    this.attemptedBackend,
     this.onRetry,
+    this.onTryAlternateBackend,
+    this.alternateBackend,
+    this.alternateBackendLabel,
   });
 
   final String content;
   final bool isStreaming;
   final bool hasError;
+  final AiInferenceBackend? attemptedBackend;
   final VoidCallback? onRetry;
+  final VoidCallback? onTryAlternateBackend;
+  final AiInferenceBackend? alternateBackend;
+  final String? alternateBackendLabel;
 
   Future<void> _copyMessage(BuildContext context) async {
     if (content.isEmpty) return;
@@ -29,6 +38,12 @@ class AssistantBubble extends StatelessWidget {
       const SnackBar(content: Text('Message copied')),
     );
   }
+
+  String? get _errorLabel => switch (attemptedBackend) {
+        AiInferenceBackend.openRouter => 'Cloud error',
+        AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => 'On-device error',
+        null => hasError ? 'Coach error' : null,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +62,11 @@ class AssistantBubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (hasError)
+              if (_errorLabel != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: Spacing.sm),
                   child: KynosChip.accent(
-                    label: 'On-device error',
+                    label: _errorLabel!,
                     color: Theme.of(context).colorScheme.error,
                   ),
                 ),
@@ -83,12 +98,30 @@ class AssistantBubble extends StatelessWidget {
                               },
                       ),
                     ),
-              if (hasError && onRetry != null) ...[
+              if (hasError && (onRetry != null || onTryAlternateBackend != null)) ...[
                 const Gap(Spacing.sm),
-                TextButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Retry'),
+                Wrap(
+                  spacing: Spacing.sm,
+                  runSpacing: Spacing.xs,
+                  children: [
+                    if (onRetry != null)
+                      TextButton.icon(
+                        onPressed: onRetry,
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: const Text('Retry'),
+                      ),
+                    if (onTryAlternateBackend != null && alternateBackendLabel != null)
+                      TextButton.icon(
+                        onPressed: onTryAlternateBackend,
+                        icon: Icon(
+                          alternateBackend == AiInferenceBackend.openRouter
+                              ? Icons.cloud_outlined
+                              : Icons.memory_rounded,
+                          size: 18,
+                        ),
+                        label: Text(alternateBackendLabel!),
+                      ),
+                  ],
                 ),
               ],
             ],

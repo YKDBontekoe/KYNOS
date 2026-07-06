@@ -20,6 +20,7 @@ abstract interface class AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   });
 
   /// Discards the current chat session and starts a fresh one.

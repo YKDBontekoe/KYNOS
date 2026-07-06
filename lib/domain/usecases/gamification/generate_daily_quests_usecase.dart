@@ -231,8 +231,10 @@ class GenerateDailyQuestsUseCase {
     required List<Quest> baseQuests,
   }) async {
     try {
-      await _aiModelRepository.initialize();
-      if (!_aiModelRepository.hasActiveModel) return null;
+      final initResult = await _aiModelRepository.initialize();
+      if (initResult.failure != null || !_aiModelRepository.hasActiveModel) {
+        return null;
+      }
 
       final quest = baseQuests.first;
       final prompt = StringBuffer()

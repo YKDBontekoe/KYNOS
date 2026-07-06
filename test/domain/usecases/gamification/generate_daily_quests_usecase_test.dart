@@ -1,13 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kynos/domain/entities/ai_inference_backend.dart';
-import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/gamification/character_class.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
-import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/domain/repositories/ai_coach_repository.dart';
-import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/usecases/gamification/generate_daily_quests_usecase.dart';
+
+import '../../../support/fake_ai_repositories.dart';
 
 void main() {
   group('GenerateDailyQuestsUseCase', () {
@@ -31,8 +28,8 @@ void main() {
 
     test('returns deterministic quest when model is unavailable', () async {
       final useCase = GenerateDailyQuestsUseCase(
-        aiCoachRepository: _FakeAiCoachRepository(),
-        aiModelRepository: _FakeAiModelRepository(hasActiveModel: false),
+        aiCoachRepository: FakeAiCoachRepository(),
+        aiModelRepository: FakeAiModelRepository(hasActiveModel: false),
       );
 
       final result = await useCase(
@@ -47,39 +44,4 @@ void main() {
       expect(result.quests.last.measurableObjective, isNotNull);
     });
   });
-}
-
-class _FakeAiCoachRepository implements AiCoachRepository {
-  @override
-  bool get isReady => false;
-
-  @override
-  AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
-
-  @override
-  Stream<String> chat({
-    required String userMessage,
-    List<HealthSummary>? healthContext,
-    AiTaskKind taskKind = AiTaskKind.coachChat,
-    int estimatedPromptTokens = 0,
-  }) async* {}
-
-  @override
-  Future<void> dispose() async {}
-
-  @override
-  Future<void> resetSession() async {}
-}
-
-class _FakeAiModelRepository implements AiModelRepository {
-  _FakeAiModelRepository({required this.hasActiveModel});
-
-  @override
-  final bool hasActiveModel;
-
-  @override
-  Future<void> initialize({String? huggingFaceToken}) async {}
-
-  @override
-  Future<void> installFromNetwork({required String url, String? token}) async {}
 }

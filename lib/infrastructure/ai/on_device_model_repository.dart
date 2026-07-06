@@ -1,35 +1,91 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:kynos/core/errors/failures.dart';
+import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
+import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 
 /// flutter_gemma implementation of [AiModelRepository].
 class OnDeviceModelRepository implements AiModelRepository {
   GemmaInferenceTier? _cachedTier;
+  String? _installedModelId;
 
   @override
   bool get hasActiveModel => GemmaRuntime.hasCompatibleActiveModel();
 
   @override
-  Future<void> initialize({String? huggingFaceToken}) =>
-      GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
+  String? get installedModelId =>
+      _installedModelId ?? GemmaRuntime.installedCatalogId;
 
   @override
-  Future<void> installFromNetwork({required String url, String? token}) async {
-    _cachedTier = await GemmaRuntimeTier.resolve();
+  bool isActiveModel(String catalogId) =>
+      hasActiveModel && installedModelId == catalogId;
 
-    if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(_cachedTier!)) {
-      throw StateError(
-        'This device cannot run the on-device Gemma model (insufficient RAM).',
-      );
+  @override
+  Future<({Failure? failure})> initialize({String? huggingFaceToken}) async {
+    try {
+      await GemmaRuntime.initialize(huggingFaceToken: huggingFaceToken);
+      return (failure: null);
+    } on Object catch (error) {
+      return (failure: AiModelFailure(error.toString()));
     }
+  }
 
-    await GemmaRuntime.installGemma4E2B()
-        .fromNetwork(url, token: token)
-        .install();
+  @override
+  Future<({Failure? failure})> install(OnDeviceModel model, {String? token}) async {
+    try {
+      _cachedTier = await GemmaRuntimeTier.resolve();
 
-    if (!hasActiveModel) {
-      throw StateError('Gemma model install completed but model is not active.');
+      if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(_cachedTier!)) {
+        return (
+          failure: const AiModelFailure(
+            'This device cannot run on-device models (insufficient RAM).',
+          ),
+        );
+      }
+
+      final ramBytes = await GemmaDeviceRamProbe.totalRamBytes();
+      if (ramBytes != null) {
+        final ramGb = ramBytes / (1024 * 1024 * 1024);
+        if (ramGb < model.minRamGb) {
+          return (
+            failure: AiModelFailure(
+              'This device does not have enough RAM for ${model.name}. '
+              'Try a lighter model such as ${OnDeviceModelCatalog.gemma3_270m.name}.',
+            ),
+          );
+        }
+      }
+
+      if (model.requiresHuggingFaceToken && (token == null || token.isEmpty)) {
+        return (
+          failure: AiModelFailure(
+            'A HuggingFace access token is required for ${model.name}.',
+          ),
+        );
+      }
+
+      final url = model.downloadUrl(isWeb: kIsWeb);
+      await GemmaRuntime.installModel(model)
+          .fromNetwork(url, token: token)
+          .install();
+
+      if (!hasActiveModel) {
+        return (
+          failure: AiModelFailure(
+            '${model.name} install completed but model is not active.',
+          ),
+        );
+      }
+
+      _installedModelId = model.id;
+      GemmaRuntime.markInstalled(model.id);
+      return (failure: null);
+    } on Object catch (error) {
+      return (failure: AiModelFailure(error.toString()));
     }
   }
 

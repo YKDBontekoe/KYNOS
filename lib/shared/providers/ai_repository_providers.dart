@@ -14,6 +14,16 @@ export 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart'
 export 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart'
     show GemmaRuntime;
 
+/// Whether coach chat can run via OpenRouter without a local model install.
+final isCloudCoachConfiguredProvider = FutureProvider<bool>((ref) async {
+  final settings = ref.watch(settingsProvider);
+  if (!settings.cloudTasksEnabled || !settings.hasSelectedCloudModel) {
+    return false;
+  }
+  final apiKey = await ref.read(openRouterApiKeyManagerProvider.future);
+  return apiKey != null && apiKey.isNotEmpty;
+});
+
 final openRouterModelsRepositoryProvider = Provider<OpenRouterModelsRepository>(
   (ref) => OpenRouterModelsRepositoryImpl(),
 );

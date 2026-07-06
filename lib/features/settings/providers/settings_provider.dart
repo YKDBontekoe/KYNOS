@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,6 +14,9 @@ class SettingsState {
     required this.cloudDataLevel,
     required this.selectedCloudModelId,
     required this.selectedCloudModelName,
+    required this.selectedLocalModelId,
+    required this.selectedLocalModelName,
+    required this.installedLocalModelId,
   });
 
   final bool isDarkMode;
@@ -21,11 +25,18 @@ class SettingsState {
   final CloudDataLevel cloudDataLevel;
   final String? selectedCloudModelId;
   final String? selectedCloudModelName;
+  final String selectedLocalModelId;
+  final String selectedLocalModelName;
+  final String? installedLocalModelId;
 
   ThemeMode get themeMode => isDarkMode ? ThemeMode.dark : ThemeMode.light;
 
   bool get hasSelectedCloudModel =>
       selectedCloudModelId != null && selectedCloudModelId!.isNotEmpty;
+
+  bool get isSelectedLocalModelInstalled =>
+      installedLocalModelId != null &&
+      installedLocalModelId == selectedLocalModelId;
 }
 
 @Riverpod(keepAlive: true)
@@ -36,11 +47,16 @@ class Settings extends _$Settings {
   static const _cloudDataLevelKey = 'cloudDataLevel';
   static const _cloudModelIdKey = 'selectedCloudModelId';
   static const _cloudModelNameKey = 'selectedCloudModelName';
+  static const _localModelIdKey = 'selectedLocalModelId';
+  static const _localModelNameKey = 'selectedLocalModelName';
+  static const _installedLocalModelIdKey = 'installedLocalModelId';
 
   @override
   SettingsState build() {
     final prefs = ref.watch(sharedPreferencesProvider);
     final levelName = prefs.getString(_cloudDataLevelKey);
+    final defaultModel =
+        OnDeviceModelCatalog.byId(OnDeviceModelCatalog.defaultModelId);
     return SettingsState(
       isDarkMode: prefs.getBool(_themeKey) ?? false,
       languageCode: prefs.getString(_languageKey) ?? 'en',
@@ -51,6 +67,11 @@ class Settings extends _$Settings {
       ),
       selectedCloudModelId: prefs.getString(_cloudModelIdKey),
       selectedCloudModelName: prefs.getString(_cloudModelNameKey),
+      selectedLocalModelId:
+          prefs.getString(_localModelIdKey) ?? defaultModel.id,
+      selectedLocalModelName:
+          prefs.getString(_localModelNameKey) ?? defaultModel.name,
+      installedLocalModelId: prefs.getString(_installedLocalModelIdKey),
     );
   }
 
@@ -96,6 +117,26 @@ class Settings extends _$Settings {
     );
   }
 
+  Future<void> updateSelectedLocalModel({
+    required String id,
+    required String name,
+  }) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(_localModelIdKey, id);
+    await prefs.setString(_localModelNameKey, name);
+    state = _copy(
+      state,
+      selectedLocalModelId: id,
+      selectedLocalModelName: name,
+    );
+  }
+
+  Future<void> markLocalModelInstalled(String id) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(_installedLocalModelIdKey, id);
+    state = _copy(state, installedLocalModelId: id);
+  }
+
   Future<void> clearSelectedCloudModel() async {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.remove(_cloudModelIdKey);
@@ -107,6 +148,9 @@ class Settings extends _$Settings {
       cloudDataLevel: state.cloudDataLevel,
       selectedCloudModelId: null,
       selectedCloudModelName: null,
+      selectedLocalModelId: state.selectedLocalModelId,
+      selectedLocalModelName: state.selectedLocalModelName,
+      installedLocalModelId: state.installedLocalModelId,
     );
   }
 
@@ -118,6 +162,9 @@ class Settings extends _$Settings {
     CloudDataLevel? cloudDataLevel,
     String? selectedCloudModelId,
     String? selectedCloudModelName,
+    String? selectedLocalModelId,
+    String? selectedLocalModelName,
+    String? installedLocalModelId,
   }) {
     return SettingsState(
       isDarkMode: isDarkMode ?? current.isDarkMode,
@@ -128,6 +175,12 @@ class Settings extends _$Settings {
           selectedCloudModelId ?? current.selectedCloudModelId,
       selectedCloudModelName:
           selectedCloudModelName ?? current.selectedCloudModelName,
+      selectedLocalModelId:
+          selectedLocalModelId ?? current.selectedLocalModelId,
+      selectedLocalModelName:
+          selectedLocalModelName ?? current.selectedLocalModelName,
+      installedLocalModelId:
+          installedLocalModelId ?? current.installedLocalModelId,
     );
   }
 }

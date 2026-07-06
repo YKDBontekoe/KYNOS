@@ -64,49 +64,89 @@ class HybridAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) async* {
     final config = await _configReader();
     final apiKey = await _keyStorage.readOpenRouterKey();
     final hasKey = apiKey != null && apiKey.isNotEmpty;
+    final cloudAvailable =
+        config.canUseCloud && hasKey && config.selectedModelId != null;
 
-    final useCloud = AiTaskRouter.shouldUseCloud(
-      kind: taskKind,
-      cloudTasksEnabled: config.cloudTasksEnabled,
-      hasApiKey: hasKey,
-      hasSelectedModel: config.selectedModelId != null,
-      estimatedPromptTokens: estimatedPromptTokens,
-    );
+    final useCloud = switch (preferredBackend) {
+      AiInferenceBackend.openRouter => true,
+      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => false,
+      null =>
+        cloudAvailable &&
+            AiTaskRouter.shouldUseCloud(
+              kind: taskKind,
+              cloudTasksEnabled: config.cloudTasksEnabled,
+              hasApiKey: hasKey,
+              hasSelectedModel: config.selectedModelId != null,
+              estimatedPromptTokens: estimatedPromptTokens,
+            ),
+    };
 
-    if (useCloud && apiKey != null && config.selectedModelId != null) {
-      lastBackend = AiInferenceBackend.openRouter;
-      final contextLines = HealthContextFormatter.summarizeForPrompt(
-        healthContext ?? const [],
-        level: config.cloudDataLevel,
-      );
-      final userPrompt = StringBuffer()..writeln(userMessage);
-      if (contextLines.isNotEmpty) {
-        userPrompt
-          ..writeln()
-          ..writeln('Athlete context:')
-          ..writeln(contextLines.join('\n'));
+    if (useCloud) {
+      if (!cloudAvailable) {
+        throw StateError(
+          'Cloud coach is not configured. Add an OpenRouter key and model in Settings.',
+        );
       }
-
-      yield* _cloud.streamCompletion(
+      lastBackend = AiInferenceBackend.openRouter;
+      yield* _streamCloud(
         apiKey: apiKey,
         modelId: config.selectedModelId!,
-        systemPrompt: _cloudSystemPrompt,
-        userPrompt: userPrompt.toString(),
+        userMessage: userMessage,
+        healthContext: healthContext,
+        cloudDataLevel: config.cloudDataLevel,
       );
       return;
     }
 
+    lastBackend = AiInferenceBackend.onDevice;
     yield* _local.chat(
       userMessage: userMessage,
       healthContext: healthContext,
       taskKind: taskKind,
       estimatedPromptTokens: estimatedPromptTokens,
+      preferredBackend: preferredBackend,
     );
     lastBackend = _local.lastBackend;
+  }
+
+  Stream<AiChunk> _streamCloud({
+    required String apiKey,
+    required String modelId,
+    required String userMessage,
+    required List<HealthSummary>? healthContext,
+    required CloudDataLevel cloudDataLevel,
+  }) async* {
+    final contextLines = HealthContextFormatter.summarizeForPrompt(
+      healthContext ?? const [],
+      level: cloudDataLevel,
+    );
+    final userPrompt = StringBuffer()..writeln(userMessage);
+    if (contextLines.isNotEmpty) {
+      userPrompt
+        ..writeln()
+        ..writeln('Athlete context:')
+        ..writeln(contextLines.join('\n'));
+    }
+
+    var emitted = false;
+    await for (final chunk in _cloud.streamCompletion(
+      apiKey: apiKey,
+      modelId: modelId,
+      systemPrompt: _cloudSystemPrompt,
+      userPrompt: userPrompt.toString(),
+    )) {
+      emitted = true;
+      yield chunk;
+    }
+
+    if (!emitted) {
+      throw StateError('Cloud coach returned an empty response');
+    }
   }
 
   @override

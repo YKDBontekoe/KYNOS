@@ -42,7 +42,7 @@ final class ModelSetupNotifierProvider
 }
 
 String _$modelSetupNotifierHash() =>
-    r'16bfc4cb80ea3d3a84977ca00fee347fbd55664e';
+    r'f1840224ae7ee109bbe754cd80658f8bb14ab9bb';
 
 abstract class _$ModelSetupNotifier
     extends $Notifier<AsyncValue<ModelSetupState>> {

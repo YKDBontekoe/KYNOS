@@ -1,3 +1,4 @@
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:meta/meta.dart';
 
 enum MessageRole { user, assistant }
@@ -18,6 +19,9 @@ class ChatMessage {
   /// Original user prompt preserved for per-message retry.
   final String? userPromptForRetry;
 
+  /// Backend used for the last inference attempt on this message.
+  final AiInferenceBackend? attemptedBackend;
+
   const ChatMessage({
     required this.id,
     required this.role,
@@ -26,6 +30,7 @@ class ChatMessage {
     this.isStreaming = false,
     this.hasError = false,
     this.userPromptForRetry,
+    this.attemptedBackend,
   });
 
   ChatMessage copyWith({
@@ -33,6 +38,7 @@ class ChatMessage {
     bool? isStreaming,
     bool? hasError,
     String? userPromptForRetry,
+    AiInferenceBackend? attemptedBackend,
   }) {
     return ChatMessage(
       id: id,
@@ -42,6 +48,7 @@ class ChatMessage {
       isStreaming: isStreaming ?? this.isStreaming,
       hasError: hasError ?? this.hasError,
       userPromptForRetry: userPromptForRetry ?? this.userPromptForRetry,
+      attemptedBackend: attemptedBackend ?? this.attemptedBackend,
     );
   }
 
@@ -56,7 +63,8 @@ class ChatMessage {
           timestamp == other.timestamp &&
           isStreaming == other.isStreaming &&
           hasError == other.hasError &&
-          userPromptForRetry == other.userPromptForRetry;
+          userPromptForRetry == other.userPromptForRetry &&
+          attemptedBackend == other.attemptedBackend;
 
   @override
   int get hashCode => Object.hash(
@@ -67,5 +75,6 @@ class ChatMessage {
         isStreaming,
         hasError,
         userPromptForRetry,
+        attemptedBackend,
       );
 }

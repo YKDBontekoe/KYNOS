@@ -23,8 +23,10 @@ class TodayInsightsModelRefiner {
     required List<HealthSummary> history,
   }) async {
     try {
-      await _aiModelRepository.initialize();
-      if (!_aiModelRepository.hasActiveModel) return null;
+      final initResult = await _aiModelRepository.initialize();
+      if (initResult.failure != null || !_aiModelRepository.hasActiveModel) {
+        return null;
+      }
 
       final contextLines = <String>[
         'Today HRV: ${today.hrvMs?.toStringAsFixed(1) ?? 'na'}',
