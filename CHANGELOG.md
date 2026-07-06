@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.1...v1.12.2) (2026-07-06)
+
+
+### Bug Fixes
+
+* implement ui/ux bug backlog across navigation, errors, and theme ([#63](https://github.com/YKDBontekoe/KYNOS/issues/63)) ([852b07f](https://github.com/YKDBontekoe/KYNOS/commit/852b07ff2496d769cfc223cbda29b7b7b637bfca))
+
 ## [1.12.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.0...v1.12.1) (2026-07-06)
 
 
