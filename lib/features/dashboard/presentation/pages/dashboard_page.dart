@@ -9,7 +9,6 @@ import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
-import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/character_glance_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
@@ -25,6 +24,7 @@ import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.da
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
+import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';

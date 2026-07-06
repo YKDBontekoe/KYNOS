@@ -7,12 +7,12 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
-import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/on_device_model_card.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
-import 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
+import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/model_setup_provider.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
 class OnDeviceModelPickerPage extends ConsumerStatefulWidget {
