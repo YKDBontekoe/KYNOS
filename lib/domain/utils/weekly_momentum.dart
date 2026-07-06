@@ -1,5 +1,6 @@
 import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/utils/running_distance.dart';
 
 /// Week-over-week training momentum derived from health history.
 class WeeklyMomentum {
@@ -25,9 +26,7 @@ class WeeklyMomentum {
 }
 
 double _weekDistanceKm(List<HealthSummary> week) => week
-    .map(
-      (s) => (s.runningWorkoutDistanceMeters ?? s.distanceMeters ?? 0) / 1000,
-    )
+    .map(dailyRunningDistanceKm)
     .fold(0.0, (a, b) => a + b);
 
 int _weekRuns(List<HealthSummary> week) => week
