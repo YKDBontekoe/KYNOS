@@ -1,3 +1,11 @@
+# [1.15.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.14.1...v1.15.0) (2026-07-06)
+
+
+### Features
+
+* enrich run route viewer with pace charts and splits ([#73](https://github.com/YKDBontekoe/KYNOS/issues/73)) ([c196f0e](https://github.com/YKDBontekoe/KYNOS/commit/c196f0eb98e6e5ec4492e8360d06f76c2c3e2e64))
+* replace trail run with summit camp game ([#71](https://github.com/YKDBontekoe/KYNOS/issues/71)) ([45a23cb](https://github.com/YKDBontekoe/KYNOS/commit/45a23cb830dc62a79b2d7be4f734c246ddcb4e59))
+
 ## [1.14.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.14.0...v1.14.1) (2026-07-06)
 
 
