@@ -40,6 +40,31 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('successful on-device assistant message does not show error chip', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: MessageBubble(
+              message: ChatMessage(
+                id: 'assistant_ok',
+                role: MessageRole.assistant,
+                content: 'Your recovery is showing some fluctuation.',
+                timestamp: DateTime(2026, 7, 5),
+                hasError: false,
+                attemptedBackend: AiInferenceBackend.onDevice,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('On-device error'), findsNothing);
+    expect(find.text('Your recovery is showing some fluctuation.'), findsOneWidget);
+  });
+
   testWidgets('failed assistant message shows retry and cloud switch', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
