@@ -98,7 +98,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/app/shell_navigation_scope.dart` | 41 | ShellNavigationScope, DashboardTab |
 | `lib/app/shell_page.dart` | 157 | ShellPage, _ShellPageState, _AnimatedShellBody, … |
 | `lib/core/constants/app_constants.dart` | 54 | Compile-time constants for KYNOS. |
-| `lib/core/constants/gamification_constants.dart` | 21 | Gameplay tuning for the Trail Run character mini-game. |
+| `lib/core/constants/gamification_constants.dart` | 46 | Gameplay tuning for Summit Camp. |
 | `lib/core/constants/imported_workout_ids.dart` | 10 | Prefix and helpers for locally imported workout identifiers. |
 | `lib/core/errors/failures.dart` | 33 | Base class for all domain-level failures in KYNOS. |
 | `lib/core/theme/app_theme.dart` | 191 | AppTheme |
@@ -118,15 +118,16 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/entities/chat_message.dart` | 80 | ChatMessage |
 | `lib/domain/entities/cloud_data_level.dart` | 9 | How much health context may be included in OpenRouter prompts. |
 | `lib/domain/entities/dashboard/dashboard_summary.dart` | 60 | DashboardSummary |
-| `lib/domain/entities/gamification/activity_resources.dart` | 39 | ActivityResources |
-| `lib/domain/entities/gamification/adventure_session.dart` | 95 | AdventureSession |
+| `lib/domain/entities/gamification/camp_building.dart` | 87 | PlacedBuilding |
+| `lib/domain/entities/gamification/camp_resources.dart` | 74 | CampResources |
+| `lib/domain/entities/gamification/camp_state.dart` | 238 | CampState |
+| `lib/domain/entities/gamification/camp_tile.dart` | 56 | CampTile |
 | `lib/domain/entities/gamification/character_class.dart` | 156 | Dart module |
 | `lib/domain/entities/gamification/character_stats.dart` | 128 | CharacterStats |
 | `lib/domain/entities/gamification/earned_title.dart` | 64 | EarnedTitle |
-| `lib/domain/entities/gamification/encounter_state.dart` | 95 | EncounterState |
-| `lib/domain/entities/gamification/quest.dart` | 201 | QuestObjective, Quest |
+| `lib/domain/entities/gamification/expedition_event.dart` | 47 | ExpeditionEvent |
+| `lib/domain/entities/gamification/quest.dart` | 203 | QuestObjective, Quest |
 | `lib/domain/entities/gamification/runner_character.dart` | 134 | RunnerCharacter |
-| `lib/domain/entities/gamification/trail_node.dart` | 51 | TrailNode |
 | `lib/domain/entities/gamification/xp_gain.dart` | 21 | XpGain |
 | `lib/domain/entities/health_summary.dart` | 114 | HealthSummary |
 | `lib/domain/entities/insights/insight_confidence.dart` | 14 | Dart module |
@@ -145,13 +146,16 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/repositories/gamekit_repository.dart` | 42 | Dart module |
 | `lib/domain/repositories/health_repository.dart` | 39 | Contract for accessing biometric data from the platform health store. |
 | `lib/domain/repositories/openrouter_models_repository.dart` | 12 | Contract for fetching the OpenRouter model catalog. |
+| `lib/domain/usecases/gamification/advance_weekly_summit_usecase.dart` | 31 | AdvanceWeeklySummitUseCase |
 | `lib/domain/usecases/gamification/assign_character_class_usecase.dart` | 146 | AssignCharacterClassUseCase |
-| `lib/domain/usecases/gamification/compute_activity_resources_usecase.dart` | 50 | ComputeActivityResourcesUseCase |
+| `lib/domain/usecases/gamification/build_camp_structure_usecase.dart` | 96 | BuildCampStructureResult, BuildCampStructureUseCase |
+| `lib/domain/usecases/gamification/compute_camp_resources_usecase.dart` | 82 | ComputeCampResourcesUseCase |
 | `lib/domain/usecases/gamification/compute_xp_usecase.dart` | 122 | ComputeXpUseCase |
-| `lib/domain/usecases/gamification/evaluate_quest_progress_usecase.dart` | 65 | EvaluateQuestProgressUseCase |
-| `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 298 | GenerateDailyQuestsUseCase |
-| `lib/domain/usecases/gamification/generate_daily_trail_usecase.dart` | 60 | GenerateDailyTrailUseCase |
-| `lib/domain/usecases/gamification/resolve_encounter_turn_usecase.dart` | 217 | EncounterTurnResult, ResolveEncounterTurnUseCase |
+| `lib/domain/usecases/gamification/evaluate_quest_progress_usecase.dart` | 68 | EvaluateQuestProgressUseCase |
+| `lib/domain/usecases/gamification/expand_camp_tile_usecase.dart` | 71 | ExpandCampTileResult, ExpandCampTileUseCase |
+| `lib/domain/usecases/gamification/generate_camp_quests_usecase.dart` | 165 | GenerateCampQuestsUseCase |
+| `lib/domain/usecases/gamification/resolve_expedition_usecase.dart` | 71 | ResolveExpeditionResult, ResolveExpeditionUseCase |
+| `lib/domain/usecases/gamification/rest_camp_usecase.dart` | 62 | RestCampResult, RestCampUseCase |
 | `lib/domain/usecases/health/import_apple_health_export_usecase.dart` | 144 | ImportAppleHealthExportResult, ImportAppleHealthExportUseCase |
 | `lib/domain/usecases/health/import_workout_usecase.dart` | 48 | ImportWorkoutUseCase |
 | `lib/domain/usecases/insights/generate_post_run_debrief_usecase.dart` | 98 | PostRunDebrief, GeneratePostRunDebriefUseCase |
@@ -177,20 +181,21 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/run_streak.dart` | 65 | Dart module |
 | `lib/domain/utils/seeded_roll.dart` | 17 | Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates). |
 | `lib/domain/utils/weekly_momentum.dart` | 88 | WeeklyMomentum |
-| `lib/features/character/presentation/pages/character_page.dart` | 235 | CharacterPage, EmptyCharacterState |
-| `lib/features/character/presentation/widgets/activity_resources_bar.dart` | 99 | ActivityResourcesBar, _ResourceTile |
+| `lib/features/character/presentation/pages/character_page.dart` | 258 | CharacterPage, EmptyCharacterState |
+| `lib/features/character/presentation/widgets/camp_build_sheet.dart` | 133 | CampBuildSheet |
+| `lib/features/character/presentation/widgets/camp_game_panel.dart` | 145 | CampGamePanel, _CampGamePanelState |
+| `lib/features/character/presentation/widgets/camp_grid.dart` | 119 | CampGrid, _CampTileCell |
+| `lib/features/character/presentation/widgets/camp_resources_bar.dart` | 122 | CampResourcesBar, _ResourceChip |
 | `lib/features/character/presentation/widgets/character_hero_card.dart` | 92 | CharacterHeroCard |
 | `lib/features/character/presentation/widgets/character_shield_icon.dart` | 35 | CharacterShieldPainter |
-| `lib/features/character/presentation/widgets/encounter_panel.dart` | 118 | EncounterPanel |
+| `lib/features/character/presentation/widgets/expedition_card.dart` | 89 | ExpeditionCard |
 | `lib/features/character/presentation/widgets/gamekit_panel.dart` | 104 | GameKitPanel, GameKitButton |
 | `lib/features/character/presentation/widgets/quest_card.dart` | 254 | QuestPanel, QuestCard |
 | `lib/features/character/presentation/widgets/signatory_power_card.dart` | 68 | SignatoryPowerCard |
 | `lib/features/character/presentation/widgets/stats_panel.dart` | 96 | StatsPanel, StatRow |
+| `lib/features/character/presentation/widgets/summit_progress_card.dart` | 70 | SummitProgressCard |
 | `lib/features/character/presentation/widgets/titles_panel.dart` | 37 | TitlesPanel |
-| `lib/features/character/presentation/widgets/trail_map.dart` | 210 | TrailMap, _TrailNodeDot, _TrailNodeDotState |
-| `lib/features/character/presentation/widgets/trail_run_game_panel.dart` | 68 | TrailRunGamePanel |
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 69 | XpBar |
-| `lib/features/character/providers/adventure_provider.dart` | 251 | AdventureViewState, AdventureSessionNotifier |
 | `lib/features/character/providers/character_provider.dart` | 1 | Dart module |
 | `lib/features/character/providers/quest_provider.dart` | 48 | QuestNotifier |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 221 | CoachChatPage, _CoachChatPageState |
@@ -208,12 +213,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/providers/model_setup_provider.dart` | 2 | Dart module |
 | `lib/features/coach_chat/providers/model_setup_state.dart` | 1 | Dart module |
 | `lib/features/coach_chat/utils/chat_history_codec.dart` | 74 | Serialises coach chat history to SharedPreferences JSON. |
-| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 347 | DashboardPage, _DashboardPageState |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 353 | DashboardPage, _DashboardPageState |
 | `lib/features/dashboard/presentation/pages/run_history_page.dart` | 138 | RunHistoryPage |
 | `lib/features/dashboard/presentation/pages/run_route_missing_page.dart` | 53 | RunRouteMissingPage |
 | `lib/features/dashboard/presentation/pages/run_route_page.dart` | 183 | RunRoutePage, _RunRouteScaffold, _RouteContent |
 | `lib/features/dashboard/presentation/widgets/activity_ring.dart` | 214 | ActivityRing, AnimatedActivityRing, _AnimatedActivityRingState, … |
-| `lib/features/dashboard/presentation/widgets/character_glance_card.dart` | 89 | CharacterGlanceCard |
+| `lib/features/dashboard/presentation/widgets/character_glance_card.dart` | 116 | CharacterGlanceCard |
 | `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, … |
 | `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 88 | ConnectHealthkitCard |
 | `lib/features/dashboard/presentation/widgets/daily_quest_teaser.dart` | 129 | DailyQuestTeaser |
@@ -287,7 +292,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/openrouter/openrouter_cloud_ai_repository.dart` | 24 | OpenRouterCloudAiRepository |
 | `lib/infrastructure/ai/openrouter/openrouter_models_repository_impl.dart` | 46 | OpenRouterModelsRepositoryImpl |
 | `lib/infrastructure/ai/secure_api_key_storage.dart` | 41 | SecureApiKeyStorage |
-| `lib/infrastructure/gamification/character_persistence_repository.dart` | 118 | CharacterPersistenceRepository |
+| `lib/infrastructure/gamification/character_persistence_repository.dart` | 120 | CharacterPersistenceRepository |
 | `lib/infrastructure/gamification/gamekit_repository_impl.dart` | 80 | GameKitRepositoryImpl |
 | `lib/infrastructure/health/apple_workout_route_channel.dart` | 36 | AppleWorkoutRouteChannel |
 | `lib/infrastructure/health/composite_health_repository.dart` | 189 | CompositeHealthRepository |
@@ -322,10 +327,11 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/providers/ai_reconnect_provider.dart` | 14 | AiReconnectState |
 | `lib/shared/providers/ai_repository_providers.dart` | 65 | Dart module |
 | `lib/shared/providers/biomechanics_provider.dart` | 20 | Dart module |
+| `lib/shared/providers/camp_providers.dart` | 232 | CampViewState, CampSessionNotifier |
 | `lib/shared/providers/character_providers.dart` | 29 | Loads the persisted [RunnerCharacter], creating one via class assignment |
 | `lib/shared/providers/coach_chat_seed_provider.dart` | 18 | CoachChatSeed |
-| `lib/shared/providers/daily_quests_provider.dart` | 60 | Dart module |
-| `lib/shared/providers/gamification_providers.dart` | 61 | Dart module |
+| `lib/shared/providers/daily_quests_provider.dart` | 56 | Dart module |
+| `lib/shared/providers/gamification_providers.dart` | 73 | Dart module |
 | `lib/shared/providers/health_import_providers.dart` | 23 | Dart module |
 | `lib/shared/providers/health_providers.dart` | 148 | HealthPermissionsNotifier, ImportedHealthDataNotifier |
 | `lib/shared/providers/health_repository_provider.dart` | 15 | Dart module |
@@ -384,20 +390,19 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | File | Lines | Target |
 |------|------:|--------|
 | `lib/features/settings/presentation/pages/settings_page.dart` | 600 | Split if > 250 lines |
-| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 347 | Split if > 250 lines |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 353 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 339 | Split if > 250 lines |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 324 | Split if > 250 lines |
-| `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 298 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 292 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | Split if > 250 lines |
 | `lib/domain/utils/run_route_analytics.dart` | 274 | Split if > 250 lines |
+| `lib/features/character/presentation/pages/character_page.dart` | 258 | Split if > 250 lines |
 | `lib/features/character/presentation/widgets/quest_card.dart` | 254 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |
-| `lib/features/character/providers/adventure_provider.dart` | 251 | Split if > 250 lines |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 287 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 293 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->

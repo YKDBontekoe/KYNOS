@@ -45,7 +45,7 @@ class DailyQuestTeaser extends ConsumerWidget {
                 ),
                 const Gap(Spacing.xs),
                 Text(
-                  'Open Character to generate today\'s quest.',
+                  'Open Character to generate today\'s camp quests.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: kynos.secondaryLabel,
                       ),
@@ -73,7 +73,7 @@ class DailyQuestTeaser extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'DAILY QUEST',
+                    'CAMP QUEST',
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                   const Spacer(),

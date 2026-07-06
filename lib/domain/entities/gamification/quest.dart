@@ -11,6 +11,8 @@ enum QuestObjectiveKind {
   activeCalories,
   runMinutes,
   runDistanceKm,
+  exerciseMinutes,
+  sleepHours,
   manual,
 }
 

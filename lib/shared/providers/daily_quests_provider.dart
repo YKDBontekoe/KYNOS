@@ -42,19 +42,15 @@ Future<List<Quest>> _loadOrGenerateDailyQuests(Ref ref) async {
   final summary = await ref.watch(healthSummaryProvider.future);
   final readiness = readinessScoreOrDefault(summary);
 
-  final useCase = ref.read(generateDailyQuestsUseCaseProvider);
-  final result = await useCase(
+  final useCase = ref.read(generateCampQuestsUseCaseProvider);
+  final quests = useCase(
     character: character,
     readinessScore: readiness,
   );
 
-  if (result.failure != null) {
-    throw result.failure!;
+  if (quests.isNotEmpty) {
+    await repo.saveQuests(quests);
   }
 
-  if (result.quests.isNotEmpty) {
-    await repo.saveQuests(result.quests);
-  }
-
-  return result.quests;
+  return quests;
 }

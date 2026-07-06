@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:kynos/core/errors/failures.dart';
-import 'package:kynos/domain/entities/gamification/adventure_session.dart';
+import 'package:kynos/domain/entities/gamification/camp_state.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/repositories/character_repository.dart';
@@ -10,7 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CharacterPersistenceRepository implements CharacterRepository {
   static const _characterKey = 'kynos_runner_character_v1';
   static const _questsKey = 'kynos_daily_quests_v1';
-  static const _adventureKey = 'kynos_adventure_session_v1';
+  static const _campKey = 'kynos_camp_state_v1';
+  static const _legacyAdventureKey = 'kynos_adventure_session_v1';
 
   @override
   Future<({RunnerCharacter? character, Failure? failure})>
@@ -54,7 +55,6 @@ class CharacterPersistenceRepository implements CharacterRepository {
           .map((q) => Quest.fromJson(q as Map<String, dynamic>))
           .toList();
 
-      // Only return quests generated today
       final today = DateTime.now();
       final todayQuests = quests.where((q) {
         final d = q.generatedAt;
@@ -87,32 +87,34 @@ class CharacterPersistenceRepository implements CharacterRepository {
   }
 
   @override
-  Future<({AdventureSession? session, Failure? failure})>
-      loadAdventureSession() async {
+  Future<({CampState? camp, Failure? failure})> loadCampState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final json = prefs.getString(_adventureKey);
-      if (json == null) return (session: null, failure: null);
-      final session = AdventureSession.fromJson(
+      // Discard legacy trail-run save data.
+      await prefs.remove(_legacyAdventureKey);
+
+      final json = prefs.getString(_campKey);
+      if (json == null) return (camp: null, failure: null);
+      final camp = CampState.fromJson(
         jsonDecode(json) as Map<String, dynamic>,
       );
-      return (session: session, failure: null);
+      return (camp: camp, failure: null);
     } catch (e) {
       return (
-        session: null,
-        failure: StorageFailure('Failed to load adventure session: $e'),
+        camp: null,
+        failure: StorageFailure('Failed to load camp: $e'),
       );
     }
   }
 
   @override
-  Future<Failure?> saveAdventureSession(AdventureSession session) async {
+  Future<Failure?> saveCampState(CampState camp) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_adventureKey, jsonEncode(session.toJson()));
+      await prefs.setString(_campKey, jsonEncode(camp.toJson()));
       return null;
     } catch (e) {
-      return StorageFailure('Failed to save adventure session: $e');
+      return StorageFailure('Failed to save camp: $e');
     }
   }
 }

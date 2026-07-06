@@ -6,14 +6,16 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/features/character/presentation/widgets/camp_game_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/character_hero_card.dart';
 import 'package:kynos/features/character/presentation/widgets/gamekit_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/quest_card.dart';
 import 'package:kynos/features/character/presentation/widgets/signatory_power_card.dart';
 import 'package:kynos/features/character/presentation/widgets/stats_panel.dart';
+import 'package:kynos/features/character/presentation/widgets/summit_progress_card.dart';
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
-import 'package:kynos/features/character/presentation/widgets/trail_run_game_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
+import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -30,10 +32,12 @@ class CharacterPage extends ConsumerWidget {
   Future<void> _refreshCharacter(WidgetRef ref) async {
     ref.invalidate(runnerCharacterProvider);
     ref.invalidate(dailyQuestsProvider);
+    ref.invalidate(campSessionProvider);
     ref.invalidate(nexusLabProvider);
     await Future.wait([
       ref.read(runnerCharacterProvider.future),
       ref.read(dailyQuestsProvider.future),
+      ref.read(campSessionProvider.future),
       ref.read(nexusLabProvider.future),
     ]);
   }
@@ -43,6 +47,7 @@ class CharacterPage extends ConsumerWidget {
     final kynos = context.kynosTheme;
     final characterAsync = ref.watch(runnerCharacterProvider);
     final questsAsync = ref.watch(dailyQuestsProvider);
+    final campAsync = ref.watch(campSessionProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refreshCharacter(ref),
@@ -106,7 +111,25 @@ class CharacterPage extends ConsumerWidget {
               ),
               sliver: SliverList.list(
                 children: [
-                  const TrailRunGamePanel(),
+                  campAsync.when(
+                    loading: () => const KynosSkeleton.tile(height: 72),
+                    error: (_, _) => KynosInlineErrorCard(
+                      message: 'Could not load camp.',
+                      onRetry: () => ref.invalidate(campSessionProvider),
+                    ),
+                    data: (viewState) {
+                      if (viewState == null) return const SizedBox.shrink();
+                      return Column(
+                        children: [
+                          SummitProgressCard(camp: viewState.camp),
+                          const Gap(tokens.Spacing.md),
+                          const KynosSectionHeader(title: 'SUMMIT CAMP'),
+                          const Gap(tokens.Spacing.sm),
+                          const CampGamePanel(),
+                        ],
+                      );
+                    },
+                  ),
                   const Gap(tokens.Spacing.lg),
                   CharacterHeroCard(character: character),
                   const Gap(tokens.Spacing.md),
@@ -116,7 +139,7 @@ class CharacterPage extends ConsumerWidget {
                   const Gap(tokens.Spacing.sm),
                   StatsPanel(character: character),
                   const Gap(tokens.Spacing.lg),
-                  const KynosSectionHeader(title: "TODAY'S QUEST"),
+                  const KynosSectionHeader(title: "TODAY'S CAMP QUESTS"),
                   const Gap(tokens.Spacing.sm),
                   QuestPanel(questsAsync: questsAsync),
                   const Gap(tokens.Spacing.lg),
