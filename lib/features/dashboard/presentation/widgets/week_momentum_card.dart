@@ -16,11 +16,13 @@ class WeekMomentumCard extends StatelessWidget {
     required this.momentum,
     this.isLoading = false,
     this.onImportRun,
+    this.onAskCoach,
   });
 
   final WeeklyMomentum? momentum;
   final bool isLoading;
   final VoidCallback? onImportRun;
+  final VoidCallback? onAskCoach;
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +128,17 @@ class WeekMomentumCard extends StatelessWidget {
                   child: _wowSummaryTile(context, kynos, m, isLoading),
                 ),
               ],
+            ),
+          ],
+          if (onAskCoach != null) ...[
+            const Gap(tokens.Spacing.md),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onAskCoach,
+                icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                label: const Text('Ask Coach for a plan'),
+              ),
             ),
           ],
         ],

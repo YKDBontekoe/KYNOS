@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/features/training/presentation/widgets/past_runs_list.dart';
 import 'package:kynos/features/training/presentation/widgets/training_insight_cards.dart';
 import 'package:kynos/features/training/presentation/widgets/trend_cards.dart';
@@ -14,6 +15,7 @@ import 'package:kynos/features/training/providers/training_insights_provider.dar
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/date_label.dart';
+import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/gait_model_card.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
@@ -137,7 +139,16 @@ class TrainingPage extends ConsumerWidget {
                     recentRunsProvider(days: 365, limit: 60),
                   ),
                 ),
-                data: (runs) => PastRunsList(runs: runs),
+                data: (runs) => PastRunsList(
+                  runs: runs,
+                  onAskCoach: (run, seed) => openCoachChat(
+                    context,
+                    ref,
+                    seed: seed,
+                    topic: CoachSeedTopic.run,
+                    runId: run.id,
+                  ),
+                ),
               ),
               const Gap(tokens.Spacing.lg),
               const KynosSectionHeader(title: 'Gait Model'),
@@ -154,6 +165,14 @@ class TrainingPage extends ConsumerWidget {
                 onCalibrate: kIsWeb
                     ? null
                     : () => ref.read(nexusLabProvider.notifier).calibrate(),
+                onAskCoach: () => openCoachChat(
+                  context,
+                  ref,
+                  seed:
+                      'Explain my gait model and what the beta coefficients mean '
+                      'for my running form.',
+                  topic: CoachSeedTopic.gait,
+                ),
               ),
               const Gap(tokens.Spacing.lg),
               TextButton(

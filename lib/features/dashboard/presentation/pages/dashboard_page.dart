@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
+import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/character_glance_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
@@ -25,11 +27,11 @@ import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dar
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
-import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
+import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
@@ -100,11 +102,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return sorted.take(7).toList();
   }
 
-  void _openCoachChat({String? seedMessage}) {
-    if (seedMessage != null && seedMessage.isNotEmpty) {
-      ref.read(coachChatSeedProvider.notifier).setSeed(seedMessage);
-    }
-    context.push(Routes.coachChat);
+  void _openCoachChat({
+    String? seedMessage,
+    CoachSeedTopic topic = CoachSeedTopic.general,
+    String? runId,
+    String? questId,
+  }) {
+    openCoachChat(
+      context,
+      ref,
+      seed: seedMessage,
+      topic: topic,
+      runId: runId,
+      questId: questId,
+    );
   }
 
   String? _coachSeedFromInsights(TodayInsightsState? state) {
@@ -117,6 +128,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return 'Based on my readiness today: ${insights.readinessBrief}. '
         'Top risk: $risk. ${insights.actionNow} '
         'What should I prioritise in training today?';
+  }
+
+  bool _shouldShowWeeklyGoalCoachNudge(WeeklyMomentum? momentum) {
+    if (momentum == null) return false;
+    final weekday = DateTime.now().weekday;
+    return weekday >= DateTime.wednesday &&
+        momentum.distanceGoalProgress < 0.5;
   }
 
   String _statusSubtitle({
@@ -169,11 +187,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 label: 'Read debrief',
                 onPressed: () {
                   if (!mounted || !context.mounted) return;
-                  ref.read(coachChatSeedProvider.notifier).setSeed(
+                  _openCoachChat(
+                    seedMessage:
                         'Here is my post-run debrief: ${data.debrief.highlight}. '
                         'What should I focus on in recovery?',
-                      );
-                  context.push(Routes.coachChat);
+                    topic: CoachSeedTopic.postRunDebrief,
+                    runId: data.workoutId,
+                  );
                   ref.read(postRunDebriefProvider.notifier).dismiss();
                 },
               ),
@@ -237,6 +257,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isLoading:
                       loadHistory.isLoading || dashboardSummaryAsync.isLoading,
                   onImportRun: () => context.push(Routes.healthImport),
+                  onAskCoach: _shouldShowWeeklyGoalCoachNudge(dash?.weeklyMomentum)
+                      ? () => _openCoachChat(
+                            seedMessage:
+                                'I am behind on my weekly distance goal. '
+                                'Help me plan the rest of the week.',
+                            topic: CoachSeedTopic.weeklyGoal,
+                          )
+                      : null,
                 ),
                 const Gap(tokens.Spacing.xl),
                 const KynosSectionRow(title: 'Highlights'),

@@ -1,5 +1,7 @@
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
+import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 
 /// Streaming response chunk from the on-device or cloud LLM.
@@ -18,6 +20,8 @@ abstract interface class AiCoachRepository {
   Stream<AiChunk> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,

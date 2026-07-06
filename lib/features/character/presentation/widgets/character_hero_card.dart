@@ -6,9 +6,14 @@ import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
 
 class CharacterHeroCard extends StatelessWidget {
-  const CharacterHeroCard({super.key, required this.character});
+  const CharacterHeroCard({
+    super.key,
+    required this.character,
+    this.onAskCoach,
+  });
 
   final RunnerCharacter character;
+  final VoidCallback? onAskCoach;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +90,16 @@ class CharacterHeroCard extends StatelessWidget {
               color: KynosColors.onAccent.withValues(alpha: 0.75),
             ),
           ),
+          if (onAskCoach != null) ...[
+            const Gap(tokens.Spacing.sm),
+            TextButton(
+              onPressed: onAskCoach,
+              style: TextButton.styleFrom(
+                foregroundColor: KynosColors.onAccent,
+              ),
+              child: const Text('Ask Coach about my class'),
+            ),
+          ],
         ],
       ),
     );

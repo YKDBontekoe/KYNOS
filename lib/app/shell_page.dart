@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
+import 'package:kynos/shared/utils/open_coach_chat.dart';
+import 'package:kynos/shared/widgets/glass_card.dart';
 import 'package:kynos/shared/widgets/kynos_bottom_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
 /// Root app shell — floating bottom nav with three focused tabs.
-class ShellPage extends StatefulWidget {
+class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  @override
-  State<ShellPage> createState() => _ShellPageState();
-}
-
-class _ShellPageState extends State<ShellPage> {
   static const _navItems = [
     KynosBottomNavItem(label: 'Today', icon: NavIconPaths.today),
     KynosBottomNavItem(label: 'Training', icon: NavIconPaths.training),
@@ -26,14 +25,14 @@ class _ShellPageState extends State<ShellPage> {
   ];
 
   void _onTabSelected(int index) {
-    widget.navigationShell.goBranch(
+    navigationShell.goBranch(
       index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+      initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
 
     return ShellNavigationScope(
@@ -47,15 +46,60 @@ class _ShellPageState extends State<ShellPage> {
               bottom: LayoutTokens.shellNavExtent(context),
             ),
             child: _AnimatedShellBody(
-              tabIndex: widget.navigationShell.currentIndex,
-              child: widget.navigationShell,
+              tabIndex: navigationShell.currentIndex,
+              child: navigationShell,
+            ),
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Padding(
+          padding: EdgeInsets.only(
+            bottom: LayoutTokens.shellNavExtent(context) - 8,
+          ),
+          child: Hero(
+            tag: CoachHeroTags.sparkle,
+            child: Semantics(
+              label: 'Ask Coach',
+              button: true,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => openCoachChat(context, ref),
+                  borderRadius: BorderRadius.circular(Radius.lg),
+                  child: GlassCard(
+                    borderRadius: Radius.lg,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md,
+                      vertical: Spacing.sm,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 20,
+                          color: kynos.purple,
+                        ),
+                        const SizedBox(width: Spacing.xs),
+                        Text(
+                          'Coach',
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: kynos.label,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
         bottomNavigationBar: ResponsiveCenter(
           child: KynosBottomNav(
             items: _navItems,
-            selectedIndex: widget.navigationShell.currentIndex,
+            selectedIndex: navigationShell.currentIndex,
             onSelected: _onTabSelected,
           ),
         ),

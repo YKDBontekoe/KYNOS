@@ -86,18 +86,52 @@ class OpenRouterApiClient {
     required String systemPrompt,
     required String userPrompt,
   }) async* {
-    final sanitizedSystem = CloudPromptSanitizer.sanitize(systemPrompt);
-    final sanitizedUser = CloudPromptSanitizer.sanitize(userPrompt);
+    yield* _streamMessages(
+      apiKey: apiKey,
+      modelId: modelId,
+      messages: [
+        {'role': 'system', 'content': CloudPromptSanitizer.sanitize(systemPrompt)},
+        {'role': 'user', 'content': CloudPromptSanitizer.sanitize(userPrompt)},
+      ],
+    );
+  }
 
+  Stream<String> streamChatMessages({
+    required String apiKey,
+    required String modelId,
+    required String systemPrompt,
+    required List<Map<String, String>> messages,
+  }) async* {
+    final sanitized = [
+      {
+        'role': 'system',
+        'content': CloudPromptSanitizer.sanitize(systemPrompt),
+      },
+      ...messages.map(
+        (m) => {
+          'role': m['role']!,
+          'content': CloudPromptSanitizer.sanitize(m['content']!),
+        },
+      ),
+    ];
+    yield* _streamMessages(
+      apiKey: apiKey,
+      modelId: modelId,
+      messages: sanitized,
+    );
+  }
+
+  Stream<String> _streamMessages({
+    required String apiKey,
+    required String modelId,
+    required List<Map<String, String>> messages,
+  }) async* {
     final response = await _dio.post<ResponseBody>(
       '/chat/completions',
       data: {
         'model': modelId,
         'stream': true,
-        'messages': [
-          {'role': 'system', 'content': sanitizedSystem},
-          {'role': 'user', 'content': sanitizedUser},
-        ],
+        'messages': messages,
       },
       options: Options(
         headers: {'Authorization': 'Bearer $apiKey'},

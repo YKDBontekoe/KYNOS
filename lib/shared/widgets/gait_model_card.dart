@@ -15,6 +15,7 @@ class GaitModelCard extends StatelessWidget {
     required this.coefficients,
     this.calibratedAt,
     this.onCalibrate,
+    this.onAskCoach,
     this.isLoading = false,
     this.errorMessage,
     this.webOnlyMessage,
@@ -24,6 +25,7 @@ class GaitModelCard extends StatelessWidget {
   final ({double? b0, double? b1, double? b2}) coefficients;
   final DateTime? calibratedAt;
   final VoidCallback? onCalibrate;
+  final VoidCallback? onAskCoach;
   final bool isLoading;
   final String? errorMessage;
   final String? webOnlyMessage;
@@ -103,6 +105,16 @@ class GaitModelCard extends StatelessWidget {
               webOnlyMessage != null ? 'Available On iOS' : 'Run Calibration',
             ),
           ),
+          if (onAskCoach != null) ...[
+            const Gap(tokens.Spacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onAskCoach,
+                child: const Text('Ask Coach about gait'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -186,6 +198,7 @@ class GaitModelCardAsync extends StatelessWidget {
     super.key,
     required this.labState,
     required this.onCalibrate,
+    this.onAskCoach,
     this.webOnlyMessage,
   });
 
@@ -195,6 +208,7 @@ class GaitModelCardAsync extends StatelessWidget {
         DateTime? calibratedAt,
       })>? labState;
   final VoidCallback? onCalibrate;
+  final VoidCallback? onAskCoach;
   final String? webOnlyMessage;
 
   @override
@@ -203,6 +217,7 @@ class GaitModelCardAsync extends StatelessWidget {
       return GaitModelCard(
         coefficients: (b0: null, b1: null, b2: null),
         onCalibrate: onCalibrate,
+        onAskCoach: onAskCoach,
         webOnlyMessage: webOnlyMessage ??
             'Gait model calibration is available on iOS devices only.',
       );
@@ -212,17 +227,20 @@ class GaitModelCardAsync extends StatelessWidget {
       loading: () => GaitModelCard(
         coefficients: (b0: null, b1: null, b2: null),
         onCalibrate: onCalibrate,
+        onAskCoach: onAskCoach,
         isLoading: true,
       ),
       error: (e, _) => GaitModelCard(
         coefficients: (b0: null, b1: null, b2: null),
         onCalibrate: onCalibrate,
+        onAskCoach: onAskCoach,
         errorMessage: '$e',
       ),
       data: (state) => GaitModelCard(
         coefficients: state.coefficients,
         calibratedAt: state.calibratedAt,
         onCalibrate: onCalibrate,
+        onAskCoach: onAskCoach,
       ),
     );
   }

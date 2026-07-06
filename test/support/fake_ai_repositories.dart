@@ -1,6 +1,8 @@
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
+import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
@@ -17,6 +19,8 @@ class FakeAiCoachRepository implements AiCoachRepository {
   Stream<String> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,

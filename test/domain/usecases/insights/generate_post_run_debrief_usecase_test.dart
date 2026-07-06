@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
+import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
@@ -108,6 +110,8 @@ class _NotReadyAiCoach implements AiCoachRepository {
   Stream<String> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
@@ -136,6 +140,8 @@ class _RefiningAiCoach implements AiCoachRepository {
   Stream<String> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
@@ -166,6 +172,8 @@ class _ThrowingAiCoach implements AiCoachRepository {
   Stream<String> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,

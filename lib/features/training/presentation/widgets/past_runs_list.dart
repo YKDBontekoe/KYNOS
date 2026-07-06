@@ -9,9 +9,14 @@ import 'package:kynos/shared/widgets/run_card.dart';
 
 /// Recent completed runs from HealthKit and imported sources.
 class PastRunsList extends StatelessWidget {
-  const PastRunsList({super.key, required this.runs});
+  const PastRunsList({
+    super.key,
+    required this.runs,
+    this.onAskCoach,
+  });
 
   final List<WorkoutSession> runs;
+  final void Function(WorkoutSession run, String seed)? onAskCoach;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +42,29 @@ class PastRunsList extends StatelessWidget {
           .map(
             (run) => Padding(
               padding: const EdgeInsets.only(bottom: tokens.Spacing.sm),
-              child: RunCard(run: run),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RunCard(run: run),
+                  if (onAskCoach != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          final km = (run.distanceMeters ?? 0) / 1000;
+                          onAskCoach!(
+                            run,
+                            'Review my run on ${run.start.month}/${run.start.day}: '
+                            '${km.toStringAsFixed(1)} km in '
+                            '${run.duration.inMinutes} minutes. '
+                            'What should I take away from this session?',
+                          );
+                        },
+                        child: const Text('Ask about this run'),
+                      ),
+                    ),
+                ],
+              ),
             ),
           )
           .toList(),

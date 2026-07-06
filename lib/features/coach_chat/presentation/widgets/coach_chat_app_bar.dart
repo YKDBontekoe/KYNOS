@@ -5,6 +5,7 @@ import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/features/coach_chat/providers/last_coach_context_provider.dart';
 import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
@@ -19,57 +20,81 @@ class CoachChatAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final backend = ref.watch(lastAiInferenceBackendProvider);
+    final contextBadge = ref.watch(lastCoachContextProvider)?.contextBadge;
     final kynos = context.kynosTheme;
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
-        child: Row(
-          children: [
-            Semantics(
-              label: 'Close coach chat',
-              button: true,
-              child: IconButton(
-                icon: const Icon(Icons.close_rounded),
-                color: kynos.secondaryLabel,
-                onPressed: () => _close(context),
-                tooltip: 'Close',
-              ),
-            ),
-            Hero(
-              tag: CoachHeroTags.sparkle,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                size: 20,
-                color: kynos.purple,
-              ),
-            ),
-            const Gap(Spacing.sm),
-            Text(
-              'KYNOS Coach',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const Spacer(),
-            _InferenceBadge(backend: backend),
-            const Gap(Spacing.sm),
-            Semantics(
-              label: 'Clear conversation',
-              button: true,
-              child: Tooltip(
-                message: 'Clear conversation',
-                child: GestureDetector(
-                  onTap: onClear,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(color: kynos.separator, borderRadius: BorderRadius.circular(Radius.md)),
-                    child: Icon(Icons.refresh_rounded, size: 18, color: kynos.secondaryLabel),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
+            child: Row(
+              children: [
+                Semantics(
+                  label: 'Close coach chat',
+                  button: true,
+                  child: IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    color: kynos.secondaryLabel,
+                    onPressed: () => _close(context),
+                    tooltip: 'Close',
                   ),
+                ),
+                Hero(
+                  tag: CoachHeroTags.sparkle,
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 20,
+                    color: kynos.purple,
+                  ),
+                ),
+                const Gap(Spacing.sm),
+                Text(
+                  'KYNOS Coach',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                _InferenceBadge(backend: backend),
+                const Gap(Spacing.sm),
+                Semantics(
+                  label: 'Clear conversation',
+                  button: true,
+                  child: Tooltip(
+                    message: 'Clear conversation',
+                    child: GestureDetector(
+                      onTap: onClear,
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: kynos.separator,
+                          borderRadius: BorderRadius.circular(Radius.md),
+                        ),
+                        child: Icon(
+                          Icons.refresh_rounded,
+                          size: 18,
+                          color: kynos.secondaryLabel,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (contextBadge != null && contextBadge.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: KynosChip.accent(
+                  label: contextBadge,
+                  color: kynos.stand,
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

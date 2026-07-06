@@ -34,15 +34,10 @@ final cloudAiRepositoryProvider = Provider<CloudAiRepository>(
   (ref) => OpenRouterCloudAiRepository(),
 );
 
-final localAiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
-  final repo = IsolateAiCoachRepository();
-  ref.onDispose(repo.dispose);
-  return repo;
-});
-
-/// Hybrid coach — local isolate Gemma + optional OpenRouter cloud.
-final aiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
-  final local = ref.watch(localAiCoachRepositoryProvider);
+HybridAiCoachRepository _createHybridRepo(
+  Ref ref,
+  AiCoachRepository local,
+) {
   final cloud = ref.watch(cloudAiRepositoryProvider);
   final keyStorage = ref.watch(secureApiKeyStorageProvider);
 
@@ -62,4 +57,37 @@ final aiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
   );
   ref.onDispose(repo.dispose);
   return repo;
+}
+
+/// On-device isolate for interactive coach chat (isolated from refinements).
+final localChatAiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
+  final repo = IsolateAiCoachRepository();
+  ref.onDispose(repo.dispose);
+  return repo;
 });
+
+/// On-device isolate for background insight/quest refinements.
+final localRefinementAiCoachRepositoryProvider =
+    Provider<AiCoachRepository>((ref) {
+  final repo = IsolateAiCoachRepository();
+  ref.onDispose(repo.dispose);
+  return repo;
+});
+
+/// Hybrid coach for interactive chat — local isolate + optional OpenRouter cloud.
+final chatAiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
+  final local = ref.watch(localChatAiCoachRepositoryProvider);
+  return _createHybridRepo(ref, local);
+});
+
+/// Hybrid coach for background refinements — separate isolate session.
+final refinementAiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
+  final local = ref.watch(localRefinementAiCoachRepositoryProvider);
+  return _createHybridRepo(ref, local);
+});
+
+/// @deprecated Use [refinementAiCoachRepositoryProvider] or [chatAiCoachRepositoryProvider].
+final localAiCoachRepositoryProvider = localRefinementAiCoachRepositoryProvider;
+
+/// Background AI jobs (insights, quests, debrief).
+final aiCoachRepositoryProvider = refinementAiCoachRepositoryProvider;
