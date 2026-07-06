@@ -18,6 +18,24 @@ class ImportedHealthRepository implements HealthRepository {
   Future<bool> requestPermissions() async => false;
 
   @override
+  Future<bool> hasPermissions() async => false;
+
+  @override
+  Future<({WorkoutSession? workout, Failure? failure})> getWorkoutById({
+    required String workoutId,
+  }) async {
+    try {
+      final workout = await _store.getWorkoutById(workoutId);
+      return (workout: workout, failure: null);
+    } catch (e) {
+      return (
+        workout: null,
+        failure: StorageFailure(e.toString()),
+      );
+    }
+  }
+
+  @override
   Future<({List<HealthSummary> summaries, Failure? failure})> getSummaries({
     required int days,
   }) async {

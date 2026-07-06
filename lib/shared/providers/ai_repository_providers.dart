@@ -11,6 +11,8 @@ import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 
 export 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart'
     show aiModelRepositoryProvider;
+export 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart'
+    show GemmaRuntime;
 
 final openRouterModelsRepositoryProvider = Provider<OpenRouterModelsRepository>(
   (ref) => OpenRouterModelsRepositoryImpl(),

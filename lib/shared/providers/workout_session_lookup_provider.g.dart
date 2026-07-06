@@ -69,7 +69,7 @@ final class WorkoutSessionByIdProvider
 }
 
 String _$workoutSessionByIdHash() =>
-    r'53628739e54a3d1454e14d49a89d292982d2ad32';
+    r'595d1ffa51393fadd72d6845e9b1777a25f3f230';
 
 /// Resolves a [WorkoutSession] by id for deep-linked run routes.
 

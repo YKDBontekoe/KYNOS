@@ -110,6 +110,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: ':runId',
             builder: (context, state) {
+              final extra = state.extra;
+              if (extra is WorkoutSession) {
+                return RunRoutePage(run: extra);
+              }
               final runId = state.pathParameters['runId'];
               if (runId == null || runId.isEmpty) {
                 return const RunRouteMissingPage();

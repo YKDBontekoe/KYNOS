@@ -45,9 +45,10 @@ class MetricTile extends StatelessWidget {
     return Semantics(
       label: valueLabel,
       button: onTap != null,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
         padding: const EdgeInsets.all(Spacing.md),
         decoration: flat
             ? null
@@ -123,6 +124,7 @@ class MetricTile extends StatelessWidget {
         ],
       ),
     ),
+        ),
       ),
     );
   }

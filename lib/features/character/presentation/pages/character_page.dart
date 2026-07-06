@@ -34,6 +34,7 @@ class CharacterPage extends ConsumerWidget {
     await Future.wait([
       ref.read(runnerCharacterProvider.future),
       ref.read(dailyQuestsProvider.future),
+      ref.read(nexusLabProvider.future),
     ]);
   }
 
@@ -185,8 +186,12 @@ class EmptyCharacterState extends ConsumerWidget {
                       ref.read(healthPermissionsProvider).whenOrNull(
                         data: (granted) {
                           final message = granted
-                              ? '$platform connected.'
-                              : '$platform permission not granted. ${HealthPlatformLabels.settingsHint()}';
+                              ? HealthPermissionFeedback.connectedMessage(
+                                  platform,
+                                )
+                              : HealthPermissionFeedback.permissionDeniedMessage(
+                                  platform,
+                                );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(message)),
                           );

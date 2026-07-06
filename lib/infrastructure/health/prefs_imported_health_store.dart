@@ -49,6 +49,14 @@ class PrefsImportedHealthStore implements ImportedHealthStore {
   }
 
   @override
+  Future<WorkoutSession?> getWorkoutById(String workoutId) async {
+    for (final workout in _readWorkouts()) {
+      if (workout.id == workoutId) return workout;
+    }
+    return null;
+  }
+
+  @override
   Future<void> saveWorkout({
     required WorkoutSession workout,
     List<WorkoutRoutePoint> routePoints = const [],

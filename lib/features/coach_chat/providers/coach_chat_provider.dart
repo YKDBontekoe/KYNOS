@@ -20,6 +20,7 @@ const _coachHealthHistoryDays = 14;
 class CoachChatNotifier extends _$CoachChatNotifier {
   final _logger = Logger();
   bool _cancelRequested = false;
+  Future<void> _persistChain = Future.value();
 
   @override
   Future<List<ChatMessage>> build() async {
@@ -206,7 +207,12 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
   }
 
-  Future<void> _persist() async {
+  Future<void> _persist() {
+    _persistChain = _persistChain.then((_) => _persistNow());
+    return _persistChain;
+  }
+
+  Future<void> _persistNow() async {
     final messages = state.value;
     if (messages == null) return;
     final prefs = ref.read(sharedPreferencesProvider);

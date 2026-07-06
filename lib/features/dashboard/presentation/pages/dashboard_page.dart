@@ -24,11 +24,11 @@ import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
-import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/providers/training_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
@@ -164,6 +164,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               action: SnackBarAction(
                 label: 'Read debrief',
                 onPressed: () {
+                  if (!mounted || !context.mounted) return;
                   ref.read(coachChatSeedProvider.notifier).setSeed(
                         'Here is my post-run debrief: ${data.debrief.highlight}. '
                         'What should I focus on in recovery?',

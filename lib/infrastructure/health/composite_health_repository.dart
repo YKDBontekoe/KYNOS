@@ -23,6 +23,19 @@ class CompositeHealthRepository implements HealthRepository {
   Future<bool> requestPermissions() => _healthKit.requestPermissions();
 
   @override
+  Future<bool> hasPermissions() => _healthKit.hasPermissions();
+
+  @override
+  Future<({WorkoutSession? workout, Failure? failure})> getWorkoutById({
+    required String workoutId,
+  }) async {
+    if (ImportedWorkoutIds.isImported(workoutId)) {
+      return _imported.getWorkoutById(workoutId: workoutId);
+    }
+    return _healthKit.getWorkoutById(workoutId: workoutId);
+  }
+
+  @override
   Future<({List<HealthSummary> summaries, Failure? failure})> getSummaries({
     required int days,
   }) async {

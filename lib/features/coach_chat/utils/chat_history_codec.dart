@@ -1,20 +1,43 @@
 import 'dart:convert';
 
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:logger/logger.dart';
 
 /// Serialises coach chat history to SharedPreferences JSON.
 abstract final class ChatHistoryCodec {
   static const prefsKey = 'coach_chat_history_v1';
+  static final _logger = Logger();
 
   static List<ChatMessage> decode(String? raw) {
     if (raw == null || raw.isEmpty) return const [];
     try {
       final list = jsonDecode(raw) as List<dynamic>;
-      return list
-          .map((item) => _fromMap(item as Map<String, dynamic>))
-          .where((m) => m.content.isNotEmpty && !m.isStreaming)
-          .toList();
-    } on Object {
+      final messages = <ChatMessage>[];
+      for (final item in list) {
+        try {
+          if (item is! Map<String, dynamic>) {
+            _logger.w('Skipping chat history entry: expected map, got ${item.runtimeType}');
+            continue;
+          }
+          final message = _fromMap(item);
+          if (message.content.isNotEmpty && !message.isStreaming) {
+            messages.add(message);
+          }
+        } on Object catch (error, stackTrace) {
+          _logger.w(
+            'Skipping malformed chat history entry',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+      return messages;
+    } on Object catch (error, stackTrace) {
+      _logger.w(
+        'Could not decode chat history payload',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return const [];
     }
   }

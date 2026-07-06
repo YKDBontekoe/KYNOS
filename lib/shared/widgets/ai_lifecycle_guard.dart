@@ -57,7 +57,10 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
 
   void _onAppResumed() {
     if (!kIsWeb) {
-      invalidateHealthProviders(ref as Ref);
+      ref.invalidate(healthSummaryProvider);
+      ref.invalidate(healthHistoryProvider);
+      ref.invalidate(recentRunsProvider);
+      ref.invalidate(importedWorkoutCountProvider);
       ref.invalidate(healthPermissionsProvider);
     }
     ref.read(aiReconnectStateProvider.notifier).markNeedsReconnect();

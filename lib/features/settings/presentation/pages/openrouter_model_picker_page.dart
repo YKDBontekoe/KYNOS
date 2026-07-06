@@ -93,7 +93,8 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(tokens.Spacing.md),
                       child: KynosInlineErrorCard(
-                        message: result.error!,
+                        message:
+                            'Could not load models. Check your API key and try again.',
                         onRetry: () =>
                             ref.invalidate(openRouterCatalogDataProvider),
                       ),
@@ -201,10 +202,7 @@ class OpenRouterModelPickerPage extends ConsumerWidget {
                   Navigator.pop(ctx);
                 }
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Selected ${model.name}')),
-                  );
-                  context.pop();
+                  context.pop(model.name);
                 }
               },
               child: const Text('Select model'),

@@ -304,7 +304,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           : 'Choose a model',
                     ),
                     trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
-                    onTap: () => context.push(Routes.openRouterModels),
+                    onTap: () async {
+                      final selected =
+                          await context.push<String>(Routes.openRouterModels);
+                      if (selected != null && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Selected $selected')),
+                        );
+                      }
+                    },
                     contentPadding: EdgeInsets.zero,
                   ),
                   const Gap(tokens.Spacing.xs),

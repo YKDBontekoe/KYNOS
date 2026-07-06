@@ -396,7 +396,7 @@ final class HealthPermissionsNotifierProvider
 }
 
 String _$healthPermissionsNotifierHash() =>
-    r'63fc18f40bfcbbd36c874deb0b19ba14eb5ae842';
+    r'9032f26135d27f6225bc8d8d0d91935411293e7e';
 
 /// Handles the HealthKit permission request triggered from the UI.
 

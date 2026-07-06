@@ -7,9 +7,10 @@ part 'workout_session_lookup_provider.g.dart';
 /// Resolves a [WorkoutSession] by id for deep-linked run routes.
 @riverpod
 Future<WorkoutSession?> workoutSessionById(Ref ref, String runId) async {
-  final runs = await ref.watch(recentRunsProvider(days: 365, limit: 200).future);
-  for (final run in runs) {
-    if (run.id == runId) return run;
+  final repository = ref.watch(healthRepositoryProvider);
+  final result = await repository.getWorkoutById(workoutId: runId);
+  if (result.failure != null) {
+    throw result.failure!;
   }
-  return null;
+  return result.workout;
 }

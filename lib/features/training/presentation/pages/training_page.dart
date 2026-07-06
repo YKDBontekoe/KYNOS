@@ -35,6 +35,7 @@ class TrainingPage extends ConsumerWidget {
       ref.read(healthHistoryProvider(days: 30).future),
       ref.read(recentRunsProvider(days: 365, limit: 60).future),
       ref.read(trainingInsightsStateProvider.future),
+      ref.read(nexusLabProvider.future),
     ]);
   }
 

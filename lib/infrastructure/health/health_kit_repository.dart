@@ -104,6 +104,53 @@ class HealthKitRepository implements HealthRepository {
     return anyGroupGranted;
   }
 
+  @override
+  Future<bool> hasPermissions() async {
+    await _ensureConfigured();
+    final types = _types;
+    if (types.isEmpty) return false;
+
+    final permissions = types
+        .map((_) => HealthDataAccess.READ)
+        .toList(growable: false);
+
+    try {
+      return await _health.hasPermissions(types, permissions: permissions) ??
+          false;
+    } catch (e) {
+      _logger.w('HealthKit permission check failed: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<({WorkoutSession? workout, Failure? failure})> getWorkoutById({
+    required String workoutId,
+  }) async {
+    try {
+      await _ensureConfigured();
+      final now = DateTime.now();
+      final startTime = now.subtract(const Duration(days: 365 * 10));
+      final points = await _health.getHealthDataFromTypes(
+        types: const [HealthDataType.WORKOUT],
+        startTime: startTime,
+        endTime: now,
+      );
+
+      for (final point in points) {
+        if (point.uuid != workoutId || !isRunningWorkout(point)) continue;
+        return (workout: toWorkoutSession(point), failure: null);
+      }
+
+      return (workout: null, failure: null);
+    } catch (e) {
+      return (
+        workout: null,
+        failure: HealthDataFailure(e.toString()),
+      );
+    }
+  }
+
   Future<bool> _requestReadAccess(List<HealthDataType> types) async {
     if (types.isEmpty) return false;
 

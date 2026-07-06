@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
+import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_providers.g.dart';
@@ -84,14 +85,20 @@ void invalidateHealthProviders(Ref ref) {
 /// Handles the HealthKit permission request triggered from the UI.
 @Riverpod(keepAlive: true)
 class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
+  final _logger = Logger();
+
   @override
   Future<bool> build() async {
     if (kIsWeb) return false;
     try {
       final repo = ref.read(healthRepositoryProvider);
-      final result = await repo.getToday();
-      return result.failure == null;
-    } on Object {
+      return await repo.hasPermissions();
+    } on Object catch (error, stackTrace) {
+      _logger.w(
+        'Unexpected error checking health permissions',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }

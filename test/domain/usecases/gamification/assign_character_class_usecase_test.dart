@@ -73,4 +73,13 @@ class _FakeHealthRepository implements HealthRepository {
 
   @override
   Future<bool> requestPermissions() async => true;
+
+  @override
+  Future<bool> hasPermissions() async => true;
+
+  @override
+  Future<({WorkoutSession? workout, Failure? failure})> getWorkoutById({
+    required String workoutId,
+  }) async =>
+      (workout: null, failure: null);
 }

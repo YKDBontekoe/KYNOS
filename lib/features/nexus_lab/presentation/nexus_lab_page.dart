@@ -24,6 +24,7 @@ class NexusLabPage extends ConsumerWidget {
         title: const Text('KYNOS Lab'),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
+          tooltip: 'Close KYNOS Lab',
           onPressed: () => popOrGo(context, Routes.training),
         ),
       ),

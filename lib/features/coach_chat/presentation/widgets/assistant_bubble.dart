@@ -31,47 +31,62 @@ class AssistantBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          height: 1.5,
+          color: hasError ? Theme.of(context).colorScheme.error : null,
+        );
+
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.84),
-        child: GestureDetector(
-          onLongPress: content.isEmpty ? null : () => _copyMessage(context),
-          child: GlassCard(
-            borderRadius: Radius.lg,
-            padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: Spacing.sm),
-                    child: KynosChip.accent(
-                      label: 'On-device error',
-                      color: Theme.of(context).colorScheme.error,
+        child: GlassCard(
+          borderRadius: Radius.lg,
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasError)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Spacing.sm),
+                  child: KynosChip.accent(
+                    label: 'On-device error',
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              isStreaming && content.isEmpty
+                  ? const TypingIndicator()
+                  : SelectableText(
+                      content,
+                      style: textStyle,
+                      contextMenuBuilder: content.isEmpty
+                          ? null
+                          : (menuContext, editableTextState) {
+                              final items = editableTextState.contextMenuButtonItems;
+                              return AdaptiveTextSelectionToolbar.buttonItems(
+                                anchors: editableTextState.contextMenuAnchors,
+                                buttonItems: [
+                                  ...items,
+                                  ContextMenuButtonItem(
+                                    onPressed: () {
+                                      ContextMenuController.removeAny();
+                                      _copyMessage(menuContext);
+                                    },
+                                    label: 'Copy message',
+                                  ),
+                                ],
+                              );
+                            },
                     ),
-                  ),
-                isStreaming && content.isEmpty
-                    ? const TypingIndicator()
-                    : SelectableText(
-                        content,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              height: 1.5,
-                              color: hasError
-                                  ? Theme.of(context).colorScheme.error
-                                  : null,
-                            ),
-                      ),
-                if (hasError && onRetry != null) ...[
-                  const Gap(Spacing.sm),
-                  TextButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Retry'),
-                  ),
-                ],
+              if (hasError && onRetry != null) ...[
+                const Gap(Spacing.sm),
+                TextButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Retry'),
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),

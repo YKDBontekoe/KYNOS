@@ -12,6 +12,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/model_setup_scree
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
+import 'package:kynos/features/coach_chat/providers/model_setup_state.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 
 class CoachChatPage extends ConsumerStatefulWidget {
@@ -108,7 +109,15 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     ref.listen(aiReconnectStateProvider, (previous, next) {
       if (!next || !mounted) return;
       ref.read(aiReconnectStateProvider.notifier).clear();
-      ref.read(modelSetupProvider.notifier).checkAndInstall();
+
+      final setup = ref.read(modelSetupProvider);
+      final setupBusy = setup.isLoading ||
+          setup.value?.phase == ModelSetupPhase.checking ||
+          setup.value?.phase == ModelSetupPhase.downloading;
+      if (!setupBusy) {
+        ref.read(modelSetupProvider.notifier).checkAndInstall();
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Reconnecting on-device coach…'),

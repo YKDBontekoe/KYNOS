@@ -34,11 +34,7 @@ class RunRoutePage extends ConsumerWidget {
     return lookup.when(
       loading: () => Scaffold(
         backgroundColor: kynos.background,
-        appBar: AppBar(
-          title: const Text('Run Route'),
-          backgroundColor: kynos.background,
-          surfaceTintColor: Colors.transparent,
-        ),
+        appBar: _runRouteAppBar(context),
         body: const Padding(
           padding: EdgeInsets.all(tokens.Spacing.md),
           child: KynosSkeleton.tile(height: 300),
@@ -46,11 +42,7 @@ class RunRoutePage extends ConsumerWidget {
       ),
       error: (_, _) => Scaffold(
         backgroundColor: kynos.background,
-        appBar: AppBar(
-          title: const Text('Run Route'),
-          backgroundColor: kynos.background,
-          surfaceTintColor: Colors.transparent,
-        ),
+        appBar: _runRouteAppBar(context),
         body: Padding(
           padding: const EdgeInsets.all(tokens.Spacing.md),
           child: KynosInlineErrorCard(
@@ -63,11 +55,7 @@ class RunRoutePage extends ConsumerWidget {
         if (session == null) {
           return Scaffold(
             backgroundColor: kynos.background,
-            appBar: AppBar(
-              title: const Text('Run Route'),
-              backgroundColor: kynos.background,
-              surfaceTintColor: Colors.transparent,
-            ),
+            appBar: _runRouteAppBar(context),
             body: const Center(child: Text('Run not found on this device.')),
           );
         }
@@ -75,6 +63,25 @@ class RunRoutePage extends ConsumerWidget {
       },
     );
   }
+}
+
+AppBar _runRouteAppBar(BuildContext context) {
+  final kynos = context.kynosTheme;
+  return AppBar(
+    title: const Text('Run Route'),
+    backgroundColor: kynos.background,
+    surfaceTintColor: Colors.transparent,
+    leading: IconButton(
+      icon: const Icon(Icons.arrow_back_rounded),
+      onPressed: () {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(Routes.dashboard);
+        }
+      },
+    ),
+  );
 }
 
 class _RunRouteScaffold extends ConsumerWidget {
@@ -89,21 +96,7 @@ class _RunRouteScaffold extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: kynos.background,
-      appBar: AppBar(
-        title: const Text('Run Route'),
-        backgroundColor: kynos.background,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(Routes.dashboard);
-            }
-          },
-        ),
-      ),
+      appBar: _runRouteAppBar(context),
       body: routeAsync.when(
         data: (points) => _RouteContent(run: run, points: points),
         loading: () => const Padding(
