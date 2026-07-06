@@ -6,7 +6,7 @@ import 'package:kynos/features/character/presentation/widgets/activity_resources
 import 'package:kynos/features/character/presentation/widgets/encounter_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/trail_map.dart';
 import 'package:kynos/features/character/providers/adventure_provider.dart';
-import 'package:kynos/shared/widgets/kynos_loading_line.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class TrailRunGamePanel extends ConsumerWidget {
@@ -24,8 +24,9 @@ class TrailRunGamePanel extends ConsumerWidget {
           KynosSkeleton.tile(height: 160),
         ],
       ),
-      error: (_, _) => const KynosLoadingLine(
-        label: 'Trail unavailable',
+      error: (error, _) => KynosInlineErrorCard(
+        message: 'Trail unavailable: $error',
+        onRetry: () => ref.invalidate(adventureSessionProvider),
       ),
       data: (viewState) {
         if (viewState == null) return const SizedBox.shrink();
@@ -41,7 +42,8 @@ class TrailRunGamePanel extends ConsumerWidget {
             const Gap(tokens.Spacing.sm),
             TrailMap(
               session: session,
-              canAdvance: resources.canAdvance && !inCombat && !session.trailCompleted,
+              canAdvance:
+                  resources.canAdvance && !inCombat && !session.trailCompleted,
               onAdvance: () =>
                   ref.read(adventureSessionProvider.notifier).advance(),
             ),

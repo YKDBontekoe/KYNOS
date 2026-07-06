@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -57,14 +58,14 @@ class LastRunPreview extends StatelessWidget {
         }
 
         return SizedBox(
-          height: 132,
+          height: LayoutTokens.runCarouselHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: runs.length,
             separatorBuilder: (_, _) => const Gap(Spacing.sm),
             itemBuilder: (context, index) {
               return SizedBox(
-                width: 280,
+                width: LayoutTokens.runCarouselTileWidth,
                 child: RunCard(run: runs[index]),
               );
             },

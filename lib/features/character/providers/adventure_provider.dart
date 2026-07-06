@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/core/constants/gamification_constants.dart';
 import 'package:kynos/domain/entities/gamification/activity_resources.dart';
 import 'package:kynos/domain/entities/gamification/adventure_session.dart';
@@ -140,6 +141,8 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
 
       await _persist(session);
       unawaited(_syncMeasurableQuests());
+    } on Failure catch (failure, stackTrace) {
+      state = AsyncError(failure, stackTrace);
     } finally {
       _actionInFlight = false;
     }
@@ -210,6 +213,8 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
 
       await _persist(session);
       unawaited(_syncMeasurableQuests());
+    } on Failure catch (failure, stackTrace) {
+      state = AsyncError(failure, stackTrace);
     } finally {
       _actionInFlight = false;
     }
@@ -231,6 +236,8 @@ class AdventureSessionNotifier extends _$AdventureSessionNotifier {
           clearEncounter: true,
         ),
       );
+    } on Failure catch (failure, stackTrace) {
+      state = AsyncError(failure, stackTrace);
     } finally {
       _actionInFlight = false;
     }

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/features/training/presentation/widgets/chart_placeholder.dart';
+import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
 

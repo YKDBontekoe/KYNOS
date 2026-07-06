@@ -76,7 +76,12 @@ class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
         xpGain.amount,
         statDeltas: xpGain.statDeltas,
       );
-      await ref.read(characterRepositoryProvider).saveCharacter(updated);
+      final saveResult =
+          await ref.read(characterRepositoryProvider).saveCharacter(updated);
+      if (saveResult != null) {
+        state = AsyncError(saveResult, StackTrace.current);
+        return;
+      }
       ref.invalidate(runnerCharacterProvider);
 
       await _markProcessed(latest.id, processed);

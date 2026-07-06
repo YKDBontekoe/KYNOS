@@ -23,7 +23,11 @@ class QuestNotifier extends _$QuestNotifier {
     }).toList();
 
     final repo = ref.read(characterRepositoryProvider);
-    await repo.saveQuests(updated);
+    final saveQuestsFailure = await repo.saveQuests(updated);
+    if (saveQuestsFailure != null) {
+      state = AsyncError(saveQuestsFailure, StackTrace.current);
+      return;
+    }
     state = AsyncData(updated);
 
     final completedQuest = updated.firstWhere((q) => q.id == questId);
@@ -34,7 +38,11 @@ class QuestNotifier extends _$QuestNotifier {
         completedQuest.xpReward,
         statDeltas: completedQuest.statRewards,
       );
-      await charRepo.saveCharacter(updatedChar);
+      final saveCharacterFailure = await charRepo.saveCharacter(updatedChar);
+      if (saveCharacterFailure != null) {
+        state = AsyncError(saveCharacterFailure, StackTrace.current);
+        return;
+      }
       ref.invalidate(runnerCharacterProvider);
     }
   }

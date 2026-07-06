@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,10 +17,11 @@ Future<void> main() async {
     huggingFaceToken: hfToken != null && hfToken.isNotEmpty ? hfToken : null,
   );
 
-  // Lock to portrait while the full layout is being built.
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
 
   final prefs = await SharedPreferences.getInstance();
 

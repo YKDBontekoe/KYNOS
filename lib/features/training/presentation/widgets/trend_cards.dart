@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/features/training/presentation/widgets/chart_placeholder.dart';
-import 'package:kynos/features/training/presentation/widgets/hrv_chart.dart';
-import 'package:kynos/features/training/presentation/widgets/load_chart.dart';
+import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
+import 'package:kynos/shared/widgets/charts/hrv_chart.dart';
+import 'package:kynos/shared/widgets/charts/load_chart.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 /// 30-day recovery and training-load trend cards.

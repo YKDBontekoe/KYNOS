@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/widgets/character_hero_card.dart';
@@ -12,8 +15,10 @@ import 'package:kynos/features/character/presentation/widgets/stats_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/trail_run_game_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
-import 'package:kynos/features/character/providers/character_provider.dart';
+import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
@@ -22,6 +27,7 @@ class CharacterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     final characterAsync = ref.watch(runnerCharacterProvider);
     final questsAsync = ref.watch(dailyQuestsProvider);
 
@@ -31,7 +37,7 @@ class CharacterPage extends ConsumerWidget {
       ),
       slivers: [
         SliverAppBar(
-          backgroundColor: AppTheme.background,
+          backgroundColor: kynos.background,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           pinned: true,
@@ -39,12 +45,11 @@ class CharacterPage extends ConsumerWidget {
           titleSpacing: 20,
           title: Text(
             'CHARACTER',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.tertiaryLabel,
-              letterSpacing: 0.8,
-            ),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: kynos.tertiaryLabel,
+                  letterSpacing: 0.8,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ),
         characterAsync.when(
@@ -66,7 +71,9 @@ class CharacterPage extends ConsumerWidget {
             child: Center(
               child: Text(
                 'Could not load character',
-                style: GoogleFonts.inter(color: AppTheme.secondaryLabel),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: kynos.secondaryLabel,
+                    ),
               ),
             ),
           ),
@@ -77,7 +84,7 @@ class CharacterPage extends ConsumerWidget {
               );
             }
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 tokens.Spacing.md,
                 0,
                 tokens.Spacing.md,
@@ -123,6 +130,7 @@ class EmptyCharacterState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     return Padding(
       padding: const EdgeInsets.all(tokens.Spacing.lg),
       child: Column(
@@ -130,25 +138,40 @@ class EmptyCharacterState extends ConsumerWidget {
         children: [
           Text(
             'CHARACTER NOT ASSIGNED',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.tertiaryLabel,
-              letterSpacing: 0.8,
-            ),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: kynos.tertiaryLabel,
+                  letterSpacing: 0.8,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const Gap(tokens.Spacing.sm),
           Text(
-            'Connect HealthKit and log a few runs to unlock your class assignment.',
+            HealthPlatformLabels.characterEmptyHint(),
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppTheme.secondaryLabel,
-              height: 1.4,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: kynos.secondaryLabel,
+                  height: 1.4,
+                ),
           ),
           const Gap(tokens.Spacing.lg),
-          FilledButton(
+          if (!kIsWeb)
+            FilledButton(
+              onPressed: () =>
+                  ref.read(healthPermissionsProvider.notifier).request(),
+              child: Text(HealthPlatformLabels.connectLabel()),
+            ),
+          const Gap(tokens.Spacing.sm),
+          OutlinedButton(
+            onPressed: () => context.push(Routes.healthImport),
+            child: const Text('Import a run'),
+          ),
+          const Gap(tokens.Spacing.sm),
+          OutlinedButton(
+            onPressed: () => context.push(Routes.manualRun),
+            child: const Text('Log a run manually'),
+          ),
+          const Gap(tokens.Spacing.sm),
+          TextButton(
             onPressed: () => ref.invalidate(runnerCharacterProvider),
             child: const Text('Try Again'),
           ),

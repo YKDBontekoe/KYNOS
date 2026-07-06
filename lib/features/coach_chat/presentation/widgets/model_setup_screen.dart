@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
@@ -12,6 +14,7 @@ class ModelSetupScreen extends StatelessWidget {
     this.onSecondaryAction,
     this.secondaryActionLabel,
     this.isLoading = false,
+    this.showClose = true,
   });
 
   final String? title;
@@ -20,6 +23,7 @@ class ModelSetupScreen extends StatelessWidget {
   final VoidCallback? onSecondaryAction;
   final String? secondaryActionLabel;
   final bool isLoading;
+  final bool showClose;
 
   factory ModelSetupScreen.checking() => const ModelSetupScreen(
         title: 'Preparing AI Coach',
@@ -45,6 +49,20 @@ class ModelSetupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.kynosTheme.background,
+      appBar: showClose
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(Routes.dashboard);
+                  }
+                },
+              ),
+            )
+          : null,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(Spacing.xl),

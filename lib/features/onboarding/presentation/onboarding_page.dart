@@ -1,23 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
-import 'package:kynos/core/theme/theme.dart' hide Radius, Spacing;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 
 class OnboardingItem {
-  final String imagePath;
-  final String title;
-  final String description;
-
   const OnboardingItem({
     required this.imagePath,
     required this.title,
     required this.description,
   });
+
+  final String imagePath;
+  final String title;
+  final String description;
 }
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -35,17 +37,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     OnboardingItem(
       imagePath: 'assets/images/onboarding_biomechanics.png',
       title: 'Personalised Running',
-      description: 'Train smarter with AI-driven insights that adapt to your unique biomechanics.',
+      description:
+          'Train smarter with AI-driven insights that adapt to your unique biomechanics.',
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_privacy.png',
       title: 'Zero Knowledge Privacy',
-      description: 'Your data stays on your device. Period. Powered by local AI and zk-SNARK proofs.',
+      description:
+          'Your data stays on your device. Period. Powered by local AI and zk-SNARK proofs.',
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_health_data.png',
       title: 'Ready to go?',
-      description: 'Get started and connect your health data to build your baseline.',
+      description:
+          'Get started and connect your health data to build your baseline.',
     ),
   ];
 
@@ -61,15 +66,29 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     super.dispose();
   }
 
-  void _finishOnboarding() {
-    ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+  Future<void> _finishOnboarding() async {
+    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+    if (!mounted) return;
     context.go(Routes.dashboard);
+  }
+
+  Future<void> _skipOnboarding() async {
+    await _finishOnboarding();
+  }
+
+  Future<void> _getStarted() async {
+    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
+    if (!mounted) return;
+    if (!kIsWeb) {
+      await ref.read(healthPermissionsProvider.notifier).request();
+    }
+    if (!mounted) return;
+    context.go(Routes.healthImport);
   }
 
   @override
   Widget build(BuildContext context) {
     final isLastPage = _currentIndex == items.length - 1;
-
     final kynos = context.kynosTheme;
 
     return Scaffold(
@@ -77,7 +96,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar: Skip Button
             Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -87,12 +105,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ),
                 child: LiquidGlassButton(
                   label: 'Skip',
-                  onPressed: _finishOnboarding,
+                  onPressed: _skipOnboarding,
                 ),
               ),
             ),
-
-            // Middle: Scrollable PageView
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -107,8 +123,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 },
               ),
             ),
-
-            // Bottom: Indicators & Button
             Padding(
               padding: const EdgeInsets.all(tokens.Spacing.xl),
               child: Column(
@@ -120,6 +134,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       items.length,
                       (index) => _DotIndicator(
                         isActive: index == _currentIndex,
+                        index: index,
+                        total: items.length,
                       ),
                     ),
                   ),
@@ -129,7 +145,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: FilledButton(
                       onPressed: () {
                         if (isLastPage) {
-                          _finishOnboarding();
+                          _getStarted();
                         } else {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 400),
@@ -151,9 +167,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 }
 
 class _OnboardingPageWidget extends StatelessWidget {
-  final OnboardingItem item;
-
   const _OnboardingPageWidget({required this.item});
+
+  final OnboardingItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -202,22 +218,33 @@ class _OnboardingPageWidget extends StatelessWidget {
 }
 
 class _DotIndicator extends StatelessWidget {
+  const _DotIndicator({
+    required this.isActive,
+    required this.index,
+    required this.total,
+  });
+
   final bool isActive;
-  const _DotIndicator({required this.isActive});
+  final int index;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-      margin: const EdgeInsets.symmetric(horizontal: tokens.Spacing.xs),
-      height: tokens.Spacing.sm,
-      width: isActive ? tokens.Spacing.lg : tokens.Spacing.sm,
-      decoration: BoxDecoration(
-        color: isActive
-            ? context.kynosTheme.stand
-            : context.kynosTheme.tertiaryLabel,
-        borderRadius: BorderRadius.circular(tokens.Radius.sm),
+    return Semantics(
+      label: 'Page ${index + 1} of $total',
+      selected: isActive,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        margin: const EdgeInsets.symmetric(horizontal: tokens.Spacing.xs),
+        height: tokens.Spacing.sm,
+        width: isActive ? tokens.Spacing.lg : tokens.Spacing.sm,
+        decoration: BoxDecoration(
+          color: isActive
+              ? context.kynosTheme.stand
+              : context.kynosTheme.tertiaryLabel,
+          borderRadius: BorderRadius.circular(tokens.Radius.sm),
+        ),
       ),
     );
   }

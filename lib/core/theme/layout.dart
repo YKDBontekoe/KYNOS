@@ -47,4 +47,23 @@ abstract final class LayoutTokens {
         tokens.Spacing.md,
         tokens.Spacing.sm,
       );
+
+  /// Max content width for web and wide viewports.
+  static const double maxContentWidth = 560;
+
+  /// Bottom padding to clear the coach chat input bar.
+  static const double chatInputClearance =
+      tokens.Spacing.xxxl * 2 + tokens.Spacing.md;
+
+  /// Height for horizontal run-card carousels on the dashboard.
+  static const double runCarouselHeight =
+      tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.md;
+
+  /// Width for horizontal run-card carousel tiles.
+  static const double runCarouselTileWidth =
+      tokens.Spacing.xxxl * 5 + tokens.Spacing.lg;
+
+  /// Height for dashboard trend carousel charts.
+  static const double trendCarouselHeight =
+      tokens.Spacing.xxxl * 4 + tokens.Spacing.md;
 }

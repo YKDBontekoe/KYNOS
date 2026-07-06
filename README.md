@@ -106,7 +106,7 @@ CoachChatPage                         aiIsolateEntryPoint()
 ## Roadmap
 
 - [x] `v0.1` — Flutter scaffold, design system, architecture rules
-- [ ] `v0.2` — HealthKit integration + dashboard metrics
-- [ ] `v0.3` — AI coach chat with streaming Gemma output
-- [ ] `v0.4` — Nexus Lab biomechanics training loop
+- [x] `v0.2` — HealthKit integration + dashboard metrics
+- [x] `v0.3` — AI coach chat with streaming Gemma output
+- [x] `v0.4` — Nexus Lab biomechanics training loop
 - [ ] `v1.0` — App Store submission

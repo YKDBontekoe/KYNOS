@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
@@ -22,7 +23,12 @@ class MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.sm, Spacing.md, 96),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        LayoutTokens.chatInputClearance,
+      ),
       itemCount: messages.length,
       itemBuilder: (context, index) => RepaintBoundary(
         child: Padding(

@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
@@ -15,29 +14,35 @@ class RunHistoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     final runsAsync = ref.watch(recentRunsProvider(days: 365, limit: 200));
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: kynos.background,
       body: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
         slivers: [
           SliverAppBar(
-            backgroundColor: AppTheme.background,
+            backgroundColor: kynos.background,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             pinned: true,
             titleSpacing: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(Routes.dashboard);
+                }
+              },
+            ),
             title: Text(
               'Run History',
-              style: GoogleFonts.inter(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.label,
-                letterSpacing: -0.3,
-              ),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           runsAsync.when(
@@ -48,27 +53,22 @@ class RunHistoryPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.directions_run_rounded,
                           size: 48,
-                          color: AppTheme.tertiaryLabel,
+                          color: kynos.tertiaryLabel,
                         ),
                         const Gap(tokens.Spacing.md),
                         Text(
                           'No runs found',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.secondaryLabel,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const Gap(tokens.Spacing.xs),
                         Text(
                           'Import Apple Health export.zip or log a run manually in Settings.',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            color: AppTheme.tertiaryLabel,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: kynos.tertiaryLabel,
+                              ),
                           textAlign: TextAlign.center,
                         ),
                         const Gap(tokens.Spacing.sm),
@@ -91,9 +91,9 @@ class RunHistoryPage extends ConsumerWidget {
                 ),
                 sliver: SliverList.separated(
                   itemCount: runs.length,
-                  separatorBuilder: (context, index) => const Gap(tokens.Spacing.sm),
-                  itemBuilder: (context, index) =>
-                      RunCard(run: runs[index]),
+                  separatorBuilder: (context, index) =>
+                      const Gap(tokens.Spacing.sm),
+                  itemBuilder: (context, index) => RunCard(run: runs[index]),
                 ),
               );
             },
@@ -115,13 +115,24 @@ class RunHistoryPage extends ConsumerWidget {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(tokens.Spacing.md),
-                  child: Text(
-                    'Failed to load runs: $e',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppTheme.secondaryLabel,
-                    ),
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Failed to load runs: $e',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: kynos.secondaryLabel,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Gap(tokens.Spacing.md),
+                      FilledButton(
+                        onPressed: () => ref.invalidate(
+                          recentRunsProvider(days: 365, limit: 200),
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 ),
               ),

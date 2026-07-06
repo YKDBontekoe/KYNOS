@@ -25,4 +25,10 @@ class OnboardingCompleted extends _$OnboardingCompleted {
     await prefs.setBool(_key, true);
     state = true;
   }
+
+  Future<void> resetOnboarding() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_key, false);
+    state = false;
+  }
 }

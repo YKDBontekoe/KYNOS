@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
@@ -12,24 +13,43 @@ class CoachChatAppBar extends ConsumerWidget {
 
   final VoidCallback onClear;
 
+  void _close(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.dashboard);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final backend = ref.watch(lastAiInferenceBackendProvider);
+    final kynos = context.kynosTheme;
     return SafeArea(
       bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, Spacing.sm),
         child: Row(
           children: [
+            Semantics(
+              label: 'Close coach chat',
+              button: true,
+              child: IconButton(
+                icon: const Icon(Icons.close_rounded),
+                color: kynos.secondaryLabel,
+                onPressed: () => _close(context),
+                tooltip: 'Close',
+              ),
+            ),
             Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(color: AppTheme.exercise, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: kynos.exercise, shape: BoxShape.circle),
             ),
             const Gap(Spacing.sm),
             Text(
               'KYNOS Coach',
-              style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700, color: AppTheme.label),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const Spacer(),
             _InferenceBadge(backend: backend),
@@ -44,8 +64,8 @@ class CoachChatAppBar extends ConsumerWidget {
                   child: Container(
                     width: 32,
                     height: 32,
-                    decoration: BoxDecoration(color: AppTheme.separator, borderRadius: BorderRadius.circular(Radius.md)),
-                    child: const Icon(Icons.refresh_rounded, size: 18, color: AppTheme.secondaryLabel),
+                    decoration: BoxDecoration(color: kynos.separator, borderRadius: BorderRadius.circular(Radius.md)),
+                    child: Icon(Icons.refresh_rounded, size: 18, color: kynos.secondaryLabel),
                   ),
                 ),
               ),

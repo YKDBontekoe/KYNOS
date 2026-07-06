@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
+import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 /// Compact daily quest preview for the Today tab.
-class DailyQuestTeaser extends StatelessWidget {
+class DailyQuestTeaser extends ConsumerWidget {
   const DailyQuestTeaser({
     super.key,
     required this.questsAsync,
@@ -19,14 +21,17 @@ class DailyQuestTeaser extends StatelessWidget {
   final VoidCallback? onViewCharacter;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
 
     return questsAsync.when(
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Loading daily quest...'),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => KynosInlineErrorCard(
+        message: 'Could not load daily quest.',
+        onRetry: () => ref.invalidate(dailyQuestsProvider),
+      ),
       data: (quests) {
         if (quests.isEmpty) return const SizedBox.shrink();
 
@@ -57,12 +62,9 @@ class DailyQuestTeaser extends StatelessWidget {
               Text(
                 quest.title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      decoration: isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                      color: isCompleted
-                          ? kynos.secondaryLabel
-                          : kynos.label,
+                      decoration:
+                          isCompleted ? TextDecoration.lineThrough : null,
+                      color: isCompleted ? kynos.secondaryLabel : kynos.label,
                     ),
               ),
               const Gap(Spacing.xs),
@@ -84,9 +86,8 @@ class DailyQuestTeaser extends StatelessWidget {
                     TextButton(
                       onPressed: onViewCharacter,
                       style: TextButton.styleFrom(
-                        minimumSize: Size.zero,
-                        padding: EdgeInsets.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: const Size(48, 48),
+                        tapTargetSize: MaterialTapTargetSize.padded,
                       ),
                       child: const Text('View Character'),
                     ),
