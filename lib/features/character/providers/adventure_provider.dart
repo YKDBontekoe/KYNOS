@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/core/constants/gamification_constants.dart';
+import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/gamification/activity_resources.dart';
 import 'package:kynos/domain/entities/gamification/adventure_session.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';

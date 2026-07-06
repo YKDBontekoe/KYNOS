@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kynos/app/not_found_page.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dart';
@@ -14,7 +15,6 @@ import 'package:kynos/features/settings/presentation/pages/health_import_page.da
 import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart';
 import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
-import 'package:kynos/app/not_found_page.dart';
 
 /// All named route paths — single source of truth.
 abstract final class Routes {

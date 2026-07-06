@@ -4,8 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 /// Prompt card to connect health data when no summary is available.

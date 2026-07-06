@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';

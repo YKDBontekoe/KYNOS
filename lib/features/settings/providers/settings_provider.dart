@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
