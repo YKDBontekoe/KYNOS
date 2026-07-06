@@ -15,8 +15,8 @@ import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
 import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:kynos/features/settings/presentation/pages/health_import_page.dart';
 import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart';
-import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/on_device_model_picker_page.dart';
+import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
 
 /// All named route paths — single source of truth.
