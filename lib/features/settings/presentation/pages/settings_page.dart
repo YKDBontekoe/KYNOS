@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/cloud_data_level.dart';
@@ -17,7 +16,6 @@ import 'package:kynos/shared/providers/onboarding_provider.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
-import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
@@ -383,21 +381,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   _ActionTile(
                     title: 'Privacy Policy',
                     icon: Icons.privacy_tip_outlined,
-                    onTap: () => _openLegalUrl(
-                      context,
-                      AppConstants.privacyPolicyUrl,
-                      'Privacy Policy',
-                    ),
+                    onTap: () => context.push(Routes.privacyPolicy),
                   ),
                   Divider(color: kynos.separator, height: 1),
                   _ActionTile(
                     title: 'Terms of Service',
                     icon: Icons.description_outlined,
-                    onTap: () => _openLegalUrl(
-                      context,
-                      AppConstants.termsOfServiceUrl,
-                      'Terms of Service',
-                    ),
+                    onTap: () => context.push(Routes.termsOfService),
                   ),
                 ],
               ),
@@ -406,16 +396,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ],
         ),
     );
-  }
-
-  Future<void> _openLegalUrl(
-    BuildContext context,
-    String url,
-    String label,
-  ) async {
-    final opened = await openExternalUrl(url);
-    if (!context.mounted) return;
-    if (!opened) showUrlLaunchError(context, label);
   }
 
   Future<void> _replayOnboarding(BuildContext context) async {

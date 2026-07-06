@@ -10,6 +10,8 @@ import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dar
 import 'package:kynos/features/dashboard/presentation/pages/run_history_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_route_missing_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
+import 'package:kynos/features/legal/presentation/pages/privacy_policy_page.dart';
+import 'package:kynos/features/legal/presentation/pages/terms_of_service_page.dart';
 import 'package:kynos/features/nexus_lab/presentation/nexus_lab_page.dart';
 import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
 import 'package:kynos/features/settings/presentation/pages/health_import_page.dart';
@@ -34,6 +36,8 @@ abstract final class Routes {
   static const onDeviceModels = '/settings/on-device-models';
   static const healthImport = '/settings/import';
   static const manualRun = '/settings/manual-run';
+  static const privacyPolicy = '/settings/privacy';
+  static const termsOfService = '/settings/terms';
 }
 
 class _RouterRefreshNotifier extends ChangeNotifier {
@@ -198,6 +202,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
               key: state.pageKey,
               child: const ManualRunPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'privacy',
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const PrivacyPolicyPage(),
+            ),
+          ),
+          GoRoute(
+            path: 'terms',
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const TermsOfServicePage(),
             ),
           ),
         ],
