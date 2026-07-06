@@ -39,17 +39,21 @@ class AssistantBubble extends StatelessWidget {
     );
   }
 
-  String? get _errorLabel => switch (attemptedBackend) {
-        AiInferenceBackend.openRouter => 'Cloud error',
-        AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => 'On-device error',
-        null => hasError ? 'Coach error' : null,
-      };
+  String? get _errorLabel {
+    if (!hasError) return null;
+    return switch (attemptedBackend) {
+      AiInferenceBackend.openRouter => 'Cloud error',
+      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => 'On-device error',
+      null => 'Coach error',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
     final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           height: 1.5,
-          color: hasError ? Theme.of(context).colorScheme.error : null,
+          color: kynos.label,
         );
 
     return Align(
