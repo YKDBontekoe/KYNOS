@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/entities/gamification/adventure_session.dart';
-import 'package:kynos/domain/entities/gamification/trail_node.dart';
 import 'package:kynos/domain/usecases/gamification/generate_daily_trail_usecase.dart';
 import 'package:kynos/features/character/presentation/widgets/trail_map.dart';
 
