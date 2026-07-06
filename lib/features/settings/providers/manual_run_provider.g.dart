@@ -41,7 +41,7 @@ final class ManualRunProvider
   }
 }
 
-String _$manualRunHash() => r'e3254dde1473742474808bb2290e0705253d20a2';
+String _$manualRunHash() => r'c6a608eaf0d55c234c4165aca3cab7881bc591b8';
 
 abstract class _$ManualRun extends $Notifier<ManualRunState> {
   ManualRunState build();

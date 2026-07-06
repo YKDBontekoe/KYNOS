@@ -37,6 +37,7 @@ class ReadinessCard extends StatelessWidget {
       data: (summary) => _ReadinessCardContent(
         summary: summary,
         todayInsightsState: todayInsightsState,
+        onRetry: onRetry,
       ),
     );
   }
@@ -46,10 +47,12 @@ class _ReadinessCardContent extends StatelessWidget {
   const _ReadinessCardContent({
     required this.summary,
     required this.todayInsightsState,
+    this.onRetry,
   });
 
   final HealthSummary? summary;
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +119,10 @@ class _ReadinessCardContent extends StatelessWidget {
               ),
             ],
           ),
-          ConfidenceBadgeRow(todayInsightsState: todayInsightsState),
+          ConfidenceBadgeRow(
+            todayInsightsState: todayInsightsState,
+            onRetry: onRetry,
+          ),
         ],
       ),
     );
@@ -136,9 +142,14 @@ String _readinessBrief({
 
 /// Confidence and model-source badge below the readiness score.
 class ConfidenceBadgeRow extends StatelessWidget {
-  const ConfidenceBadgeRow({super.key, required this.todayInsightsState});
+  const ConfidenceBadgeRow({
+    super.key,
+    required this.todayInsightsState,
+    this.onRetry,
+  });
 
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -148,11 +159,10 @@ class ConfidenceBadgeRow extends StatelessWidget {
       loading: () => const SizedBox.shrink(),
       error: (_, _) => Padding(
         padding: const EdgeInsets.only(top: Spacing.md),
-        child: Text(
-          'Insights unavailable',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: kynos.tertiaryLabel,
-              ),
+        child: KynosInlineErrorCard(
+          message: 'Insights unavailable.',
+          onRetry: onRetry,
+          retryLabel: 'Retry insights',
         ),
       ),
       data: (state) {

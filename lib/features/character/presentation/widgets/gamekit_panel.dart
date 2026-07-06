@@ -73,6 +73,7 @@ class GameKitButton extends StatelessWidget {
     return Semantics(
       label: label,
       button: true,
+      excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
         child: Container(

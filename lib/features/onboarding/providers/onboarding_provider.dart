@@ -1,14 +1,7 @@
+import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'onboarding_provider.g.dart';
-
-/// Provides a synchronously accessible SharedPreferences instance.
-/// This must be overridden with the actual instance in the `ProviderScope` during app initialization.
-@riverpod
-SharedPreferences sharedPreferences(Ref ref) {
-  throw UnimplementedError('sharedPreferencesProvider must be overridden in ProviderScope');
-}
 
 @riverpod
 class OnboardingCompleted extends _$OnboardingCompleted {

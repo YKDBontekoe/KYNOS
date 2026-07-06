@@ -24,8 +24,8 @@ class TrailRunGamePanel extends ConsumerWidget {
           KynosSkeleton.tile(height: 160),
         ],
       ),
-      error: (error, _) => KynosInlineErrorCard(
-        message: 'Trail unavailable: $error',
+      error: (_, _) => KynosInlineErrorCard(
+        message: 'Trail unavailable. Try again.',
         onRetry: () => ref.invalidate(adventureSessionProvider),
       ),
       data: (viewState) {

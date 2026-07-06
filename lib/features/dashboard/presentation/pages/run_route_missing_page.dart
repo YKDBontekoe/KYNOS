@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 /// Shown when `/run-route` is opened without a [WorkoutSession] in route extra.
@@ -18,13 +19,7 @@ class RunRouteMissingPage extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go(Routes.dashboard);
-            }
-          },
+          onPressed: () => popOrGo(context, Routes.dashboard),
         ),
         title: const Text('Run Route'),
       ),

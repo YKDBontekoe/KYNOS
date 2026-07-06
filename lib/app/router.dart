@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/not_found_page.dart';
+import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dart';
@@ -39,8 +40,7 @@ class _RouterRefreshNotifier extends ChangeNotifier {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
+  final hasCompletedOnboarding = ref.watch(onboardingCompletedProvider);
   final refresh = _RouterRefreshNotifier(ref);
 
   return GoRouter(
@@ -50,8 +50,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final completed = ref.read(onboardingCompletedProvider);
       final isOnboarding = state.matchedLocation == Routes.onboarding;
+      final isImportHandoff = state.matchedLocation == Routes.healthImport;
 
-      if (!completed && !isOnboarding) return Routes.onboarding;
+      if (!completed && !isOnboarding && !isImportHandoff) {
+        return Routes.onboarding;
+      }
       if (completed && isOnboarding) return Routes.dashboard;
 
       return null;

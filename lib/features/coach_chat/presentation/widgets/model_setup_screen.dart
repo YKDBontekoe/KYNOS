@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class ModelSetupScreen extends StatelessWidget {
@@ -51,15 +51,14 @@ class ModelSetupScreen extends StatelessWidget {
       backgroundColor: context.kynosTheme.background,
       appBar: showClose
           ? AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.close_rounded),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go(Routes.dashboard);
-                  }
-                },
+              leading: Semantics(
+                label: 'Close',
+                button: true,
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  tooltip: 'Close',
+                  onPressed: () => popOrGo(context, Routes.dashboard),
+                ),
               ),
             )
           : null,

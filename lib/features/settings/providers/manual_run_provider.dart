@@ -12,18 +12,21 @@ class ManualRunState {
     this.isSaving = false,
     this.error,
     this.saveSucceeded = false,
+    this.errorToken = 0,
   });
 
   final DateTime start;
   final bool isSaving;
   final String? error;
   final bool saveSucceeded;
+  final int errorToken;
 
   ManualRunState copyWith({
     DateTime? start,
     bool? isSaving,
     String? error,
     bool? saveSucceeded,
+    int? errorToken,
     bool clearError = false,
   }) {
     return ManualRunState(
@@ -31,6 +34,7 @@ class ManualRunState {
       isSaving: isSaving ?? this.isSaving,
       error: clearError ? null : (error ?? this.error),
       saveSucceeded: saveSucceeded ?? this.saveSucceeded,
+      errorToken: errorToken ?? this.errorToken,
     );
   }
 }
@@ -48,17 +52,24 @@ class ManualRun extends _$ManualRun {
     state = state.copyWith(start: start, clearError: true);
   }
 
+  void _emitError(String message) {
+    state = state.copyWith(
+      error: message,
+      errorToken: state.errorToken + 1,
+    );
+  }
+
   Future<void> saveRun({
     required int durationMinutes,
     required double distanceKm,
     double? calories,
   }) async {
     if (durationMinutes <= 0) {
-      state = state.copyWith(error: 'Enter a valid duration in minutes.');
+      _emitError('Enter a valid duration in minutes.');
       return;
     }
     if (distanceKm <= 0) {
-      state = state.copyWith(error: 'Enter a valid distance in km.');
+      _emitError('Enter a valid distance in km.');
       return;
     }
 
@@ -81,6 +92,7 @@ class ManualRun extends _$ManualRun {
       state = state.copyWith(
         isSaving: false,
         error: result.failure!.message,
+        errorToken: state.errorToken + 1,
       );
       return;
     }

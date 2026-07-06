@@ -77,13 +77,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _getStarted() async {
-    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
     if (!mounted) return;
+    context.go(Routes.healthImport);
     if (!kIsWeb) {
       await ref.read(healthPermissionsProvider.notifier).request();
     }
     if (!mounted) return;
-    context.go(Routes.healthImport);
+    await ref.read(onboardingCompletedProvider.notifier).completeOnboarding();
   }
 
   @override

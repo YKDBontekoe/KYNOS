@@ -29,10 +29,9 @@ class HealthImportPage extends ConsumerWidget {
 
       final error = next.error;
       if (error != null &&
-          error != previous?.error &&
+          next.errorToken != (previous?.errorToken ?? 0) &&
           !next.isParsing &&
-          !next.isImporting &&
-          (next.gpxPreview != null || next.zipPreview != null)) {
+          !next.isImporting) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(error)),
         );

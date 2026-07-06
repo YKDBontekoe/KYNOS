@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
 class CoachChatAppBar extends ConsumerWidget {
@@ -13,13 +13,7 @@ class CoachChatAppBar extends ConsumerWidget {
 
   final VoidCallback onClear;
 
-  void _close(BuildContext context) {
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go(Routes.dashboard);
-    }
-  }
+  void _close(BuildContext context) => popOrGo(context, Routes.dashboard);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

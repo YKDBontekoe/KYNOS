@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kynos/app/router.dart';
+import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
-import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
 import 'package:kynos/shared/widgets/kynos_bottom_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
@@ -31,37 +30,27 @@ class ShellPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    return Scaffold(
-      backgroundColor: kynos.background,
-      extendBody: true,
-      body: ResponsiveCenter(
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: LayoutTokens.shellNavExtent(context),
+    return ShellNavigationScope(
+      goToBranch: _onTabSelected,
+      child: Scaffold(
+        backgroundColor: kynos.background,
+        extendBody: true,
+        body: ResponsiveCenter(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: LayoutTokens.shellNavExtent(context),
+            ),
+            child: navigationShell,
           ),
-          child: navigationShell,
+        ),
+        bottomNavigationBar: ResponsiveCenter(
+          child: KynosBottomNav(
+            items: _navItems,
+            selectedIndex: navigationShell.currentIndex,
+            onSelected: _onTabSelected,
+          ),
         ),
       ),
-      bottomNavigationBar: ResponsiveCenter(
-        child: KynosBottomNav(
-          items: _navItems,
-          selectedIndex: navigationShell.currentIndex,
-          onSelected: _onTabSelected,
-        ),
-      ),
-    );
-  }
-}
-
-/// Today tab — extracted for [StatefulShellRoute].
-class DashboardTab extends StatelessWidget {
-  const DashboardTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DashboardPage(
-      onViewTraining: () => context.go(Routes.training),
-      onViewCharacter: () => context.go(Routes.character),
     );
   }
 }

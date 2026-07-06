@@ -17,24 +17,27 @@ class KynosPageDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (i) {
-        final active = i == activeIndex;
-        return Semantics(
-          label: 'Page ${i + 1} of $count',
-          selected: active,
-          child: Container(
-            width: active ? tokens.Spacing.lg : tokens.Spacing.xs + 2,
-            height: tokens.Spacing.xs + 2,
-            margin: const EdgeInsets.symmetric(horizontal: tokens.Spacing.xs - 1),
-            decoration: BoxDecoration(
-              color: active ? kynos.stand : kynos.separator,
-              borderRadius: BorderRadius.circular(Radius.full),
-            ),
-          ),
-        );
-      }),
+    return Semantics(
+      label: 'Page ${activeIndex + 1} of $count',
+      child: ExcludeSemantics(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(count, (i) {
+            final active = i == activeIndex;
+            return Container(
+              width: active ? tokens.Spacing.lg : tokens.Spacing.xs + 2,
+              height: tokens.Spacing.xs + 2,
+              margin: const EdgeInsets.symmetric(
+                horizontal: tokens.Spacing.xs - 1,
+              ),
+              decoration: BoxDecoration(
+                color: active ? kynos.stand : kynos.separator,
+                borderRadius: BorderRadius.circular(Radius.full),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }

@@ -6,11 +6,16 @@ import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/navigation_utils.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 import 'package:kynos/shared/widgets/run_card.dart';
+import 'package:logger/logger.dart';
 
 class RunHistoryPage extends ConsumerWidget {
   const RunHistoryPage({super.key});
+
+  static final _log = Logger();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,13 +37,7 @@ class RunHistoryPage extends ConsumerWidget {
             titleSpacing: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go(Routes.dashboard);
-                }
-              },
+              onPressed: () => popOrGo(context, Routes.dashboard),
             ),
             title: Text(
               'Run History',
@@ -111,32 +110,20 @@ class RunHistoryPage extends ConsumerWidget {
                 ),
               ),
             ),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(
+            error: (e, st) {
+              _log.e('Failed to load run history', error: e, stackTrace: st);
+              return SliverFillRemaining(
                 child: Padding(
                   padding: const EdgeInsets.all(tokens.Spacing.md),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Failed to load runs: $e',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: kynos.secondaryLabel,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Gap(tokens.Spacing.md),
-                      FilledButton(
-                        onPressed: () => ref.invalidate(
-                          recentRunsProvider(days: 365, limit: 200),
-                        ),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                  child: KynosInlineErrorCard(
+                    message: 'Could not load runs.',
+                    onRetry: () => ref.invalidate(
+                      recentRunsProvider(days: 365, limit: 200),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),

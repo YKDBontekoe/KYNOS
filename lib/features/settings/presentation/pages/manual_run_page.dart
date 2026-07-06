@@ -88,7 +88,8 @@ class _ManualRunPageState extends ConsumerState<ManualRunPage> {
     final runState = ref.watch(manualRunProvider);
 
     ref.listen(manualRunProvider, (previous, next) {
-      if (next.error != null && next.error != previous?.error) {
+      if (next.error != null &&
+          next.errorToken != (previous?.errorToken ?? 0)) {
         _showError(next.error!);
       }
       if (next.saveSucceeded && previous?.saveSucceeded != true) {

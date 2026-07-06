@@ -25,6 +25,7 @@ class HealthImportState {
     this.progressMessage,
     this.importMessage,
     this.importedWorkout,
+    this.errorToken = 0,
   });
 
   final GpxParseResult? gpxPreview;
@@ -37,6 +38,7 @@ class HealthImportState {
   final String? progressMessage;
   final String? importMessage;
   final WorkoutSession? importedWorkout;
+  final int errorToken;
 
   bool get isBusy => isParsing || isImporting;
 
@@ -51,6 +53,7 @@ class HealthImportState {
     String? progressMessage,
     String? importMessage,
     WorkoutSession? importedWorkout,
+    int? errorToken,
     bool clearGpxPreview = false,
     bool clearZipPreview = false,
     bool clearPickedFile = false,
@@ -78,6 +81,7 @@ class HealthImportState {
       importedWorkout: clearImportedWorkout
           ? null
           : (importedWorkout ?? this.importedWorkout),
+      errorToken: errorToken ?? this.errorToken,
     );
   }
 }
@@ -188,18 +192,42 @@ class HealthImport extends _$HealthImport {
     final pickedFile = state.pickedFile;
     final isZip = pickedFile?.extension?.toLowerCase() == 'zip';
 
+    String? error;
+    String? importMessage;
+    WorkoutSession? importedWorkout;
+    var clearZipPreview = false;
+    var clearPickedFile = false;
+
     if (pickedFile != null && (state.zipPreview != null || isZip)) {
-      await _importZip(pickedFile);
+      final result = await _importZip(pickedFile);
+      error = result.error;
+      importMessage = result.importMessage;
+      clearZipPreview = result.cleared;
+      clearPickedFile = result.cleared;
     } else if (state.gpxPreview != null) {
-      await _importGpx();
+      final result = await _importGpx();
+      error = result.error;
+      importMessage = result.importMessage;
+      importedWorkout = result.importedWorkout;
     }
 
-    state = state.copyWith(isImporting: false);
+    state = state.copyWith(
+      isImporting: false,
+      error: error,
+      importMessage: importMessage,
+      importedWorkout: importedWorkout,
+      clearZipPreview: clearZipPreview,
+      clearPickedFile: clearPickedFile,
+      errorToken: error != null ? state.errorToken + 1 : state.errorToken,
+    );
   }
 
-  Future<void> _importGpx() async {
+  Future<({String? error, String? importMessage, WorkoutSession? importedWorkout})>
+      _importGpx() async {
     final preview = state.gpxPreview;
-    if (preview == null) return;
+    if (preview == null) {
+      return (error: null, importMessage: null, importedWorkout: null);
+    }
 
     final useCase = ref.read(importWorkoutUseCaseProvider);
     final result = await useCase(
@@ -208,19 +236,25 @@ class HealthImport extends _$HealthImport {
     );
 
     if (result.failure != null) {
-      state = state.copyWith(error: result.failure!.message);
-      return;
+      return (
+        error: result.failure!.message,
+        importMessage: null,
+        importedWorkout: null,
+      );
     }
 
     invalidateHealthProviders(ref);
 
-    state = state.copyWith(
+    return (
+      error: null,
       importMessage: 'Run imported successfully.',
       importedWorkout: result.workout,
     );
   }
 
-  Future<void> _importZip(PlatformFile file) async {
+  Future<({String? error, String? importMessage, bool cleared})> _importZip(
+    PlatformFile file,
+  ) async {
     final preview = state.zipPreview;
     final bytes = preview == null && file.path == null
         ? await readPickedFileBytes(file)
@@ -233,16 +267,17 @@ class HealthImport extends _$HealthImport {
     );
 
     if (result.failure != null) {
-      state = state.copyWith(error: result.failure!.message);
-      return;
+      return (error: result.failure!.message, importMessage: null, cleared: false);
     }
 
     invalidateHealthProviders(ref);
 
-    state = state.copyWith(
+    return (
+      error: null,
       importMessage:
           'Imported ${result.importedDays} days of metrics and '
           '${result.importedWorkouts} runs.',
+      cleared: true,
     );
   }
 }

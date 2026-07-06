@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
-import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'settings_provider.g.dart';

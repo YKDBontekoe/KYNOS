@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:kynos/core/theme/layout.dart';
+import 'package:kynos/core/theme/theme.dart';
 
 /// Centers content on wide viewports (web/desktop) with a max width cap.
 class ResponsiveCenter extends StatelessWidget {

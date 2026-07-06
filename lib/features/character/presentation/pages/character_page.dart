@@ -130,6 +130,9 @@ class EmptyCharacterState extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
+    final permissionState = ref.watch(healthPermissionsProvider);
+    final isLoading = permissionState.isLoading;
+    final platform = HealthPlatformLabels.platformName();
     return Padding(
       padding: const EdgeInsets.all(tokens.Spacing.lg),
       child: Column(
@@ -155,9 +158,40 @@ class EmptyCharacterState extends ConsumerWidget {
           const Gap(tokens.Spacing.lg),
           if (!kIsWeb)
             FilledButton(
-              onPressed: () =>
-                  ref.read(healthPermissionsProvider.notifier).request(),
-              child: Text(HealthPlatformLabels.connectLabel()),
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      await ref
+                          .read(healthPermissionsProvider.notifier)
+                          .request();
+
+                      if (!context.mounted) return;
+
+                      ref.read(healthPermissionsProvider).whenOrNull(
+                        data: (granted) {
+                          final message = granted
+                              ? '$platform connected.'
+                              : '$platform permission not granted. ${HealthPlatformLabels.settingsHint()}';
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        },
+                        error: (error, _) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Health connection failed: $error',
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+              child: Text(
+                isLoading
+                    ? 'Connecting…'
+                    : HealthPlatformLabels.connectLabel(),
+              ),
             ),
           const Gap(tokens.Spacing.sm),
           OutlinedButton(

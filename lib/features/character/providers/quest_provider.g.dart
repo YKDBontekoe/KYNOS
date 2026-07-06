@@ -36,7 +36,7 @@ final class QuestNotifierProvider
   QuestNotifier create() => QuestNotifier();
 }
 
-String _$questNotifierHash() => r'c0a6fb17543349b96455e35067403013463026ca';
+String _$questNotifierHash() => r'23328e8423ac288338d6a9e123cad819880bce9b';
 
 /// Notifier that allows quest status mutations (complete / expire).
 

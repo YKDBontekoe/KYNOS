@@ -24,10 +24,14 @@ class GaitTeaserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
+    final semanticsLabel = onViewTraining != null
+        ? 'Gait model summary, tap to view training'
+        : 'Gait model summary';
 
     return Semantics(
-      label: 'Gait model summary, tap to view training',
+      label: semanticsLabel,
       button: onViewTraining != null,
+      excludeSemantics: true,
       child: KynosCard(
         padding: const EdgeInsets.all(tokens.Spacing.md),
         onTap: onViewTraining,
