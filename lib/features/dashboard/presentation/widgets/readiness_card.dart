@@ -7,6 +7,7 @@ import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/activity_ring.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/widgets/animated_async_content.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -26,15 +27,16 @@ class ReadinessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return summaryAsync.when(
-      loading: () => const KynosCard(
+    return AnimatedAsyncContent<HealthSummary?>(
+      value: summaryAsync,
+      loading: (_) => const KynosCard(
         child: KynosLoadingLine(label: 'Loading readiness...'),
       ),
-      error: (_, _) => KynosInlineErrorCard(
+      error: (_, _, _) => KynosInlineErrorCard(
         message: 'Could not load health data.',
         onRetry: onRetry,
       ),
-      data: (summary) => _ReadinessCardContent(
+      data: (_, summary) => _ReadinessCardContent(
         summary: summary,
         todayInsightsState: todayInsightsState,
         onRetry: onRetry,
@@ -74,7 +76,7 @@ class _ReadinessCardContent extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ActivityRing(
+              AnimatedActivityRing(
                 ringProgresses: dimensions.ringProgresses,
                 size: 110,
                 strokeWidth: 10,
@@ -90,18 +92,35 @@ class _ReadinessCardContent extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                     const Gap(Spacing.xs),
-                    Text(
-                      summary == null ? '—' : score.round().toString(),
-                      style: kynos.metricValueStyle.copyWith(
-                        fontSize: 44,
-                        fontWeight: FontWeight.w800,
-                        color: summary == null
-                            ? kynos.secondaryLabel
-                            : kynos.purple,
-                        height: 1,
-                        letterSpacing: -1,
+                    if (summary == null)
+                      Text(
+                        '—',
+                        style: kynos.metricValueStyle.copyWith(
+                          fontSize: 44,
+                          fontWeight: FontWeight.w800,
+                          color: kynos.secondaryLabel,
+                          height: 1,
+                          letterSpacing: -1,
+                        ),
+                      )
+                    else
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: score),
+                        duration: Motion.ringSweep,
+                        curve: Motion.curve,
+                        builder: (context, value, _) {
+                          return Text(
+                            value.round().toString(),
+                            style: kynos.metricValueStyle.copyWith(
+                              fontSize: 44,
+                              fontWeight: FontWeight.w800,
+                              color: kynos.purple,
+                              height: 1,
+                              letterSpacing: -1,
+                            ),
+                          );
+                        },
                       ),
-                    ),
                     const Gap(Spacing.sm),
                     Text(
                       summary == null

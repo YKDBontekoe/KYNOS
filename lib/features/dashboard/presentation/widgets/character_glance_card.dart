@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
+import 'package:kynos/shared/widgets/animated_async_content.dart';
+import 'package:kynos/shared/widgets/animated_progress_bar.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -26,11 +28,12 @@ class CharacterGlanceCard extends StatelessWidget {
         ? 'Character level ${character.level}, tap to view'
         : 'Character level ${character.level}';
 
-    return Semantics(
-      label: semanticsLabel,
-      button: onViewCharacter != null,
-      excludeSemantics: true,
-      child: KynosCard(
+    return FadeInOnAppear(
+      child: Semantics(
+        label: semanticsLabel,
+        button: onViewCharacter != null,
+        excludeSemantics: true,
+        child: KynosCard(
         padding: const EdgeInsets.all(tokens.Spacing.md),
         onTap: onViewCharacter,
         child: Column(
@@ -50,14 +53,12 @@ class CharacterGlanceCard extends StatelessWidget {
               ],
             ),
             const Gap(tokens.Spacing.sm),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: character.levelProgress,
-                minHeight: 8,
-                backgroundColor: kynos.separator,
-                valueColor: AlwaysStoppedAnimation(classColor),
-              ),
+            AnimatedProgressBar(
+              value: character.levelProgress,
+              minHeight: 8,
+              backgroundColor: kynos.separator,
+              valueColor: classColor,
+              borderRadius: 4,
             ),
             const Gap(tokens.Spacing.xs),
             Row(
@@ -81,6 +82,7 @@ class CharacterGlanceCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

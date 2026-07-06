@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 
-/// Page indicator dots for carousels.
+/// Page indicator dots for carousels with animated active-state morph.
 class KynosPageDots extends StatelessWidget {
   const KynosPageDots({
     super.key,
@@ -24,7 +24,9 @@ class KynosPageDots extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(count, (i) {
             final active = i == activeIndex;
-            return Container(
+            return AnimatedContainer(
+              duration: Motion.slow,
+              curve: Motion.curve,
               width: active ? tokens.Spacing.lg : tokens.Spacing.xs + 2,
               height: tokens.Spacing.xs + 2,
               margin: const EdgeInsets.symmetric(

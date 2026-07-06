@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/motion.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
 
@@ -78,6 +79,8 @@ class HrvChart extends StatelessWidget {
           ),
         ],
       ),
+      duration: Motion.medium,
+      curve: Motion.curve,
     );
   }
 }

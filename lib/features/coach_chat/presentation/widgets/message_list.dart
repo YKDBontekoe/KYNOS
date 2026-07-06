@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
-import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
-class MessageList extends StatelessWidget {
+class MessageList extends StatefulWidget {
   const MessageList({
     super.key,
     required this.messages,
@@ -19,22 +20,41 @@ class MessageList extends StatelessWidget {
   final ScrollController scrollController;
 
   @override
+  State<MessageList> createState() => _MessageListState();
+}
+
+class _MessageListState extends State<MessageList> {
+  final _animatedMessageIds = <String>{};
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      controller: scrollController,
+      controller: widget.scrollController,
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
         Spacing.sm,
         Spacing.md,
         LayoutTokens.chatInputClearance,
       ),
-      itemCount: messages.length,
-      itemBuilder: (context, index) => RepaintBoundary(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: Spacing.sm),
-          child: MessageBubble(message: messages[index]),
-        ),
-      ),
+      itemCount: widget.messages.length,
+      itemBuilder: (context, index) {
+        final message = widget.messages[index];
+        final shouldAnimate = !_animatedMessageIds.contains(message.id);
+        if (shouldAnimate) {
+          _animatedMessageIds.add(message.id);
+        }
+
+        return RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: Spacing.sm),
+            child: AnimatedMessageEntrance(
+              fromRight: message.role == MessageRole.user,
+              animate: shouldAnimate,
+              child: MessageBubble(message: message),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -75,7 +95,11 @@ class CoachChatEmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.chat_bubble_outline_rounded, size: 48, color: context.kynosTheme.stand),
+            Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 48,
+              color: context.kynosTheme.stand,
+            ),
             const Gap(Spacing.md),
             Text(
               'Your AI Coach',
@@ -94,15 +118,9 @@ class CoachChatEmptyState extends StatelessWidget {
             ])
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
-                child: KynosCard(
+                child: GlassSuggestionChip(
+                  label: suggestion,
                   onTap: () => onSuggestionTap(suggestion),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      suggestion,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
                 ),
               ),
           ],

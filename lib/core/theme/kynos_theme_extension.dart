@@ -186,7 +186,39 @@ class KynosThemeExtension extends ThemeExtension<KynosThemeExtension> {
     double t,
   ) {
     if (other is! KynosThemeExtension) return this;
-    return t < 0.5 ? this : other;
+    return KynosThemeExtension(
+      move: Color.lerp(move, other.move, t)!,
+      exercise: Color.lerp(exercise, other.exercise, t)!,
+      stand: Color.lerp(stand, other.stand, t)!,
+      energy: Color.lerp(energy, other.energy, t)!,
+      purple: Color.lerp(purple, other.purple, t)!,
+      willpower: Color.lerp(willpower, other.willpower, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      card: Color.lerp(card, other.card, t)!,
+      label: Color.lerp(label, other.label, t)!,
+      secondaryLabel: Color.lerp(secondaryLabel, other.secondaryLabel, t)!,
+      tertiaryLabel: Color.lerp(tertiaryLabel, other.tertiaryLabel, t)!,
+      separator: Color.lerp(separator, other.separator, t)!,
+      navUnselected: Color.lerp(navUnselected, other.navUnselected, t)!,
+      glassFill: Color.lerp(glassFill, other.glassFill, t)!,
+      glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
+      heroOrbOverlay: Color.lerp(heroOrbOverlay, other.heroOrbOverlay, t)!,
+      cardShadow: t < 0.5 ? cardShadow : other.cardShadow,
+      metricTileShadow: t < 0.5 ? metricTileShadow : other.metricTileShadow,
+      navBarShadow: t < 0.5 ? navBarShadow : other.navBarShadow,
+      sectionLabelStyle:
+          TextStyle.lerp(sectionLabelStyle, other.sectionLabelStyle, t)!,
+      metricValueStyle:
+          TextStyle.lerp(metricValueStyle, other.metricValueStyle, t)!,
+      heroTitleStyle: TextStyle.lerp(heroTitleStyle, other.heroTitleStyle, t)!,
+      heroSubtitleStyle:
+          TextStyle.lerp(heroSubtitleStyle, other.heroSubtitleStyle, t)!,
+      chipLabelStyle: TextStyle.lerp(chipLabelStyle, other.chipLabelStyle, t)!,
+      onboardingTitleStyle:
+          TextStyle.lerp(onboardingTitleStyle, other.onboardingTitleStyle, t)!,
+      onboardingBodyStyle:
+          TextStyle.lerp(onboardingBodyStyle, other.onboardingBodyStyle, t)!,
+    );
   }
 }
 

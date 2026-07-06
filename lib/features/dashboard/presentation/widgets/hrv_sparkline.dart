@@ -60,6 +60,8 @@ class HrvSparkline extends StatelessWidget {
             ),
           ],
         ),
+        duration: Motion.medium,
+        curve: Motion.curve,
       ),
     );
   }

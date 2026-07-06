@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
+import 'package:kynos/shared/utils/run_date_label.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -41,9 +43,15 @@ class RunCard extends StatelessWidget {
               ),
               const Gap(Spacing.sm),
               Expanded(
-                child: Text(
-                  _runDateLabel(run.start),
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Hero(
+                  tag: RunHeroTags.date(run.id),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      formatRunHeroDateLabel(run.start),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
                 ),
               ),
               Flexible(
@@ -98,14 +106,6 @@ class RunCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _runDateLabel(DateTime date) {
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }
 
 String _durationLabel(Duration duration) {
