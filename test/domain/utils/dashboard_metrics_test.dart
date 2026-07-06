@@ -140,6 +140,22 @@ void main() {
       expect(momentum.distanceDeltaPct, closeTo(100, 1));
       expect(momentum.distanceGoalProgress, closeTo(1.0, 0.01));
     });
+
+    test('excludes walking-only distance from weekly total', () {
+      final now = DateTime.now();
+      final history = <HealthSummary>[
+        for (var i = 0; i < 7; i++)
+          HealthSummary(
+            date: now.subtract(Duration(days: i)),
+            distanceMeters: 7000,
+            runningWorkoutCount: 0,
+          ),
+      ];
+
+      final momentum = computeWeeklyMomentum(history);
+
+      expect(momentum.thisWeekDistanceKm, 0);
+    });
   });
 
   group('findPersonalBestCallouts', () {
