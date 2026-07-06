@@ -34,7 +34,7 @@ final class CampSessionNotifierProvider
 }
 
 String _$campSessionNotifierHash() =>
-    r'6a53296f36915e927c1b53f29cbf9cb3b0c0ad6e';
+    r'5ace07e2fe2ad064242d2cb2807dc6ed6c78b935';
 
 abstract class _$CampSessionNotifier extends $AsyncNotifier<CampViewState?> {
   FutureOr<CampViewState?> build();
