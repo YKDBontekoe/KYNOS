@@ -389,11 +389,14 @@ Barrel import: `package:kynos/shared/widgets/widgets.dart`.
 2. Create `lib/features/<name>/providers/<name>_provider.dart`
 3. Add use-case in `lib/domain/usecases/<name>/`
 4. Add repository interface in `lib/domain/repositories/`
-5. Add data model with `@freezed` in `lib/data/models/`
-6. Implement repository in `lib/data/repositories/` or `lib/infrastructure/`
-7. Register route in `lib/app/router.dart`
-8. Write unit tests for use-case and widget smoke test for page
-9. Open PR, monitor review, 👍 all addressed comments
+5. Add entity with `@freezed` in `lib/domain/entities/` (if needed)
+6. Implement repository in `lib/infrastructure/`
+7. Register provider in `lib/shared/providers/` (DI binding)
+8. Register route in `lib/app/router.dart`
+9. Write unit tests for use-case and widget smoke test for page
+10. Run `dart run tool/generate_codemap.dart` and open PR, monitor review, 👍 all addressed comments
+
+See also [docs/agents/file-templates.md](docs/agents/file-templates.md) and the `/add-feature` Cursor skill.
 
 ---
 

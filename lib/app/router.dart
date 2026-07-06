@@ -12,12 +12,12 @@ import 'package:kynos/features/dashboard/presentation/pages/run_route_missing_pa
 import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
 import 'package:kynos/features/nexus_lab/presentation/nexus_lab_page.dart';
 import 'package:kynos/features/onboarding/presentation/onboarding_page.dart';
-import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:kynos/features/settings/presentation/pages/health_import_page.dart';
 import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart';
 import 'package:kynos/features/settings/presentation/pages/on_device_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
+import 'package:kynos/shared/providers/onboarding_provider.dart';
 
 /// All named route paths — single source of truth.
 abstract final class Routes {

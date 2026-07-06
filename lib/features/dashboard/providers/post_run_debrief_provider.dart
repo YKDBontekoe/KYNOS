@@ -1,8 +1,8 @@
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/usecases/gamification/compute_xp_usecase.dart';
 import 'package:kynos/domain/usecases/insights/generate_post_run_debrief_usecase.dart';
-import 'package:kynos/features/character/providers/character_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

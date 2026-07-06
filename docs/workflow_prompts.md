@@ -1,12 +1,35 @@
 # KYNOS — Advanced Continuous Improvement Agents
 
-These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recurring basis. They enforce high-level engineering standards and require **empirical proof of work**.
+> **Agent hub:** [docs/agents/README.md](agents/README.md) · **Skills:** `.cursor/skills/audits/`
+
+These prompts are designed to be run by AI agents on a recurring basis. Each prompt
+has a corresponding Cursor skill under `.cursor/skills/audits/` — invoke with
+`/audit-<name>`. Skills use `disable-model-invocation: true` so they only run when
+explicitly requested.
+
+**Architecture (actual):** `features/ → domain/ ← infrastructure/` with
+`shared/providers/` as the DI composition root. There is **no `data/` layer yet**.
+
+| # | Prompt | Skill | AGENTS.md reference |
+|---|--------|-------|---------------------|
+| 1 | Architectural Integrity Sentinel | `/audit-architecture` | §5 Dependency Rule |
+| 2 | 120Hz ProMotion Performance | `/audit-performance` | §6 State, §14 UI |
+| 3 | Zero-Knowledge Privacy Guardian | `/audit-privacy` | §11 Privacy |
+| 4 | AI Coach Isolate Specialist | `/audit-ai-isolate` | §10 On-Device AI |
+| 5 | Glassmorphism & Motion Designer | `/audit-ui-polish` | §14 UI Components |
+| 6 | Automated Quality & Test Coverage | `/audit-test-coverage` | §13 Testing |
+| 7 | Health Data Integrity Specialist | `/audit-health-data` | §9 Error Handling |
+| 8 | Biomechanics Model Tuner | `/audit-biomechanics` | §10 On-Device AI |
+| 9 | Documentation & ADR Governance | `/audit-documentation` | §2 Repository Map |
+| 10 | Modern Dart & Flutter Optimization | `/audit-dart-modernization` | §15 What NOT to Do |
+
+All audits require **empirical proof of work** (see each skill for specifics).
 
 ---
 
-## 1. The Architectural Integrity Sentinel (Rule #1 Enforcement)
+## 1. The Architectural Integrity Sentinel (AGENTS.md §5)
 **Role:** Senior Software Architect
-**Objective:** Continuously audit and reinforce the `Feature -> Domain <- Data` dependency rule.
+**Objective:** Continuously audit and reinforce the `features → domain ← infrastructure` dependency rule.
 
 ### **Technical Instructions:**
 1. **Audit Phase:** Map all imports in `lib/features/`. Use `grep` or static analysis to find any import that bypasses the `domain` layer (e.g., a Feature importing a concrete Repository or another Feature's internal widgets).
@@ -20,11 +43,13 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 
 ### **Proof of Work (Mandatory):**
 - **Build Proof:** Output of a successful `flutter analyze` showing 0 errors/warnings.
-- **Architectural Proof:** A clean `grep` log showing that `lib/domain/` has no prohibited imports.
+- **Architectural Proof:** A clean `bash scripts/check_architecture.sh` run.
+
+**Skill:** `.cursor/skills/audits/audit-architecture/SKILL.md`
 
 ---
 
-## 2. The 120Hz ProMotion Performance Agent (Rule #10 Optimization)
+## 2. The 120Hz ProMotion Performance Agent (AGENTS.md §14)
 **Role:** Graphics & Performance Engineer
 **Objective:** Proactively hunt for jank and ensure 120Hz scrolling fidelity.
 
@@ -42,9 +67,11 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 - **Visual Proof:** A screen recording of the app running with the **Performance Overlay** enabled. The bars must stay consistently below the 8.3ms line.
 - **Optimization Log:** A list of widgets converted to `const` or optimized via `ref.select`.
 
+**Skill:** `.cursor/skills/audits/audit-performance/SKILL.md`
+
 ---
 
-## 3. The Zero-Knowledge Privacy Guardian (Rule #7 Auditor)
+## 3. The Zero-Knowledge Privacy Guardian (AGENTS.md §11)
 **Role:** Security & Privacy Specialist
 **Objective:** Ensure biometric data never leaves the device or enters a log stream.
 
@@ -62,9 +89,11 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 - **Audit Proof:** A comprehensive `grep` or `ripgrep` report showing that sensitive variable names (e.g., `hrvMs`, `rhrBpm`) never appear in logging statements.
 - **Build Proof:** Verify `AppConstants.zeroKnowledgeMode == true`.
 
+**Skill:** `.cursor/skills/audits/audit-privacy/SKILL.md`
+
 ---
 
-## 4. The AI Coach Isolate Specialist (Rule #6 Bridge)
+## 4. The AI Coach Isolate Specialist (AGENTS.md §10)
 **Role:** Systems & Concurrency Engineer
 **Objective:** Evolve the background isolate bridge for Gemma LLM inference.
 
@@ -82,29 +111,33 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 - **Visual Proof:** A video showing a chat session where the text streams smoothly while the user is actively scrolling or interacting with other UI elements.
 - **Isolate Log:** Proof of the background isolate's RAM consumption during inference.
 
+**Skill:** `.cursor/skills/audits/audit-ai-isolate/SKILL.md`
+
 ---
 
-## 5. The Glassmorphism & Motion Designer (UX Polish)
+## 5. The Glassmorphism & Motion Designer (AGENTS.md §14)
 **Role:** High-End UI/UX Developer
 **Objective:** Maintain the "Liquid Glass" aesthetic and interactive feedback loops.
 
 ### **Technical Instructions:**
-1. **Visual Iteration:** Refine the `GlassCard` and `GlassCard` borders. Ensure the tinting matches the latest Apple Fitness iOS 18 design language.
+1. **Visual Iteration:** Refine the `GlassCard` borders. Ensure the tinting matches the latest Apple Fitness iOS 18 design language.
 2. **Interactive Feedback:** Implement `HapticFeedback.mediumImpact()` on primary actions and `selectionClick()` on scrolling elements.
 3. **Motion Design:** Ensure all transitions (e.g., moving from Today to Lab) use `go_router` custom transitions that feel "fluid" rather than "mechanical."
 
 ### **Agent Self-Reflection & Evaluation:**
 - "Does the Glassmorphism look premium in both Light and Dark modes?"
 - "Is the haptic feedback purposeful, or is it just 'noise'?"
-- "Did I follow the spacing tokens in `core/theme/spacing.dart` strictly (Rule #10)?"
+- "Did I follow the spacing tokens in `core/theme/spacing.dart` strictly?"
 
 ### **Proof of Work (Mandatory):**
 - **Visual Proof:** High-resolution screenshots (Light vs Dark mode) and a video demonstrating the fluid transitions and haptic feedback triggers.
 - **Thematic Proof:** Verification that all colors used are from the `AppTheme` palette.
 
+**Skill:** `.cursor/skills/audits/audit-ui-polish/SKILL.md`
+
 ---
 
-## 6. The Automated Quality & Test Coverage Agent (Rule #9)
+## 6. The Automated Quality & Test Coverage Agent (AGENTS.md §13)
 **Role:** SDET / Quality Engineer
 **Objective:** Continuously shrink the "Untested Code" surface area.
 
@@ -122,9 +155,11 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 - **Test Proof:** Output of `flutter test` showing 0 failures.
 - **Coverage Proof:** An HTML coverage report (or summary) showing increased percentage in the target feature.
 
+**Skill:** `.cursor/skills/audits/audit-test-coverage/SKILL.md`
+
 ---
 
-## 7. The Health Data Integrity Specialist (v0.2 Evolve)
+## 7. The Health Data Integrity Specialist
 **Role:** Data Engineer / Health Specialist
 **Objective:** Improve the robustness and accuracy of biometric data processing.
 
@@ -136,15 +171,17 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 ### **Agent Self-Reflection & Evaluation:**
 - "Does the app handle a user having 0 health data gracefully? (No empty grey screens)."
 - "Is the data aggregation mathematically accurate for users who sleep across midnight?"
-- "Did I follow Rule #5 for error handling (Sealed Failure hierarchy)?"
+- "Did I follow AGENTS.md §9 for error handling (Sealed Failure hierarchy)?"
 
 ### **Proof of Work (Mandatory):**
 - **Logic Proof:** Unit tests covering complex data scenarios (e.g., split sleep, daylight savings shifts).
 - **Visual Proof:** Screenshot of the Dashboard showing clear "Empty State" or "Permission Required" UI.
 
+**Skill:** `.cursor/skills/audits/audit-health-data/SKILL.md`
+
 ---
 
-## 8. The Biomechanics Model Tuner (v0.4 Numerical Agent)
+## 8. The Biomechanics Model Tuner
 **Role:** Data Scientist / Biomechanics Engineer
 **Objective:** Ensure the on-device regression model is numerically stable and accurate.
 
@@ -154,13 +191,15 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 3. **Validation:** Implement a "Confidence Score" for the predicted stride length.
 
 ### **Agent Self-Reflection & Evaluation:**
-- "Is the regression math pure enough to run in a background isolate (Rule #6)?"
+- "Is the regression math pure enough to run in a background isolate?"
 - "Did I handle the 'Cold Start' problem where the user has only 1 or 2 data points?"
 - "Is the Protocol Buffer schema versioned for future updates?"
 
 ### **Proof of Work (Mandatory):**
 - **Mathematical Proof:** A unit test verifying the OLS prediction against a Python-verified reference dataset.
 - **Visual Proof:** A screenshot of the "Nexus Lab" showing the current β-coefficients and model confidence.
+
+**Skill:** `.cursor/skills/audits/audit-biomechanics/SKILL.md`
 
 ---
 
@@ -171,7 +210,7 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 ### **Technical Instructions:**
 1. **Synchronization Audit:** Read all `.md` files in `docs/architecture/`. Compare the "Isolate Protocol" or "Folder Structure" documentation with the actual code in `lib/`.
 2. **ADR Generation:** If a significant technical decision was made (e.g., switching from Isar to Drift), generate a new ADR (`docs/architecture/adr-XXX.md`).
-3. **API Docs:** Ensure all `public` methods in `domain` and `data` have proper DartDoc comments.
+3. **API Docs:** Ensure all `public` methods in `domain/` have proper DartDoc comments.
 
 ### **Agent Self-Reflection & Evaluation:**
 - "If a new engineer joined today, could they understand the 'Why' behind our Isolate bridge from the docs?"
@@ -180,6 +219,8 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 ### **Proof of Work (Mandatory):**
 - **Doc Proof:** A new or updated ADR file and a report on DartDoc coverage for the modified layers.
 
+**Skill:** `.cursor/skills/audits/audit-documentation/SKILL.md`
+
 ---
 
 ## 10. The Modern Dart & Flutter Optimization Agent
@@ -187,7 +228,7 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 **Objective:** Continuous adoption of the latest Dart/Flutter features for code safety.
 
 ### **Technical Instructions:**
-1. **Language Evolution:** Proactively adopt new Dart features (e.g., Records, Pattern Matching, Macros) where they simplify the code (e.g., in `Failure` handling or `JsonSerializable` boilerplate).
+1. **Language Evolution:** Proactively adopt new Dart features (e.g., Records, Pattern Matching) where they simplify the code (e.g., in `Failure` handling).
 2. **Linting Upgrades:** Audit `analysis_options.yaml`. Enable stricter linting rules as the Dart ecosystem evolves (e.g., `strict-casts`, `unawaited_futures`).
 3. **Build Speed:** Optimize the `build_runner` configuration to reduce generation time. Use `build.yaml` to exclude unnecessary files from the scanning process.
 
@@ -198,3 +239,5 @@ These prompts are designed to be run by AI agents (Gemini CLI, Claude) on a recu
 ### **Proof of Work (Mandatory):**
 - **Build Proof:** A screenshot showing a significantly faster `build_runner` execution or a clean `flutter analyze` with new strict rules.
 - **Code Proof:** A 'Before vs After' snippet demonstrating a refactor to a more idiomatic Dart 3 pattern.
+
+**Skill:** `.cursor/skills/audits/audit-dart-modernization/SKILL.md`

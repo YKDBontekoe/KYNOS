@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/features/settings/presentation/widgets/health_import_preview_row.dart';
-import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
+import 'package:kynos/shared/providers/health_import_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 

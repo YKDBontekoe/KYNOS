@@ -4,7 +4,7 @@ import 'package:kynos/domain/usecases/insights/today_insights_deterministic.dart
 import 'package:kynos/domain/utils/personal_bests.dart';
 import 'package:kynos/domain/utils/run_streak.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
-import 'package:kynos/features/character/providers/character_provider.dart';
+import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

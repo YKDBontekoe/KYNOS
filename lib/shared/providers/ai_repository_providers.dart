@@ -2,15 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/repositories/openrouter_models_repository.dart';
-import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/infrastructure/ai/hybrid_ai_coach_repository.dart';
 import 'package:kynos/infrastructure/ai/isolate_ai_coach_repository.dart';
 import 'package:kynos/infrastructure/ai/openrouter/openrouter_cloud_ai_repository.dart';
 import 'package:kynos/infrastructure/ai/openrouter/openrouter_models_repository_impl.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
+import 'package:kynos/shared/providers/settings_provider.dart';
 
 export 'package:kynos/infrastructure/ai/ai_infrastructure_providers.dart'
     show aiModelRepositoryProvider;
+export 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart'
+    show GemmaDeviceRamProbe;
 export 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart'
     show GemmaRuntime;
 

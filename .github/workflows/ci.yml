@@ -105,6 +105,14 @@ jobs:
       - name: Check design system conventions
         run: bash scripts/check_design_system.sh
 
+      - name: Check architecture layer imports
+        run: bash scripts/check_architecture.sh
+
+      - name: Check CODEMAP freshness
+        run: |
+          dart run tool/generate_codemap.dart
+          git diff --exit-code CODEMAP.md || (echo "CODEMAP.md is out of date. Run: dart run tool/generate_codemap.dart" && exit 1)
+
   test:
     needs: bootstrap
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}

@@ -57,6 +57,22 @@ See [CODEMAP.md](CODEMAP.md) for feature entry points and [docs/architecture/fol
 
 ---
 
+## For AI Agents
+
+| Step | Resource |
+|------|----------|
+| 1. Onboard | [docs/agents/README.md](docs/agents/README.md) — hub, skills index, validation |
+| 2. Navigate | [CODEMAP.md](CODEMAP.md) — feature entry points, hot files |
+| 3. Follow rules | [AGENTS.md](AGENTS.md) — architecture, PR lifecycle, design system |
+| 4. Quick ref | [CLAUDE.md](CLAUDE.md) — bootstrap commands |
+| 5. Skills | [`.cursor/skills/`](.cursor/skills/) — `/add-feature`, `/validate-change`, `/open-pr`, etc. |
+
+**Branch naming:** `cursor/<descriptive-name>-d1bd`
+
+**Before opening a PR:** `flutter analyze`, `flutter test`, `flutter build web`, regenerate CODEMAP if `lib/` structure changed.
+
+---
+
 ## Getting Started
 
 ```bash

@@ -6,6 +6,7 @@
 
 | Task | Start here |
 |------|------------|
+| Agent onboarding | [`docs/agents/README.md`](docs/agents/README.md) |
 | Add a route | [`lib/app/router.dart`](lib/app/router.dart) |
 | Add a feature | [`lib/features/<name>/`](lib/features/) + AGENTS.md §17 |
 | Wire a repository | [`lib/shared/providers/`](lib/shared/providers/) |
@@ -90,147 +91,308 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 
 | File | Lines | Summary |
 |------|------:|---------|
-| `lib/app/app.dart` | 24 | KynosApp |
-| `lib/app/router.dart` | 53 | All named route paths — single source of truth. |
-| `lib/app/shell_page.dart` | 171 | ShellPage, _ShellState, _BottomBar, … |
-| `lib/core/constants/app_constants.dart` | 51 | Compile-time constants for KYNOS. |
-| `lib/core/errors/failures.dart` | 29 | Base class for all domain-level failures in KYNOS. |
-| `lib/core/theme/app_theme.dart` | 180 | AppTheme |
+| `lib/app/app.dart` | 27 | KynosApp |
+| `lib/app/not_found_page.dart` | 46 | NotFoundPage |
+| `lib/app/page_transitions.dart` | 100 | Route transition presets for [GoRouter] [pageBuilder] callbacks. |
+| `lib/app/router.dart` | 207 | _RouterRefreshNotifier |
+| `lib/app/shell_navigation_scope.dart` | 41 | ShellNavigationScope, DashboardTab |
+| `lib/app/shell_page.dart` | 157 | ShellPage, _ShellPageState, _AnimatedShellBody, … |
+| `lib/core/constants/app_constants.dart` | 54 | Compile-time constants for KYNOS. |
+| `lib/core/constants/gamification_constants.dart` | 21 | Gameplay tuning for the Trail Run character mini-game. |
+| `lib/core/constants/imported_workout_ids.dart` | 10 | Prefix and helpers for locally imported workout identifiers. |
+| `lib/core/errors/failures.dart` | 33 | Base class for all domain-level failures in KYNOS. |
+| `lib/core/theme/app_theme.dart` | 191 | AppTheme |
 | `lib/core/theme/colors.dart` | 82 | KYNOS colour palette — iOS system colours, Apple Fitness aesthetic. |
 | `lib/core/theme/elevation.dart` | 33 | Shadow presets for the KYNOS design system. |
-| `lib/core/theme/kynos_theme_extension.dart` | 185 | KynosThemeExtension |
-| `lib/core/theme/layout.dart` | 39 | Layout constants for consistent page structure. |
+| `lib/core/theme/kynos_theme_extension.dart` | 229 | KynosThemeExtension |
+| `lib/core/theme/layout.dart` | 69 | Layout constants for consistent page structure. |
+| `lib/core/theme/liquid_glass_tokens.dart` | 54 | Design tokens for Apple Liquid Glass materials — blur, vibrancy, specular edges. |
+| `lib/core/theme/motion.dart` | 17 | Design token: motion durations and curves shared across the app. |
 | `lib/core/theme/spacing.dart` | 20 | Design token: spacing scale (4-point grid). |
-| `lib/core/theme/theme.dart` | 10 | KYNOS design system — barrel export. |
-| `lib/core/theme/typography.dart` | 149 | Named text styles for the KYNOS design system. |
+| `lib/core/theme/theme.dart` | 12 | KYNOS design system — barrel export. |
+| `lib/core/theme/typography.dart` | 171 | Named text styles for the KYNOS design system. |
+| `lib/domain/catalog/on_device_model_catalog.dart` | 100 | Curated catalog of LiteRT-LM models supported by KYNOS on-device coach. |
+| `lib/domain/entities/ai_inference_backend.dart` | 6 | Where the last coach inference ran. |
+| `lib/domain/entities/ai_task_kind.dart` | 9 | Classification for hybrid local/cloud AI routing. |
 | `lib/domain/entities/athlete_profile.dart` | 55 | AthleteProfile |
-| `lib/domain/entities/chat_message.dart` | 44 | ChatMessage |
+| `lib/domain/entities/chat_message.dart` | 80 | ChatMessage |
+| `lib/domain/entities/cloud_data_level.dart` | 9 | How much health context may be included in OpenRouter prompts. |
+| `lib/domain/entities/dashboard/dashboard_summary.dart` | 60 | DashboardSummary |
+| `lib/domain/entities/gamification/activity_resources.dart` | 39 | ActivityResources |
+| `lib/domain/entities/gamification/adventure_session.dart` | 95 | AdventureSession |
 | `lib/domain/entities/gamification/character_class.dart` | 156 | Dart module |
 | `lib/domain/entities/gamification/character_stats.dart` | 128 | CharacterStats |
 | `lib/domain/entities/gamification/earned_title.dart` | 64 | EarnedTitle |
-| `lib/domain/entities/gamification/quest.dart` | 147 | Quest |
+| `lib/domain/entities/gamification/encounter_state.dart` | 95 | EncounterState |
+| `lib/domain/entities/gamification/quest.dart` | 201 | QuestObjective, Quest |
 | `lib/domain/entities/gamification/runner_character.dart` | 134 | RunnerCharacter |
+| `lib/domain/entities/gamification/trail_node.dart` | 51 | TrailNode |
 | `lib/domain/entities/gamification/xp_gain.dart` | 21 | XpGain |
 | `lib/domain/entities/health_summary.dart` | 114 | HealthSummary |
 | `lib/domain/entities/insights/insight_confidence.dart` | 14 | Dart module |
 | `lib/domain/entities/insights/today_insights.dart` | 41 | TodayInsights |
 | `lib/domain/entities/insights/training_insights.dart` | 33 | TrainingInsights |
+| `lib/domain/entities/on_device_model.dart` | 39 | OnDeviceModel |
+| `lib/domain/entities/openrouter_model.dart` | 51 | OpenRouterModelPricing, OpenRouterModel |
+| `lib/domain/entities/openrouter_model_filters.dart` | 112 | OpenRouterModelFilters |
 | `lib/domain/entities/workout_route_point.dart` | 27 | WorkoutRoutePoint |
 | `lib/domain/entities/workout_session.dart` | 37 | WorkoutSession |
-| `lib/domain/repositories/ai_coach_repository.dart` | 28 | Streaming response chunk from the on-device LLM. |
-| `lib/domain/repositories/ai_model_repository.dart` | 16 | Contract for managing the lifecycle of the on-device AI model file. |
+| `lib/domain/repositories/ai_coach_repository.dart` | 31 | Streaming response chunk from the on-device or cloud LLM. |
+| `lib/domain/repositories/ai_model_repository.dart` | 25 | Contract for managing the lifecycle of the on-device AI model file. |
 | `lib/domain/repositories/biomechanics_repository.dart` | 40 | BiomechanicsSample |
-| `lib/domain/repositories/character_repository.dart` | 11 | Dart module |
+| `lib/domain/repositories/character_repository.dart` | 15 | Dart module |
+| `lib/domain/repositories/cloud_ai_repository.dart` | 10 | Cloud inference backend for BYOK OpenRouter requests. |
 | `lib/domain/repositories/gamekit_repository.dart` | 42 | Dart module |
-| `lib/domain/repositories/health_repository.dart` | 31 | Contract for accessing biometric data from the platform health store. |
+| `lib/domain/repositories/health_repository.dart` | 39 | Contract for accessing biometric data from the platform health store. |
+| `lib/domain/repositories/openrouter_models_repository.dart` | 12 | Contract for fetching the OpenRouter model catalog. |
 | `lib/domain/usecases/gamification/assign_character_class_usecase.dart` | 146 | AssignCharacterClassUseCase |
+| `lib/domain/usecases/gamification/compute_activity_resources_usecase.dart` | 50 | ComputeActivityResourcesUseCase |
 | `lib/domain/usecases/gamification/compute_xp_usecase.dart` | 122 | ComputeXpUseCase |
-| `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 239 | GenerateDailyQuestsUseCase |
+| `lib/domain/usecases/gamification/evaluate_quest_progress_usecase.dart` | 65 | EvaluateQuestProgressUseCase |
+| `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 298 | GenerateDailyQuestsUseCase |
+| `lib/domain/usecases/gamification/generate_daily_trail_usecase.dart` | 60 | GenerateDailyTrailUseCase |
+| `lib/domain/usecases/gamification/resolve_encounter_turn_usecase.dart` | 217 | EncounterTurnResult, ResolveEncounterTurnUseCase |
+| `lib/domain/usecases/health/import_apple_health_export_usecase.dart` | 144 | ImportAppleHealthExportResult, ImportAppleHealthExportUseCase |
+| `lib/domain/usecases/health/import_workout_usecase.dart` | 48 | ImportWorkoutUseCase |
+| `lib/domain/usecases/insights/generate_post_run_debrief_usecase.dart` | 98 | PostRunDebrief, GeneratePostRunDebriefUseCase |
 | `lib/domain/usecases/insights/generate_today_insights_usecase.dart` | 69 | GenerateTodayInsightsUseCase |
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 294 | GenerateTrainingInsightsUseCase |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 296 | GenerateTrainingInsightsUseCase |
 | `lib/domain/usecases/insights/today_insights_deterministic.dart` | 145 | Builds deterministic today insights from health metrics. |
-| `lib/domain/usecases/insights/today_insights_model_refiner.dart` | 126 | TodayInsightsModelRefiner |
+| `lib/domain/usecases/insights/today_insights_model_refiner.dart` | 128 | TodayInsightsModelRefiner |
 | `lib/domain/usecases/nexus_lab/calibrate_gait_model_usecase.dart` | 155 | CalibrateGaitModelUseCase, _SteadyStateExtractionTool |
-| `lib/domain/utils/readiness_score.dart` | 73 | Dart module |
-| `lib/features/character/presentation/pages/character_page.dart` | 156 | CharacterPage, EmptyCharacterState |
+| `lib/domain/utils/acwr.dart` | 38 | Acute:chronic workload ratio from daily running distance. |
+| `lib/domain/utils/ai_inference_error_policy.dart` | 149 | Classifies on-device LLM failures and maps them to user-facing copy. |
+| `lib/domain/utils/ai_task_router.dart` | 37 | Routes AI tasks to local Gemma or OpenRouter cloud backends. |
+| `lib/domain/utils/cloud_prompt_sanitizer.dart` | 29 | Strips sensitive fields from cloud-bound prompts. |
+| `lib/domain/utils/coach_fallback_reply.dart` | 28 | Deterministic coach reply when on-device Gemma is unavailable. |
+| `lib/domain/utils/gemma_device_capability.dart` | 62 | On-device Gemma inference tier based on device resources. |
+| `lib/domain/utils/gemma_inference_limits.dart` | 19 | Token budgets keyed by on-device Gemma inference tier. |
+| `lib/domain/utils/health_context_formatter.dart` | 57 | Formats [HealthSummary] rows for LLM prompts without raw GPS or device IDs. |
+| `lib/domain/utils/metric_trends.dart` | 85 | MetricDelta |
+| `lib/domain/utils/personal_bests.dart` | 63 | Finds short personal-best callouts for dashboard chips. |
+| `lib/domain/utils/readiness_score.dart` | 123 | ReadinessDimensions |
+| `lib/domain/utils/run_streak.dart` | 65 | Dart module |
+| `lib/domain/utils/seeded_roll.dart` | 17 | Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates). |
+| `lib/domain/utils/weekly_momentum.dart` | 88 | WeeklyMomentum |
+| `lib/features/character/presentation/pages/character_page.dart` | 235 | CharacterPage, EmptyCharacterState |
+| `lib/features/character/presentation/widgets/activity_resources_bar.dart` | 99 | ActivityResourcesBar, _ResourceTile |
 | `lib/features/character/presentation/widgets/character_hero_card.dart` | 92 | CharacterHeroCard |
 | `lib/features/character/presentation/widgets/character_shield_icon.dart` | 35 | CharacterShieldPainter |
-| `lib/features/character/presentation/widgets/gamekit_panel.dart` | 99 | GameKitPanel, GameKitButton |
-| `lib/features/character/presentation/widgets/quest_card.dart` | 188 | QuestPanel, QuestCard |
+| `lib/features/character/presentation/widgets/encounter_panel.dart` | 118 | EncounterPanel |
+| `lib/features/character/presentation/widgets/gamekit_panel.dart` | 104 | GameKitPanel, GameKitButton |
+| `lib/features/character/presentation/widgets/quest_card.dart` | 254 | QuestPanel, QuestCard |
 | `lib/features/character/presentation/widgets/signatory_power_card.dart` | 68 | SignatoryPowerCard |
 | `lib/features/character/presentation/widgets/stats_panel.dart` | 96 | StatsPanel, StatRow |
 | `lib/features/character/presentation/widgets/titles_panel.dart` | 37 | TitlesPanel |
+| `lib/features/character/presentation/widgets/trail_map.dart` | 210 | TrailMap, _TrailNodeDot, _TrailNodeDotState |
+| `lib/features/character/presentation/widgets/trail_run_game_panel.dart` | 68 | TrailRunGamePanel |
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 69 | XpBar |
-| `lib/features/character/providers/character_provider.dart` | 29 | Loads the persisted [RunnerCharacter], creating one via class assignment |
-| `lib/features/character/providers/quest_provider.dart` | 69 | QuestNotifier |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 110 | CoachChatPage, _CoachChatPageState |
-| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 37 | AssistantBubble |
-| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 53 | ChatInputBar |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 74 | CoachChatAppBar, OnDeviceBadge |
-| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 100 | MessageList, MessageBubble, CoachChatEmptyState |
-| `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 74 | ModelSetupScreen |
+| `lib/features/character/providers/adventure_provider.dart` | 251 | AdventureViewState, AdventureSessionNotifier |
+| `lib/features/character/providers/character_provider.dart` | 1 | Dart module |
+| `lib/features/character/providers/quest_provider.dart` | 48 | QuestNotifier |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 221 | CoachChatPage, _CoachChatPageState |
+| `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 63 | AnimatedMessageEntrance, _AnimatedMessageEntranceState |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 137 | AssistantBubble |
+| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 64 | ChatInputBar |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 100 | CoachChatAppBar, _InferenceBadge |
+| `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | GlassSuggestionChip, _GlassSuggestionChipState |
+| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 198 | MessageList, _MessageListState, MessageBubble, … |
+| `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 107 | ModelSetupScreen |
+| `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | StreamingTextPulse, _StreamingTextPulseState |
 | `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 52 | TypingIndicator, _TypingIndicatorState |
-| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 79 | CoachChatNotifier |
-| `lib/features/coach_chat/providers/model_setup_provider.dart` | 35 | ModelSetupNotifier |
-| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 98 | DashboardPage |
-| `lib/features/dashboard/presentation/pages/run_history_page.dart` | 126 | RunHistoryPage |
-| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 166 | RunRoutePage, _RouteContent, _AppleRouteMap, … |
-| `lib/features/dashboard/presentation/widgets/activity_ring.dart` | 82 | ActivityRing, RingPainter |
-| `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 73 | ConnectHealthkitCard |
-| `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 93 | HealthMetricsGrid |
-| `lib/features/dashboard/presentation/widgets/readiness_card.dart` | 142 | ReadinessCard, ConfidenceBadgeRow |
-| `lib/features/dashboard/presentation/widgets/today_insight_cards.dart` | 185 | TodayInsightCards, ActionCompactCard, _ActionCompactCardState, … |
-| `lib/features/dashboard/providers/ai_insight_provider.dart` | 58 | Generates a single coaching sentence from today's health data using the |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 324 | CoachChatNotifier, LastAiInferenceBackend |
+| `lib/features/coach_chat/providers/coach_chat_seed_provider.dart` | 1 | Dart module |
+| `lib/features/coach_chat/providers/model_setup_provider.dart` | 2 | Dart module |
+| `lib/features/coach_chat/providers/model_setup_state.dart` | 1 | Dart module |
+| `lib/features/coach_chat/utils/chat_history_codec.dart` | 74 | Serialises coach chat history to SharedPreferences JSON. |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 347 | DashboardPage, _DashboardPageState |
+| `lib/features/dashboard/presentation/pages/run_history_page.dart` | 138 | RunHistoryPage |
+| `lib/features/dashboard/presentation/pages/run_route_missing_page.dart` | 53 | RunRouteMissingPage |
+| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 267 | RunRoutePage, _RunRouteScaffold, _RouteContent, … |
+| `lib/features/dashboard/presentation/widgets/activity_ring.dart` | 214 | ActivityRing, AnimatedActivityRing, _AnimatedActivityRingState, … |
+| `lib/features/dashboard/presentation/widgets/character_glance_card.dart` | 89 | CharacterGlanceCard |
+| `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, … |
+| `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 88 | ConnectHealthkitCard |
+| `lib/features/dashboard/presentation/widgets/daily_quest_teaser.dart` | 129 | DailyQuestTeaser |
+| `lib/features/dashboard/presentation/widgets/dashboard_header_sliver.dart` | 109 | DashboardHeaderSliver |
+| `lib/features/dashboard/presentation/widgets/gait_teaser_card.dart` | 94 | GaitTeaserCard |
+| `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | HealthMetricsGrid |
+| `lib/features/dashboard/presentation/widgets/hrv_sparkline.dart` | 68 | HrvSparkline |
+| `lib/features/dashboard/presentation/widgets/last_run_preview.dart` | 76 | LastRunPreview |
+| `lib/features/dashboard/presentation/widgets/metric_detail_sheet.dart` | 185 | MetricDetailSheet, _MetricMeta |
+| `lib/features/dashboard/presentation/widgets/readiness_card.dart` | 216 | ReadinessCard, _ReadinessCardContent, ConfidenceBadgeRow |
+| `lib/features/dashboard/presentation/widgets/trend_carousel.dart` | 96 | TrendCarousel, _TrendCarouselState, _TrendPage |
+| `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 191 | WeekMomentumCard |
+| `lib/features/dashboard/presentation/widgets/what_changed_chips.dart` | 45 | WhatChangedChips |
+| `lib/features/dashboard/providers/dashboard_summary_provider.dart` | 60 | Dart module |
+| `lib/features/dashboard/providers/post_run_debrief_provider.dart` | 114 | PostRunDebriefState, PostRunDebriefNotifier |
 | `lib/features/dashboard/providers/today_insights_provider.dart` | 54 | TodayInsightsState |
-| `lib/features/nexus_lab/presentation/nexus_lab_page.dart` | 202 | NexusLabPage, _Content, _LoadingState, … |
-| `lib/features/onboarding/presentation/onboarding_page.dart` | 230 | OnboardingItem, OnboardingPage, _OnboardingPageState, … |
-| `lib/features/onboarding/providers/onboarding_provider.dart` | 28 | OnboardingCompleted |
-| `lib/features/settings/presentation/pages/settings_page.dart` | 179 | SettingsPage, _SwitchTile, _DropdownTile, … |
-| `lib/features/settings/providers/settings_provider.dart` | 57 | SettingsState, Settings |
-| `lib/features/training/presentation/pages/training_page.dart` | 139 | TrainingPage |
-| `lib/features/training/presentation/widgets/chart_placeholder.dart` | 15 | ChartPlaceholder |
-| `lib/features/training/presentation/widgets/hrv_chart.dart` | 83 | HrvChart |
-| `lib/features/training/presentation/widgets/load_chart.dart` | 87 | LoadChart |
-| `lib/features/training/presentation/widgets/past_runs_list.dart` | 35 | PastRunsList |
+| `lib/features/nexus_lab/presentation/nexus_lab_page.dart` | 211 | NexusLabPage, _Content, _LoadingState, … |
+| `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | OnboardingItem, OnboardingPage, _OnboardingPageState, … |
+| `lib/features/onboarding/providers/onboarding_provider.dart` | 1 | Dart module |
+| `lib/features/settings/presentation/on_device_model_selection_result.dart` | 10 | OnDeviceModelSelectionResult |
+| `lib/features/settings/presentation/pages/health_import_page.dart` | 118 | HealthImportPage |
+| `lib/features/settings/presentation/pages/manual_run_page.dart` | 167 | ManualRunPage, _ManualRunPageState |
+| `lib/features/settings/presentation/pages/on_device_model_picker_page.dart` | 107 | OnDeviceModelPickerPage, _OnDeviceModelPickerPageState |
+| `lib/features/settings/presentation/pages/openrouter_model_picker_page.dart` | 215 | OpenRouterModelPickerPage |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 600 | SettingsPage, _SettingsPageState, _SwitchTile, … |
+| `lib/features/settings/presentation/widgets/apple_health_export_preview_card.dart` | 104 | AppleHealthExportPreviewCard |
+| `lib/features/settings/presentation/widgets/gpx_import_preview_card.dart` | 82 | GpxImportPreviewCard |
+| `lib/features/settings/presentation/widgets/health_import_preview_row.dart` | 27 | HealthImportPreviewRow |
+| `lib/features/settings/presentation/widgets/health_import_progress_card.dart` | 58 | HealthImportProgressCard |
+| `lib/features/settings/presentation/widgets/on_device_model_card.dart` | 98 | OnDeviceModelCard |
+| `lib/features/settings/presentation/widgets/openrouter_model_card.dart` | 80 | OpenRouterModelCard |
+| `lib/features/settings/presentation/widgets/settings_appearance_section.dart` | 39 | SettingsAppearanceSection |
+| `lib/features/settings/providers/health_import_provider.dart` | 280 | HealthImportState, HealthImport |
+| `lib/features/settings/providers/manual_run_provider.dart` | 104 | ManualRunState, ManualRun |
+| `lib/features/settings/providers/openrouter_models_provider.dart` | 121 | OpenRouterCatalogState, OpenRouterCatalog |
+| `lib/features/settings/providers/settings_provider.dart` | 1 | Dart module |
+| `lib/features/training/presentation/pages/training_page.dart` | 172 | TrainingPage |
+| `lib/features/training/presentation/widgets/past_runs_list.dart` | 46 | PastRunsList |
 | `lib/features/training/presentation/widgets/training_chip.dart` | 33 | TrainingChip |
-| `lib/features/training/presentation/widgets/training_insight_cards.dart` | 74 | TrainingInsightsCards |
+| `lib/features/training/presentation/widgets/training_insight_cards.dart` | 78 | TrainingInsightsCards |
 | `lib/features/training/presentation/widgets/training_insight_list_card.dart` | 28 | TrainingInsightListCard |
 | `lib/features/training/presentation/widgets/training_insight_text_card.dart` | 34 | TrainingInsightTextCard |
 | `lib/features/training/presentation/widgets/trend_cards.dart` | 76 | TrendCards |
 | `lib/features/training/presentation/widgets/weekly_stats_grid.dart` | 90 | WeeklyStatsGrid |
 | `lib/features/training/providers/training_insights_provider.dart` | 56 | TrainingInsightsState |
-| `lib/infrastructure/ai/ai_infrastructure_providers.dart` | 20 | Provides the [AiCoachRepository] singleton. |
+| `lib/infrastructure/ai/ai_infrastructure_providers.dart` | 8 | Provides the [AiModelRepository] singleton. |
 | `lib/infrastructure/ai/biomechanics/biomechanics_coefficients_protobuf.dart` | 169 | BiomechanicsCoefficientsProtobuf |
-| `lib/infrastructure/ai/biomechanics/on_device_biomechanics_repository.dart` | 234 | OnDeviceBiomechanicsRepository |
-| `lib/infrastructure/ai/gemma/ai_isolate_bridge.dart` | 2 | Dart module |
-| `lib/infrastructure/ai/gemma/ai_isolate_entrypoint.dart` | 163 | Dart module |
-| `lib/infrastructure/ai/gemma/ai_isolate_messages.dart` | 91 | AiInitRequest, AiChatRequest, AiTrainRegressionRequest, … |
+| `lib/infrastructure/ai/biomechanics/on_device_biomechanics_repository.dart` | 238 | OnDeviceBiomechanicsRepository |
+| `lib/infrastructure/ai/gemma/ai_isolate_bridge.dart` | 3 | Dart module |
+| `lib/infrastructure/ai/gemma/ai_isolate_entrypoint.dart` | 160 | Dart module |
+| `lib/infrastructure/ai/gemma/ai_isolate_messages.dart` | 121 | AiInitRequest, AiChatRequest, AiReloadChatRequest, … |
 | `lib/infrastructure/ai/gemma/ai_regression_math.dart` | 99 | Fits multivariate regression coefficients for stride length prediction. |
-| `lib/infrastructure/ai/on_device_ai_coach_repository.dart` | 58 | OnDeviceAiCoachRepository |
-| `lib/infrastructure/ai/on_device_model_repository.dart` | 20 | OnDeviceModelRepository |
-| `lib/infrastructure/gamification/character_persistence_repository.dart` | 86 | CharacterPersistenceRepository |
+| `lib/infrastructure/ai/gemma/coach_prompt_builder.dart` | 13 | Builds the user turn for coach chat (system instruction lives on [InferenceChat]). |
+| `lib/infrastructure/ai/gemma/gemma_device_ram_probe.dart` | 51 | Dart module |
+| `lib/infrastructure/ai/gemma/gemma_inference_session.dart` | 55 | Dart module |
+| `lib/infrastructure/ai/gemma/gemma_runtime.dart` | 80 | Central bootstrap for flutter_gemma 1.x opt-in inference engines. |
+| `lib/infrastructure/ai/gemma/gemma_runtime_tier.dart` | 18 | Resolves the current on-device Gemma tier from platform RAM and thermal probes. |
+| `lib/infrastructure/ai/gemma/gemma_thermal_probe.dart` | 19 | Reads platform thermal / power-save signals for conservative Gemma routing. |
+| `lib/infrastructure/ai/gemma/on_device_model_installer.dart` | 20 | Maps domain [OnDeviceModel] specs to flutter_gemma install APIs. |
+| `lib/infrastructure/ai/gemma/regression_isolate_entrypoint.dart` | 42 | Lightweight background worker for gait regression math (no LLM deps). |
+| `lib/infrastructure/ai/hybrid_ai_coach_repository.dart` | 157 | HybridAiCoachConfig, HybridAiCoachRepository |
+| `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 339 | IsolateAiCoachRepository |
+| `lib/infrastructure/ai/on_device_model_repository.dart` | 94 | OnDeviceModelRepository |
+| `lib/infrastructure/ai/openrouter/openrouter_api_client.dart` | 181 | OpenRouterApiClient |
+| `lib/infrastructure/ai/openrouter/openrouter_cloud_ai_repository.dart` | 24 | OpenRouterCloudAiRepository |
+| `lib/infrastructure/ai/openrouter/openrouter_models_repository_impl.dart` | 46 | OpenRouterModelsRepositoryImpl |
+| `lib/infrastructure/ai/secure_api_key_storage.dart` | 41 | SecureApiKeyStorage |
+| `lib/infrastructure/gamification/character_persistence_repository.dart` | 118 | CharacterPersistenceRepository |
 | `lib/infrastructure/gamification/gamekit_repository_impl.dart` | 80 | GameKitRepositoryImpl |
 | `lib/infrastructure/health/apple_workout_route_channel.dart` | 36 | AppleWorkoutRouteChannel |
+| `lib/infrastructure/health/composite_health_repository.dart` | 189 | CompositeHealthRepository |
+| `lib/infrastructure/health/drift_imported_health_store.dart` | 177 | DriftImportedHealthStore |
 | `lib/infrastructure/health/health_data_aggregator.dart` | 173 | _DailyAccumulator |
-| `lib/infrastructure/health/health_infrastructure_providers.dart` | 13 | Platform binding for Apple HealthKit. |
-| `lib/infrastructure/health/health_kit_repository.dart` | 151 | HealthKitRepository |
+| `lib/infrastructure/health/health_infrastructure_providers.dart` | 28 | Dart module |
+| `lib/infrastructure/health/health_kit_repository.dart` | 251 | HealthKitRepository |
 | `lib/infrastructure/health/health_kit_workout_mapper.dart` | 110 | Returns true when [point] represents a running workout. |
+| `lib/infrastructure/health/import/apple_health_date_parser.dart` | 22 | Parses timestamps from Apple Health `export.xml` attributes. |
+| `lib/infrastructure/health/import/apple_health_export_isolate.dart` | 30 | Parses Apple Health zip archives off the UI isolate. |
+| `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | AppleHealthWorkoutImport, AppleHealthExportParseResult, AppleHealthExportParser |
+| `lib/infrastructure/health/import/apple_health_record_aggregator.dart` | 250 | AppleHealthRecordAggregator, _DailyAccumulator |
+| `lib/infrastructure/health/import/apple_health_unit_converter.dart` | 62 | Converts Apple Health export units into KYNOS canonical units. |
+| `lib/infrastructure/health/import/apple_health_workout_builder.dart` | 48 | AppleHealthWorkoutBuilder |
+| `lib/infrastructure/health/import/apple_health_xml_event_stream.dart` | 35 | Chunk size for streaming `export.xml` without loading the full file. |
+| `lib/infrastructure/health/import/gpx_workout_parser.dart` | 114 | GpxParseResult, GpxWorkoutParser |
+| `lib/infrastructure/health/imported_health_connection_native.dart` | 14 | Dart module |
+| `lib/infrastructure/health/imported_health_connection_stub.dart` | 5 | Dart module |
+| `lib/infrastructure/health/imported_health_database.dart` | 59 | ImportedWorkouts, ImportedRoutePoints, ImportedDailySummaries, … |
+| `lib/infrastructure/health/imported_health_database_providers.dart` | 8 | Dart module |
+| `lib/infrastructure/health/imported_health_repository.dart` | 109 | ImportedHealthRepository |
+| `lib/infrastructure/health/imported_health_store.dart` | 124 | Contract for locally persisted imported workouts. |
+| `lib/infrastructure/health/imported_summary_merger.dart` | 54 | Merges imported daily summaries, preferring stored metrics and adding |
+| `lib/infrastructure/health/imported_workout_summary_aggregator.dart` | 59 | _DayRollup |
+| `lib/infrastructure/health/platform_imported_health_store_native.dart` | 8 | Dart module |
+| `lib/infrastructure/health/platform_imported_health_store_web.dart` | 8 | Dart module |
+| `lib/infrastructure/health/prefs_imported_health_store.dart` | 162 | PrefsImportedHealthStore |
 | `lib/infrastructure/privacy/local_sync_privacy_guard.dart` | 58 | LocalSyncPrivacyGuard |
-| `lib/main.dart` | 29 | Dart module |
+| `lib/main.dart` | 36 | Dart module |
+| `lib/shared/constants/hero_tags.dart` | 8 | Shared Hero tag constants for cross-route transitions. |
 | `lib/shared/providers/ai_insights_usecase_provider.dart` | 23 | Dart module |
-| `lib/shared/providers/ai_repository_providers.dart` | 4 | Dart module |
+| `lib/shared/providers/ai_reconnect_provider.dart` | 14 | AiReconnectState |
+| `lib/shared/providers/ai_repository_providers.dart` | 65 | Dart module |
 | `lib/shared/providers/biomechanics_provider.dart` | 20 | Dart module |
-| `lib/shared/providers/gamification_providers.dart` | 37 | Dart module |
-| `lib/shared/providers/health_providers.dart` | 110 | HealthPermissionsNotifier |
+| `lib/shared/providers/character_providers.dart` | 29 | Loads the persisted [RunnerCharacter], creating one via class assignment |
+| `lib/shared/providers/coach_chat_seed_provider.dart` | 18 | CoachChatSeed |
+| `lib/shared/providers/daily_quests_provider.dart` | 60 | Dart module |
+| `lib/shared/providers/gamification_providers.dart` | 61 | Dart module |
+| `lib/shared/providers/health_import_providers.dart` | 23 | Dart module |
+| `lib/shared/providers/health_providers.dart` | 148 | HealthPermissionsNotifier, ImportedHealthDataNotifier |
 | `lib/shared/providers/health_repository_provider.dart` | 15 | Dart module |
+| `lib/shared/providers/huggingface_token_provider.dart` | 25 | HuggingFaceTokenManager |
+| `lib/shared/providers/measurable_quest_sync_provider.dart` | 79 | MeasurableQuestSync |
+| `lib/shared/providers/model_setup_provider.dart` | 121 | MissingHuggingFaceTokenException, ModelSetupNotifier |
+| `lib/shared/providers/model_setup_state.dart` | 17 | ModelSetupState |
 | `lib/shared/providers/nexus_lab_provider.dart` | 74 | NexusLabState, NexusLabNotifier |
+| `lib/shared/providers/onboarding_provider.dart` | 27 | OnboardingCompleted |
+| `lib/shared/providers/openrouter_api_key_provider.dart` | 28 | OpenRouterApiKeyManager |
+| `lib/shared/providers/settings_provider.dart` | 186 | SettingsState, Settings |
+| `lib/shared/providers/shared_preferences_provider.dart` | 12 | Synchronously accessible [SharedPreferences] — override at app startup. |
+| `lib/shared/providers/training_insights_provider.dart` | 1 | Dart module |
+| `lib/shared/providers/workout_session_lookup_provider.dart` | 16 | Resolves a [WorkoutSession] by id for deep-linked run routes. |
 | `lib/shared/utils/date_label.dart` | 20 | Formats today's date as "Mon, Jan 5". |
+| `lib/shared/utils/health_permission_feedback.dart` | 14 | User-facing copy for health permission flows — never expose raw exceptions. |
+| `lib/shared/utils/health_platform_labels.dart` | 41 | Platform-aware labels for health data sources. |
 | `lib/shared/utils/insight_text_formatter.dart` | 48 | Formats coaching insight text for concise, beginner-friendly UI labels. |
-| `lib/shared/widgets/gait_model_card.dart` | 225 | GaitModelCard, _CoefficientsRow, GaitModelCardAsync |
-| `lib/shared/widgets/glass_card.dart` | 64 | GlassCard |
-| `lib/shared/widgets/insight_expandable_card.dart` | 197 | InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, … |
+| `lib/shared/utils/navigation_utils.dart` | 11 | Pops the current route or navigates to [fallbackRoute] when nothing to pop. |
+| `lib/shared/utils/picked_file_bytes.dart` | 2 | Dart module |
+| `lib/shared/utils/picked_file_bytes_io.dart` | 15 | Dart module |
+| `lib/shared/utils/picked_file_bytes_web.dart` | 9 | Dart module |
+| `lib/shared/utils/run_date_label.dart` | 18 | Formats a workout date for run cards and Hero transitions. |
+| `lib/shared/utils/url_opener.dart` | 20 | Opens an external URL in the platform browser. |
+| `lib/shared/widgets/ai_lifecycle_guard.dart` | 74 | AiLifecycleGuard, _AiLifecycleGuardState |
+| `lib/shared/widgets/animated_async_content.dart` | 84 | AnimatedAsyncContent, FadeInOnAppear, _FadeInOnAppearState |
+| `lib/shared/widgets/animated_progress_bar.dart` | 43 | AnimatedProgressBar |
+| `lib/shared/widgets/charts/chart_placeholder.dart` | 15 | ChartPlaceholder |
+| `lib/shared/widgets/charts/hrv_chart.dart` | 86 | HrvChart |
+| `lib/shared/widgets/charts/load_chart.dart` | 90 | LoadChart |
+| `lib/shared/widgets/gait_model_card.dart` | 229 | GaitModelCard, _CoefficientsRow, GaitModelCardAsync |
+| `lib/shared/widgets/glass_card.dart` | 43 | GlassCard |
+| `lib/shared/widgets/insight_expandable_card.dart` | 221 | InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, … |
+| `lib/shared/widgets/kynos_bottom_nav.dart` | 192 | KynosBottomNavItem, KynosBottomNav, _NavBarItem |
 | `lib/shared/widgets/kynos_card.dart` | 57 | KynosCard |
 | `lib/shared/widgets/kynos_chip.dart` | 128 | KynosChip, _MetricChip, _AccentChip |
-| `lib/shared/widgets/kynos_hero_banner.dart` | 110 | KynosHeroBanner |
-| `lib/shared/widgets/kynos_loading_line.dart` | 53 | KynosLoadingLine |
+| `lib/shared/widgets/kynos_hero_banner.dart` | 125 | KynosHeroBanner |
+| `lib/shared/widgets/kynos_inline_error_card.dart` | 53 | KynosInlineErrorCard |
+| `lib/shared/widgets/kynos_loading_line.dart` | 59 | KynosLoadingLine |
+| `lib/shared/widgets/kynos_page_dots.dart` | 45 | KynosPageDots |
 | `lib/shared/widgets/kynos_privacy_footer.dart` | 25 | KynosPrivacyFooter |
 | `lib/shared/widgets/kynos_section_header.dart` | 21 | KynosSectionHeader |
+| `lib/shared/widgets/kynos_section_row.dart` | 38 | KynosSectionRow |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | KynosSkeleton |
-| `lib/shared/widgets/kynos_user_bubble.dart` | 45 | KynosUserBubble |
-| `lib/shared/widgets/metric_tile.dart` | 91 | MetricTile |
-| `lib/shared/widgets/nav_icon.dart` | 190 | NavIconPainter |
-| `lib/shared/widgets/run_card.dart` | 115 | RunCard |
-| `lib/shared/widgets/widgets.dart` | 14 | KYNOS shared widgets — barrel export. |
+| `lib/shared/widgets/kynos_user_bubble.dart` | 57 | KynosUserBubble |
+| `lib/shared/widgets/liquid_glass_button.dart` | 142 | LiquidGlassButton, LiquidGlassIconButton |
+| `lib/shared/widgets/liquid_glass_surface.dart` | 103 | LiquidGlassSurface |
+| `lib/shared/widgets/metric_tile.dart` | 131 | MetricTile |
+| `lib/shared/widgets/nav_icon.dart` | 241 | NavIconDefinition, NavIconPainter |
+| `lib/shared/widgets/responsive_center.dart` | 30 | ResponsiveCenter |
+| `lib/shared/widgets/run_card.dart` | 125 | RunCard |
+| `lib/shared/widgets/widgets.dart` | 23 | KYNOS shared widgets — barrel export. |
 
 ## Hot Files (do not grow)
 
 | File | Lines | Target |
 |------|------:|--------|
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 294 | Split if > 250 lines |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 600 | Split if > 250 lines |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 347 | Split if > 250 lines |
+| `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 339 | Split if > 250 lines |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 324 | Split if > 250 lines |
+| `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 298 | Split if > 250 lines |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 296 | Split if > 250 lines |
+| `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
+| `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
+| `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | Split if > 250 lines |
+| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 267 | Split if > 250 lines |
+| `lib/features/character/presentation/widgets/quest_card.dart` | 254 | Split if > 250 lines |
+| `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |
+| `lib/features/character/providers/adventure_provider.dart` | 251 | Split if > 250 lines |
+| `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 131 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 278 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->
+
 
 
 
