@@ -82,7 +82,7 @@ jobs:
       - name: Install semantic-release tooling
         run: npm ci
 
-      - name: Semantic release (APK + unsigned IPA)
+      - name: Semantic release (unsigned IPA only)
         id: semantic_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
