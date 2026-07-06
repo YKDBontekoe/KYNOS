@@ -11,6 +11,7 @@ import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/usecases/health/import_apple_health_export_usecase.dart';
 import 'package:kynos/domain/usecases/health/import_workout_usecase.dart';
 import 'package:kynos/infrastructure/health/drift_imported_health_store.dart';
+import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
 import 'package:kynos/infrastructure/health/imported_health_database.dart';
 import 'package:kynos/infrastructure/health/imported_health_store.dart';
 
@@ -67,6 +68,32 @@ void main() {
       );
       expect(summaries, isNotEmpty);
       expect(summaries.first.steps, 8421);
+    });
+
+    test('preview-then-import only parses the zip once', () async {
+      var parseCount = 0;
+      late AppleHealthExportParseResult preview;
+      final countingUseCase = ImportAppleHealthExportUseCase(
+        store: store,
+        importWorkout: ImportWorkoutUseCase(store),
+        parseZip: ({String? zipPath, List<int>? zipBytes}) async {
+          parseCount += 1;
+          return const AppleHealthExportParser().parseZip(zipBytes!);
+        },
+      );
+
+      preview = await const AppleHealthExportParser().parseZip(zipBytes);
+      parseCount += 1;
+
+      final result = await countingUseCase(
+        parsed: preview,
+        zipBytes: zipBytes,
+        now: DateTime(2026, 4, 22),
+      );
+
+      expect(result.failure, isNull);
+      expect(result.importedWorkouts, 1);
+      expect(parseCount, 1);
     });
 
     test('maps missing export.xml to HealthDataFailure', () async {
