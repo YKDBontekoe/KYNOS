@@ -41,7 +41,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final seed = ref.read(coachChatSeedProvider.notifier).consumeSeed();
     if (seed == null || seed.isEmpty) return;
     _seedApplied = true;
-    _textController.text = seed;
+    _textController.text = seed.message ?? '';
     _focusNode.requestFocus();
   }
 

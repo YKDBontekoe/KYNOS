@@ -1,16 +1,26 @@
+import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_chat_seed_provider.g.dart';
 
-/// Optional seed message injected when opening coach chat from the dashboard.
+/// Structured seed injected when opening coach chat from another feature.
 @Riverpod(keepAlive: true)
 class CoachChatSeed extends _$CoachChatSeed {
   @override
-  String? build() => null;
+  CoachChatSeedData? build() => null;
 
-  void setSeed(String? message) => state = message;
+  void setSeed(CoachChatSeedData? seed) => state = seed;
 
-  String? consumeSeed() {
+  /// Legacy helper for plain-text seeds.
+  void setMessage(String? message) {
+    if (message == null || message.trim().isEmpty) {
+      state = null;
+      return;
+    }
+    state = CoachChatSeedData(message: message.trim());
+  }
+
+  CoachChatSeedData? consumeSeed() {
     final seed = state;
     state = null;
     return seed;

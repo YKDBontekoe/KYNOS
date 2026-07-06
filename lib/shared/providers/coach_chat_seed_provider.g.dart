@@ -8,15 +8,15 @@ part of 'coach_chat_seed_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Optional seed message injected when opening coach chat from the dashboard.
+/// Structured seed injected when opening coach chat from another feature.
 
 @ProviderFor(CoachChatSeed)
 final coachChatSeedProvider = CoachChatSeedProvider._();
 
-/// Optional seed message injected when opening coach chat from the dashboard.
+/// Structured seed injected when opening coach chat from another feature.
 final class CoachChatSeedProvider
-    extends $NotifierProvider<CoachChatSeed, String?> {
-  /// Optional seed message injected when opening coach chat from the dashboard.
+    extends $NotifierProvider<CoachChatSeed, CoachChatSeedData?> {
+  /// Structured seed injected when opening coach chat from another feature.
   CoachChatSeedProvider._()
     : super(
         from: null,
@@ -36,29 +36,29 @@ final class CoachChatSeedProvider
   CoachChatSeed create() => CoachChatSeed();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
+  Override overrideWithValue(CoachChatSeedData? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
+      providerOverride: $SyncValueProvider<CoachChatSeedData?>(value),
     );
   }
 }
 
-String _$coachChatSeedHash() => r'd4401d94d354e9bd6b12eb6d77b695bc56f66a81';
+String _$coachChatSeedHash() => r'7ddc71f17a2a9fd0dc11f4a2511e9b6704527fa9';
 
-/// Optional seed message injected when opening coach chat from the dashboard.
+/// Structured seed injected when opening coach chat from another feature.
 
-abstract class _$CoachChatSeed extends $Notifier<String?> {
-  String? build();
+abstract class _$CoachChatSeed extends $Notifier<CoachChatSeedData?> {
+  CoachChatSeedData? build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<String?, String?>;
+    final ref = this.ref as $Ref<CoachChatSeedData?, CoachChatSeedData?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<String?, String?>,
-              String?,
+              AnyNotifier<CoachChatSeedData?, CoachChatSeedData?>,
+              CoachChatSeedData?,
               Object?,
               Object?
             >;

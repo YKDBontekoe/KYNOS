@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/features/training/presentation/widgets/training_insight_list_card.dart';
 import 'package:kynos/features/training/presentation/widgets/training_insight_text_card.dart';
 import 'package:kynos/features/training/providers/training_insights_provider.dart';
+import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -19,6 +21,15 @@ class TrainingInsightsCards extends ConsumerWidget {
   static final _logger = Logger();
 
   final AsyncValue<TrainingInsightsState> insightsState;
+
+  void _askCoach(
+    BuildContext context,
+    WidgetRef ref, {
+    required String seed,
+    CoachSeedTopic topic = CoachSeedTopic.training,
+  }) {
+    openCoachChat(context, ref, seed: seed, topic: topic);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,6 +64,20 @@ class TrainingInsightsCards extends ConsumerWidget {
               confidence: insights.confidence.label,
               usedModel: state.usedModel,
             ),
+            const Gap(tokens.Spacing.xs),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => _askCoach(
+                  context,
+                  ref,
+                  seed:
+                      'My session intent today is: "${insights.sessionIntent}". '
+                      'How should I execute this session?',
+                ),
+                child: const Text('Ask Coach'),
+              ),
+            ),
             const Gap(tokens.Spacing.md),
             const KynosSectionHeader(title: 'Adjustment Hints'),
             const Gap(tokens.Spacing.sm),
@@ -60,6 +85,21 @@ class TrainingInsightsCards extends ConsumerWidget {
               title: 'Adjustments',
               icon: Icons.tune_rounded,
               lines: insights.adjustmentHints,
+            ),
+            const Gap(tokens.Spacing.xs),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => _askCoach(
+                  context,
+                  ref,
+                  seed:
+                      'Given these training adjustments: '
+                      '${insights.adjustmentHints.join('; ')}. '
+                      'Which should I prioritise this week?',
+                ),
+                child: const Text('Ask Coach'),
+              ),
             ),
             const Gap(tokens.Spacing.md),
             const KynosSectionHeader(title: 'Post-Session Debrief'),
@@ -69,6 +109,21 @@ class TrainingInsightsCards extends ConsumerWidget {
               icon: Icons.summarize_rounded,
               lines: insights.postSessionDebrief,
               evidence: insights.evidence,
+            ),
+            const Gap(tokens.Spacing.xs),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => _askCoach(
+                  context,
+                  ref,
+                  seed:
+                      'Review my post-session debrief notes: '
+                      '${insights.postSessionDebrief.join('; ')}. '
+                      'What should I carry into my next run?',
+                ),
+                child: const Text('Ask Coach'),
+              ),
             ),
           ],
         );

@@ -15,11 +15,19 @@ class PostRunDebriefState {
     required this.debrief,
     required this.xpAmount,
     required this.workoutId,
+    required this.generatedAt,
   });
 
   final PostRunDebrief debrief;
   final int xpAmount;
   final String workoutId;
+  final DateTime generatedAt;
+
+  bool get isRecent =>
+      DateTime.now().difference(generatedAt) < const Duration(minutes: 30);
+
+  String get summaryText =>
+      '${debrief.highlight} Fix: ${debrief.oneFix} Recovery: ${debrief.recoveryNote}';
 }
 
 @Riverpod(keepAlive: true)
@@ -91,6 +99,7 @@ class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
           debrief: debrief,
           xpAmount: xpGain.amount,
           workoutId: latest.id,
+          generatedAt: DateTime.now(),
         ),
       );
     } on Object catch (error, stackTrace) {

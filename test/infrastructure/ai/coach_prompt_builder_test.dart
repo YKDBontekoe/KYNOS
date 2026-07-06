@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_messages.dart';
 import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
@@ -6,8 +7,8 @@ import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 void main() {
   group('buildCoachUserMessage', () {
     test('returns user message unchanged when health context is absent', () {
-      expect(buildCoachUserMessage('How is my cadence?', null), 'How is my cadence?');
-      expect(buildCoachUserMessage('How is my cadence?', []), 'How is my cadence?');
+      expect(buildCoachUserMessage('How is my cadence?', null), 'Athlete question: How is my cadence?');
+      expect(buildCoachUserMessage('How is my cadence?', []), 'Athlete question: How is my cadence?');
     });
 
     test('prepends health metrics without system instruction', () {
@@ -22,6 +23,7 @@ void main() {
             distanceMeters: 28000,
           ),
         ],
+        cloudLevel: CloudDataLevel.full,
       );
 
       expect(prompt, contains('Recent athlete metrics:'));

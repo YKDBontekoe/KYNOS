@@ -2,20 +2,20 @@ import 'dart:async';
 
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
-import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/domain/repositories/ai_coach_repository.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/features/coach_chat/utils/chat_history_codec.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
-import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/features/coach_chat/providers/coach_context_provider.dart';
+import 'package:kynos/features/coach_chat/providers/last_coach_context_provider.dart';
+import 'package:kynos/shared/providers/coach_usecase_providers.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_chat_provider.g.dart';
 
-const _coachHealthHistoryDays = 14;
 const _healthContextTimeout = Duration(seconds: 8);
 const _inferenceTimeout = Duration(seconds: 120);
 
@@ -140,25 +140,29 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       state = AsyncData([...current, userMsg, placeholder]);
     }
 
-    List<HealthSummary>? healthContext;
-    AiCoachRepository? repository;
+    CoachContext? coachContext;
     try {
-      final coachRepository = ref.read(aiCoachRepositoryProvider);
-      repository = coachRepository;
-      healthContext = await _loadHealthContext();
+      final sendCoach = ref.read(sendCoachMessageUseCaseProvider);
+      final chatRepository = ref.read(chatAiCoachRepositoryProvider);
 
-      final estimatedTokens = _estimateTokens(userMessage, healthContext);
+      coachContext = await _loadCoachContext();
+      ref.read(lastCoachContextProvider.notifier).set(coachContext);
 
-      await for (final chunk in coachRepository.chat(
+      final priorMessages = _priorMessagesForInference(
+        state.value ?? const [],
+        assistantId,
+      );
+
+      await for (final chunk in sendCoach(
         userMessage: userMessage,
-        healthContext: healthContext,
-        estimatedPromptTokens: estimatedTokens,
+        coachContext: coachContext,
+        conversationHistory: priorMessages,
         preferredBackend: preferredBackend,
       ).timeout(_inferenceTimeout)) {
         if (_cancelRequested) break;
 
         ref.read(lastAiInferenceBackendProvider.notifier).set(
-              coachRepository.lastBackend,
+              chatRepository.lastBackend,
             );
 
         final msgs = state.value!;
@@ -182,17 +186,19 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         assistantId,
         streaming: false,
         hasError: false,
-        attemptedBackend: coachRepository.lastBackend,
+        attemptedBackend: chatRepository.lastBackend,
       );
       await _persist();
     } catch (e, st) {
       if (_cancelRequested) return;
 
       _logger.e('Inference error', error: e, stackTrace: st);
-      healthContext ??= await _readHealthContextSafely();
+      coachContext ??= await _readCoachContextSafely();
+      ref.read(lastCoachContextProvider.notifier).set(coachContext);
 
       final attemptedBackend =
-          preferredBackend ?? repository?.lastBackend ?? AiInferenceBackend.onDevice;
+          preferredBackend ??
+          ref.read(chatAiCoachRepositoryProvider).lastBackend;
       final cloudConfigured =
           await ref.read(isCloudCoachConfiguredProvider.future);
       final canSwitchToCloud = cloudConfigured &&
@@ -210,7 +216,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       final fallback = showFallback
           ? CoachFallbackReply.forRecoveryQuestion(
               userMessage: userMessage,
-              healthContext: healthContext,
+              healthContext: coachContext.healthHistory,
             )
           : null;
 
@@ -226,6 +232,16 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     }
   }
 
+  List<ChatMessage> _priorMessagesForInference(
+    List<ChatMessage> all,
+    String currentAssistantId,
+  ) {
+    final withoutCurrent = all
+        .where((m) => m.id != currentAssistantId && !m.isStreaming)
+        .toList();
+    return withoutCurrent;
+  }
+
   AiInferenceBackend? _alternateBackend(AiInferenceBackend? attempted) {
     return switch (attempted) {
       AiInferenceBackend.onDevice ||
@@ -236,28 +252,31 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     };
   }
 
-  int _estimateTokens(String message, List<HealthSummary> healthContext) {
-    final chars = message.length + healthContext.length * 80;
-    return (chars / 4).round();
-  }
-
-  Future<List<HealthSummary>> _loadHealthContext() async {
+  Future<CoachContext> _loadCoachContext() async {
     try {
       return await ref
-          .read(healthHistoryProvider(days: _coachHealthHistoryDays).future)
+          .read(coachContextProvider.future)
           .timeout(_healthContextTimeout);
     } on TimeoutException {
-      _logger.w('Health context timed out; proceeding without history');
-      return const [];
+      _logger.w('Coach context timed out; using minimal context');
+      return ref.read(buildCoachContextUseCaseProvider).call(
+            healthHistory: const [],
+            recentRuns: const [],
+          );
     } on Object catch (error, stackTrace) {
       _logger.w(
-        'Health context unavailable; proceeding without history',
+        'Coach context unavailable; using minimal context',
         error: error,
         stackTrace: stackTrace,
       );
-      return const [];
+      return ref.read(buildCoachContextUseCaseProvider).call(
+            healthHistory: const [],
+            recentRuns: const [],
+          );
     }
   }
+
+  Future<CoachContext> _readCoachContextSafely() => _loadCoachContext();
 
   String _messageContent(String assistantId) {
     final msgs = state.value;
@@ -267,11 +286,10 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     return msgs[idx].content;
   }
 
-  Future<List<HealthSummary>> _readHealthContextSafely() => _loadHealthContext();
-
   Future<void> clearConversation() async {
     state = const AsyncData([]);
-    await ref.read(aiCoachRepositoryProvider).resetSession();
+    ref.read(lastCoachContextProvider.notifier).set(null);
+    await ref.read(chatAiCoachRepositoryProvider).resetSession();
     await _persist();
   }
 

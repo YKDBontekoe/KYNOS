@@ -15,6 +15,7 @@ import 'package:kynos/features/character/presentation/widgets/stats_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/summit_progress_card.dart';
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
+import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -22,6 +23,7 @@ import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
+import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
@@ -131,7 +133,17 @@ class CharacterPage extends ConsumerWidget {
                     },
                   ),
                   const Gap(tokens.Spacing.lg),
-                  CharacterHeroCard(character: character),
+                  CharacterHeroCard(
+                    character: character,
+                    onAskCoach: () => openCoachChat(
+                      context,
+                      ref,
+                      seed:
+                          'Why am I assigned as ${character.characterClass.name}? '
+                          'What does this class mean for my training?',
+                      topic: CoachSeedTopic.characterClass,
+                    ),
+                  ),
                   const Gap(tokens.Spacing.md),
                   XpBar(character: character),
                   const Gap(tokens.Spacing.lg),
@@ -141,7 +153,17 @@ class CharacterPage extends ConsumerWidget {
                   const Gap(tokens.Spacing.lg),
                   const KynosSectionHeader(title: "TODAY'S CAMP QUESTS"),
                   const Gap(tokens.Spacing.sm),
-                  QuestPanel(questsAsync: questsAsync),
+                  QuestPanel(
+                    questsAsync: questsAsync,
+                    onAskCoach: (quest) => openCoachChat(
+                      context,
+                      ref,
+                      seed:
+                          'How can I complete this quest: "${quest.objective}"?',
+                      topic: CoachSeedTopic.quest,
+                      questId: quest.id,
+                    ),
+                  ),
                   const Gap(tokens.Spacing.lg),
                   if (character.earnedTitles.isNotEmpty) ...[
                     const KynosSectionHeader(title: 'TITLES'),

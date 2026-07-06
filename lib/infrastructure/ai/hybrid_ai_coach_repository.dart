@@ -1,11 +1,13 @@
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
+import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/utils/ai_task_router.dart';
-import 'package:kynos/domain/utils/health_context_formatter.dart';
+import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
 /// Configuration for hybrid local/cloud coach routing.
@@ -62,6 +64,8 @@ class HybridAiCoachRepository implements AiCoachRepository {
   Stream<AiChunk> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
@@ -98,6 +102,8 @@ class HybridAiCoachRepository implements AiCoachRepository {
         modelId: config.selectedModelId!,
         userMessage: userMessage,
         healthContext: healthContext,
+        coachContext: coachContext,
+        conversationHistory: conversationHistory,
         cloudDataLevel: config.cloudDataLevel,
       );
       return;
@@ -107,6 +113,8 @@ class HybridAiCoachRepository implements AiCoachRepository {
     yield* _local.chat(
       userMessage: userMessage,
       healthContext: healthContext,
+      coachContext: coachContext,
+      conversationHistory: conversationHistory,
       taskKind: taskKind,
       estimatedPromptTokens: estimatedPromptTokens,
       preferredBackend: preferredBackend,
@@ -119,27 +127,43 @@ class HybridAiCoachRepository implements AiCoachRepository {
     required String modelId,
     required String userMessage,
     required List<HealthSummary>? healthContext,
+    required CoachContext? coachContext,
+    required List<ChatMessage>? conversationHistory,
     required CloudDataLevel cloudDataLevel,
   }) async* {
-    final contextLines = HealthContextFormatter.summarizeForPrompt(
-      healthContext ?? const [],
-      level: cloudDataLevel,
-    );
-    final userPrompt = StringBuffer()..writeln(userMessage);
-    if (contextLines.isNotEmpty) {
-      userPrompt
+    final contextBlock = buildCoachUserMessage(
+      '',
+      healthContext,
+      coachContext: coachContext,
+      cloudLevel: cloudDataLevel,
+    ).trim();
+
+    final userTurn = StringBuffer()..writeln(userMessage);
+    if (contextBlock.isNotEmpty) {
+      userTurn
         ..writeln()
-        ..writeln('Athlete context:')
-        ..writeln(contextLines.join('\n'));
+        ..writeln(contextBlock);
     }
 
+    final history = conversationHistory ?? const <ChatMessage>[];
+
     var emitted = false;
-    await for (final chunk in _cloud.streamCompletion(
-      apiKey: apiKey,
-      modelId: modelId,
-      systemPrompt: _cloudSystemPrompt,
-      userPrompt: userPrompt.toString(),
-    )) {
+    final stream = history.isEmpty
+        ? _cloud.streamCompletion(
+            apiKey: apiKey,
+            modelId: modelId,
+            systemPrompt: _cloudSystemPrompt,
+            userPrompt: userTurn.toString(),
+          )
+        : _cloud.streamChat(
+            apiKey: apiKey,
+            modelId: modelId,
+            systemPrompt: _cloudSystemPrompt,
+            conversationHistory: history,
+            userMessage: userTurn.toString(),
+          );
+
+    await for (final chunk in stream) {
       emitted = true;
       yield chunk;
     }

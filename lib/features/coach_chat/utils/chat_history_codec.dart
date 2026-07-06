@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:logger/logger.dart';
 
@@ -58,10 +59,13 @@ abstract final class ChatHistoryCodec {
       'timestamp': message.timestamp.toIso8601String(),
       'hasError': message.hasError,
       'userPromptForRetry': message.userPromptForRetry,
+      if (message.attemptedBackend != null)
+        'attemptedBackend': message.attemptedBackend!.name,
     };
   }
 
   static ChatMessage _fromMap(Map<String, dynamic> map) {
+    final backendName = map['attemptedBackend'] as String?;
     return ChatMessage(
       id: map['id'] as String,
       role: MessageRole.values.byName(map['role'] as String),
@@ -69,6 +73,9 @@ abstract final class ChatHistoryCodec {
       timestamp: DateTime.parse(map['timestamp'] as String),
       hasError: map['hasError'] as bool? ?? false,
       userPromptForRetry: map['userPromptForRetry'] as String?,
+      attemptedBackend: backendName == null
+          ? null
+          : AiInferenceBackend.values.byName(backendName),
     );
   }
 }

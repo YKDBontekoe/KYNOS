@@ -4,6 +4,8 @@ import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
+import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
@@ -28,6 +30,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   StreamController<AiIsolateResponse>? _responseController;
   StreamSubscription<dynamic>? _receiveSubscription;
   bool _initialized = false;
+  bool _warmChatSession = false;
   Future<void>? _initFuture;
   Future<void> _chatQueue = Future<void>.value();
   int _nextRequestId = 1;
@@ -42,6 +45,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   Stream<AiChunk> chat({
     required String userMessage,
     List<HealthSummary>? healthContext,
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
@@ -69,8 +74,16 @@ class IsolateAiCoachRepository implements AiCoachRepository {
             await _ensureIsolate();
             lastBackend = AiInferenceBackend.onDevice;
 
-            final prompt = _buildPrompt(userMessage, healthContext);
+            final includeHistory = !_warmChatSession;
+            final prompt = _buildPrompt(
+              userMessage,
+              healthContext,
+              coachContext: coachContext,
+              conversationHistory:
+                  includeHistory ? conversationHistory : null,
+            );
             await _chatWithRecovery(prompt: prompt, controller: controller);
+            _warmChatSession = true;
           } catch (error, stackTrace) {
             if (!controller.isClosed) {
               controller.addError(error, stackTrace);
@@ -217,8 +230,18 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     }
   }
 
-  String _buildPrompt(String userMessage, List<HealthSummary>? healthContext) {
-    final prompt = buildCoachUserMessage(userMessage, healthContext);
+  String _buildPrompt(
+    String userMessage,
+    List<HealthSummary>? healthContext, {
+    CoachContext? coachContext,
+    List<ChatMessage>? conversationHistory,
+  }) {
+    final prompt = buildCoachUserMessage(
+      userMessage,
+      healthContext,
+      coachContext: coachContext,
+      conversationHistory: conversationHistory,
+    );
     if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
       return prompt;
     }
@@ -289,6 +312,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   Future<void> _tearDownIsolate() async {
     _initialized = false;
+    _warmChatSession = false;
     _isolateSendPort = null;
     await _receiveSubscription?.cancel();
     _receiveSubscription = null;
@@ -302,6 +326,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   @override
   Future<void> resetSession() async {
+    _warmChatSession = false;
     if (_isolateSendPort == null) return;
     try {
       await _sendControlRequest(AiResetSessionRequest(requestId: _nextRequestId++));

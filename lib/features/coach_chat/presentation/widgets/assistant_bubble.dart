@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/coach_markdown_text.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
@@ -29,15 +29,6 @@ class AssistantBubble extends StatelessWidget {
   final VoidCallback? onTryAlternateBackend;
   final AiInferenceBackend? alternateBackend;
   final String? alternateBackendLabel;
-
-  Future<void> _copyMessage(BuildContext context) async {
-    if (content.isEmpty) return;
-    await Clipboard.setData(ClipboardData(text: content));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Message copied')),
-    );
-  }
 
   String? get _errorLabel {
     if (!hasError) return null;
@@ -78,28 +69,9 @@ class AssistantBubble extends StatelessWidget {
                   ? const TypingIndicator()
                   : StreamingTextPulse(
                       isActive: isStreaming && content.isNotEmpty,
-                      child: SelectableText(
-                        content,
+                      child: CoachMarkdownText(
+                        text: content,
                         style: textStyle,
-                        contextMenuBuilder: content.isEmpty
-                            ? null
-                            : (menuContext, editableTextState) {
-                                final items =
-                                    editableTextState.contextMenuButtonItems;
-                                return AdaptiveTextSelectionToolbar.buttonItems(
-                                  anchors: editableTextState.contextMenuAnchors,
-                                  buttonItems: [
-                                    ...items,
-                                    ContextMenuButtonItem(
-                                      onPressed: () {
-                                        ContextMenuController.removeAny();
-                                        _copyMessage(menuContext);
-                                      },
-                                      label: 'Copy message',
-                                    ),
-                                  ],
-                                );
-                              },
                       ),
                     ),
               if (hasError && (onRetry != null || onTryAlternateBackend != null)) ...[

@@ -15,9 +15,14 @@ import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 class QuestPanel extends ConsumerWidget {
-  const QuestPanel({super.key, required this.questsAsync});
+  const QuestPanel({
+    super.key,
+    required this.questsAsync,
+    this.onAskCoach,
+  });
 
   final AsyncValue<List<Quest>> questsAsync;
+  final void Function(Quest quest)? onAskCoach;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +49,7 @@ class QuestPanel extends ConsumerWidget {
         return Column(
           children: [
             for (final quest in quests) ...[
-              QuestCard(quest: quest),
+              QuestCard(quest: quest, onAskCoach: onAskCoach),
               if (quest != quests.last) const Gap(tokens.Spacing.sm),
             ],
           ],
@@ -55,9 +60,14 @@ class QuestPanel extends ConsumerWidget {
 }
 
 class QuestCard extends ConsumerWidget {
-  const QuestCard({super.key, required this.quest});
+  const QuestCard({
+    super.key,
+    required this.quest,
+    this.onAskCoach,
+  });
 
   final Quest quest;
+  final void Function(Quest quest)? onAskCoach;
 
   Color _difficultyColor(QuestDifficulty d) => switch (d) {
         QuestDifficulty.easy => AppTheme.exercise,
@@ -244,6 +254,11 @@ class QuestCard extends ConsumerWidget {
                     fontSize: 11,
                     color: AppTheme.tertiaryLabel,
                   ),
+                ),
+              if (!isCompleted && onAskCoach != null)
+                TextButton(
+                  onPressed: () => onAskCoach!(quest),
+                  child: const Text('Ask Coach'),
                 ),
             ],
           ),

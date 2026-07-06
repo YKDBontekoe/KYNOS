@@ -149,13 +149,19 @@ class MessageBubble extends ConsumerWidget {
   }
 }
 
-class CoachChatEmptyState extends StatelessWidget {
+class CoachChatEmptyState extends ConsumerWidget {
   const CoachChatEmptyState({super.key, required this.onSuggestionTap});
 
   final ValueChanged<String> onSuggestionTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cloudConfigured =
+        ref.watch(isCloudCoachConfiguredProvider).value ?? false;
+    final subtitle = cloudConfigured
+        ? 'Ask about training or recovery.\nOn-device or cloud coach when configured.'
+        : 'Ask about training or recovery.\nRuns on-device when a model is installed.';
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xl),
@@ -174,7 +180,7 @@ class CoachChatEmptyState extends StatelessWidget {
             ),
             const Gap(Spacing.sm),
             Text(
-              'Ask about training or recovery.\nAll analysis runs on-device.',
+              subtitle,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
