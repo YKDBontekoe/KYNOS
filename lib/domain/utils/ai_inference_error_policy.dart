@@ -7,9 +7,13 @@ abstract final class AiInferenceErrorPolicy {
     'Stream error',
     'INTERNAL',
     'OUT_OF_MEMORY',
+    'OUT OF MEMORY',
     'RESOURCE_EXHAUSTED',
+    'RESOURCE EXHAUSTED',
     'Chat not initialized',
     'Resource limit',
+    'too many resources',
+    'too much memory',
     'litert',
     'compiled model',
     'timed out',
@@ -27,21 +31,77 @@ abstract final class AiInferenceErrorPolicy {
     return false;
   }
 
-  static String userFriendlyMessage(Object error) {
+  static bool isResourceLimitError(Object error) {
+    final message = _messageFor(error).toLowerCase();
+    return message.contains('resource') ||
+        message.contains('out_of_memory') ||
+        message.contains('out of memory') ||
+        message.contains('resource_exhausted') ||
+        message.contains('too many resources') ||
+        message.contains('too much memory');
+  }
+
+  static String userFriendlyMessage(
+    Object error, {
+    bool canSwitchToCloud = false,
+    bool canSwitchToOnDevice = false,
+  }) {
     final message = _messageFor(error);
+    if (_isCloudError(message)) {
+      if (message.contains('401') || message.toLowerCase().contains('unauthorized')) {
+        return 'Your OpenRouter API key was rejected. Check Settings → AI & Cloud, then tap Retry.';
+      }
+      if (error is TimeoutException ||
+          message.toLowerCase().contains('timed out') ||
+          message.contains('TimeoutException')) {
+        return canSwitchToOnDevice
+            ? 'The cloud coach took too long to respond. Retry on cloud, or try on-device coaching instead.'
+            : 'The cloud coach took too long to respond. Tap Retry to try again.';
+      }
+      if (message.toLowerCase().contains('empty response')) {
+        return 'The cloud coach returned no text. Retry, choose a different model in Settings, or try on-device coaching.';
+      }
+      return canSwitchToOnDevice
+          ? 'Cloud coaching failed. Retry on cloud, or try on-device coaching instead.'
+          : 'Cloud coaching is temporarily unavailable. Tap Retry to try again.';
+    }
+    if (isResourceLimitError(error)) {
+      return canSwitchToCloud
+          ? 'The on-device model used too many resources on this device. '
+              'Tap Retry to try a lighter on-device mode, or use Try cloud coach if you have OpenRouter configured.'
+          : 'The on-device model used too many resources on this device. '
+              'Close other apps, wait a moment, then tap Retry to try a lighter on-device mode.';
+    }
     if (isRecoverable(error)) {
       if (error is TimeoutException ||
           message.toLowerCase().contains('timed out') ||
           message.contains('TimeoutException')) {
-        return 'The on-device model took too long to respond. Tap Retry to try again.';
+        return canSwitchToCloud
+            ? 'The on-device model took too long to respond. Retry on-device, or try cloud coaching instead.'
+            : 'The on-device model took too long to respond. Tap Retry to try again.';
       }
-      return 'The on-device model hit a resource limit. '
-          'Tap Retry — we will switch to a safer inference mode.';
+      return canSwitchToCloud
+          ? 'The on-device model hit a resource limit. Retry on-device, or try cloud coaching instead.'
+          : 'The on-device model hit a resource limit. Tap Retry to try a safer on-device mode.';
     }
     if (message.contains('No active Gemma model')) {
-      return 'The on-device model is not installed. Complete model setup, then try again.';
+      return canSwitchToCloud
+          ? 'The on-device model is not installed. Try cloud coaching, or complete model setup in Settings.'
+          : 'The on-device model is not installed. Complete model setup, then try again.';
     }
-    return 'On-device coaching is temporarily unavailable. Tap Retry or ask again in a moment.';
+    if (message.toLowerCase().contains('empty response')) {
+      return 'The coach returned no text. Tap Retry to try again.';
+    }
+    return canSwitchToCloud
+        ? 'On-device coaching is temporarily unavailable. Retry on-device, or try cloud coaching instead.'
+        : 'On-device coaching is temporarily unavailable. Tap Retry or ask again in a moment.';
+  }
+
+  static bool _isCloudError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('openrouter') ||
+        lower.contains('dioexception') ||
+        lower.contains('cloud coach');
   }
 
   static String _messageFor(Object error) {

@@ -44,6 +44,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) {
     final completer = Completer<void>();
     final previous = _chatQueue;
@@ -311,6 +312,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   @override
   Future<void> dispose() async {
+    _chatQueue = Future<void>.value();
     if (_isolateSendPort != null && _responseController != null) {
       const disposeRequestId = 0;
       final completer = Completer<void>();

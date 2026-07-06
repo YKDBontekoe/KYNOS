@@ -110,6 +110,7 @@ class _NotReadyAiCoach implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) =>
       const Stream.empty();
 
@@ -137,6 +138,7 @@ class _RefiningAiCoach implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) async* {
     yield response;
   }
@@ -166,6 +168,7 @@ class _ThrowingAiCoach implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) {
     if (throwOnChat) {
       return Stream<String>.error(StateError('chat failed'));

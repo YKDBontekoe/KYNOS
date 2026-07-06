@@ -162,6 +162,7 @@ class _FakeAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) async* {}
 
   @override

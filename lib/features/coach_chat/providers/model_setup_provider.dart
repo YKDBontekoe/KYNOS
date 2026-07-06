@@ -23,8 +23,9 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
   AsyncValue<ModelSetupState> build() =>
       const AsyncData(ModelSetupState(phase: ModelSetupPhase.checking));
 
-  Future<void> checkAndInstall() async {
+  Future<void> checkAndInstall({bool force = false}) async {
     if (_installInProgress) return;
+    if (!force && state.value?.isReady == true) return;
     _installInProgress = true;
     try {
       await _checkAndInstallImpl();
@@ -36,6 +37,12 @@ class ModelSetupNotifier extends _$ModelSetupNotifier {
   Future<void> _checkAndInstallImpl() async {
     state = const AsyncLoading();
     try {
+      final cloudReady = await ref.read(isCloudCoachConfiguredProvider.future);
+      if (cloudReady) {
+        state = const AsyncData(ModelSetupState(phase: ModelSetupPhase.ready));
+        return;
+      }
+
       final hfToken = await ref.read(huggingFaceTokenManagerProvider.future);
       if (hfToken == null || hfToken.isEmpty) {
         throw MissingHuggingFaceTokenException();
