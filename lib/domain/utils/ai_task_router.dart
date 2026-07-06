@@ -2,7 +2,8 @@ import 'package:kynos/domain/entities/ai_task_kind.dart';
 
 /// Routes AI tasks to local Gemma or OpenRouter cloud backends.
 abstract final class AiTaskRouter {
-  static const int coachChatCloudTokenThreshold = 800;
+  /// When cloud tasks are enabled, coach chat uses OpenRouter like other tasks.
+  static const int coachChatCloudTokenThreshold = 0;
 
   /// Whether this task may use OpenRouter when cloud is enabled.
   static bool isCloudEligible(AiTaskKind kind) {

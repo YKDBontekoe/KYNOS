@@ -29,6 +29,20 @@ abstract final class AiInferenceErrorPolicy {
 
   static String userFriendlyMessage(Object error) {
     final message = _messageFor(error);
+    if (_isCloudError(message)) {
+      if (message.contains('401') || message.toLowerCase().contains('unauthorized')) {
+        return 'Your OpenRouter API key was rejected. Check Settings → AI & Cloud, then tap Retry.';
+      }
+      if (error is TimeoutException ||
+          message.toLowerCase().contains('timed out') ||
+          message.contains('TimeoutException')) {
+        return 'The cloud coach took too long to respond. Tap Retry to try again.';
+      }
+      if (message.toLowerCase().contains('empty response')) {
+        return 'The cloud coach returned no text. Tap Retry or choose a different model in Settings.';
+      }
+      return 'Cloud coaching is temporarily unavailable. Tap Retry or switch to on-device mode.';
+    }
     if (isRecoverable(error)) {
       if (error is TimeoutException ||
           message.toLowerCase().contains('timed out') ||
@@ -41,7 +55,17 @@ abstract final class AiInferenceErrorPolicy {
     if (message.contains('No active Gemma model')) {
       return 'The on-device model is not installed. Complete model setup, then try again.';
     }
+    if (message.toLowerCase().contains('empty response')) {
+      return 'The coach returned no text. Tap Retry to try again.';
+    }
     return 'On-device coaching is temporarily unavailable. Tap Retry or ask again in a moment.';
+  }
+
+  static bool _isCloudError(String message) {
+    final lower = message.toLowerCase();
+    return lower.contains('openrouter') ||
+        lower.contains('dioexception') ||
+        lower.contains('cloud coach');
   }
 
   static String _messageFor(Object error) {

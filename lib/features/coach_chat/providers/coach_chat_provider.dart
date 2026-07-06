@@ -15,6 +15,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'coach_chat_provider.g.dart';
 
 const _coachHealthHistoryDays = 14;
+const _healthContextTimeout = Duration(seconds: 8);
+const _inferenceTimeout = Duration(seconds: 120);
 
 @Riverpod(keepAlive: true)
 class CoachChatNotifier extends _$CoachChatNotifier {
@@ -109,18 +111,15 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     List<HealthSummary>? healthContext;
     try {
       final repository = ref.read(aiCoachRepositoryProvider);
-      final history = await ref.read(
-        healthHistoryProvider(days: _coachHealthHistoryDays).future,
-      );
-      healthContext = history;
+      healthContext = await _loadHealthContext();
 
-      final estimatedTokens = _estimateTokens(userMessage, history);
+      final estimatedTokens = _estimateTokens(userMessage, healthContext);
 
       await for (final chunk in repository.chat(
         userMessage: userMessage,
         healthContext: healthContext,
         estimatedPromptTokens: estimatedTokens,
-      )) {
+      ).timeout(_inferenceTimeout)) {
         if (_cancelRequested) break;
 
         ref.read(lastAiInferenceBackendProvider.notifier).set(
@@ -138,6 +137,11 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       }
 
       if (_cancelRequested) return;
+
+      final finalContent = _messageContent(assistantId);
+      if (finalContent.trim().isEmpty) {
+        throw StateError('Coach returned an empty response');
+      }
 
       _finaliseMessage(assistantId, streaming: false, hasError: false);
       await _persist();
@@ -169,15 +173,33 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     return (chars / 4).round();
   }
 
-  Future<List<HealthSummary>> _readHealthContextSafely() async {
+  Future<List<HealthSummary>> _loadHealthContext() async {
     try {
-      return await ref.read(
-        healthHistoryProvider(days: _coachHealthHistoryDays).future,
+      return await ref
+          .read(healthHistoryProvider(days: _coachHealthHistoryDays).future)
+          .timeout(_healthContextTimeout);
+    } on TimeoutException {
+      _logger.w('Health context timed out; proceeding without history');
+      return const [];
+    } on Object catch (error, stackTrace) {
+      _logger.w(
+        'Health context unavailable; proceeding without history',
+        error: error,
+        stackTrace: stackTrace,
       );
-    } on Object {
       return const [];
     }
   }
+
+  String _messageContent(String assistantId) {
+    final msgs = state.value;
+    if (msgs == null) return '';
+    final idx = msgs.indexWhere((m) => m.id == assistantId);
+    if (idx == -1) return '';
+    return msgs[idx].content;
+  }
+
+  Future<List<HealthSummary>> _readHealthContextSafely() => _loadHealthContext();
 
   Future<void> clearConversation() async {
     state = const AsyncData([]);

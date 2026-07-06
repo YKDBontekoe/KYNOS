@@ -5,7 +5,9 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/utils/ai_task_router.dart';
+import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
 /// Configuration for hybrid local/cloud coach routing.
@@ -68,45 +70,119 @@ class HybridAiCoachRepository implements AiCoachRepository {
     final config = await _configReader();
     final apiKey = await _keyStorage.readOpenRouterKey();
     final hasKey = apiKey != null && apiKey.isNotEmpty;
+    final cloudAvailable =
+        config.canUseCloud && hasKey && config.selectedModelId != null;
 
-    final useCloud = AiTaskRouter.shouldUseCloud(
-      kind: taskKind,
-      cloudTasksEnabled: config.cloudTasksEnabled,
-      hasApiKey: hasKey,
-      hasSelectedModel: config.selectedModelId != null,
-      estimatedPromptTokens: estimatedPromptTokens,
-    );
+    final useCloud = cloudAvailable &&
+        AiTaskRouter.shouldUseCloud(
+          kind: taskKind,
+          cloudTasksEnabled: config.cloudTasksEnabled,
+          hasApiKey: hasKey,
+          hasSelectedModel: config.selectedModelId != null,
+          estimatedPromptTokens: estimatedPromptTokens,
+        );
 
     if (useCloud && apiKey != null && config.selectedModelId != null) {
-      lastBackend = AiInferenceBackend.openRouter;
-      final contextLines = HealthContextFormatter.summarizeForPrompt(
-        healthContext ?? const [],
-        level: config.cloudDataLevel,
-      );
-      final userPrompt = StringBuffer()..writeln(userMessage);
-      if (contextLines.isNotEmpty) {
-        userPrompt
-          ..writeln()
-          ..writeln('Athlete context:')
-          ..writeln(contextLines.join('\n'));
+      try {
+        lastBackend = AiInferenceBackend.openRouter;
+        yield* _streamCloud(
+          apiKey: apiKey,
+          modelId: config.selectedModelId!,
+          userMessage: userMessage,
+          healthContext: healthContext,
+          cloudDataLevel: config.cloudDataLevel,
+        );
+        return;
+      } on Object {
+        final tier = await GemmaRuntimeTier.resolve();
+        if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(tier)) {
+          rethrow;
+        }
+      }
+    }
+
+    final tier = await GemmaRuntimeTier.resolve();
+    final canRunLocal = GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(tier);
+
+    if (!canRunLocal) {
+      if (cloudAvailable && apiKey != null && config.selectedModelId != null) {
+        lastBackend = AiInferenceBackend.openRouter;
+        yield* _streamCloud(
+          apiKey: apiKey,
+          modelId: config.selectedModelId!,
+          userMessage: userMessage,
+          healthContext: healthContext,
+          cloudDataLevel: config.cloudDataLevel,
+        );
+        return;
       }
 
-      yield* _cloud.streamCompletion(
-        apiKey: apiKey,
-        modelId: config.selectedModelId!,
-        systemPrompt: _cloudSystemPrompt,
-        userPrompt: userPrompt.toString(),
+      yield* _local.chat(
+        userMessage: userMessage,
+        healthContext: healthContext,
+        taskKind: taskKind,
+        estimatedPromptTokens: estimatedPromptTokens,
       );
+      lastBackend = _local.lastBackend;
       return;
     }
 
-    yield* _local.chat(
-      userMessage: userMessage,
-      healthContext: healthContext,
-      taskKind: taskKind,
-      estimatedPromptTokens: estimatedPromptTokens,
+    try {
+      yield* _local.chat(
+        userMessage: userMessage,
+        healthContext: healthContext,
+        taskKind: taskKind,
+        estimatedPromptTokens: estimatedPromptTokens,
+      );
+      lastBackend = _local.lastBackend;
+    } on Object {
+      if (!cloudAvailable || apiKey == null || config.selectedModelId == null) {
+        rethrow;
+      }
+      lastBackend = AiInferenceBackend.openRouter;
+      yield* _streamCloud(
+        apiKey: apiKey,
+        modelId: config.selectedModelId!,
+        userMessage: userMessage,
+        healthContext: healthContext,
+        cloudDataLevel: config.cloudDataLevel,
+      );
+    }
+  }
+
+  Stream<AiChunk> _streamCloud({
+    required String apiKey,
+    required String modelId,
+    required String userMessage,
+    required List<HealthSummary>? healthContext,
+    required CloudDataLevel cloudDataLevel,
+  }) async* {
+    final contextLines = HealthContextFormatter.summarizeForPrompt(
+      healthContext ?? const [],
+      level: cloudDataLevel,
     );
-    lastBackend = _local.lastBackend;
+    final userPrompt = StringBuffer()..writeln(userMessage);
+    if (contextLines.isNotEmpty) {
+      userPrompt
+        ..writeln()
+        ..writeln('Athlete context:')
+        ..writeln(contextLines.join('\n'));
+    }
+
+    var emitted = false;
+    await for (final chunk in _cloud.streamCompletion(
+      apiKey: apiKey,
+      modelId: modelId,
+      systemPrompt: _cloudSystemPrompt,
+      userPrompt: userPrompt.toString(),
+    )) {
+      emitted = true;
+      yield chunk;
+    }
+
+    if (!emitted) {
+      throw StateError('Cloud coach returned an empty response');
+    }
   }
 
   @override

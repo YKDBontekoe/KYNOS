@@ -102,11 +102,27 @@ class OpenRouterApiClient {
       options: Options(
         headers: {'Authorization': 'Bearer $apiKey'},
         responseType: ResponseType.stream,
+        validateStatus: (status) => status != null && status < 500,
       ),
     );
 
+    if (response.statusCode != null && response.statusCode! >= 400) {
+      final errorBody = await response.data?.stream
+          .transform(utf8.decoder)
+          .join();
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        message: errorBody?.isNotEmpty == true
+            ? errorBody
+            : 'OpenRouter request failed (${response.statusCode})',
+      );
+    }
+
     final stream = response.data?.stream;
-    if (stream == null) return;
+    if (stream == null) {
+      throw StateError('OpenRouter returned an empty stream');
+    }
 
     var buffer = '';
     await for (final chunk in stream) {

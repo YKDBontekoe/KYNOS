@@ -311,6 +311,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   @override
   Future<void> dispose() async {
+    _chatQueue = Future<void>.value();
     if (_isolateSendPort != null && _responseController != null) {
       const disposeRequestId = 0;
       final completer = Completer<void>();
