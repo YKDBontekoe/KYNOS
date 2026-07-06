@@ -151,6 +151,7 @@ abstract final class OnDeviceModelCatalog {
     capabilities: {
       OnDeviceModelCapability.functionCalling,
       OnDeviceModelCapability.vision,
+      OnDeviceModelCapability.audio,
       OnDeviceModelCapability.multilingual,
     },
     bestFor: 'Multimodal chat',

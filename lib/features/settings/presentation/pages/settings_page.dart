@@ -9,7 +9,7 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
-import 'package:kynos/domain/entities/on_device_model.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/settings_appearance_section.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
@@ -25,27 +25,14 @@ import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
 String _onDeviceModelSubtitle(String modelId) {
   final model = OnDeviceModelCatalog.byId(modelId);
-  final highlights = <String>[
-    for (final capability in [
-      OnDeviceModelCapability.thinkingMode,
-      OnDeviceModelCapability.vision,
-      OnDeviceModelCapability.functionCalling,
-    ])
-      if (model.hasCapability(capability)) _capabilityHighlight(capability),
+  final highlights = [
+    for (final capability in OnDeviceModelCapabilityUi.settingsHighlights)
+      if (model.hasCapability(capability))
+        OnDeviceModelCapabilityUi.label(capability),
   ].take(2);
 
   if (highlights.isEmpty) return model.name;
   return '${model.name} · ${highlights.join(' · ')}';
-}
-
-String _capabilityHighlight(OnDeviceModelCapability capability) {
-  return switch (capability) {
-    OnDeviceModelCapability.functionCalling => 'Tools',
-    OnDeviceModelCapability.thinkingMode => 'Thinking',
-    OnDeviceModelCapability.vision => 'Vision',
-    OnDeviceModelCapability.audio => 'Audio',
-    OnDeviceModelCapability.multilingual => 'Multilingual',
-  };
 }
 
 class SettingsPage extends ConsumerStatefulWidget {

@@ -7,6 +7,7 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/on_device_model.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/on_device_model_card.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
@@ -117,36 +118,17 @@ class _OnDeviceModelPickerPageState
                   spacing: tokens.Spacing.xs,
                   runSpacing: tokens.Spacing.xs,
                   children: [
-                    _FilterChip(
-                      label: 'Tools',
-                      isSelected: _activeFilters.contains(
-                        OnDeviceModelCapability.functionCalling,
+                    for (final capability
+                        in OnDeviceModelCapabilityUi.filterable)
+                      _FilterChip(
+                        label: OnDeviceModelCapabilityUi.label(capability),
+                        isSelected: _activeFilters.contains(capability),
+                        color: OnDeviceModelCapabilityUi.color(
+                          capability,
+                          kynos,
+                        ),
+                        onTap: () => _toggleFilter(capability),
                       ),
-                      color: kynos.stand,
-                      onTap: () => _toggleFilter(
-                        OnDeviceModelCapability.functionCalling,
-                      ),
-                    ),
-                    _FilterChip(
-                      label: 'Thinking',
-                      isSelected: _activeFilters.contains(
-                        OnDeviceModelCapability.thinkingMode,
-                      ),
-                      color: kynos.move,
-                      onTap: () => _toggleFilter(
-                        OnDeviceModelCapability.thinkingMode,
-                      ),
-                    ),
-                    _FilterChip(
-                      label: 'Vision',
-                      isSelected: _activeFilters.contains(
-                        OnDeviceModelCapability.vision,
-                      ),
-                      color: kynos.exercise,
-                      onTap: () => _toggleFilter(
-                        OnDeviceModelCapability.vision,
-                      ),
-                    ),
                   ],
                 ),
                 const Gap(tokens.Spacing.md),

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/on_device_model.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -76,8 +77,8 @@ class OnDeviceModelCard extends StatelessWidget {
                 ),
                 ...model.capabilities.map(
                   (capability) => KynosChip.accent(
-                    label: _capabilityLabel(capability),
-                    color: _capabilityColor(capability, kynos),
+                    label: OnDeviceModelCapabilityUi.label(capability),
+                    color: OnDeviceModelCapabilityUi.color(capability, kynos),
                   ),
                 ),
                 if (model.requiresHuggingFaceToken)
@@ -110,29 +111,6 @@ class OnDeviceModelCard extends StatelessWidget {
       OnDeviceModelFamily.qwen2 => 'Qwen 2.5',
       OnDeviceModelFamily.phi => 'Phi-4',
       OnDeviceModelFamily.functionGemma => 'FunctionGemma',
-    };
-  }
-
-  String _capabilityLabel(OnDeviceModelCapability capability) {
-    return switch (capability) {
-      OnDeviceModelCapability.functionCalling => 'Tools',
-      OnDeviceModelCapability.thinkingMode => 'Thinking',
-      OnDeviceModelCapability.vision => 'Vision',
-      OnDeviceModelCapability.audio => 'Audio',
-      OnDeviceModelCapability.multilingual => 'Multilingual',
-    };
-  }
-
-  Color _capabilityColor(
-    OnDeviceModelCapability capability,
-    KynosThemeExtension kynos,
-  ) {
-    return switch (capability) {
-      OnDeviceModelCapability.functionCalling => kynos.stand,
-      OnDeviceModelCapability.thinkingMode => kynos.move,
-      OnDeviceModelCapability.vision => kynos.exercise,
-      OnDeviceModelCapability.audio => kynos.purple,
-      OnDeviceModelCapability.multilingual => kynos.secondaryLabel,
     };
   }
 }
