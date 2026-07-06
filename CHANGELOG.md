@@ -1,3 +1,11 @@
+# [1.13.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.2...v1.13.0) (2026-07-06)
+
+
+### Features
+
+* add motion polish across navigation, dashboard, and coach chat ([#65](https://github.com/YKDBontekoe/KYNOS/issues/65)) ([557d321](https://github.com/YKDBontekoe/KYNOS/commit/557d3210c4616ba6a03fb08ca9317b6d0ca89e0a))
+* implement 35 quality-of-life improvements across KYNOS ([#64](https://github.com/YKDBontekoe/KYNOS/issues/64)) ([34081e2](https://github.com/YKDBontekoe/KYNOS/commit/34081e26f378dcbc09a213b37c31cc24e3252938))
+
 ## [1.12.2](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.1...v1.12.2) (2026-07-06)
 
 
