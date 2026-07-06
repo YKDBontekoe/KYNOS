@@ -1,13 +1,13 @@
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/infrastructure/health/imported_health_store.dart';
+import 'package:kynos/domain/repositories/imported_health_persistence.dart';
 
 /// Validates and persists an imported workout to local storage.
 class ImportWorkoutUseCase {
   const ImportWorkoutUseCase(this._store);
 
-  final ImportedHealthStore _store;
+  final ImportedHealthPersistence _store;
 
   Future<({WorkoutSession? workout, Failure? failure})> call({
     required WorkoutSession workout,

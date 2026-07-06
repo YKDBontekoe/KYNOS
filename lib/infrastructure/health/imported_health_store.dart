@@ -1,9 +1,11 @@
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/repositories/imported_health_persistence.dart';
 
 /// Contract for locally persisted imported workouts.
-abstract interface class ImportedHealthStore {
+abstract interface class ImportedHealthStore
+    implements ImportedHealthPersistence {
   Future<int> workoutCount();
 
   Future<List<WorkoutSession>> getWorkouts({
