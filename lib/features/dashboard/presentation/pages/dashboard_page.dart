@@ -23,8 +23,8 @@ import 'package:kynos/features/dashboard/presentation/widgets/trend_carousel.dar
 import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card.dart';
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
-import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/features/training/providers/training_insights_provider.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
