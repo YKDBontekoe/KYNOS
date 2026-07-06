@@ -114,4 +114,3 @@ class CoachConversations extends _$CoachConversations {
     }
   }
 }
-
