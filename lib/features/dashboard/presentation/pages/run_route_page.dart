@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -9,12 +7,19 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/utils/run_route_analytics.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/run_detail/run_insight_chips.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/run_detail/run_pace_chart.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/run_detail/run_route_map_section.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/run_detail/run_split_list.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/run_detail/run_summary_metrics.dart';
 import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/workout_session_lookup_provider.dart';
 import 'package:kynos/shared/utils/run_date_label.dart';
-import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
+import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
+import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class RunRoutePage extends ConsumerWidget {
@@ -133,135 +138,46 @@ class _RouteContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kynos = context.kynosTheme;
-    final hasPoints = points.isNotEmpty;
+    final analytics = computeRunRouteAnalytics(session: run, points: points);
 
-    return Column(
-      children: [
-        Expanded(
-          child: hasPoints
-              ? _AppleRouteMap(points: points)
-              : _UnavailableMapPlaceholder(points: points),
-        ),
-        Container(
-          color: kynos.card,
-          width: double.infinity,
-          padding: const EdgeInsets.all(tokens.Spacing.md),
-          child: Wrap(
-            spacing: tokens.Spacing.md,
-            runSpacing: tokens.Spacing.sm,
-            children: [
-              _chip(context, 'Date', formatRunHeroDateLabel(run.start)),
-              _chip(context, 'Duration', _durationLabel(run.duration)),
-              _chip(
-                context,
-                'Distance',
-                run.distanceMeters == null
-                    ? '—'
-                    : '${(run.distanceMeters! / 1000).toStringAsFixed(2)} km',
-              ),
-              _chip(context, 'Points', points.length.toString()),
-            ],
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(child: RunRouteMapSection(points: points)),
+        SliverToBoxAdapter(child: RunRouteExternalMapsButton(points: points)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: tokens.Spacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                RunSummaryMetrics(run: run, analytics: analytics),
+                const Gap(tokens.Spacing.lg),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.Spacing.md),
+                  child: KynosSectionHeader(title: 'Pace Profile'),
+                ),
+                const Gap(tokens.Spacing.sm),
+                RunPaceChart(analytics: analytics),
+                const Gap(tokens.Spacing.lg),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.Spacing.md),
+                  child: KynosSectionHeader(title: 'Kilometer Splits'),
+                ),
+                const Gap(tokens.Spacing.sm),
+                RunSplitList(analytics: analytics),
+                const Gap(tokens.Spacing.lg),
+                RunInsightChips(
+                  run: run,
+                  analytics: analytics,
+                  points: points,
+                ),
+                const Gap(tokens.Spacing.lg),
+                const Center(child: KynosPrivacyFooter()),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
-
-  Widget _chip(BuildContext context, String label, String value) {
-    final kynos = context.kynosTheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: tokens.Spacing.sm,
-        vertical: tokens.Spacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: kynos.background,
-        borderRadius: BorderRadius.circular(tokens.Radius.md),
-      ),
-      child: Text('$label: $value'),
-    );
-  }
-}
-
-class _AppleRouteMap extends StatelessWidget {
-  const _AppleRouteMap({required this.points});
-
-  final List<WorkoutRoutePoint> points;
-
-  @override
-  Widget build(BuildContext context) {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
-      return _UnavailableMapPlaceholder(points: points);
-    }
-
-    final payload = <String, dynamic>{
-      'points': points
-          .map((p) => <String, dynamic>{
-                'latitude': p.latitude,
-                'longitude': p.longitude,
-                'timestamp': p.timestamp?.toIso8601String(),
-              })
-          .toList(),
-    };
-
-    return UiKitView(
-      viewType: 'kynos/apple_route_map',
-      creationParams: payload,
-      creationParamsCodec: const StandardMessageCodec(),
-    );
-  }
-}
-
-class _UnavailableMapPlaceholder extends StatelessWidget {
-  const _UnavailableMapPlaceholder({required this.points});
-
-  final List<WorkoutRoutePoint> points;
-
-  @override
-  Widget build(BuildContext context) {
-    final kynos = context.kynosTheme;
-    final first = points.isNotEmpty ? points.first : null;
-    final mapsUrl = first == null
-        ? null
-        : 'https://www.google.com/maps/search/?api=1&query=${first.latitude},${first.longitude}';
-
-    return ColoredBox(
-      color: kynos.separator.withValues(alpha: 0.35),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(tokens.Spacing.md),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'No in-app map on this platform.\n'
-                'KYNOS reads HKWorkoutRoute on iOS when present.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              if (mapsUrl != null) ...[
-                const Gap(tokens.Spacing.md),
-                FilledButton.icon(
-                  onPressed: () => openExternalUrl(mapsUrl),
-                  icon: const Icon(Icons.map_outlined, size: 18),
-                  label: const Text('Open in Maps'),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-String _durationLabel(Duration duration) {
-  final h = duration.inHours;
-  final m = duration.inMinutes % 60;
-  final s = duration.inSeconds % 60;
-  if (h > 0) {
-    return '${h}h ${m}m';
-  }
-  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
 }

@@ -6,6 +6,7 @@ import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/domain/utils/pace_format.dart';
 
 class GenerateTrainingInsightsUseCase {
   const GenerateTrainingInsightsUseCase({
@@ -186,7 +187,10 @@ class GenerateTrainingInsightsUseCase {
     final latestDistance = latest.distanceMeters == null
         ? null
         : latest.distanceMeters! / 1000;
-    final latestPace = _pacePerKm(latest.duration, latest.distanceMeters);
+    final latestPace = formatPaceFromSession(
+      duration: latest.duration,
+      distanceMeters: latest.distanceMeters,
+    );
 
     return [
       if (latestDistance != null && latestPace != null)
@@ -194,14 +198,6 @@ class GenerateTrainingInsightsUseCase {
       'Weekly load is ${thisWeekDistanceKm.toStringAsFixed(1)} km (${distanceChangePct >= 0 ? '+' : ''}${distanceChangePct.toStringAsFixed(0)}%).',
       'Next tweak: keep first 10 minutes easier before quality work.',
     ];
-  }
-
-  String? _pacePerKm(Duration duration, double? distanceMeters) {
-    if (distanceMeters == null || distanceMeters <= 0) return null;
-    final paceSeconds = duration.inSeconds / (distanceMeters / 1000);
-    final paceMinutes = paceSeconds ~/ 60;
-    final paceRemainderSeconds = (paceSeconds % 60).round();
-    return '$paceMinutes:${paceRemainderSeconds.toString().padLeft(2, '0')} /km';
   }
 
   Future<TrainingInsights?> _tryRefineWithModel({
