@@ -1,26 +1,19 @@
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/core/constants/imported_workout_ids.dart';
+import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/entities/workout_route_point.dart';
+import 'package:kynos/domain/repositories/imported_health_persistence.dart';
 import 'package:kynos/domain/usecases/health/import_workout_usecase.dart';
-import 'package:kynos/infrastructure/health/drift_imported_health_store.dart';
-import 'package:kynos/infrastructure/health/imported_health_database.dart';
-import 'package:kynos/infrastructure/health/imported_health_store.dart';
 
 void main() {
   group('ImportWorkoutUseCase', () {
-    late ImportedHealthDatabase db;
-    late ImportedHealthStore store;
+    late _FakeImportedHealthPersistence store;
     late ImportWorkoutUseCase useCase;
 
     setUp(() {
-      db = ImportedHealthDatabase(NativeDatabase.memory());
-      store = DriftImportedHealthStore(db);
+      store = _FakeImportedHealthPersistence();
       useCase = ImportWorkoutUseCase(store);
-    });
-
-    tearDown(() async {
-      await db.close();
     });
 
     WorkoutSession validSession() {
@@ -85,4 +78,39 @@ void main() {
       expect(result.failure, isNotNull);
     });
   });
+}
+
+class _FakeImportedHealthPersistence implements ImportedHealthPersistence {
+  final workouts = <WorkoutSession>[];
+
+  @override
+  Future<void> clearAll() async => workouts.clear();
+
+  @override
+  Future<List<HealthSummary>> getSummaries({
+    required DateTime since,
+  }) async =>
+      [];
+
+  @override
+  Future<List<WorkoutRoutePoint>> getRoutePoints(String workoutId) async => [];
+
+  @override
+  Future<List<WorkoutSession>> getWorkouts({
+    required DateTime since,
+    int? limit,
+  }) async =>
+      workouts;
+
+  @override
+  Future<void> saveSummaries(List<HealthSummary> summaries) async {}
+
+  @override
+  Future<void> saveWorkout({
+    required WorkoutSession workout,
+    List<WorkoutRoutePoint> routePoints = const [],
+  }) async => workouts.add(workout);
+
+  @override
+  Future<int> workoutCount() async => workouts.length;
 }

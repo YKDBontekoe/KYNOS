@@ -2,54 +2,49 @@ import 'dart:convert';
 
 import 'package:archive/archive.dart';
 import 'package:kynos/core/constants/imported_workout_ids.dart';
-import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/domain/usecases/health/apple_health_export_parser.dart'
+    as domain;
+
 import 'package:kynos/infrastructure/health/import/apple_health_record_aggregator.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_workout_builder.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_xml_event_stream.dart';
 import 'package:kynos/infrastructure/health/import/gpx_workout_parser.dart';
 import 'package:xml/xml_events.dart';
 
-/// A running workout parsed from an Apple Health export.
-class AppleHealthWorkoutImport {
-  const AppleHealthWorkoutImport({
-    required this.workout,
-    this.routePoints = const [],
-  });
-
-  final WorkoutSession workout;
-  final List<WorkoutRoutePoint> routePoints;
-}
-
-/// Result of parsing an Apple Health `export.zip` archive.
-class AppleHealthExportParseResult {
-  const AppleHealthExportParseResult({
-    required this.summaries,
-    required this.workouts,
-    required this.recordCount,
-    required this.skippedWorkouts,
-  });
-
-  final List<HealthSummary> summaries;
-  final List<AppleHealthWorkoutImport> workouts;
-  final int recordCount;
-  final int skippedWorkouts;
-}
+typedef AppleHealthExportParseResult = domain.AppleHealthExportParseResult;
+typedef AppleHealthWorkoutImport = domain.AppleHealthWorkoutImport;
 
 /// Parses Apple Health `export.zip` into daily summaries and running workouts.
 ///
 /// Uses streaming I/O so large `export.xml` files do not need to fit fully in
 /// memory. On native platforms prefer [parseZipFile] with a file path.
-class AppleHealthExportParser {
+class AppleHealthExportParser implements domain.AppleHealthExportParser {
   const AppleHealthExportParser({
     GpxWorkoutParser? gpxParser,
   }) : _gpxParser = gpxParser ?? const GpxWorkoutParser();
 
   final GpxWorkoutParser _gpxParser;
 
+  @override
+  Future<domain.AppleHealthExportParseResult> parse({
+    List<int>? zipBytes,
+    String? zipPath,
+  }) {
+    if (zipPath != null && zipPath.isNotEmpty) {
+      return parseZipFile(zipPath);
+    }
+    if (zipBytes != null) {
+      return parseZip(zipBytes);
+    }
+    throw ArgumentError('Either zipPath or zipBytes must be provided.');
+  }
+
   /// Parses a zip archive from an on-disk path without loading the zip bytes.
-  Future<AppleHealthExportParseResult> parseZipFile(String zipPath) async {
+  Future<domain.AppleHealthExportParseResult> parseZipFile(
+    String zipPath,
+  ) async {
     final input = InputFileStream(zipPath);
     try {
       final archive = ZipDecoder().decodeStream(input);
@@ -60,13 +55,17 @@ class AppleHealthExportParser {
   }
 
   /// Parses a zip archive held in memory (web and tests).
-  Future<AppleHealthExportParseResult> parseZip(List<int> zipBytes) async {
+  Future<domain.AppleHealthExportParseResult> parseZip(
+    List<int> zipBytes,
+  ) async {
     final input = InputMemoryStream(zipBytes);
     final archive = ZipDecoder().decodeStream(input);
     return _parseArchive(archive);
   }
 
-  Future<AppleHealthExportParseResult> _parseArchive(Archive archive) async {
+  Future<domain.AppleHealthExportParseResult> _parseArchive(
+    Archive archive,
+  ) async {
     final files = _indexArchive(archive);
     final exportXmlFile = _findExportXmlFile(files);
     if (exportXmlFile == null) {
@@ -102,7 +101,7 @@ class AppleHealthExportParser {
     return null;
   }
 
-  Future<AppleHealthExportParseResult> _parseExportXmlStream(
+  Future<domain.AppleHealthExportParseResult> _parseExportXmlStream(
     ArchiveFile exportXmlFile,
     Map<String, ArchiveFile> files,
   ) async {
@@ -122,12 +121,12 @@ class AppleHealthExportParser {
     }
   }
 
-  Future<AppleHealthExportParseResult> _consumeXmlEvents(
+  Future<domain.AppleHealthExportParseResult> _consumeXmlEvents(
     Stream<XmlEvent> events,
     Map<String, ArchiveFile> files,
   ) async {
     final aggregator = AppleHealthRecordAggregator();
-    final workouts = <AppleHealthWorkoutImport>[];
+    final workouts = <domain.AppleHealthWorkoutImport>[];
     var recordCount = 0;
     var skippedWorkouts = 0;
 
@@ -181,7 +180,7 @@ class AppleHealthExportParser {
       }
     }
 
-    return AppleHealthExportParseResult(
+    return domain.AppleHealthExportParseResult(
       summaries: aggregator.finalize(),
       workouts: workouts,
       recordCount: recordCount,
@@ -189,7 +188,7 @@ class AppleHealthExportParser {
     );
   }
 
-  AppleHealthWorkoutImport? _finalizeWorkout(
+  domain.AppleHealthWorkoutImport? _finalizeWorkout(
     AppleHealthWorkoutBuilder builder,
     Map<String, ArchiveFile> files,
   ) {
@@ -245,7 +244,10 @@ class AppleHealthExportParser {
       endLongitude: routePoints.isEmpty ? null : routePoints.last.longitude,
     );
 
-    return AppleHealthWorkoutImport(workout: workout, routePoints: routePoints);
+    return domain.AppleHealthWorkoutImport(
+      workout: workout,
+      routePoints: routePoints,
+    );
   }
 
   String _stableWorkoutId(DateTime start, DateTime end) {

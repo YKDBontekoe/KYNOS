@@ -1,7 +1,7 @@
 import 'package:kynos/core/errors/failures.dart';
+import 'package:kynos/domain/repositories/imported_health_persistence.dart';
+import 'package:kynos/domain/usecases/health/apple_health_export_parser.dart';
 import 'package:kynos/domain/usecases/health/import_workout_usecase.dart';
-import 'package:kynos/infrastructure/health/import/apple_health_export_isolate.dart';
-import 'package:kynos/infrastructure/health/imported_health_store.dart';
 
 /// Result of importing an Apple Health `export.zip` archive.
 class ImportAppleHealthExportResult {
@@ -23,12 +23,15 @@ class ImportAppleHealthExportResult {
 /// Parses and persists an Apple Health export archive.
 class ImportAppleHealthExportUseCase {
   const ImportAppleHealthExportUseCase({
-    required ImportedHealthStore store,
+    required ImportedHealthPersistence store,
+    required AppleHealthExportParser parser,
     required ImportWorkoutUseCase importWorkout,
   })  : _store = store,
+        _parser = parser,
         _importWorkout = importWorkout;
 
-  final ImportedHealthStore _store;
+  final ImportedHealthPersistence _store;
+  final AppleHealthExportParser _parser;
   final ImportWorkoutUseCase _importWorkout;
 
   Future<ImportAppleHealthExportResult> call({
@@ -37,7 +40,7 @@ class ImportAppleHealthExportUseCase {
     DateTime? now,
   }) async {
     try {
-      final parsed = await parseAppleHealthZipAsync(
+      final parsed = await _parser.parse(
         zipPath: zipPath,
         zipBytes: zipBytes,
       );
