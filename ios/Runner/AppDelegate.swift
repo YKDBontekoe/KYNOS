@@ -33,6 +33,33 @@ import GameKit
     if let gameKitRegistrar = registry.registrar(forPlugin: "GameKitChannel") {
       GameKitChannel.register(with: gameKitRegistrar)
     }
+
+    if let thermalRegistrar = registry.registrar(forPlugin: "DeviceThermalChannel") {
+      DeviceThermalChannel.register(with: thermalRegistrar)
+    }
+  }
+}
+
+// MARK: - Device Thermal Channel
+
+final class DeviceThermalChannel: NSObject {
+  static func register(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "kynos/device_thermal",
+      binaryMessenger: registrar.messenger()
+    )
+    let instance = DeviceThermalChannel()
+    channel.setMethodCallHandler(instance.handle)
+  }
+
+  private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    switch call.method {
+    case "isThermallyThrottled":
+      let state = ProcessInfo.processInfo.thermalState
+      result(state == .serious || state == .critical)
+    default:
+      result(FlutterMethodNotImplemented)
+    }
   }
 }
 

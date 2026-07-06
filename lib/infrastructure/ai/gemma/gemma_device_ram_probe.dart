@@ -30,15 +30,22 @@ abstract final class GemmaDeviceRamProbe {
   }
 
   static int? _iosRamFromMachine(String machine) {
+    const eightGbMachines = {
+      'iPhone16,1', 'iPhone16,2',
+      'iPhone17,1', 'iPhone17,2', 'iPhone17,3', 'iPhone17,4',
+    };
     const sixGbMachines = {
       'iPhone14,2', 'iPhone14,3', 'iPhone15,2', 'iPhone15,3',
-      'iPhone16,1', 'iPhone16,2',
+      'iPhone15,4', 'iPhone15,5',
     };
     const fourGbMachines = {
       'iPhone13,1', 'iPhone13,2', 'iPhone13,3', 'iPhone13,4',
       'iPhone14,4', 'iPhone14,5',
     };
 
+    if (eightGbMachines.contains(machine)) {
+      return 8 * 1024 * 1024 * 1024;
+    }
     if (sixGbMachines.contains(machine)) {
       return 6 * 1024 * 1024 * 1024;
     }

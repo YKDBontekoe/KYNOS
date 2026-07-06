@@ -3,18 +3,12 @@ import 'dart:isolate';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
-import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
+import 'package:kynos/domain/utils/gemma_inference_limits.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_messages.dart';
+import 'package:kynos/infrastructure/ai/gemma/gemma_inference_session.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
-
-const _systemInstruction =
-    'You are KYNOS Coach — an expert on-device running coach. '
-    'Give concise, biomechanics-aware advice. '
-    'Never reveal you are an AI model or reference any training data.';
-
-const _maxCoachReplyTokens = 256;
 
 Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
   final receivePort = ReceivePort();
@@ -22,7 +16,21 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
 
   InferenceModel? model;
   InferenceChat? chat;
+  GemmaInferenceTier tier = GemmaInferenceTier.constrained;
+  AiPreferredBackend activeBackend = AiPreferredBackend.cpu;
   bool messengerInitialized = false;
+
+  Future<void> ensureSession({AiPreferredBackend? backendOverride}) async {
+    tier = await GemmaRuntimeTier.resolve();
+    activeBackend = backendOverride ?? preferredBackendFromTier(tier);
+    final session = await loadGemmaCoachSession(
+      tier: tier,
+      backend: activeBackend,
+      existingModel: model,
+    );
+    model = session.model;
+    chat = session.chat;
+  }
 
   await for (final message in receivePort) {
     if (message is AiInitRequest) {
@@ -42,53 +50,78 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
           mainSendPort.send(
             AiIsolateError(
               'No active Gemma model is installed. Complete model setup before starting chat.',
+              requestId: 0,
             ),
           );
           continue;
         }
 
-        final tier = await GemmaRuntimeTier.resolve();
-        final backend = tier == GemmaInferenceTier.full
-            ? PreferredBackend.gpu
-            : PreferredBackend.cpu;
-
-        model ??= await FlutterGemma.getActiveModel(
-          maxTokens: AppConstants.modelContextWindow,
-          preferredBackend: backend,
-        );
-
-        chat = await model.createChat(
-          systemInstruction: _systemInstruction,
-          maxOutputTokens: _maxCoachReplyTokens,
-        );
-
+        await ensureSession();
         mainSendPort.send(AiIsolateReady());
       } catch (e) {
-        mainSendPort.send(AiIsolateError(e.toString()));
+        mainSendPort.send(AiIsolateError(e.toString(), requestId: 0));
+      }
+      continue;
+    }
+
+    if (message is AiReloadChatRequest) {
+      try {
+        if (model == null) {
+          await ensureSession();
+        } else {
+          await chat?.clearHistory();
+          chat = await recreateCoachChat(model: model!, tier: tier);
+        }
+        mainSendPort.send(AiIsolateDone(requestId: message.requestId));
+      } catch (e) {
+        mainSendPort.send(
+          AiIsolateError(e.toString(), requestId: message.requestId),
+        );
+      }
+      continue;
+    }
+
+    if (message is AiReloadModelRequest) {
+      try {
+        activeBackend = message.backend;
+        await ensureSession(backendOverride: message.backend);
+        mainSendPort.send(AiIsolateDone(requestId: message.requestId));
+      } catch (e) {
+        mainSendPort.send(
+          AiIsolateError(e.toString(), requestId: message.requestId),
+        );
       }
       continue;
     }
 
     if (message is AiChatRequest) {
       if (chat == null || model == null) {
-        mainSendPort.send(AiIsolateError('Chat not initialized'));
+        mainSendPort.send(
+          AiIsolateError('Chat not initialized', requestId: message.requestId),
+        );
         continue;
       }
 
+      final prompt = _truncatePrompt(message.userMessage);
+
       try {
-        await chat.addQueryChunk(
-          Message.text(text: message.userMessage, isUser: true),
+        await chat!.addQueryChunk(
+          Message.text(text: prompt, isUser: true),
         );
 
-        await for (final response in chat.generateChatResponseAsync()) {
+        await for (final response in chat!.generateChatResponseAsync()) {
           if (response is TextResponse && response.token.isNotEmpty) {
-            mainSendPort.send(AiIsolateChunk(response.token));
+            mainSendPort.send(
+              AiIsolateChunk(response.token, requestId: message.requestId),
+            );
           }
         }
 
-        mainSendPort.send(AiIsolateDone());
+        mainSendPort.send(AiIsolateDone(requestId: message.requestId));
       } catch (e) {
-        mainSendPort.send(AiIsolateError(e.toString()));
+        mainSendPort.send(
+          AiIsolateError(e.toString(), requestId: message.requestId),
+        );
       }
       continue;
     }
@@ -96,9 +129,11 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
     if (message is AiResetSessionRequest) {
       try {
         await chat?.clearHistory();
-        mainSendPort.send(AiIsolateDone());
+        mainSendPort.send(AiIsolateDone(requestId: message.requestId));
       } catch (e) {
-        mainSendPort.send(AiIsolateError(e.toString()));
+        mainSendPort.send(
+          AiIsolateError(e.toString(), requestId: message.requestId),
+        );
       }
       continue;
     }
@@ -110,9 +145,16 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
         chat = null;
         mainSendPort.send(AiIsolateDone());
       } catch (e) {
-        mainSendPort.send(AiIsolateError(e.toString()));
+        mainSendPort.send(AiIsolateError(e.toString(), requestId: 0));
       }
       break;
     }
   }
+}
+
+String _truncatePrompt(String prompt) {
+  if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
+    return prompt;
+  }
+  return prompt.substring(0, GemmaInferenceLimits.maxPromptCharacters);
 }

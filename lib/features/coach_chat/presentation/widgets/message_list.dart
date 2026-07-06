@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
+import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
@@ -32,18 +34,24 @@ class MessageList extends StatelessWidget {
   }
 }
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends ConsumerWidget {
   const MessageBubble({super.key, required this.message});
 
   final ChatMessage message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return switch (message.role) {
       MessageRole.user => KynosUserBubble(text: message.content),
       MessageRole.assistant => AssistantBubble(
           content: message.content,
           isStreaming: message.isStreaming,
+          hasError: message.hasError,
+          onRetry: message.hasError && message.userPromptForRetry != null
+              ? () => ref
+                  .read(coachChatProvider.notifier)
+                  .retryMessage(message.id)
+              : null,
         ),
     };
   }

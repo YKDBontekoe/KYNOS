@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+enum AiPreferredBackend { gpu, cpu }
+
 // Request messages
 sealed class AiIsolateRequest {}
 
@@ -11,9 +13,26 @@ class AiInitRequest implements AiIsolateRequest {
 }
 
 class AiChatRequest implements AiIsolateRequest {
-  AiChatRequest(this.userMessage);
+  AiChatRequest(this.userMessage, {required this.requestId});
 
   final String userMessage;
+  final int requestId;
+}
+
+class AiReloadChatRequest implements AiIsolateRequest {
+  AiReloadChatRequest({required this.requestId});
+
+  final int requestId;
+}
+
+class AiReloadModelRequest implements AiIsolateRequest {
+  AiReloadModelRequest({
+    required this.backend,
+    required this.requestId,
+  });
+
+  final AiPreferredBackend backend;
+  final int requestId;
 }
 
 class AiTrainRegressionRequest implements AiIsolateRequest {
@@ -38,7 +57,11 @@ class AiInferRegressionRequest implements AiIsolateRequest {
   final double b2;
 }
 
-class AiResetSessionRequest implements AiIsolateRequest {}
+class AiResetSessionRequest implements AiIsolateRequest {
+  AiResetSessionRequest({this.requestId = 0});
+
+  final int requestId;
+}
 
 class AiDisposeRequest implements AiIsolateRequest {}
 
@@ -60,12 +83,17 @@ sealed class AiIsolateResponse {}
 class AiIsolateReady implements AiIsolateResponse {}
 
 class AiIsolateChunk implements AiIsolateResponse {
-  AiIsolateChunk(this.chunk);
+  AiIsolateChunk(this.chunk, {required this.requestId});
 
   final String chunk;
+  final int requestId;
 }
 
-class AiIsolateDone implements AiIsolateResponse {}
+class AiIsolateDone implements AiIsolateResponse {
+  AiIsolateDone({this.requestId = 0});
+
+  final int requestId;
+}
 
 class AiTrainRegressionResult implements AiIsolateResponse {
   AiTrainRegressionResult({
@@ -86,7 +114,8 @@ class AiInferRegressionResult implements AiIsolateResponse {
 }
 
 class AiIsolateError implements AiIsolateResponse {
-  AiIsolateError(this.error);
+  AiIsolateError(this.error, {required this.requestId});
 
   final String error;
+  final int requestId;
 }

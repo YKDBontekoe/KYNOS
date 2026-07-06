@@ -21,7 +21,7 @@ Future<void> regressionIsolateEntrypoint(SendPort mainSendPort) async {
           ),
         );
       } catch (e) {
-        mainSendPort.send(AiIsolateError(e.toString()));
+        mainSendPort.send(AiIsolateError(e.toString(), requestId: 0));
       }
       continue;
     }

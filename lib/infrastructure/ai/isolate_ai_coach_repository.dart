@@ -6,11 +6,14 @@ import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
+import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
+import 'package:kynos/domain/utils/gemma_inference_limits.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_bridge.dart';
 import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
+import 'package:logger/logger.dart';
 
 /// On-device Gemma coach running in a background isolate.
 class IsolateAiCoachRepository implements AiCoachRepository {
@@ -18,6 +21,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       : _keyStorage = keyStorage ?? SecureApiKeyStorage();
 
   final SecureApiKeyStorage _keyStorage;
+  final _logger = Logger();
   Isolate? _isolate;
   SendPort? _isolateSendPort;
   ReceivePort? _receivePort;
@@ -26,6 +30,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   bool _initialized = false;
   Future<void>? _initFuture;
   Future<void> _chatQueue = Future<void>.value();
+  int _nextRequestId = 1;
 
   @override
   bool get isReady => _initialized;
@@ -64,23 +69,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
             lastBackend = AiInferenceBackend.onDevice;
 
             final prompt = _buildPrompt(userMessage, healthContext);
-            late final StreamSubscription<AiIsolateResponse> sub;
-            sub = _responseController!.stream.listen((response) {
-              if (response is AiIsolateChunk) {
-                controller.add(response.chunk);
-              } else if (response is AiIsolateDone) {
-                unawaited(sub.cancel());
-                unawaited(controller.close());
-              } else if (response is AiIsolateError) {
-                unawaited(sub.cancel());
-                controller.addError(StateError(response.error));
-                unawaited(controller.close());
-              }
-            });
-
-            _isolateSendPort!.send(AiChatRequest(prompt));
-            await controller.done;
-            await sub.cancel();
+            await _chatWithRecovery(prompt: prompt, controller: controller);
           } catch (error, stackTrace) {
             if (!controller.isClosed) {
               controller.addError(error, stackTrace);
@@ -101,8 +90,139 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     return controller.stream;
   }
 
-  String _buildPrompt(String userMessage, List<HealthSummary>? healthContext) =>
-      buildCoachUserMessage(userMessage, healthContext);
+  Future<void> _chatWithRecovery({
+    required String prompt,
+    required StreamController<AiChunk> controller,
+  }) async {
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (var attempt = 0; attempt < AiChatRecoveryPlan.maxAttempts; attempt++) {
+      try {
+        final chunks = await _runSingleChatAttempt(prompt);
+        for (final chunk in chunks) {
+          if (!controller.isClosed) controller.add(chunk);
+        }
+        if (!controller.isClosed) await controller.close();
+        return;
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+        _logger.w(
+          'On-device chat attempt ${attempt + 1} failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+
+        final canRetry = attempt < AiChatRecoveryPlan.maxAttempts - 1 &&
+            AiInferenceErrorPolicy.isRecoverable(error);
+        if (!canRetry) break;
+
+        final action = AiChatRecoveryPlan.actionBeforeRetry(attempt);
+        try {
+          await _applyRecoveryAction(action);
+        } catch (recoveryError, recoveryStack) {
+          _logger.w(
+            'Recovery action $action failed',
+            error: recoveryError,
+            stackTrace: recoveryStack,
+          );
+          if (action == AiChatRecoveryAction.respawnIsolate) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (!controller.isClosed) {
+      controller.addError(lastError ?? StateError('Unknown inference error'), lastStackTrace);
+      await controller.close();
+    }
+  }
+
+  Future<List<AiChunk>> _runSingleChatAttempt(String prompt) async {
+    final requestId = _nextRequestId++;
+    final buffer = <AiChunk>[];
+    final completer = Completer<void>();
+
+    late final StreamSubscription<AiIsolateResponse> sub;
+    sub = _responseController!.stream.listen((response) {
+      if (response is AiIsolateChunk && response.requestId == requestId) {
+        buffer.add(response.chunk);
+      } else if (response is AiIsolateDone && response.requestId == requestId) {
+        if (!completer.isCompleted) completer.complete();
+      } else if (response is AiIsolateError && response.requestId == requestId) {
+        if (!completer.isCompleted) {
+          completer.completeError(StateError(response.error));
+        }
+      }
+    });
+
+    _isolateSendPort!.send(AiChatRequest(prompt, requestId: requestId));
+
+    try {
+      await completer.future.timeout(const Duration(seconds: 120));
+      return buffer;
+    } finally {
+      await sub.cancel();
+    }
+  }
+
+  Future<void> _applyRecoveryAction(AiChatRecoveryAction action) async {
+    switch (action) {
+      case AiChatRecoveryAction.reloadChat:
+        await _sendControlRequest(AiReloadChatRequest(requestId: _nextRequestId++));
+      case AiChatRecoveryAction.reloadModelCpu:
+        await _sendControlRequest(
+          AiReloadModelRequest(
+            backend: AiPreferredBackend.cpu,
+            requestId: _nextRequestId++,
+          ),
+        );
+      case AiChatRecoveryAction.respawnIsolate:
+        await _tearDownIsolate();
+        await _ensureIsolate();
+      case AiChatRecoveryAction.none:
+        return;
+    }
+  }
+
+  Future<void> _sendControlRequest(AiIsolateRequest request) async {
+    final requestId = switch (request) {
+      AiReloadChatRequest(:final requestId) => requestId,
+      AiReloadModelRequest(:final requestId) => requestId,
+      AiResetSessionRequest(:final requestId) => requestId,
+      _ => 0,
+    };
+
+    final completer = Completer<void>();
+    late final StreamSubscription<AiIsolateResponse> sub;
+    sub = _responseController!.stream.listen((response) {
+      if (response is AiIsolateDone && response.requestId == requestId) {
+        if (!completer.isCompleted) completer.complete();
+      } else if (response is AiIsolateError && response.requestId == requestId) {
+        if (!completer.isCompleted) {
+          completer.completeError(StateError(response.error));
+        }
+      }
+    });
+
+    _isolateSendPort!.send(request);
+
+    try {
+      await completer.future.timeout(const Duration(seconds: 30));
+    } finally {
+      await sub.cancel();
+    }
+  }
+
+  String _buildPrompt(String userMessage, List<HealthSummary>? healthContext) {
+    final prompt = buildCoachUserMessage(userMessage, healthContext);
+    if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
+      return prompt;
+    }
+    return prompt.substring(0, GemmaInferenceLimits.maxPromptCharacters);
+  }
 
   Future<void> _ensureIsolate() async {
     if (_isolateSendPort != null && _initialized) return;
@@ -182,31 +302,27 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   @override
   Future<void> resetSession() async {
     if (_isolateSendPort == null) return;
-    final completer = Completer<void>();
-    late final StreamSubscription<AiIsolateResponse> sub;
-    sub = _responseController!.stream.listen((response) {
-      if (response is AiIsolateDone) {
-        completer.complete();
-      } else if (response is AiIsolateError) {
-        completer.completeError(StateError(response.error));
-      }
-    });
-    _isolateSendPort!.send(AiResetSessionRequest());
-    await completer.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () {},
-    );
-    await sub.cancel();
+    try {
+      await _sendControlRequest(AiResetSessionRequest(requestId: _nextRequestId++));
+    } on Object catch (error, stackTrace) {
+      _logger.w('resetSession failed', error: error, stackTrace: stackTrace);
+    }
   }
 
   @override
   Future<void> dispose() async {
     if (_isolateSendPort != null && _responseController != null) {
+      const disposeRequestId = 0;
       final completer = Completer<void>();
       late final StreamSubscription<AiIsolateResponse> sub;
       sub = _responseController!.stream.listen((response) {
-        if (response is AiIsolateDone || response is AiIsolateError) {
-          if (!completer.isCompleted) completer.complete();
+        final matchesDispose = switch (response) {
+          AiIsolateDone(:final requestId) => requestId == disposeRequestId,
+          AiIsolateError(:final requestId) => requestId == disposeRequestId,
+          _ => false,
+        };
+        if (matchesDispose && !completer.isCompleted) {
+          completer.complete();
         }
       });
       _isolateSendPort!.send(AiDisposeRequest());
