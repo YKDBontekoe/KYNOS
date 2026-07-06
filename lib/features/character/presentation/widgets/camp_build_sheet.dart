@@ -83,7 +83,7 @@ class CampBuildSheet extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onExpand,
                   icon: const Icon(Icons.explore_outlined),
-                  label: Text(
+                  label: const Text(
                     'Expand (${GamificationConstants.momentumPerTileExpand} Momentum)',
                   ),
                 ),

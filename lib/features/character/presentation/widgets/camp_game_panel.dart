@@ -90,7 +90,7 @@ class _CampGamePanelState extends ConsumerState<CampGamePanel> {
                             .restCamp()
                         : null,
                     icon: const Icon(Icons.nightlight_round),
-                    label: Text(
+                    label: const Text(
                       'Rest (${GamificationConstants.focusCostRest} Focus)',
                     ),
                   ),
