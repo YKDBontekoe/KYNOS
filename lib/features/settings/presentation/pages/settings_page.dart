@@ -220,9 +220,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   const Gap(tokens.Spacing.xs),
                   Text(
-                    'Required to download the on-device Gemma coach model. '
-                    'Create a token at huggingface.co/settings/tokens with '
-                    'read access to gated models.',
+                    'Required for gated Gemma models. Public models like Qwen3 0.6B '
+                    'do not need a token. Create one at huggingface.co/settings/tokens.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: kynos.secondaryLabel,
+                        ),
+                  ),
+                  Divider(color: kynos.separator, height: 1),
+                  ListTile(
+                    leading: Icon(Icons.memory_rounded, color: kynos.purple),
+                    title: Text(
+                      'On-device model',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(settings.selectedLocalModelName),
+                    trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
+                    onTap: () async {
+                      await context.push<String>(Routes.onDeviceModels);
+                    },
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  const Gap(tokens.Spacing.xs),
+                  Text(
+                    'Choose a lightweight local model for coach chat. '
+                    'Smaller models use less RAM on your phone.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: kynos.secondaryLabel,
                         ),

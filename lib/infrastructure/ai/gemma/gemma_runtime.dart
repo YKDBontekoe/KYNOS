@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_gemma_litertlm/flutter_gemma_litertlm.dart';
-import 'package:kynos/core/constants/app_constants.dart';
+import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
+import 'package:kynos/domain/entities/on_device_model.dart';
+import 'package:kynos/infrastructure/ai/gemma/on_device_model_installer.dart';
 
 /// Central bootstrap for flutter_gemma 1.x opt-in inference engines.
 ///
@@ -9,6 +11,10 @@ import 'package:kynos/core/constants/app_constants.dart';
 /// [FlutterGemma.getActiveModel] or model installation can run.
 abstract final class GemmaRuntime {
   static const _inferenceEngines = [LiteRtLmEngine()];
+
+  static String? _installedCatalogId;
+
+  static String? get installedCatalogId => _installedCatalogId;
 
   static Future<void> initialize({String? huggingFaceToken}) async {
     await FlutterGemma.initialize(
@@ -52,21 +58,23 @@ abstract final class GemmaRuntime {
     if (FlutterGemma.hasActiveModel()) {
       await FlutterGemma.clearActiveInferenceIdentity();
     }
+    _installedCatalogId = null;
   }
 
-  /// Starts installing the on-device Gemma 4 E2B model (.litertlm).
+  /// Starts installing an on-device model (.litertlm).
+  static InferenceInstallationBuilder installModel(OnDeviceModel model) =>
+      OnDeviceModelInstaller.builderFor(model);
+
+  static String downloadUrlFor(OnDeviceModel model) =>
+      model.downloadUrl(isWeb: kIsWeb);
+
+  /// Legacy Gemma 4 install entry point.
   static InferenceInstallationBuilder installGemma4E2B() =>
-      FlutterGemma.installModel(
-        modelType: ModelType.gemma4,
-        fileType: ModelFileType.litertlm,
-      );
+      installModel(OnDeviceModelCatalog.gemma4E2b);
 
-  /// HuggingFace URL for the active platform.
-  static String get modelDownloadUrl {
-    if (kIsWeb) {
-      return 'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm'
-          '/resolve/main/gemma-4-E2B-it-web.litertlm?download=true';
-    }
-    return AppConstants.modelDownloadUrl;
-  }
+  /// Legacy default download URL.
+  static String get modelDownloadUrl =>
+      downloadUrlFor(OnDeviceModelCatalog.gemma4E2b);
+
+  static void markInstalled(String catalogId) => _installedCatalogId = catalogId;
 }

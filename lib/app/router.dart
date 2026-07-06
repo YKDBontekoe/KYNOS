@@ -16,6 +16,7 @@ import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
 import 'package:kynos/features/settings/presentation/pages/health_import_page.dart';
 import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart';
 import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
+import 'package:kynos/features/settings/presentation/pages/on_device_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
 
 /// All named route paths — single source of truth.
@@ -30,6 +31,7 @@ abstract final class Routes {
   static const settings = '/settings';
   static const nexusLab = '/nexus-lab';
   static const openRouterModels = '/settings/openrouter-models';
+  static const onDeviceModels = '/settings/on-device-models';
   static const healthImport = '/settings/import';
   static const manualRun = '/settings/manual-run';
 }
@@ -170,6 +172,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: const SettingsPage(),
         ),
         routes: [
+          GoRoute(
+            path: 'on-device-models',
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const OnDeviceModelPickerPage(),
+            ),
+          ),
           GoRoute(
             path: 'openrouter-models',
             pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
