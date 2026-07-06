@@ -51,12 +51,21 @@ class ChatMessage {
       other is ChatMessage &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          role == other.role &&
           content == other.content &&
+          timestamp == other.timestamp &&
           isStreaming == other.isStreaming &&
           hasError == other.hasError &&
           userPromptForRetry == other.userPromptForRetry;
 
   @override
-  int get hashCode =>
-      Object.hash(id, content, isStreaming, hasError, userPromptForRetry);
+  int get hashCode => Object.hash(
+        id,
+        role,
+        content,
+        timestamp,
+        isStreaming,
+        hasError,
+        userPromptForRetry,
+      );
 }

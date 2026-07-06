@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 
@@ -19,6 +21,15 @@ void main() {
       );
     });
 
+    test('marks TimeoutException as recoverable', () {
+      expect(
+        AiInferenceErrorPolicy.isRecoverable(
+          TimeoutException('AI isolate init timed out'),
+        ),
+        isTrue,
+      );
+    });
+
     test('marks unrelated errors as non-recoverable', () {
       expect(
         AiInferenceErrorPolicy.isRecoverable(Exception('Invalid API key')),
@@ -31,6 +42,13 @@ void main() {
       final message = AiInferenceErrorPolicy.userFriendlyMessage(error);
       expect(message, contains('Tap Retry'));
       expect(message, isNot(contains('INTERNAL')));
+    });
+
+    test('maps timeout errors to timeout-friendly copy', () {
+      final message = AiInferenceErrorPolicy.userFriendlyMessage(
+        TimeoutException('chat timed out'),
+      );
+      expect(message, contains('too long'));
     });
   });
 
@@ -52,6 +70,25 @@ void main() {
         AiChatRecoveryPlan.actionBeforeRetry(3),
         AiChatRecoveryAction.none,
       );
+    });
+
+    test('maxAttempts allows full recovery escalation', () {
+      final actions = <AiChatRecoveryAction>[];
+      const recoverableError = 'Stream error: INTERNAL';
+      final error = StateError(recoverableError);
+
+      for (var attempt = 0; attempt < AiChatRecoveryPlan.maxAttempts; attempt++) {
+        final canRetry = attempt < AiChatRecoveryPlan.maxAttempts - 1 &&
+            AiInferenceErrorPolicy.isRecoverable(error);
+        if (!canRetry) break;
+        actions.add(AiChatRecoveryPlan.actionBeforeRetry(attempt));
+      }
+
+      expect(actions, [
+        AiChatRecoveryAction.reloadChat,
+        AiChatRecoveryAction.reloadModelCpu,
+        AiChatRecoveryAction.respawnIsolate,
+      ]);
     });
   });
 }

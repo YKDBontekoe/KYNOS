@@ -1,6 +1,7 @@
 package com.kynos.kynos
 
 import android.content.Context
+import android.os.Build
 import android.os.PowerManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -18,7 +19,14 @@ class MainActivity : FlutterActivity() {
                 "isThermallyThrottled" -> {
                     val powerManager =
                         getSystemService(Context.POWER_SERVICE) as PowerManager
-                    result.success(powerManager.isPowerSaveMode)
+                    val throttled =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            powerManager.currentThermalStatus >=
+                                PowerManager.THERMAL_STATUS_SEVERE
+                        } else {
+                            powerManager.isPowerSaveMode
+                        }
+                    result.success(throttled)
                 }
                 else -> result.notImplemented()
             }

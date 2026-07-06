@@ -312,11 +312,17 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   @override
   Future<void> dispose() async {
     if (_isolateSendPort != null && _responseController != null) {
+      const disposeRequestId = 0;
       final completer = Completer<void>();
       late final StreamSubscription<AiIsolateResponse> sub;
       sub = _responseController!.stream.listen((response) {
-        if (response is AiIsolateDone || response is AiIsolateError) {
-          if (!completer.isCompleted) completer.complete();
+        final matchesDispose = switch (response) {
+          AiIsolateDone(:final requestId) => requestId == disposeRequestId,
+          AiIsolateError(:final requestId) => requestId == disposeRequestId,
+          _ => false,
+        };
+        if (matchesDispose && !completer.isCompleted) {
+          completer.complete();
         }
       });
       _isolateSendPort!.send(AiDisposeRequest());

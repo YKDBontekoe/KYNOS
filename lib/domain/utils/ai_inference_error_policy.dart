@@ -1,3 +1,5 @@
+import 'dart:async';
+
 /// Classifies on-device LLM failures and maps them to user-facing copy.
 abstract final class AiInferenceErrorPolicy {
   static const _recoverablePatterns = [
@@ -10,9 +12,13 @@ abstract final class AiInferenceErrorPolicy {
     'Resource limit',
     'litert',
     'compiled model',
+    'timed out',
+    'timeoutexception',
   ];
 
   static bool isRecoverable(Object error) {
+    if (error is TimeoutException) return true;
+
     final message = _messageFor(error).toLowerCase();
     if (message.isEmpty) return false;
     for (final pattern in _recoverablePatterns) {
@@ -24,11 +30,13 @@ abstract final class AiInferenceErrorPolicy {
   static String userFriendlyMessage(Object error) {
     final message = _messageFor(error);
     if (isRecoverable(error)) {
+      if (error is TimeoutException ||
+          message.toLowerCase().contains('timed out') ||
+          message.contains('TimeoutException')) {
+        return 'The on-device model took too long to respond. Tap Retry to try again.';
+      }
       return 'The on-device model hit a resource limit. '
           'Tap Retry — we will switch to a safer inference mode.';
-    }
-    if (message.contains('timed out') || message.contains('TimeoutException')) {
-      return 'The on-device model took too long to respond. Tap Retry to try again.';
     }
     if (message.contains('No active Gemma model')) {
       return 'The on-device model is not installed. Complete model setup, then try again.';
@@ -61,5 +69,6 @@ abstract final class AiChatRecoveryPlan {
     };
   }
 
-  static const maxAttempts = 3;
+  /// Initial attempt plus three recovery escalations.
+  static const maxAttempts = 4;
 }

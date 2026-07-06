@@ -10,6 +10,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_chat_provider.g.dart';
 
+const _coachHealthHistoryDays = 14;
+
 @Riverpod(keepAlive: true)
 class CoachChatNotifier extends _$CoachChatNotifier {
   final _logger = Logger();
@@ -54,11 +56,9 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     final current = state.value ?? const [];
 
     late final String assistantId;
-    List<ChatMessage> workingMessages;
 
     if (existingAssistantId != null) {
       assistantId = existingAssistantId;
-      workingMessages = List<ChatMessage>.from(current);
     } else {
       final userMsg = ChatMessage(
         id: '${DateTime.now().microsecondsSinceEpoch}_user',
@@ -75,17 +75,18 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         isStreaming: true,
         userPromptForRetry: userMessage,
       );
-      workingMessages = [...current, userMsg, placeholder];
-      state = AsyncData(workingMessages);
+      state = AsyncData([...current, userMsg, placeholder]);
     }
 
+    List<HealthSummary>? healthContext;
     try {
       final repository = ref.read(aiCoachRepositoryProvider);
-      final healthContext = await ref.read(
-        healthHistoryProvider(days: 14).future,
+      final history = await ref.read(
+        healthHistoryProvider(days: _coachHealthHistoryDays).future,
       );
+      healthContext = history;
 
-      final estimatedTokens = _estimateTokens(userMessage, healthContext);
+      final estimatedTokens = _estimateTokens(userMessage, history);
 
       await for (final chunk in repository.chat(
         userMessage: userMessage,
@@ -108,7 +109,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       _finaliseMessage(assistantId, streaming: false, hasError: false);
     } catch (e, st) {
       _logger.e('Inference error', error: e, stackTrace: st);
-      final healthContext = await _readHealthContextSafely();
+      healthContext ??= await _readHealthContextSafely();
 
       final friendly = AiInferenceErrorPolicy.userFriendlyMessage(e);
       final fallback = CoachFallbackReply.forRecoveryQuestion(
@@ -133,7 +134,9 @@ class CoachChatNotifier extends _$CoachChatNotifier {
 
   Future<List<HealthSummary>> _readHealthContextSafely() async {
     try {
-      return await ref.read(healthHistoryProvider(days: 14).future);
+      return await ref.read(
+        healthHistoryProvider(days: _coachHealthHistoryDays).future,
+      );
     } on Object {
       return const [];
     }

@@ -55,12 +55,8 @@ final class DeviceThermalChannel: NSObject {
   private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "isThermallyThrottled":
-      if #available(iOS 11.0, *) {
-        let state = ProcessInfo.processInfo.thermalState
-        result(state == .serious || state == .critical)
-      } else {
-        result(false)
-      }
+      let state = ProcessInfo.processInfo.thermalState
+      result(state == .serious || state == .critical)
     default:
       result(FlutterMethodNotImplemented)
     }
