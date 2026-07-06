@@ -42,35 +42,44 @@ class _GlassSuggestionChipState extends State<GlassSuggestionChip>
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails _) => _pressController.forward();
-
-  void _handleTapEnd() {
+  void _activate() {
     _pressController.reverse();
     HapticFeedback.selectionClick();
     widget.onTap();
   }
 
-  void _handleTapCancel() => _pressController.reverse();
-
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scale,
-      child: GestureDetector(
-        onTapDown: _handleTapDown,
-        onTapUp: (_) => _handleTapEnd(),
-        onTapCancel: _handleTapCancel,
-        child: LiquidGlassSurface(
-          borderRadius: tokens.Radius.full,
-          padding: const EdgeInsets.symmetric(
-            horizontal: tokens.Spacing.lg,
-            vertical: tokens.Spacing.md,
-          ),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              widget.label,
-              style: Theme.of(context).textTheme.titleMedium,
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _activate,
+            onHighlightChanged: (pressed) {
+              if (pressed) {
+                _pressController.forward();
+              } else {
+                _pressController.reverse();
+              }
+            },
+            borderRadius: BorderRadius.circular(tokens.Radius.full),
+            child: LiquidGlassSurface(
+              borderRadius: tokens.Radius.full,
+              padding: const EdgeInsets.symmetric(
+                horizontal: tokens.Spacing.lg,
+                vertical: tokens.Spacing.md,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.label,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
             ),
           ),
         ),

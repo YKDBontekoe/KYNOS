@@ -34,7 +34,7 @@ class AnimatedAsyncContent<T> extends StatelessWidget {
           child: error(context, err, stack),
         ),
         data: (item) => KeyedSubtree(
-          key: ValueKey<String>('data-${identityHashCode(item)}'),
+          key: const ValueKey<String>('data'),
           child: data(context, item),
         ),
       ),

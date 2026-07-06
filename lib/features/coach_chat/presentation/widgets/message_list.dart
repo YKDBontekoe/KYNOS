@@ -95,13 +95,10 @@ class CoachChatEmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Hero(
-              tag: CoachHeroTags.sparkle,
-              child: Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 48,
-                color: context.kynosTheme.stand,
-              ),
+            Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 48,
+              color: context.kynosTheme.stand,
             ),
             const Gap(Spacing.md),
             Text(
@@ -131,9 +128,4 @@ class CoachChatEmptyState extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Shared Hero tag for coach entry transitions.
-abstract final class CoachHeroTags {
-  static const sparkle = 'coach-sparkle';
 }

@@ -85,6 +85,15 @@ class _AnimatedActivityRingState extends State<AnimatedActivityRing>
       widget.ringProgresses ??
       List<double>.filled(widget.colors.length, widget.progress ?? 0);
 
+  bool _progressesChanged(List<double> previous, List<double> current) {
+    if (previous.length != current.length) return true;
+    const epsilon = 0.001;
+    for (var i = 0; i < previous.length; i++) {
+      if ((previous[i] - current[i]).abs() > epsilon) return true;
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -102,7 +111,7 @@ class _AnimatedActivityRingState extends State<AnimatedActivityRing>
           oldWidget.colors.length,
           oldWidget.progress ?? 0,
         );
-    if (!listEquals(oldTargets, _targetProgresses)) {
+    if (_progressesChanged(oldTargets, _targetProgresses)) {
       _controller.forward(from: 0);
     }
   }

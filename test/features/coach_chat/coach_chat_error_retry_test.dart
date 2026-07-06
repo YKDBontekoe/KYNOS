@@ -11,20 +11,22 @@ void main() {
     final controller = ScrollController();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MessageList(
-            messages: [
-              ChatMessage(
-                id: 'user_1',
-                role: MessageRole.user,
-                content: 'Hello coach',
-                timestamp: DateTime(2026, 7, 5),
-              ),
-            ],
-            scrollController: controller,
-          ),
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: MessageList(
+              messages: [
+                ChatMessage(
+                  id: 'user_1',
+                  role: MessageRole.user,
+                  content: 'Hello coach',
+                  timestamp: DateTime(2026, 7, 5),
+                ),
+              ],
+              scrollController: controller,
+            ),
         ),
+      ),
       ),
     );
 

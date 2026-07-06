@@ -9,12 +9,13 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/workout_session_lookup_provider.dart';
+import 'package:kynos/shared/utils/run_date_label.dart';
 import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
-import 'package:kynos/shared/widgets/run_card.dart';
 
 class RunRoutePage extends ConsumerWidget {
   const RunRoutePage({super.key, this.run, this.runId})
@@ -74,7 +75,7 @@ AppBar _runRouteAppBar(BuildContext context, {WorkoutSession? run}) {
             tag: RunHeroTags.date(run.id),
             child: Material(
               color: Colors.transparent,
-              child: Text(_runDateLabel(run.start)),
+              child: Text(formatRunHeroDateLabel(run.start)),
             ),
           )
         : const Text('Run Route'),
@@ -150,7 +151,7 @@ class _RouteContent extends StatelessWidget {
             spacing: tokens.Spacing.md,
             runSpacing: tokens.Spacing.sm,
             children: [
-              _chip(context, 'Date', _runDateLabel(run.start)),
+              _chip(context, 'Date', formatRunHeroDateLabel(run.start)),
               _chip(context, 'Duration', _durationLabel(run.duration)),
               _chip(
                 context,
@@ -253,10 +254,6 @@ class _UnavailableMapPlaceholder extends StatelessWidget {
       ),
     );
   }
-}
-
-String _runDateLabel(DateTime date) {
-  return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 String _durationLabel(Duration duration) {

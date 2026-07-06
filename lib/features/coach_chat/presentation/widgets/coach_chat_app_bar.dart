@@ -4,8 +4,8 @@ import 'package:gap/gap.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 

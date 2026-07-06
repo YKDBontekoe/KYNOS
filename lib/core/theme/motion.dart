@@ -9,7 +9,9 @@ abstract final class Motion {
   static const navIndicator = Duration(milliseconds: 320);
   static const navItem = Duration(milliseconds: 220);
   static const ringStagger = Duration(milliseconds: 50);
+  static const pulse = Duration(milliseconds: 900);
 
   static const curve = Curves.easeOutCubic;
   static const curveIn = Curves.easeInCubic;
+  static const pulseCurve = Curves.easeInOut;
 }

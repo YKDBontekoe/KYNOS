@@ -35,7 +35,6 @@ class AnimatedProgressBar extends StatelessWidget {
             minHeight: minHeight,
             backgroundColor: backgroundColor,
             valueColor: AlwaysStoppedAnimation(valueColor),
-            color: valueColor,
           );
         },
       ),

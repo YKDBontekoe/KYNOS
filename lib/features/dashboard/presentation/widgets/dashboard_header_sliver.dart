@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/liquid_glass_button.dart';
 

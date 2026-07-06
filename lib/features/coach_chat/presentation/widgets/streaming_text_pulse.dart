@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kynos/core/theme/theme.dart';
 
 /// Subtle opacity pulse while assistant text is streaming.
 class StreamingTextPulse extends StatefulWidget {
@@ -25,10 +26,10 @@ class _StreamingTextPulseState extends State<StreamingTextPulse>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: Motion.pulse,
     );
     _opacity = Tween<double>(begin: 0.85, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _controller, curve: Motion.pulseCurve),
     );
     _syncAnimation();
   }
@@ -36,7 +37,9 @@ class _StreamingTextPulseState extends State<StreamingTextPulse>
   @override
   void didUpdateWidget(StreamingTextPulse oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncAnimation();
+    if (oldWidget.isActive != widget.isActive) {
+      _syncAnimation();
+    }
   }
 
   void _syncAnimation() {

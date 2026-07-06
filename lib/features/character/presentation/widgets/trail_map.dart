@@ -58,7 +58,7 @@ class TrailMap extends StatelessWidget {
                 final isCurrent = index == session.currentIndex;
                 final isPast = index < session.currentIndex;
                 return _TrailNodeDot(
-                  key: ValueKey<String>('${node.index}-${session.currentIndex}'),
+                  key: ValueKey<int>(node.index),
                   node: node,
                   isCurrent: isCurrent,
                   isPast: isPast,
@@ -113,10 +113,10 @@ class _TrailNodeDotState extends State<_TrailNodeDot>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: Motion.pulse,
     );
     _scale = Tween<double>(begin: 1, end: 1.08).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+      CurvedAnimation(parent: _pulseController, curve: Motion.pulseCurve),
     );
     _syncPulse();
   }
@@ -124,7 +124,9 @@ class _TrailNodeDotState extends State<_TrailNodeDot>
   @override
   void didUpdateWidget(_TrailNodeDot oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncPulse();
+    if (oldWidget.isCurrent != widget.isCurrent) {
+      _syncPulse();
+    }
   }
 
   void _syncPulse() {

@@ -4,13 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
+import 'package:kynos/shared/constants/hero_tags.dart';
+import 'package:kynos/shared/utils/run_date_label.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
-
-/// Shared Hero tag for run date transitions.
-abstract final class RunHeroTags {
-  static String date(String runId) => 'run-date-$runId';
-}
 
 /// Workout session card — shared across training and run history.
 class RunCard extends StatelessWidget {
@@ -51,7 +48,7 @@ class RunCard extends StatelessWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: Text(
-                      _runDateLabel(run.start),
+                      formatRunHeroDateLabel(run.start),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -109,14 +106,6 @@ class RunCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _runDateLabel(DateTime date) {
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }
 
 String _durationLabel(Duration duration) {
