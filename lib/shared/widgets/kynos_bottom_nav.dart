@@ -149,44 +149,63 @@ class _NavBarItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedScale(
-              scale: selected ? 1.05 : 1.0,
-              duration: KynosBottomNav._itemAnimDuration,
-              curve: Curves.easeOutCubic,
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: AnimatedSwitcher(
-                  duration: KynosBottomNav._itemAnimDuration,
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  child: CustomPaint(
-                    key: ValueKey('$label-$selected'),
-                    size: const Size(24, 24),
-                    painter: NavIconPainter(
-                      pathData: selected ? icon.filled : icon.outline,
-                      color: color,
-                      strokeWidth: 2.0,
-                      filled: selected,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: kMinInteractiveDimension,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: selected ? 1.05 : 1.0,
+                duration: KynosBottomNav._itemAnimDuration,
+                curve: Curves.easeOutCubic,
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: AnimatedSwitcher(
+                    duration: KynosBottomNav._itemAnimDuration,
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    child: CustomPaint(
+                      key: ValueKey('$label-$selected'),
+                      size: const Size(24, 24),
+                      painter: NavIconPainter(
+                        pathData: selected ? icon.filled : icon.outline,
+                        color: color,
+                        strokeWidth: 2.0,
+                        filled: selected,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const Gap(tokens.Spacing.xs),
-            AnimatedDefaultTextStyle(
-              duration: KynosBottomNav._itemAnimDuration,
-              curve: Curves.easeOutCubic,
-              style: KynosTypography.navLabel(
-                selected: selected,
-                color: color,
+              const Gap(tokens.Spacing.xs),
+              Flexible(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: AnimatedDefaultTextStyle(
+                    duration: KynosBottomNav._itemAnimDuration,
+                    curve: Curves.easeOutCubic,
+                    style: KynosTypography.navLabel(
+                      selected: selected,
+                      color: color,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      softWrap: false,
+                    ),
+                  ),
+                ),
               ),
-              child: Text(label),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

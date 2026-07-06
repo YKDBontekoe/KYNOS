@@ -7,9 +7,17 @@ import 'package:kynos/core/theme/colors.dart';
 import 'package:kynos/shared/widgets/kynos_bottom_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 
-Widget _wrap(Widget child, {ThemeData? theme}) => MaterialApp(
+Widget _wrap(
+  Widget child, {
+  ThemeData? theme,
+  TextScaler textScaler = TextScaler.noScaling,
+}) =>
+    MaterialApp(
       theme: theme ?? AppTheme.light,
-      home: Scaffold(bottomNavigationBar: child),
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Scaffold(bottomNavigationBar: child),
+      ),
     );
 
 void main() {
@@ -36,23 +44,26 @@ void main() {
       expect(find.text('Character'), findsOneWidget);
     });
 
-    testWidgets('tapping Training invokes onSelected with index 1', (tester) async {
-      int? selected;
-      await tester.pumpWidget(
-        _wrap(
-          KynosBottomNav(
-            items: items,
-            selectedIndex: 0,
-            onSelected: (i) => selected = i,
+    testWidgets(
+      'tapping Training invokes onSelected with index 1',
+      (tester) async {
+        int? selected;
+        await tester.pumpWidget(
+          _wrap(
+            KynosBottomNav(
+              items: items,
+              selectedIndex: 0,
+              onSelected: (i) => selected = i,
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('Training'));
-      await tester.pump();
+        await tester.tap(find.text('Training'));
+        await tester.pump();
 
-      expect(selected, 1);
-    });
+        expect(selected, 1);
+      },
+    );
 
     testWidgets('tapping the already-selected tab does not invoke onSelected',
         (tester) async {
@@ -143,6 +154,71 @@ void main() {
 
       expect(painters.length, greaterThanOrEqualTo(3));
       expect(painters.where((p) => !p.filled).length, 2);
+    });
+
+    testWidgets('keeps long labels to one centered line at large text scale',
+        (tester) async {
+      const longLabelItems = [
+        KynosBottomNavItem(
+          label: 'Today Overview',
+          icon: NavIconPaths.today,
+        ),
+        KynosBottomNavItem(
+          label: 'Training Sessions',
+          icon: NavIconPaths.training,
+        ),
+        KynosBottomNavItem(
+          label: 'Character Progression',
+          icon: NavIconPaths.character,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        _wrap(
+          KynosBottomNav(
+            items: longLabelItems,
+            selectedIndex: 1,
+            onSelected: (_) {},
+          ),
+          textScaler: const TextScaler.linear(2.4),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      for (final label in longLabelItems.map((item) => item.label)) {
+        final text = tester.widget<Text>(find.text(label));
+        expect(text.maxLines, 1);
+        expect(text.overflow, TextOverflow.ellipsis);
+        expect(text.textAlign, TextAlign.center);
+        expect(text.softWrap, isFalse);
+      }
+    });
+
+    testWidgets('maintains minimum tap target height with large text scale',
+        (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          KynosBottomNav(
+            items: items,
+            selectedIndex: 0,
+            onSelected: (_) {},
+          ),
+          textScaler: const TextScaler.linear(3),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      final tapTargetSize = tester.getSize(
+        find.byType(GestureDetector).first,
+      );
+      expect(
+        tapTargetSize.height,
+        greaterThanOrEqualTo(kMinInteractiveDimension),
+      );
     });
 
     testWidgets('renders in dark theme with glass border', (tester) async {
