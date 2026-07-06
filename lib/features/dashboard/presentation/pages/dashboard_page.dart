@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
+import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/dashboard/dashboard_summary.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
@@ -24,7 +25,6 @@ import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
-import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';

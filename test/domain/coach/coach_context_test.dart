@@ -112,7 +112,7 @@ void main() {
 
   group('CoachContextFormatter', () {
     test('includes readiness and health metrics', () {
-      final context = BuildCoachContextUseCase().call(
+      final context = const BuildCoachContextUseCase().call(
         healthHistory: [
           HealthSummary(
             date: DateTime(2026, 7, 6),
@@ -161,7 +161,7 @@ void main() {
     });
 
     test('does not leak GPS coordinates from runs with route data', () {
-      final context = BuildCoachContextUseCase().call(
+      final context = const BuildCoachContextUseCase().call(
         healthHistory: const [],
         recentRuns: [
           WorkoutSession(
@@ -201,7 +201,7 @@ void main() {
         ),
       );
 
-      final context = BuildCoachContextUseCase().call(
+      final context = const BuildCoachContextUseCase().call(
         healthHistory: longHistory,
         recentRuns: List.generate(
           5,
