@@ -2,28 +2,43 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kynos/core/theme/app_theme.dart';
+import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
 class RunRoutePage extends ConsumerWidget {
-  final WorkoutSession run;
-
   const RunRoutePage({super.key, required this.run});
+
+  final WorkoutSession run;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final kynos = context.kynosTheme;
     final routeAsync = ref.watch(runRouteProvider(workoutUuid: run.id));
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: kynos.background,
       appBar: AppBar(
         title: const Text('Run Route'),
-        backgroundColor: AppTheme.background,
+        backgroundColor: kynos.background,
         surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(Routes.dashboard);
+            }
+          },
+        ),
       ),
       body: routeAsync.when(
         data: (points) => _RouteContent(run: run, points: points),
@@ -34,10 +49,24 @@ class RunRoutePage extends ConsumerWidget {
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(tokens.Spacing.md),
-            child: Text(
-              'Could not load workout route: $error',
-              style: const TextStyle(color: AppTheme.move),
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Could not load workout route: $error',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: kynos.move,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const Gap(tokens.Spacing.md),
+                FilledButton(
+                  onPressed: () => ref.invalidate(
+                    runRouteProvider(workoutUuid: run.id),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
           ),
         ),
@@ -47,13 +76,14 @@ class RunRoutePage extends ConsumerWidget {
 }
 
 class _RouteContent extends StatelessWidget {
+  const _RouteContent({required this.run, required this.points});
+
   final WorkoutSession run;
   final List<WorkoutRoutePoint> points;
 
-  const _RouteContent({required this.run, required this.points});
-
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
     final hasPoints = points.isNotEmpty;
 
     return Column(
@@ -61,25 +91,26 @@ class _RouteContent extends StatelessWidget {
         Expanded(
           child: hasPoints
               ? _AppleRouteMap(points: points)
-              : const _UnavailableMapPlaceholder(),
+              : _UnavailableMapPlaceholder(points: points),
         ),
         Container(
-          color: AppTheme.card,
+          color: kynos.card,
           width: double.infinity,
           padding: const EdgeInsets.all(tokens.Spacing.md),
           child: Wrap(
             spacing: tokens.Spacing.md,
             runSpacing: tokens.Spacing.sm,
             children: [
-              _chip('Date', _runDateLabel(run.start)),
-              _chip('Duration', _durationLabel(run.duration)),
+              _chip(context, 'Date', _runDateLabel(run.start)),
+              _chip(context, 'Duration', _durationLabel(run.duration)),
               _chip(
+                context,
                 'Distance',
                 run.distanceMeters == null
                     ? '—'
                     : '${(run.distanceMeters! / 1000).toStringAsFixed(2)} km',
               ),
-              _chip('Points', points.length.toString()),
+              _chip(context, 'Points', points.length.toString()),
             ],
           ),
         ),
@@ -87,14 +118,15 @@ class _RouteContent extends StatelessWidget {
     );
   }
 
-  Widget _chip(String label, String value) {
+  Widget _chip(BuildContext context, String label, String value) {
+    final kynos = context.kynosTheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: tokens.Spacing.sm,
         vertical: tokens.Spacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppTheme.background,
+        color: kynos.background,
         borderRadius: BorderRadius.circular(tokens.Radius.md),
       ),
       child: Text('$label: $value'),
@@ -103,14 +135,14 @@ class _RouteContent extends StatelessWidget {
 }
 
 class _AppleRouteMap extends StatelessWidget {
-  final List<WorkoutRoutePoint> points;
-
   const _AppleRouteMap({required this.points});
+
+  final List<WorkoutRoutePoint> points;
 
   @override
   Widget build(BuildContext context) {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
-      return const _UnavailableMapPlaceholder();
+      return _UnavailableMapPlaceholder(points: points);
     }
 
     final payload = <String, dynamic>{
@@ -132,18 +164,41 @@ class _AppleRouteMap extends StatelessWidget {
 }
 
 class _UnavailableMapPlaceholder extends StatelessWidget {
-  const _UnavailableMapPlaceholder();
+  const _UnavailableMapPlaceholder({required this.points});
+
+  final List<WorkoutRoutePoint> points;
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+    final first = points.isNotEmpty ? points.first : null;
+    final mapsUrl = first == null
+        ? null
+        : 'https://www.google.com/maps/search/?api=1&query=${first.latitude},${first.longitude}';
+
     return ColoredBox(
-      color: AppTheme.separator.withValues(alpha: 0.35),
-      child: const Center(
+      color: kynos.separator.withValues(alpha: 0.35),
+      child: Center(
         child: Padding(
-          padding: EdgeInsets.all(tokens.Spacing.md),
-          child: Text(
-            'No route coordinates available for this run yet.\nKYNOS reads HKWorkoutRoute on iOS when present.',
-            textAlign: TextAlign.center,
+          padding: const EdgeInsets.all(tokens.Spacing.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'No in-app map on this platform.\n'
+                'KYNOS reads HKWorkoutRoute on iOS when present.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              if (mapsUrl != null) ...[
+                const Gap(tokens.Spacing.md),
+                FilledButton.icon(
+                  onPressed: () => openExternalUrl(mapsUrl),
+                  icon: const Icon(Icons.map_outlined, size: 18),
+                  label: const Text('Open in Maps'),
+                ),
+              ],
+            ],
           ),
         ),
       ),

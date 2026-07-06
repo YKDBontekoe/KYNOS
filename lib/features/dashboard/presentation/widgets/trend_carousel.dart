@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/hrv_sparkline.dart';
-import 'package:kynos/features/training/presentation/widgets/chart_placeholder.dart';
-import 'package:kynos/features/training/presentation/widgets/load_chart.dart';
+import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
+import 'package:kynos/shared/widgets/charts/load_chart.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_page_dots.dart';
 
@@ -36,7 +37,7 @@ class _TrendCarouselState extends State<TrendCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 220,
+          height: LayoutTokens.trendCarouselHeight,
           child: PageView(
             controller: _controller,
             onPageChanged: (i) => setState(() => _page = i),

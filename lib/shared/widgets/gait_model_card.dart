@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// Gait model coefficients display with optional calibration action.
@@ -82,7 +83,7 @@ class GaitModelCard extends StatelessWidget {
               ),
             )
           else if (isLoading)
-            const LinearProgressIndicator()
+            const KynosLoadingLine(label: 'Calibrating gait model…')
           else if (errorMessage != null)
             Text(
               'Calibration unavailable: $errorMessage',
@@ -131,6 +132,7 @@ class _CoefficientsRow extends StatelessWidget {
                 label: 'β0 Intercept',
                 value: _fmt(coefficients.b0),
                 accentColor: AppTheme.stand,
+                flat: true,
               ),
             ),
             const Gap(tokens.Spacing.sm),
@@ -139,6 +141,7 @@ class _CoefficientsRow extends StatelessWidget {
                 label: 'β1 Cadence',
                 value: _fmt(coefficients.b1),
                 accentColor: AppTheme.exercise,
+                flat: true,
               ),
             ),
             const Gap(tokens.Spacing.sm),
@@ -147,6 +150,7 @@ class _CoefficientsRow extends StatelessWidget {
                 label: 'β2 Power',
                 value: _fmt(coefficients.b2),
                 accentColor: AppTheme.energy,
+                flat: true,
               ),
             ),
           ],

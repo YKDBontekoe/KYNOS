@@ -22,7 +22,12 @@ class MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(Spacing.md, Spacing.sm, Spacing.md, 96),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        LayoutTokens.chatInputClearance,
+      ),
       itemCount: messages.length,
       itemBuilder: (context, index) => RepaintBoundary(
         child: Padding(

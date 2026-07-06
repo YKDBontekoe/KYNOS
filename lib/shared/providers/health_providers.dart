@@ -4,12 +4,9 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/infrastructure/health/health_infrastructure_providers.dart';
-import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health_providers.g.dart';
-
-final _logger = Logger();
 
 /// Canonical health repository binding — merges HealthKit and imported data.
 @Riverpod(keepAlive: true)
@@ -23,8 +20,7 @@ Future<HealthSummary?> healthSummary(Ref ref) async {
 
   final result = await repository.getToday();
   if (result.failure != null) {
-    _logger.d('Health summary unavailable: ${result.failure}');
-    return null;
+    throw result.failure!;
   }
   return result.summary;
 }
@@ -78,7 +74,7 @@ Future<int> importedWorkoutCount(Ref ref) async {
   return store.workoutCount();
 }
 
-void _invalidateHealthProviders(Ref ref) {
+void invalidateHealthProviders(Ref ref) {
   ref.invalidate(healthSummaryProvider);
   ref.invalidate(healthHistoryProvider);
   ref.invalidate(recentRunsProvider);
@@ -108,7 +104,7 @@ class HealthPermissionsNotifier extends _$HealthPermissionsNotifier {
       final success = await repo.requestPermissions();
       state = AsyncData(success);
       if (success) {
-        _invalidateHealthProviders(ref);
+        invalidateHealthProviders(ref);
       }
     } on Object catch (e, st) {
       state = AsyncError(e, st);
@@ -128,7 +124,7 @@ class ImportedHealthDataNotifier extends _$ImportedHealthDataNotifier {
       final store = ref.read(importedHealthStoreProvider);
       await store.clearAll();
       state = const AsyncData(null);
-      _invalidateHealthProviders(ref);
+      invalidateHealthProviders(ref);
     } on Object catch (e, st) {
       state = AsyncError(e, st);
     }

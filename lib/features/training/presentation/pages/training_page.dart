@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/app/router.dart';
-import 'package:kynos/core/theme/app_theme.dart';
-import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/training/presentation/widgets/past_runs_list.dart';
 import 'package:kynos/features/training/presentation/widgets/training_insight_cards.dart';
 import 'package:kynos/features/training/presentation/widgets/trend_cards.dart';
@@ -19,6 +17,7 @@ import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/gait_model_card.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_hero_banner.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
@@ -34,13 +33,15 @@ class TrainingPage extends ConsumerWidget {
     final labState = kIsWeb ? null : ref.watch(nexusLabProvider);
     final insightsState = ref.watch(trainingInsightsStateProvider);
 
+    final kynos = context.kynosTheme;
+
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
       ),
       slivers: [
         SliverAppBar(
-          backgroundColor: AppTheme.background,
+          backgroundColor: kynos.background,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           pinned: true,
@@ -48,12 +49,10 @@ class TrainingPage extends ConsumerWidget {
           titleSpacing: 20,
           title: Text(
             formatDateLabel(),
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.tertiaryLabel,
-              letterSpacing: 0.2,
-            ),
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: kynos.tertiaryLabel,
+                  letterSpacing: 0.2,
+                ),
           ),
         ),
         SliverPadding(
@@ -65,8 +64,8 @@ class TrainingPage extends ConsumerWidget {
           ),
           sliver: SliverList.list(
             children: [
-              const KynosHeroBanner(
-                accentColor: AppTheme.exercise,
+              KynosHeroBanner(
+                accentColor: kynos.exercise,
                 subtitle: 'Your progress',
                 title: 'TRAINING',
                 caption: 'Trends, runs & gait model',
@@ -79,7 +78,11 @@ class TrainingPage extends ConsumerWidget {
                 loading: () => const KynosCard(
                   child: KynosLoadingLine(label: 'Loading weekly stats...'),
                 ),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (_, _) => KynosInlineErrorCard(
+                  message: 'Could not load weekly stats.',
+                  onRetry: () =>
+                      ref.invalidate(healthHistoryProvider(days: 30)),
+                ),
                 data: (items) => WeeklyStatsGrid(history: items),
               ),
               const Gap(tokens.Spacing.lg),
@@ -91,7 +94,11 @@ class TrainingPage extends ConsumerWidget {
                 loading: () => const KynosCard(
                   child: KynosLoadingLine(label: 'Loading trends...'),
                 ),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (_, _) => KynosInlineErrorCard(
+                  message: 'Could not load trends.',
+                  onRetry: () =>
+                      ref.invalidate(healthHistoryProvider(days: 30)),
+                ),
                 data: (items) => TrendCards(history: items),
               ),
               const Gap(tokens.Spacing.lg),
@@ -109,7 +116,12 @@ class TrainingPage extends ConsumerWidget {
                 loading: () => const KynosCard(
                   child: KynosLoadingLine(label: 'Loading recent runs...'),
                 ),
-                error: (_, _) => const SizedBox.shrink(),
+                error: (_, _) => KynosInlineErrorCard(
+                  message: 'Could not load recent runs.',
+                  onRetry: () => ref.invalidate(
+                    recentRunsProvider(days: 365, limit: 60),
+                  ),
+                ),
                 data: (runs) => PastRunsList(runs: runs),
               ),
               const Gap(tokens.Spacing.lg),
@@ -127,6 +139,11 @@ class TrainingPage extends ConsumerWidget {
                 onCalibrate: kIsWeb
                     ? null
                     : () => ref.read(nexusLabProvider.notifier).calibrate(),
+              ),
+              const Gap(tokens.Spacing.lg),
+              TextButton(
+                onPressed: () => context.push(Routes.nexusLab),
+                child: const Text('Open Nexus Lab'),
               ),
               const Gap(tokens.Spacing.lg),
               const KynosPrivacyFooter(),

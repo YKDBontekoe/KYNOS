@@ -4,14 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
+import 'package:kynos/core/constants/app_constants.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
-import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/features/onboarding/providers/onboarding_provider.dart';
+import 'package:kynos/features/settings/presentation/widgets/settings_appearance_section.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/huggingface_token_provider.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
+import 'package:kynos/shared/utils/health_platform_labels.dart';
+import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 
@@ -65,33 +69,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: ListView(
           padding: const EdgeInsets.all(tokens.Spacing.md),
           children: [
-            const KynosSectionHeader(title: 'Appearance'),
-            const Gap(tokens.Spacing.sm),
-            KynosCard(
-              child: Column(
-                children: [
-                  _SwitchTile(
-                    title: 'Dark Mode',
-                    icon: Icons.dark_mode_outlined,
-                    value: settings.isDarkMode,
-                    onChanged: settingsNotifier.updateThemeMode,
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  _DropdownTile(
-                    title: 'Language',
-                    icon: Icons.language,
-                    value: settings.languageCode,
-                    items: const [
-                      DropdownMenuItem(value: 'en', child: Text('English')),
-                      DropdownMenuItem(value: 'es', child: Text('Spanish')),
-                      DropdownMenuItem(value: 'fr', child: Text('French')),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) settingsNotifier.updateLanguage(v);
-                    },
-                  ),
-                ],
-              ),
+            SettingsAppearanceSection(
+              settings: settings,
+              onThemeChanged: settingsNotifier.updateThemeMode,
             ),
             const Gap(tokens.Spacing.lg),
             const KynosSectionHeader(title: 'Health & Data'),
@@ -121,7 +101,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         child: Text(
                           permissionState.isLoading
                               ? 'Connecting…'
-                              : 'Connect HealthKit',
+                              : HealthPlatformLabels.connectLabel(),
                         ),
                       ),
                     ),
@@ -161,8 +141,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   const Gap(tokens.Spacing.xs),
                   Text(
-                    'Sideloaded installs may not access HealthKit. Import your '
-                    'Apple Health export.zip, a GPX file, or log runs manually.',
+                    HealthPlatformLabels.sideloadHint(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: kynos.secondaryLabel,
                         ),
@@ -312,6 +291,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             const Gap(tokens.Spacing.lg),
+            const KynosSectionHeader(title: 'Onboarding'),
+            const Gap(tokens.Spacing.sm),
+            KynosCard(
+              child: _ActionTile(
+                title: 'Replay onboarding',
+                icon: Icons.replay_outlined,
+                onTap: () => _replayOnboarding(context),
+              ),
+            ),
+            const Gap(tokens.Spacing.lg),
             const KynosSectionHeader(title: 'Legal'),
             const Gap(tokens.Spacing.sm),
             KynosCard(
@@ -320,33 +309,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   _ActionTile(
                     title: 'Privacy Policy',
                     icon: Icons.privacy_tip_outlined,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Navigating to Privacy Policy...'),
-                        ),
-                      );
-                    },
+                    onTap: () => _openLegalUrl(
+                      context,
+                      AppConstants.privacyPolicyUrl,
+                      'Privacy Policy',
+                    ),
                   ),
                   Divider(color: kynos.separator, height: 1),
                   _ActionTile(
                     title: 'Terms of Service',
                     icon: Icons.description_outlined,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Navigating to Terms of Service...'),
-                        ),
-                      );
-                    },
+                    onTap: () => _openLegalUrl(
+                      context,
+                      AppConstants.termsOfServiceUrl,
+                      'Terms of Service',
+                    ),
                   ),
                 ],
               ),
             ),
-            const Gap(LayoutTokens.shellBottomPadding),
+            const Gap(tokens.Spacing.xl),
           ],
         ),
     );
+  }
+
+  Future<void> _openLegalUrl(
+    BuildContext context,
+    String url,
+    String label,
+  ) async {
+    final opened = await openExternalUrl(url);
+    if (!context.mounted) return;
+    if (!opened) showUrlLaunchError(context, label);
+  }
+
+  Future<void> _replayOnboarding(BuildContext context) async {
+    await ref.read(onboardingCompletedProvider.notifier).resetOnboarding();
+    if (!context.mounted) return;
+    context.go(Routes.onboarding);
   }
 
   String _healthStatusLabel(AsyncValue<bool> permissionState) {
@@ -355,7 +356,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
     return permissionState.when(
       data: (granted) => granted
-          ? 'HealthKit connected'
+          ? HealthPlatformLabels.connectedLabel()
           : 'Not connected — import runs or grant access',
       loading: () => 'Checking connection…',
       error: (_, _) => 'Unavailable — use import or manual entry',

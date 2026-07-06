@@ -5,6 +5,7 @@ import 'package:kynos/core/theme/theme.dart' hide Radius;
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// Weekly snapshot with week-over-week deltas and distance goal progress.
@@ -45,7 +46,7 @@ class WeekMomentumCard extends StatelessWidget {
           ),
           const Gap(tokens.Spacing.md),
           if (isLoading)
-            const LinearProgressIndicator()
+            const KynosLoadingLine(height: 10, widthFactor: 1)
           else
             ClipRRect(
               borderRadius: BorderRadius.circular(tokens.Radius.sm),

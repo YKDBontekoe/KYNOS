@@ -33,21 +33,27 @@ class KynosLoadingLine extends StatelessWidget {
       ),
     );
 
-    if (label == null) return skeleton;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        skeleton,
-        const Gap(Spacing.xs),
-        Text(
-          label!,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: kynos.tertiaryLabel,
-                fontSize: 12,
+    final content = label == null
+        ? skeleton
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              skeleton,
+              const Gap(Spacing.xs),
+              Text(
+                label!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: kynos.tertiaryLabel,
+                      fontSize: 12,
+                    ),
               ),
-        ),
-      ],
+            ],
+          );
+
+    return Semantics(
+      label: label ?? 'Loading',
+      liveRegion: true,
+      child: ExcludeSemantics(child: content),
     );
   }
 }

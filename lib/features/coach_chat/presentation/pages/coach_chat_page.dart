@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
@@ -93,12 +94,56 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   }
 
   Widget _buildChat() {
+    final chatState = ref.watch(coachChatProvider);
+
     ref.listen(
       coachChatProvider.select((s) => s.value?.lastOrNull?.content),
       (prev, next) => _scrollToBottom(),
     );
 
-    final messages = ref.watch(coachChatProvider.select((s) => s.value ?? const []));
+    if (chatState.hasError && !chatState.isLoading) {
+      return Scaffold(
+        backgroundColor: context.kynosTheme.background,
+        body: Column(
+          children: [
+            CoachChatAppBar(
+              onClear: () =>
+                  ref.read(coachChatProvider.notifier).clearConversation(),
+            ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(Spacing.xl),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Could not load conversation',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const Gap(Spacing.sm),
+                      Text(
+                        '${chatState.error}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const Gap(Spacing.lg),
+                      FilledButton(
+                        onPressed: () =>
+                            ref.invalidate(coachChatProvider),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final messages = chatState.value ?? const [];
     final isStreaming = ref.watch(
       coachChatProvider.select((s) => s.value?.any((m) => m.isStreaming) ?? false),
     );

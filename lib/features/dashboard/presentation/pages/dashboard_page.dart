@@ -143,7 +143,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final showConnectCard = !kIsWeb &&
         summary.hasValue &&
         summary.requireValue == null;
-    final showHealthError = !kIsWeb && summary.hasError;
 
     ref.listen(postRunDebriefProvider, (prev, next) {
       final data = next.value;
@@ -187,6 +186,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ReadinessCard(
                   summaryAsync: summary,
                   todayInsightsState: todayInsightsState,
+                  onRetry: _refreshDashboard,
                 ),
                 const Gap(tokens.Spacing.xl),
                 KynosSectionRow(
@@ -297,25 +297,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     summary: summary.value,
                     calibratedAt: dash.gaitCalibratedAt,
                     onViewTraining: widget.onViewTraining,
-                  ),
-                  const Gap(tokens.Spacing.xl),
-                ],
-                if (showHealthError) ...[
-                  KynosCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Could not load health data.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const Gap(tokens.Spacing.sm),
-                        TextButton(
-                          onPressed: _refreshDashboard,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
                   ),
                   const Gap(tokens.Spacing.xl),
                 ],

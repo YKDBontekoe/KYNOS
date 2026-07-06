@@ -70,9 +70,13 @@ class GameKitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return Semantics(
+      label: label,
+      button: true,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: AppTheme.background,
@@ -93,6 +97,7 @@ class GameKitButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

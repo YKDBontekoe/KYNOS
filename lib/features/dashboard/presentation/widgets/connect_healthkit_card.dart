@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -6,30 +5,16 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 /// Prompt card to connect health data when no summary is available.
 class ConnectHealthkitCard extends ConsumerWidget {
   const ConnectHealthkitCard({super.key});
 
-  String _platformLabel() {
-    if (kIsWeb) return 'health data';
-    return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => 'HealthKit',
-      TargetPlatform.android => 'Health Connect',
-      _ => 'health data',
-    };
-  }
+  String _platformLabel() => HealthPlatformLabels.platformName();
 
-  String _settingsHint() {
-    return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS =>
-        'Enable access in Settings > Health > Data Access & Devices > Kynos.',
-      TargetPlatform.android =>
-        'Enable access in Settings > Apps > Kynos > Permissions > Health Connect.',
-      _ => 'Enable health permissions in system settings.',
-    };
-  }
+  String _settingsHint() => HealthPlatformLabels.settingsHint();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

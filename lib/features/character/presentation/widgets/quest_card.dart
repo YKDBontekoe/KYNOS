@@ -10,20 +10,24 @@ import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
-class QuestPanel extends StatelessWidget {
+class QuestPanel extends ConsumerWidget {
   const QuestPanel({super.key, required this.questsAsync});
 
   final AsyncValue<List<Quest>> questsAsync;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return questsAsync.when(
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Generating quest...'),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => KynosInlineErrorCard(
+        message: 'Could not load quests.',
+        onRetry: () => ref.invalidate(questProvider),
+      ),
       data: (quests) {
         if (quests.isEmpty) {
           return KynosCard(

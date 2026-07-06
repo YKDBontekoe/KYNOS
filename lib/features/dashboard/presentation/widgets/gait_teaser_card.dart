@@ -24,60 +24,70 @@ class GaitTeaserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
+    final semanticsLabel = onViewTraining != null
+        ? 'Gait model summary, tap to view training'
+        : 'Gait model summary';
 
-    return KynosCard(
-      padding: const EdgeInsets.all(tokens.Spacing.md),
-      onTap: onViewTraining,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'GAIT MODEL',
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-              const Spacer(),
-              Icon(Icons.lock_rounded, size: 12, color: kynos.tertiaryLabel),
+    return Semantics(
+      label: semanticsLabel,
+      button: onViewTraining != null,
+      excludeSemantics: true,
+      child: KynosCard(
+        padding: const EdgeInsets.all(tokens.Spacing.md),
+        onTap: onViewTraining,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'GAIT MODEL',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                const Spacer(),
+                Icon(Icons.lock_rounded, size: 12, color: kynos.tertiaryLabel),
+                const Gap(tokens.Spacing.xs),
+                Text(
+                  'On-device',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+            const Gap(tokens.Spacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: MetricTile(
+                    label: 'Cadence',
+                    value: summary?.cadenceSpm?.round().toString() ?? '—',
+                    unit: 'spm',
+                    accentColor: kynos.exercise,
+                    flat: true,
+                  ),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Expanded(
+                  child: MetricTile(
+                    label: 'Power',
+                    value: summary?.runningPowerWatts?.round().toString() ?? '—',
+                    unit: 'W',
+                    accentColor: kynos.energy,
+                    flat: true,
+                  ),
+                ),
+              ],
+            ),
+            if (calibratedAt != null) ...[
               const Gap(tokens.Spacing.xs),
               Text(
-                'On-device',
-                style: Theme.of(context).textTheme.bodySmall,
+                'Model calibrated · β₁ ${coefficients.b1?.toStringAsFixed(3) ?? '—'}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: kynos.tertiaryLabel,
+                    ),
               ),
             ],
-          ),
-          const Gap(tokens.Spacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: MetricTile(
-                  label: 'Cadence',
-                  value: summary?.cadenceSpm?.round().toString() ?? '—',
-                  unit: 'spm',
-                  accentColor: kynos.exercise,
-                ),
-              ),
-              const Gap(tokens.Spacing.sm),
-              Expanded(
-                child: MetricTile(
-                  label: 'Power',
-                  value: summary?.runningPowerWatts?.round().toString() ?? '—',
-                  unit: 'W',
-                  accentColor: kynos.energy,
-                ),
-              ),
-            ],
-          ),
-          if (calibratedAt != null) ...[
-            const Gap(tokens.Spacing.xs),
-            Text(
-              'Model calibrated · β₁ ${coefficients.b1?.toStringAsFixed(3) ?? '—'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: kynos.tertiaryLabel,
-                  ),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }

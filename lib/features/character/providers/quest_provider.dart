@@ -14,6 +14,7 @@ class QuestNotifier extends _$QuestNotifier {
 
   Future<void> completeQuest(String questId) async {
     final current = await future;
+    final completedQuest = current.firstWhere((q) => q.id == questId);
     final updated = current.map((q) {
       if (q.id != questId) return q;
       return q.copyWith(
@@ -23,19 +24,25 @@ class QuestNotifier extends _$QuestNotifier {
     }).toList();
 
     final repo = ref.read(characterRepositoryProvider);
-    await repo.saveQuests(updated);
-    state = AsyncData(updated);
-
-    final completedQuest = updated.firstWhere((q) => q.id == questId);
-    final charRepo = ref.read(characterRepositoryProvider);
-    final charResult = await charRepo.loadCharacter();
+    final charResult = await repo.loadCharacter();
     if (charResult.character != null) {
       final updatedChar = charResult.character!.withXpGain(
         completedQuest.xpReward,
         statDeltas: completedQuest.statRewards,
       );
-      await charRepo.saveCharacter(updatedChar);
+      final saveCharacterFailure = await repo.saveCharacter(updatedChar);
+      if (saveCharacterFailure != null) {
+        state = AsyncError(saveCharacterFailure, StackTrace.current);
+        return;
+      }
       ref.invalidate(runnerCharacterProvider);
     }
+
+    final saveQuestsFailure = await repo.saveQuests(updated);
+    if (saveQuestsFailure != null) {
+      state = AsyncError(saveQuestsFailure, StackTrace.current);
+      return;
+    }
+    state = AsyncData(updated);
   }
 }

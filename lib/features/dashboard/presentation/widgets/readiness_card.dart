@@ -8,6 +8,7 @@ import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/activity_ring.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 /// Readiness score card with activity ring and confidence badge.
@@ -16,10 +17,12 @@ class ReadinessCard extends StatelessWidget {
     super.key,
     required this.summaryAsync,
     required this.todayInsightsState,
+    this.onRetry,
   });
 
   final AsyncValue<HealthSummary?> summaryAsync;
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +30,14 @@ class ReadinessCard extends StatelessWidget {
       loading: () => const KynosCard(
         child: KynosLoadingLine(label: 'Loading readiness...'),
       ),
-      error: (_, _) => KynosCard(
-        child: Text(
-          'Could not load health data.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+      error: (_, _) => KynosInlineErrorCard(
+        message: 'Could not load health data.',
+        onRetry: onRetry,
       ),
       data: (summary) => _ReadinessCardContent(
         summary: summary,
         todayInsightsState: todayInsightsState,
+        onRetry: onRetry,
       ),
     );
   }
@@ -45,10 +47,12 @@ class _ReadinessCardContent extends StatelessWidget {
   const _ReadinessCardContent({
     required this.summary,
     required this.todayInsightsState,
+    this.onRetry,
   });
 
   final HealthSummary? summary;
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +119,10 @@ class _ReadinessCardContent extends StatelessWidget {
               ),
             ],
           ),
-          ConfidenceBadgeRow(todayInsightsState: todayInsightsState),
+          ConfidenceBadgeRow(
+            todayInsightsState: todayInsightsState,
+            onRetry: onRetry,
+          ),
         ],
       ),
     );
@@ -135,9 +142,14 @@ String _readinessBrief({
 
 /// Confidence and model-source badge below the readiness score.
 class ConfidenceBadgeRow extends StatelessWidget {
-  const ConfidenceBadgeRow({super.key, required this.todayInsightsState});
+  const ConfidenceBadgeRow({
+    super.key,
+    required this.todayInsightsState,
+    this.onRetry,
+  });
 
   final AsyncValue<TodayInsightsState> todayInsightsState;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +157,14 @@ class ConfidenceBadgeRow extends StatelessWidget {
 
     return todayInsightsState.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => Padding(
+        padding: const EdgeInsets.only(top: Spacing.md),
+        child: KynosInlineErrorCard(
+          message: 'Insights unavailable.',
+          onRetry: onRetry,
+          retryLabel: 'Retry insights',
+        ),
+      ),
       data: (state) {
         final insights = state.insights;
         if (insights == null) return const SizedBox.shrink();

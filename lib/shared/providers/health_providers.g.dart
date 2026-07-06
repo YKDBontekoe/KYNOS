@@ -96,7 +96,7 @@ final class HealthSummaryProvider
   }
 }
 
-String _$healthSummaryHash() => r'58364b9ff70089020a9ca2aaee16fb6eea9add73';
+String _$healthSummaryHash() => r'880dd4f6394edd5093cb6ccf70d030c7a1596978';
 
 @ProviderFor(healthHistory)
 final healthHistoryProvider = HealthHistoryFamily._();
@@ -404,7 +404,7 @@ final class HealthPermissionsNotifierProvider
 }
 
 String _$healthPermissionsNotifierHash() =>
-    r'dc7ee2d1791f1111060bcaef0814ab078d439403';
+    r'c7c62087fa89c33cd0be87f706a7384a246f886f';
 
 /// Handles the HealthKit permission request triggered from the UI.
 
@@ -463,7 +463,7 @@ final class ImportedHealthDataNotifierProvider
 }
 
 String _$importedHealthDataNotifierHash() =>
-    r'e1dd6a744cc629eaef232ead62cfc5d716464427';
+    r'd9f4376bc4194731b7580e712e7c7b1443444ce9';
 
 /// Clears all imported workouts and refreshes health providers.
 

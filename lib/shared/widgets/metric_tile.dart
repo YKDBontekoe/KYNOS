@@ -16,6 +16,7 @@ class MetricTile extends StatelessWidget {
     this.sublabelColor,
     this.onTap,
     this.compact = false,
+    this.flat = false,
   });
 
   final String label;
@@ -27,6 +28,7 @@ class MetricTile extends StatelessWidget {
   final Color? sublabelColor;
   final VoidCallback? onTap;
   final bool compact;
+  final bool flat;
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +36,21 @@ class MetricTile extends StatelessWidget {
     final theme = Theme.of(context);
     final accent = accentColor ?? kynos.stand;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-      padding: const EdgeInsets.all(Spacing.md),
-      decoration: BoxDecoration(
-        color: kynos.card,
-        borderRadius: BorderRadius.circular(Radius.lg),
-        boxShadow: kynos.metricTileShadow,
-      ),
-      child: Column(
+    return Semantics(
+      label: onTap != null ? '$label metric' : null,
+      button: onTap != null,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+        padding: const EdgeInsets.all(Spacing.md),
+        decoration: flat
+            ? null
+            : BoxDecoration(
+                color: kynos.card,
+                borderRadius: BorderRadius.circular(Radius.lg),
+                boxShadow: kynos.metricTileShadow,
+              ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -110,6 +117,7 @@ class MetricTile extends StatelessWidget {
         ],
       ),
     ),
+      ),
     );
   }
 }

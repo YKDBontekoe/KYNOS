@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'settings_provider.g.dart';
 
@@ -39,21 +39,9 @@ class Settings extends _$Settings {
 
   @override
   SettingsState build() {
-    _load();
-    return const SettingsState(
-      isDarkMode: false,
-      languageCode: 'en',
-      cloudTasksEnabled: false,
-      cloudDataLevel: CloudDataLevel.minimal,
-      selectedCloudModelId: null,
-      selectedCloudModelName: null,
-    );
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.watch(sharedPreferencesProvider);
     final levelName = prefs.getString(_cloudDataLevelKey);
-    state = SettingsState(
+    return SettingsState(
       isDarkMode: prefs.getBool(_themeKey) ?? false,
       languageCode: prefs.getString(_languageKey) ?? 'en',
       cloudTasksEnabled: prefs.getBool(_cloudTasksKey) ?? false,
@@ -68,28 +56,28 @@ class Settings extends _$Settings {
 
   Future<void> updateThemeMode(bool isDark) async {
     if (state.isDarkMode == isDark) return;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(_themeKey, isDark);
     state = _copy(state, isDarkMode: isDark);
   }
 
   Future<void> updateLanguage(String newLanguageCode) async {
     if (state.languageCode == newLanguageCode) return;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString(_languageKey, newLanguageCode);
     state = _copy(state, languageCode: newLanguageCode);
   }
 
   Future<void> updateCloudTasksEnabled(bool enabled) async {
     if (state.cloudTasksEnabled == enabled) return;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(_cloudTasksKey, enabled);
     state = _copy(state, cloudTasksEnabled: enabled);
   }
 
   Future<void> updateCloudDataLevel(CloudDataLevel level) async {
     if (state.cloudDataLevel == level) return;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString(_cloudDataLevelKey, level.name);
     state = _copy(state, cloudDataLevel: level);
   }
@@ -98,7 +86,7 @@ class Settings extends _$Settings {
     required String id,
     required String name,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString(_cloudModelIdKey, id);
     await prefs.setString(_cloudModelNameKey, name);
     state = _copy(
@@ -109,7 +97,7 @@ class Settings extends _$Settings {
   }
 
   Future<void> clearSelectedCloudModel() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.remove(_cloudModelIdKey);
     await prefs.remove(_cloudModelNameKey);
     state = SettingsState(

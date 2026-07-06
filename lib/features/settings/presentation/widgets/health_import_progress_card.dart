@@ -45,13 +45,6 @@ class HealthImportProgressCard extends StatelessWidget {
           const Gap(tokens.Spacing.md),
           const KynosLoadingLine(height: 16, widthFactor: 1),
           const Gap(tokens.Spacing.sm),
-          LinearProgressIndicator(
-            backgroundColor: kynos.separator,
-            color: kynos.move,
-            minHeight: 4,
-            borderRadius: BorderRadius.circular(Radius.sm),
-          ),
-          const Gap(tokens.Spacing.sm),
           Text(
             message,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(

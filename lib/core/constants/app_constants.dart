@@ -41,6 +41,12 @@ abstract final class AppConstants {
   /// All biometric data stays on-device; this flag disables any cloud path.
   static const bool zeroKnowledgeMode = true;
 
+  /// Public privacy policy URL.
+  static const String privacyPolicyUrl = 'https://kynos.app/privacy';
+
+  /// Public terms of service URL.
+  static const String termsOfServiceUrl = 'https://kynos.app/terms';
+
   // ── Export ────────────────────────────────────────────────────────────────
   static const String exportFormatParquet = 'parquet';
   static const String exportFormatProtobuf = 'protobuf';

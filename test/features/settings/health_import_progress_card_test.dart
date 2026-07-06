@@ -25,7 +25,6 @@ void main() {
       find.text('Reading and parsing your Apple Health export.'),
       findsOneWidget,
     );
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
     expect(find.byType(Shimmer), findsOneWidget);
   });
 }

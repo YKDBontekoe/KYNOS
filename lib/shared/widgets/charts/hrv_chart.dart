@@ -4,7 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/features/training/presentation/widgets/chart_placeholder.dart';
+import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
 
 /// Line chart of HRV recovery over recent health summaries.
 class HrvChart extends StatelessWidget {
