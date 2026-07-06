@@ -5,9 +5,7 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/utils/ai_task_router.dart';
-import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
-import 'package:kynos/infrastructure/ai/gemma/gemma_runtime_tier.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
 /// Configuration for hybrid local/cloud coach routing.
@@ -66,6 +64,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) async* {
     final config = await _configReader();
     final apiKey = await _keyStorage.readOpenRouterKey();
@@ -73,71 +72,25 @@ class HybridAiCoachRepository implements AiCoachRepository {
     final cloudAvailable =
         config.canUseCloud && hasKey && config.selectedModelId != null;
 
-    final useCloud = cloudAvailable &&
-        AiTaskRouter.shouldUseCloud(
-          kind: taskKind,
-          cloudTasksEnabled: config.cloudTasksEnabled,
-          hasApiKey: hasKey,
-          hasSelectedModel: config.selectedModelId != null,
-          estimatedPromptTokens: estimatedPromptTokens,
-        );
+    final useCloud = switch (preferredBackend) {
+      AiInferenceBackend.openRouter => true,
+      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => false,
+      null =>
+        cloudAvailable &&
+            AiTaskRouter.shouldUseCloud(
+              kind: taskKind,
+              cloudTasksEnabled: config.cloudTasksEnabled,
+              hasApiKey: hasKey,
+              hasSelectedModel: config.selectedModelId != null,
+              estimatedPromptTokens: estimatedPromptTokens,
+            ),
+    };
 
-    if (useCloud && apiKey != null && config.selectedModelId != null) {
-      try {
-        lastBackend = AiInferenceBackend.openRouter;
-        yield* _streamCloud(
-          apiKey: apiKey,
-          modelId: config.selectedModelId!,
-          userMessage: userMessage,
-          healthContext: healthContext,
-          cloudDataLevel: config.cloudDataLevel,
-        );
-        return;
-      } on Object {
-        final tier = await GemmaRuntimeTier.resolve();
-        if (!GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(tier)) {
-          rethrow;
-        }
-      }
-    }
-
-    final tier = await GemmaRuntimeTier.resolve();
-    final canRunLocal = GemmaDeviceCapabilitySelector.canRunOnDeviceLlm(tier);
-
-    if (!canRunLocal) {
-      if (cloudAvailable && apiKey != null && config.selectedModelId != null) {
-        lastBackend = AiInferenceBackend.openRouter;
-        yield* _streamCloud(
-          apiKey: apiKey,
-          modelId: config.selectedModelId!,
-          userMessage: userMessage,
-          healthContext: healthContext,
-          cloudDataLevel: config.cloudDataLevel,
-        );
-        return;
-      }
-
-      yield* _local.chat(
-        userMessage: userMessage,
-        healthContext: healthContext,
-        taskKind: taskKind,
-        estimatedPromptTokens: estimatedPromptTokens,
-      );
-      lastBackend = _local.lastBackend;
-      return;
-    }
-
-    try {
-      yield* _local.chat(
-        userMessage: userMessage,
-        healthContext: healthContext,
-        taskKind: taskKind,
-        estimatedPromptTokens: estimatedPromptTokens,
-      );
-      lastBackend = _local.lastBackend;
-    } on Object {
+    if (useCloud) {
       if (!cloudAvailable || apiKey == null || config.selectedModelId == null) {
-        rethrow;
+        throw StateError(
+          'Cloud coach is not configured. Add an OpenRouter key and model in Settings.',
+        );
       }
       lastBackend = AiInferenceBackend.openRouter;
       yield* _streamCloud(
@@ -147,7 +100,18 @@ class HybridAiCoachRepository implements AiCoachRepository {
         healthContext: healthContext,
         cloudDataLevel: config.cloudDataLevel,
       );
+      return;
     }
+
+    lastBackend = AiInferenceBackend.onDevice;
+    yield* _local.chat(
+      userMessage: userMessage,
+      healthContext: healthContext,
+      taskKind: taskKind,
+      estimatedPromptTokens: estimatedPromptTokens,
+      preferredBackend: preferredBackend,
+    );
+    lastBackend = _local.lastBackend;
   }
 
   Stream<AiChunk> _streamCloud({

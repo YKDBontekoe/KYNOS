@@ -44,6 +44,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     List<HealthSummary>? healthContext,
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
+    AiInferenceBackend? preferredBackend,
   }) {
     final completer = Completer<void>();
     final previous = _chatQueue;

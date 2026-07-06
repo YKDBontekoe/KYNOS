@@ -4,7 +4,20 @@ import 'package:kynos/domain/utils/ai_task_router.dart';
 
 void main() {
   group('AiTaskRouter.shouldUseCloud', () {
-    test('uses cloud for coach chat when cloud is fully configured', () {
+    test('uses cloud for coach chat when prompt exceeds threshold', () {
+      expect(
+        AiTaskRouter.shouldUseCloud(
+          kind: AiTaskKind.coachChat,
+          cloudTasksEnabled: true,
+          hasApiKey: true,
+          hasSelectedModel: true,
+          estimatedPromptTokens: 900,
+        ),
+        isTrue,
+      );
+    });
+
+    test('keeps short coach chat on-device when cloud is enabled', () {
       expect(
         AiTaskRouter.shouldUseCloud(
           kind: AiTaskKind.coachChat,
@@ -13,7 +26,7 @@ void main() {
           hasSelectedModel: true,
           estimatedPromptTokens: 12,
         ),
-        isTrue,
+        isFalse,
       );
     });
 

@@ -57,6 +57,36 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     await _runInference(
       userMessage: prompt,
       existingAssistantId: assistantId,
+      preferredBackend: assistant.attemptedBackend,
+    );
+  }
+
+  Future<void> retryWithAlternateBackend(String assistantId) async {
+    _cancelRequested = false;
+    final msgs = state.value;
+    if (msgs == null) return;
+
+    final assistantIndex = msgs.indexWhere((m) => m.id == assistantId);
+    if (assistantIndex == -1) return;
+
+    final assistant = msgs[assistantIndex];
+    final prompt = assistant.userPromptForRetry;
+    if (prompt == null || prompt.isEmpty) return;
+
+    final alternate = _alternateBackend(assistant.attemptedBackend);
+    if (alternate == null) return;
+
+    final cleared = List<ChatMessage>.from(msgs)..[assistantIndex] = assistant.copyWith(
+          content: '',
+          isStreaming: true,
+          hasError: false,
+        );
+    state = AsyncData(cleared);
+
+    await _runInference(
+      userMessage: prompt,
+      existingAssistantId: assistantId,
+      preferredBackend: alternate,
     );
   }
 
@@ -82,6 +112,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
   Future<void> _runInference({
     required String userMessage,
     String? existingAssistantId,
+    AiInferenceBackend? preferredBackend,
   }) async {
     final current = state.value ?? const [];
 
@@ -109,8 +140,9 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     }
 
     List<HealthSummary>? healthContext;
+    AiCoachRepository? repository;
     try {
-      final repository = ref.read(aiCoachRepositoryProvider);
+      repository = ref.read(aiCoachRepositoryProvider);
       healthContext = await _loadHealthContext();
 
       final estimatedTokens = _estimateTokens(userMessage, healthContext);
@@ -119,6 +151,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         userMessage: userMessage,
         healthContext: healthContext,
         estimatedPromptTokens: estimatedTokens,
+        preferredBackend: preferredBackend,
       ).timeout(_inferenceTimeout)) {
         if (_cancelRequested) break;
 
@@ -143,7 +176,12 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         throw StateError('Coach returned an empty response');
       }
 
-      _finaliseMessage(assistantId, streaming: false, hasError: false);
+      _finaliseMessage(
+        assistantId,
+        streaming: false,
+        hasError: false,
+        attemptedBackend: repository.lastBackend,
+      );
       await _persist();
     } catch (e, st) {
       if (_cancelRequested) return;
@@ -151,21 +189,49 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       _logger.e('Inference error', error: e, stackTrace: st);
       healthContext ??= await _readHealthContextSafely();
 
-      final friendly = AiInferenceErrorPolicy.userFriendlyMessage(e);
-      final fallback = CoachFallbackReply.forRecoveryQuestion(
-        userMessage: userMessage,
-        healthContext: healthContext,
+      final attemptedBackend =
+          preferredBackend ?? repository?.lastBackend ?? AiInferenceBackend.onDevice;
+      final cloudConfigured =
+          await ref.read(isCloudCoachConfiguredProvider.future);
+      final canSwitchToCloud = cloudConfigured &&
+          attemptedBackend != AiInferenceBackend.openRouter;
+      final canSwitchToOnDevice =
+          attemptedBackend == AiInferenceBackend.openRouter;
+
+      final friendly = AiInferenceErrorPolicy.userFriendlyMessage(
+        e,
+        canSwitchToCloud: canSwitchToCloud,
+        canSwitchToOnDevice: canSwitchToOnDevice,
       );
+
+      final showFallback = !canSwitchToCloud && !canSwitchToOnDevice;
+      final fallback = showFallback
+          ? CoachFallbackReply.forRecoveryQuestion(
+              userMessage: userMessage,
+              healthContext: healthContext,
+            )
+          : null;
 
       _finaliseMessage(
         assistantId,
         streaming: false,
         hasError: true,
-        content: '$friendly\n\n$fallback',
+        content: fallback == null ? friendly : '$friendly\n\n$fallback',
         userPromptForRetry: userMessage,
+        attemptedBackend: attemptedBackend,
       );
       await _persist();
     }
+  }
+
+  AiInferenceBackend? _alternateBackend(AiInferenceBackend? attempted) {
+    return switch (attempted) {
+      AiInferenceBackend.onDevice ||
+      AiInferenceBackend.rulesOnly =>
+        AiInferenceBackend.openRouter,
+      AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
+      null => null,
+    };
   }
 
   int _estimateTokens(String message, List<HealthSummary> healthContext) {
@@ -213,6 +279,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     required bool hasError,
     String? content,
     String? userPromptForRetry,
+    AiInferenceBackend? attemptedBackend,
   }) {
     final msgs = state.value;
     if (msgs == null) return;
@@ -225,6 +292,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
       hasError: hasError,
       content: content ?? msgs[idx].content,
       userPromptForRetry: userPromptForRetry ?? msgs[idx].userPromptForRetry,
+      attemptedBackend: attemptedBackend ?? msgs[idx].attemptedBackend,
     );
     state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
   }
