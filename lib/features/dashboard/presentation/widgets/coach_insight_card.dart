@@ -5,6 +5,7 @@ import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/acwr.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
+import 'package:kynos/shared/widgets/animated_async_content.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -24,15 +25,16 @@ class CoachInsightCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return todayInsightsState.when(
-      loading: () => const KynosCard(
+    return AnimatedAsyncContent<TodayInsightsState>(
+      value: todayInsightsState,
+      loading: (_) => const KynosCard(
         child: KynosLoadingLine(label: 'Generating today insights...'),
       ),
-      error: (_, _) => _RetryCard(
+      error: (_, _, _) => _RetryCard(
         message: 'Could not load today\'s insights.',
         onRetry: () => ref.invalidate(todayInsightsStateProvider),
       ),
-      data: (state) {
+      data: (context, state) {
         final insights = state.insights;
         if (insights == null) {
           if (state.failureMessage == null) {

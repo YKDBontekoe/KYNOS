@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/shared/widgets/glass_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -56,27 +57,31 @@ class AssistantBubble extends StatelessWidget {
                 ),
               isStreaming && content.isEmpty
                   ? const TypingIndicator()
-                  : SelectableText(
-                      content,
-                      style: textStyle,
-                      contextMenuBuilder: content.isEmpty
-                          ? null
-                          : (menuContext, editableTextState) {
-                              final items = editableTextState.contextMenuButtonItems;
-                              return AdaptiveTextSelectionToolbar.buttonItems(
-                                anchors: editableTextState.contextMenuAnchors,
-                                buttonItems: [
-                                  ...items,
-                                  ContextMenuButtonItem(
-                                    onPressed: () {
-                                      ContextMenuController.removeAny();
-                                      _copyMessage(menuContext);
-                                    },
-                                    label: 'Copy message',
-                                  ),
-                                ],
-                              );
-                            },
+                  : StreamingTextPulse(
+                      isActive: isStreaming && content.isNotEmpty,
+                      child: SelectableText(
+                        content,
+                        style: textStyle,
+                        contextMenuBuilder: content.isEmpty
+                            ? null
+                            : (menuContext, editableTextState) {
+                                final items =
+                                    editableTextState.contextMenuButtonItems;
+                                return AdaptiveTextSelectionToolbar.buttonItems(
+                                  anchors: editableTextState.contextMenuAnchors,
+                                  buttonItems: [
+                                    ...items,
+                                    ContextMenuButtonItem(
+                                      onPressed: () {
+                                        ContextMenuController.removeAny();
+                                        _copyMessage(menuContext);
+                                      },
+                                      label: 'Copy message',
+                                    ),
+                                  ],
+                                );
+                              },
+                      ),
                     ),
               if (hasError && onRetry != null) ...[
                 const Gap(Spacing.sm),

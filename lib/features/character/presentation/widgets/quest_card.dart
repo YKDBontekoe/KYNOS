@@ -8,6 +8,7 @@ import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/features/character/providers/quest_provider.dart';
 import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/widgets/animated_progress_bar.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
@@ -141,12 +142,21 @@ class QuestCard extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              if (isCompleted)
-                const Icon(
-                  Icons.check_circle_rounded,
-                  size: 18,
-                  color: AppTheme.exercise,
-                ),
+              AnimatedSwitcher(
+                duration: Motion.fast,
+                child: isCompleted
+                    ? const Icon(
+                        key: ValueKey<String>('quest-complete'),
+                        Icons.check_circle_rounded,
+                        size: 18,
+                        color: AppTheme.exercise,
+                      )
+                    : const SizedBox(
+                        key: ValueKey<String>('quest-pending'),
+                        width: 18,
+                        height: 18,
+                      ),
+              ),
             ],
           ),
           const Gap(tokens.Spacing.sm),
@@ -183,14 +193,11 @@ class QuestCard extends ConsumerWidget {
           ),
           if (isMeasurable && !isCompleted) ...[
             const Gap(tokens.Spacing.sm),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(Radius.sm),
-              child: LinearProgressIndicator(
-                value: progress.clamp(0.0, 1.0),
-                minHeight: 6,
-                backgroundColor: AppTheme.separator,
-                color: diffColor,
-              ),
+            AnimatedProgressBar(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppTheme.separator,
+              valueColor: diffColor,
             ),
             const Gap(tokens.Spacing.xs),
             Text(

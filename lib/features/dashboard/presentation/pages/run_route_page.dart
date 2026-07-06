@@ -14,6 +14,7 @@ import 'package:kynos/shared/providers/workout_session_lookup_provider.dart';
 import 'package:kynos/shared/utils/url_opener.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
+import 'package:kynos/shared/widgets/run_card.dart';
 
 class RunRoutePage extends ConsumerWidget {
   const RunRoutePage({super.key, this.run, this.runId})
@@ -65,10 +66,18 @@ class RunRoutePage extends ConsumerWidget {
   }
 }
 
-AppBar _runRouteAppBar(BuildContext context) {
+AppBar _runRouteAppBar(BuildContext context, {WorkoutSession? run}) {
   final kynos = context.kynosTheme;
   return AppBar(
-    title: const Text('Run Route'),
+    title: run != null
+        ? Hero(
+            tag: RunHeroTags.date(run.id),
+            child: Material(
+              color: Colors.transparent,
+              child: Text(_runDateLabel(run.start)),
+            ),
+          )
+        : const Text('Run Route'),
     backgroundColor: kynos.background,
     surfaceTintColor: Colors.transparent,
     leading: IconButton(
@@ -96,7 +105,7 @@ class _RunRouteScaffold extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: kynos.background,
-      appBar: _runRouteAppBar(context),
+      appBar: _runRouteAppBar(context, run: run),
       body: routeAsync.when(
         data: (points) => _RouteContent(run: run, points: points),
         loading: () => const Padding(

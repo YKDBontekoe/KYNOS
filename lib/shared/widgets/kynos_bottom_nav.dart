@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/layout.dart';
+import 'package:kynos/core/theme/motion.dart';
 import 'package:kynos/core/theme/liquid_glass_tokens.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/typography.dart';
@@ -33,9 +34,6 @@ class KynosBottomNav extends StatelessWidget {
   final List<KynosBottomNavItem> items;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
-
-  static const _indicatorDuration = Duration(milliseconds: 320);
-  static const _itemAnimDuration = Duration(milliseconds: 220);
 
   void _handleTap(int index) {
     if (index == selectedIndex) return;
@@ -78,8 +76,8 @@ class KynosBottomNav extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       AnimatedAlign(
-                        duration: _indicatorDuration,
-                        curve: Curves.easeOutCubic,
+                        duration: Motion.navIndicator,
+                        curve: Motion.curve,
                         alignment:
                             _alignmentFor(selectedIndex, items.length),
                         child: FractionallySizedBox(
@@ -154,15 +152,15 @@ class _NavBarItem extends StatelessWidget {
           children: [
             AnimatedScale(
               scale: selected ? 1.05 : 1.0,
-              duration: KynosBottomNav._itemAnimDuration,
-              curve: Curves.easeOutCubic,
+              duration: Motion.navItem,
+              curve: Motion.curve,
               child: SizedBox(
                 width: 28,
                 height: 28,
                 child: AnimatedSwitcher(
-                  duration: KynosBottomNav._itemAnimDuration,
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
+                  duration: Motion.navItem,
+                  switchInCurve: Motion.curve,
+                  switchOutCurve: Motion.curveIn,
                   child: CustomPaint(
                     key: ValueKey('$label-$selected'),
                     size: const Size(24, 24),
@@ -178,8 +176,8 @@ class _NavBarItem extends StatelessWidget {
             ),
             const Gap(tokens.Spacing.xs),
             AnimatedDefaultTextStyle(
-              duration: KynosBottomNav._itemAnimDuration,
-              curve: Curves.easeOutCubic,
+              duration: Motion.navItem,
+              curve: Motion.curve,
               style: KynosTypography.navLabel(
                 selected: selected,
                 color: color,

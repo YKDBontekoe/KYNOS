@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/motion.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/utils/insight_text_formatter.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
@@ -81,43 +82,53 @@ class _InsightExpandableCardState extends State<InsightExpandableCard> {
                 KynosChip(label: '${widget.evidence.length} signals'),
             ],
           ),
-          if (_expanded) ...[
-            const Gap(tokens.Spacing.sm),
-            for (final line in widget.lines.take(3)) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• ',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppTheme.secondaryLabel,
-                      height: 1.4,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      line,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(tokens.Spacing.xs),
-            ],
-            if (widget.evidence.isNotEmpty) ...[
-              const Gap(tokens.Spacing.xs),
-              Text(
-                widget.evidence.join(' • '),
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppTheme.tertiaryLabel,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ],
+          AnimatedSize(
+            duration: Motion.medium,
+            curve: Motion.curve,
+            alignment: Alignment.topCenter,
+            child: _expanded
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Gap(tokens.Spacing.sm),
+                      for (final line in widget.lines.take(3)) ...[
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '• ',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: AppTheme.secondaryLabel,
+                                height: 1.4,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                line,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(tokens.Spacing.xs),
+                      ],
+                      if (widget.evidence.isNotEmpty) ...[
+                        const Gap(tokens.Spacing.xs),
+                        Text(
+                          widget.evidence.join(' • '),
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppTheme.tertiaryLabel,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
@@ -186,10 +197,23 @@ class _InsightTextExpandableCardState extends State<InsightTextExpandableCard> {
                 KynosChip(label: chip),
             ],
           ),
-          if (_expanded) ...[
-            const Gap(tokens.Spacing.sm),
-            Text(widget.text, style: Theme.of(context).textTheme.bodyMedium),
-          ],
+          AnimatedSize(
+            duration: Motion.medium,
+            curve: Motion.curve,
+            alignment: Alignment.topCenter,
+            child: _expanded
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Gap(tokens.Spacing.sm),
+                      Text(
+                        widget.text,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

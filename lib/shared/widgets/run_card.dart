@@ -7,6 +7,11 @@ import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
+/// Shared Hero tag for run date transitions.
+abstract final class RunHeroTags {
+  static String date(String runId) => 'run-date-$runId';
+}
+
 /// Workout session card — shared across training and run history.
 class RunCard extends StatelessWidget {
   const RunCard({super.key, required this.run});
@@ -41,9 +46,15 @@ class RunCard extends StatelessWidget {
               ),
               const Gap(Spacing.sm),
               Expanded(
-                child: Text(
-                  _runDateLabel(run.start),
-                  style: Theme.of(context).textTheme.titleMedium,
+                child: Hero(
+                  tag: RunHeroTags.date(run.id),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      _runDateLabel(run.start),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
                 ),
               ),
               Flexible(

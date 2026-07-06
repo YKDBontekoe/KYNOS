@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/not_found_page.dart';
+import 'package:kynos/app/page_transitions.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
@@ -63,7 +64,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: Routes.onboarding,
-        builder: (context, state) => const OnboardingPage(),
+        pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
+          key: state.pageKey,
+          child: const OnboardingPage(),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -73,7 +77,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.dashboard,
-                builder: (context, state) => const DashboardTab(),
+                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
+                  key: state.pageKey,
+                  child: const DashboardTab(),
+                ),
               ),
             ],
           ),
@@ -81,7 +88,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.training,
-                builder: (context, state) => const TrainingTab(),
+                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
+                  key: state.pageKey,
+                  child: const TrainingTab(),
+                ),
               ),
             ],
           ),
@@ -89,7 +99,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.character,
-                builder: (context, state) => const CharacterTab(),
+                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
+                  key: state.pageKey,
+                  child: const CharacterTab(),
+                ),
               ),
             ],
           ),
@@ -97,55 +110,86 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.runHistory,
-        builder: (context, state) => const RunHistoryPage(),
+        pageBuilder: (context, state) => KynosPageTransitions.standard(
+          key: state.pageKey,
+          child: const RunHistoryPage(),
+        ),
       ),
       GoRoute(
         path: Routes.runRoute,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final run = state.extra;
-          if (run is WorkoutSession) return RunRoutePage(run: run);
-          return const RunRouteMissingPage();
+          final child = run is WorkoutSession
+              ? RunRoutePage(run: run)
+              : const RunRouteMissingPage();
+          return KynosPageTransitions.standard(
+            key: state.pageKey,
+            child: child,
+          );
         },
         routes: [
           GoRoute(
             path: ':runId',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final extra = state.extra;
+              final Widget child;
               if (extra is WorkoutSession) {
-                return RunRoutePage(run: extra);
+                child = RunRoutePage(run: extra);
+              } else {
+                final runId = state.pathParameters['runId'];
+                child = runId == null || runId.isEmpty
+                    ? const RunRouteMissingPage()
+                    : RunRoutePage(runId: runId);
               }
-              final runId = state.pathParameters['runId'];
-              if (runId == null || runId.isEmpty) {
-                return const RunRouteMissingPage();
-              }
-              return RunRoutePage(runId: runId);
+              return KynosPageTransitions.standard(
+                key: state.pageKey,
+                child: child,
+              );
             },
           ),
         ],
       ),
       GoRoute(
         path: Routes.coachChat,
-        builder: (context, state) => const CoachChatPage(),
+        pageBuilder: (context, state) => KynosPageTransitions.modalUp(
+          key: state.pageKey,
+          child: const CoachChatPage(),
+        ),
       ),
       GoRoute(
         path: Routes.nexusLab,
-        builder: (context, state) => const NexusLabPage(),
+        pageBuilder: (context, state) => KynosPageTransitions.modalUp(
+          key: state.pageKey,
+          child: const NexusLabPage(),
+        ),
       ),
       GoRoute(
         path: Routes.settings,
-        builder: (context, state) => const SettingsPage(),
+        pageBuilder: (context, state) => KynosPageTransitions.standard(
+          key: state.pageKey,
+          child: const SettingsPage(),
+        ),
         routes: [
           GoRoute(
             path: 'openrouter-models',
-            builder: (context, state) => const OpenRouterModelPickerPage(),
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const OpenRouterModelPickerPage(),
+            ),
           ),
           GoRoute(
             path: 'import',
-            builder: (context, state) => const HealthImportPage(),
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const HealthImportPage(),
+            ),
           ),
           GoRoute(
             path: 'manual-run',
-            builder: (context, state) => const ManualRunPage(),
+            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
+              key: state.pageKey,
+              child: const ManualRunPage(),
+            ),
           ),
         ],
       ),

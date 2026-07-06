@@ -13,12 +13,14 @@ class LiquidGlassButton extends StatelessWidget {
     required this.onPressed,
     this.onAccent = false,
     this.icon,
+    this.iconHeroTag,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool onAccent;
   final IconData? icon;
+  final String? iconHeroTag;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,12 @@ class LiquidGlassButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 18, color: foreground),
+                  iconHeroTag != null
+                      ? Hero(
+                          tag: iconHeroTag!,
+                          child: Icon(icon, size: 18, color: foreground),
+                        )
+                      : Icon(icon, size: 18, color: foreground),
                   const SizedBox(width: tokens.Spacing.xs),
                 ],
                 Text(

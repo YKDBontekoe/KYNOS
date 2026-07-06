@@ -58,6 +58,7 @@ class TrailMap extends StatelessWidget {
                 final isCurrent = index == session.currentIndex;
                 final isPast = index < session.currentIndex;
                 return _TrailNodeDot(
+                  key: ValueKey<String>('${node.index}-${session.currentIndex}'),
                   node: node,
                   isCurrent: isCurrent,
                   isPast: isPast,
@@ -86,8 +87,9 @@ class TrailMap extends StatelessWidget {
   }
 }
 
-class _TrailNodeDot extends StatelessWidget {
+class _TrailNodeDot extends StatefulWidget {
   const _TrailNodeDot({
+    super.key,
     required this.node,
     required this.isCurrent,
     required this.isPast,
@@ -97,11 +99,54 @@ class _TrailNodeDot extends StatelessWidget {
   final bool isCurrent;
   final bool isPast;
 
+  @override
+  State<_TrailNodeDot> createState() => _TrailNodeDotState();
+}
+
+class _TrailNodeDotState extends State<_TrailNodeDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _scale = Tween<double>(begin: 1, end: 1.08).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _syncPulse();
+  }
+
+  @override
+  void didUpdateWidget(_TrailNodeDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncPulse();
+  }
+
+  void _syncPulse() {
+    if (widget.isCurrent) {
+      _pulseController.repeat(reverse: true);
+    } else {
+      _pulseController.stop();
+      _pulseController.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
   Color _color(BuildContext context) {
     final kynos = context.kynosTheme;
-    if (isCurrent) return kynos.purple;
-    if (isPast || node.resolved) return AppTheme.exercise;
-    return switch (node.type) {
+    if (widget.isCurrent) return kynos.purple;
+    if (widget.isPast || widget.node.resolved) return AppTheme.exercise;
+    return switch (widget.node.type) {
       TrailNodeType.boss => AppTheme.energy,
       TrailNodeType.treasure => AppTheme.move,
       TrailNodeType.rest => AppTheme.stand,
@@ -110,7 +155,7 @@ class _TrailNodeDot extends StatelessWidget {
     };
   }
 
-  IconData _icon() => switch (node.type) {
+  IconData _icon() => switch (widget.node.type) {
         TrailNodeType.start => Icons.flag_outlined,
         TrailNodeType.encounter => Icons.flash_on_rounded,
         TrailNodeType.rest => Icons.self_improvement_outlined,
@@ -121,27 +166,31 @@ class _TrailNodeDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _color(context);
+    final dot = Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: widget.isCurrent ? 0.2 : 0.1),
+        border: Border.all(
+          color: color,
+          width: widget.isCurrent ? 2 : 1,
+        ),
+      ),
+      child: Icon(_icon(), size: 20, color: color),
+    );
+
     return SizedBox(
       width: 52,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: isCurrent ? 0.2 : 0.1),
-              border: Border.all(
-                color: color,
-                width: isCurrent ? 2 : 1,
-              ),
-            ),
-            child: Icon(_icon(), size: 20, color: color),
-          ),
+          widget.isCurrent
+              ? ScaleTransition(scale: _scale, child: dot)
+              : dot,
           const Gap(tokens.Spacing.xs),
           Text(
-            node.type.label,
+            widget.node.type.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,

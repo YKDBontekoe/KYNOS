@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/motion.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 
 double? _toKm(double? meters) => meters == null ? null : meters / 1000;
@@ -82,6 +83,8 @@ class LoadChart extends StatelessWidget {
         ),
         barGroups: bars,
       ),
+      duration: Motion.medium,
+      curve: Motion.curve,
     );
   }
 }

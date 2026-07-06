@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:kynos/core/theme/motion.dart';
 
 /// Concentric activity rings with per-ring progress arcs.
 class ActivityRing extends StatelessWidget {
@@ -23,19 +24,19 @@ class ActivityRing extends StatelessWidget {
   final double strokeWidth;
   final List<Color> colors;
 
+  List<double> get _resolvedProgresses =>
+      ringProgresses ?? List<double>.filled(colors.length, progress ?? 0);
+
   @override
   Widget build(BuildContext context) {
-    final progresses = ringProgresses ??
-        List<double>.filled(colors.length, progress ?? 0);
-
     return Semantics(
-      label: _semanticsLabel(progresses),
+      label: ringSemanticsLabel(_resolvedProgresses),
       child: SizedBox(
         width: size,
         height: size,
         child: CustomPaint(
           painter: RingPainter(
-            ringProgresses: progresses,
+            ringProgresses: _resolvedProgresses,
             strokeWidth: strokeWidth,
             colors: colors,
           ),
@@ -43,14 +44,111 @@ class ActivityRing extends StatelessWidget {
       ),
     );
   }
+}
 
-  String _semanticsLabel(List<double> progresses) {
-    final parts = <String>[];
-    for (var i = 0; i < progresses.length; i++) {
-      final pct = (progresses[i] * 100).round();
-      parts.add('Ring ${i + 1} $pct percent');
+/// Accessibility label for activity ring progress values.
+String ringSemanticsLabel(List<double> progresses) {
+  final parts = <String>[];
+  for (var i = 0; i < progresses.length; i++) {
+    final pct = (progresses[i] * 100).round();
+    parts.add('Ring ${i + 1} $pct percent');
+  }
+  return parts.isEmpty ? 'Activity rings' : 'Activity rings: ${parts.join(', ')}';
+}
+
+/// [ActivityRing] with staggered sweep-in animation on appear and data refresh.
+class AnimatedActivityRing extends StatefulWidget {
+  const AnimatedActivityRing({
+    super.key,
+    this.progress,
+    this.ringProgresses,
+    required this.size,
+    required this.strokeWidth,
+    required this.colors,
+  });
+
+  final double? progress;
+  final List<double>? ringProgresses;
+  final double size;
+  final double strokeWidth;
+  final List<Color> colors;
+
+  @override
+  State<AnimatedActivityRing> createState() => _AnimatedActivityRingState();
+}
+
+class _AnimatedActivityRingState extends State<AnimatedActivityRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  List<double> get _targetProgresses =>
+      widget.ringProgresses ??
+      List<double>.filled(widget.colors.length, widget.progress ?? 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Motion.ringSweep,
+    )..forward();
+  }
+
+  @override
+  void didUpdateWidget(AnimatedActivityRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldTargets = oldWidget.ringProgresses ??
+        List<double>.filled(
+          oldWidget.colors.length,
+          oldWidget.progress ?? 0,
+        );
+    if (!listEquals(oldTargets, _targetProgresses)) {
+      _controller.forward(from: 0);
     }
-    return parts.isEmpty ? 'Activity rings' : 'Activity rings: ${parts.join(', ')}';
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<double> _animatedProgresses() {
+    final count = _targetProgresses.length;
+    if (count == 0) return const [];
+
+    final staggerFraction =
+        Motion.ringStagger.inMilliseconds / Motion.ringSweep.inMilliseconds;
+
+    return List<double>.generate(count, (i) {
+      final start = (i * staggerFraction).clamp(0.0, 0.85);
+      final interval = Interval(start, 1, curve: Motion.curve);
+      return interval.transform(_controller.value) * _targetProgresses[i];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final progresses = _animatedProgresses();
+        return Semantics(
+          label: ringSemanticsLabel(_targetProgresses),
+          child: SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: CustomPaint(
+              painter: RingPainter(
+                ringProgresses: progresses,
+                strokeWidth: widget.strokeWidth,
+                colors: widget.colors,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart' hide Radius;
 import 'package:kynos/domain/utils/weekly_momentum.dart';
+import 'package:kynos/shared/widgets/animated_progress_bar.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
@@ -51,14 +52,11 @@ class WeekMomentumCard extends StatelessWidget {
           if (isLoading)
             const KynosLoadingLine(height: 10, widthFactor: 1)
           else
-            ClipRRect(
-              borderRadius: BorderRadius.circular(tokens.Radius.sm),
-              child: LinearProgressIndicator(
-                value: m?.distanceGoalProgress ?? 0,
-                minHeight: 10,
-                backgroundColor: kynos.separator,
-                valueColor: AlwaysStoppedAnimation(kynos.stand),
-              ),
+            AnimatedProgressBar(
+              value: m?.distanceGoalProgress ?? 0,
+              minHeight: 10,
+              backgroundColor: kynos.separator,
+              valueColor: kynos.stand,
             ),
           if (hasNoData) ...[
             const Gap(tokens.Spacing.md),

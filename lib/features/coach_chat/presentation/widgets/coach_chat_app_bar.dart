@@ -5,6 +5,7 @@ import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/shared/utils/navigation_utils.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -35,10 +36,13 @@ class CoachChatAppBar extends ConsumerWidget {
                 tooltip: 'Close',
               ),
             ),
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: kynos.exercise, shape: BoxShape.circle),
+            Hero(
+              tag: CoachHeroTags.sparkle,
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: 20,
+                color: kynos.purple,
+              ),
             ),
             const Gap(Spacing.sm),
             Text(

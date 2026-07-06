@@ -2,10 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 
 void main() {
+  testWidgets('MessageList renders messages with entrance wrapper', (tester) async {
+    final controller = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MessageList(
+            messages: [
+              ChatMessage(
+                id: 'user_1',
+                role: MessageRole.user,
+                content: 'Hello coach',
+                timestamp: DateTime(2026, 7, 5),
+              ),
+            ],
+            scrollController: controller,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('Hello coach'), findsOneWidget);
+    expect(find.byType(AnimatedMessageEntrance), findsOneWidget);
+
+    controller.dispose();
+  });
+
   testWidgets('failed assistant message shows retry button', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
