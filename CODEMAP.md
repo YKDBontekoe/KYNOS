@@ -156,7 +156,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/usecases/health/import_workout_usecase.dart` | 48 | ImportWorkoutUseCase |
 | `lib/domain/usecases/insights/generate_post_run_debrief_usecase.dart` | 98 | PostRunDebrief, GeneratePostRunDebriefUseCase |
 | `lib/domain/usecases/insights/generate_today_insights_usecase.dart` | 69 | GenerateTodayInsightsUseCase |
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 296 | GenerateTrainingInsightsUseCase |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 292 | GenerateTrainingInsightsUseCase |
 | `lib/domain/usecases/insights/today_insights_deterministic.dart` | 145 | Builds deterministic today insights from health metrics. |
 | `lib/domain/usecases/insights/today_insights_model_refiner.dart` | 128 | TodayInsightsModelRefiner |
 | `lib/domain/usecases/nexus_lab/calibrate_gait_model_usecase.dart` | 155 | CalibrateGaitModelUseCase, _SteadyStateExtractionTool |
@@ -167,10 +167,13 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/coach_fallback_reply.dart` | 28 | Deterministic coach reply when on-device Gemma is unavailable. |
 | `lib/domain/utils/gemma_device_capability.dart` | 62 | On-device Gemma inference tier based on device resources. |
 | `lib/domain/utils/gemma_inference_limits.dart` | 19 | Token budgets keyed by on-device Gemma inference tier. |
+| `lib/domain/utils/geo_distance.dart` | 40 | Haversine distance between two WGS-84 coordinates in meters. |
 | `lib/domain/utils/health_context_formatter.dart` | 57 | Formats [HealthSummary] rows for LLM prompts without raw GPS or device IDs. |
 | `lib/domain/utils/metric_trends.dart` | 85 | MetricDelta |
+| `lib/domain/utils/pace_format.dart` | 28 | Formats pace as `m:ss /km` from seconds per kilometer. |
 | `lib/domain/utils/personal_bests.dart` | 63 | Finds short personal-best callouts for dashboard chips. |
 | `lib/domain/utils/readiness_score.dart` | 123 | ReadinessDimensions |
+| `lib/domain/utils/run_route_analytics.dart` | 274 | PaceProfilePoint, KilometerSplit, RunRouteAnalytics, … |
 | `lib/domain/utils/run_streak.dart` | 65 | Dart module |
 | `lib/domain/utils/seeded_roll.dart` | 17 | Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates). |
 | `lib/domain/utils/weekly_momentum.dart` | 88 | WeeklyMomentum |
@@ -208,7 +211,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 347 | DashboardPage, _DashboardPageState |
 | `lib/features/dashboard/presentation/pages/run_history_page.dart` | 138 | RunHistoryPage |
 | `lib/features/dashboard/presentation/pages/run_route_missing_page.dart` | 53 | RunRouteMissingPage |
-| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 267 | RunRoutePage, _RunRouteScaffold, _RouteContent, … |
+| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 183 | RunRoutePage, _RunRouteScaffold, _RouteContent |
 | `lib/features/dashboard/presentation/widgets/activity_ring.dart` | 214 | ActivityRing, AnimatedActivityRing, _AnimatedActivityRingState, … |
 | `lib/features/dashboard/presentation/widgets/character_glance_card.dart` | 89 | CharacterGlanceCard |
 | `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, … |
@@ -221,6 +224,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/last_run_preview.dart` | 76 | LastRunPreview |
 | `lib/features/dashboard/presentation/widgets/metric_detail_sheet.dart` | 185 | MetricDetailSheet, _MetricMeta |
 | `lib/features/dashboard/presentation/widgets/readiness_card.dart` | 216 | ReadinessCard, _ReadinessCardContent, ConfidenceBadgeRow |
+| `lib/features/dashboard/presentation/widgets/run_detail/route_polyline_painter.dart` | 171 | RoutePolylinePainter, _Bounds |
+| `lib/features/dashboard/presentation/widgets/run_detail/run_insight_chips.dart` | 84 | RunInsightChips |
+| `lib/features/dashboard/presentation/widgets/run_detail/run_pace_chart.dart` | 137 | RunPaceChart, _PaceLineChart |
+| `lib/features/dashboard/presentation/widgets/run_detail/run_route_map_section.dart` | 163 | RunRouteMapSection, _RouteMapBody, _PolylineMap, … |
+| `lib/features/dashboard/presentation/widgets/run_detail/run_split_list.dart` | 116 | RunSplitList, _SplitRow |
+| `lib/features/dashboard/presentation/widgets/run_detail/run_summary_metrics.dart` | 91 | RunSummaryMetrics |
 | `lib/features/dashboard/presentation/widgets/trend_carousel.dart` | 96 | TrendCarousel, _TrendCarouselState, _TrendPage |
 | `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 191 | WeekMomentumCard |
 | `lib/features/dashboard/presentation/widgets/what_changed_chips.dart` | 45 | WhatChangedChips |
@@ -294,7 +303,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/health/import/apple_health_unit_converter.dart` | 62 | Converts Apple Health export units into KYNOS canonical units. |
 | `lib/infrastructure/health/import/apple_health_workout_builder.dart` | 48 | AppleHealthWorkoutBuilder |
 | `lib/infrastructure/health/import/apple_health_xml_event_stream.dart` | 35 | Chunk size for streaming `export.xml` without loading the full file. |
-| `lib/infrastructure/health/import/gpx_workout_parser.dart` | 114 | GpxParseResult, GpxWorkoutParser |
+| `lib/infrastructure/health/import/gpx_workout_parser.dart` | 78 | GpxParseResult, GpxWorkoutParser |
 | `lib/infrastructure/health/imported_health_connection_native.dart` | 14 | Dart module |
 | `lib/infrastructure/health/imported_health_connection_stub.dart` | 5 | Dart module |
 | `lib/infrastructure/health/imported_health_database.dart` | 59 | ImportedWorkouts, ImportedRoutePoints, ImportedDailySummaries, … |
@@ -367,7 +376,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/metric_tile.dart` | 131 | MetricTile |
 | `lib/shared/widgets/nav_icon.dart` | 241 | NavIconDefinition, NavIconPainter |
 | `lib/shared/widgets/responsive_center.dart` | 30 | ResponsiveCenter |
-| `lib/shared/widgets/run_card.dart` | 125 | RunCard |
+| `lib/shared/widgets/run_card.dart` | 113 | RunCard |
 | `lib/shared/widgets/widgets.dart` | 23 | KYNOS shared widgets — barrel export. |
 
 ## Hot Files (do not grow)
@@ -379,16 +388,16 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 339 | Split if > 250 lines |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 324 | Split if > 250 lines |
 | `lib/domain/usecases/gamification/generate_daily_quests_usecase.dart` | 298 | Split if > 250 lines |
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 296 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 292 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | Split if > 250 lines |
-| `lib/features/dashboard/presentation/pages/run_route_page.dart` | 267 | Split if > 250 lines |
+| `lib/domain/utils/run_route_analytics.dart` | 274 | Split if > 250 lines |
 | `lib/features/character/presentation/widgets/quest_card.dart` | 254 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |
 | `lib/features/character/providers/adventure_provider.dart` | 251 | Split if > 250 lines |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 278 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 287 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->
