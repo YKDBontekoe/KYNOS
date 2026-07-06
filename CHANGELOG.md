@@ -1,3 +1,12 @@
+## [1.12.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.12.0...v1.12.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* **ai:** add on-device llm recovery pipeline and coach retry ux ([#57](https://github.com/YKDBontekoe/KYNOS/issues/57)) ([3eee7c5](https://github.com/YKDBontekoe/KYNOS/commit/3eee7c5979d7f8802e15835443a91338d4791c45))
+* **character:** resolve trail status wrapping and nav overlap ([#59](https://github.com/YKDBontekoe/KYNOS/issues/59)) ([b4cf3eb](https://github.com/YKDBontekoe/KYNOS/commit/b4cf3eb5c7690e4743f4083da7ec370aefdb74a2))
+* reuse apple health import preview ([#58](https://github.com/YKDBontekoe/KYNOS/issues/58)) ([8856ebf](https://github.com/YKDBontekoe/KYNOS/commit/8856ebfc2d868b01412d8264e04e183c53b38bc6))
+
 # [1.12.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.11.0...v1.12.0) (2026-07-05)
 
 
