@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/app_theme.dart';
+import 'package:kynos/core/theme/layout.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
@@ -28,16 +29,21 @@ class _ShellState extends State<ShellPage> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       extendBody: true,
-      body: IndexedStack(
-        index: _index,
-        children: [
-          DashboardPage(
-            onViewTraining: () => setState(() => _index = 1),
-            onViewCharacter: () => setState(() => _index = 2),
-          ),
-          const TrainingPage(),
-          const CharacterPage(),
-        ],
+      body: Padding(
+        padding: EdgeInsets.only(
+          bottom: LayoutTokens.shellNavExtent(context),
+        ),
+        child: IndexedStack(
+          index: _index,
+          children: [
+            DashboardPage(
+              onViewTraining: () => setState(() => _index = 1),
+              onViewCharacter: () => setState(() => _index = 2),
+            ),
+            const TrainingPage(),
+            const CharacterPage(),
+          ],
+        ),
       ),
       bottomNavigationBar: KynosBottomNav(
         items: _navItems,

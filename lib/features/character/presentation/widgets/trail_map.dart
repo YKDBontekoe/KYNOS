@@ -24,7 +24,7 @@ class TrailMap extends StatelessWidget {
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             'TRAIL RUN',
@@ -35,13 +35,24 @@ class TrailMap extends StatelessWidget {
               letterSpacing: 0.8,
             ),
           ),
+          const Gap(tokens.Spacing.sm),
+          Text(
+            _statusLabel(session),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppTheme.secondaryLabel,
+            ),
+          ),
           const Gap(tokens.Spacing.md),
           SizedBox(
-            height: 72,
+            height: 80,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: session.nodes.length,
-              separatorBuilder: (_, _) => const Gap(tokens.Spacing.xs),
+              separatorBuilder: (_, _) =>
+                  const SizedBox(width: tokens.Spacing.xs),
               itemBuilder: (context, index) {
                 final node = session.nodes[index];
                 final isCurrent = index == session.currentIndex;
@@ -55,22 +66,12 @@ class TrailMap extends StatelessWidget {
             ),
           ),
           const Gap(tokens.Spacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _statusLabel(session),
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: AppTheme.secondaryLabel,
-                  ),
-                ),
-              ),
-              FilledButton(
-                onPressed: canAdvance ? onAdvance : null,
-                child: const Text('Advance'),
-              ),
-            ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton(
+              onPressed: canAdvance ? onAdvance : null,
+              child: const Text('Advance'),
+            ),
           ),
         ],
       ),
@@ -120,33 +121,39 @@ class _TrailNodeDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _color(context);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withValues(alpha: isCurrent ? 0.2 : 0.1),
-            border: Border.all(
-              color: color,
-              width: isCurrent ? 2 : 1,
+    return SizedBox(
+      width: 52,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: isCurrent ? 0.2 : 0.1),
+              border: Border.all(
+                color: color,
+                width: isCurrent ? 2 : 1,
+              ),
+            ),
+            child: Icon(_icon(), size: 20, color: color),
+          ),
+          const Gap(tokens.Spacing.xs),
+          Text(
+            node.type.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.tertiaryLabel,
+              letterSpacing: 0.4,
             ),
           ),
-          child: Icon(_icon(), size: 20, color: color),
-        ),
-        const Gap(tokens.Spacing.xs),
-        Text(
-          node.type.label,
-          style: GoogleFonts.inter(
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.tertiaryLabel,
-            letterSpacing: 0.4,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -3,6 +3,17 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 
 /// Layout constants for consistent page structure.
 abstract final class LayoutTokens {
+  /// Fixed height of the floating shell nav bar (excludes device safe-area).
+  static const double shellNavBarHeight =
+      tokens.Spacing.md +
+      tokens.Spacing.xs +
+      tokens.Spacing.xs * 2 +
+      60;
+
+  /// Total bottom inset required to clear the floating shell nav bar.
+  static double shellNavExtent(BuildContext context) =>
+      shellNavBarHeight + MediaQuery.viewPaddingOf(context).bottom;
+
   /// Bottom scroll padding to clear the floating shell nav bar.
   static const double shellBottomPadding =
       tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.lg;
