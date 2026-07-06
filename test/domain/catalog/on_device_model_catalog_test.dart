@@ -21,7 +21,7 @@ void main() {
       );
 
       expect(models.map((m) => m.id), contains('gemma3-270m'));
-      expect(models.map((m) => m.id), isNot(contains('gemma4-e2b'));
+      expect(models.map((m) => m.id), isNot(contains('gemma4-e2b')));
     });
 
     test('includes gemma4 on high-RAM mobile', () {

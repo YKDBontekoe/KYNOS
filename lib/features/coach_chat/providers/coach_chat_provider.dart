@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/features/coach_chat/utils/chat_history_codec.dart';
@@ -142,12 +143,13 @@ class CoachChatNotifier extends _$CoachChatNotifier {
     List<HealthSummary>? healthContext;
     AiCoachRepository? repository;
     try {
-      repository = ref.read(aiCoachRepositoryProvider);
+      final coachRepository = ref.read(aiCoachRepositoryProvider);
+      repository = coachRepository;
       healthContext = await _loadHealthContext();
 
       final estimatedTokens = _estimateTokens(userMessage, healthContext);
 
-      await for (final chunk in repository.chat(
+      await for (final chunk in coachRepository.chat(
         userMessage: userMessage,
         healthContext: healthContext,
         estimatedPromptTokens: estimatedTokens,
@@ -156,7 +158,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         if (_cancelRequested) break;
 
         ref.read(lastAiInferenceBackendProvider.notifier).set(
-              repository.lastBackend,
+              coachRepository.lastBackend,
             );
 
         final msgs = state.value!;
@@ -180,7 +182,7 @@ class CoachChatNotifier extends _$CoachChatNotifier {
         assistantId,
         streaming: false,
         hasError: false,
-        attemptedBackend: repository.lastBackend,
+        attemptedBackend: coachRepository.lastBackend,
       );
       await _persist();
     } catch (e, st) {

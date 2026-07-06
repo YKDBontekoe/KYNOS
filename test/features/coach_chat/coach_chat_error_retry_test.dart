@@ -63,6 +63,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Retry'), findsOneWidget);
     expect(find.text('Try cloud coach'), findsOneWidget);
@@ -127,6 +128,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Try cloud coach'));
     await tester.pump();

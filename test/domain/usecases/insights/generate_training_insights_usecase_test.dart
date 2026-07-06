@@ -3,6 +3,7 @@ import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/entities/on_device_model.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
@@ -179,8 +180,14 @@ class _FakeAiModelRepository implements AiModelRepository {
   final bool hasActiveModel;
 
   @override
+  String? get installedModelId => null;
+
+  @override
   Future<void> initialize({String? huggingFaceToken}) async {}
 
   @override
-  Future<void> installFromNetwork({required String url, String? token}) async {}
+  Future<void> install(OnDeviceModel model, {String? token}) async {}
+
+  @override
+  bool isActiveModel(String catalogId) => false;
 }

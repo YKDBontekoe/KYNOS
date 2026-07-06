@@ -107,13 +107,18 @@ class OpenRouterApiClient {
     );
 
     if (response.statusCode != null && response.statusCode! >= 400) {
-      final errorBody = await response.data?.stream
-          .transform(utf8.decoder)
-          .join();
+      final errorBuffer = StringBuffer();
+      final errorStream = response.data?.stream;
+      if (errorStream != null) {
+        await for (final chunk in errorStream) {
+          errorBuffer.write(utf8.decode(chunk));
+        }
+      }
+      final errorBody = errorBuffer.toString();
       throw DioException(
         requestOptions: response.requestOptions,
         response: response,
-        message: errorBody?.isNotEmpty == true
+        message: errorBody.isNotEmpty
             ? errorBody
             : 'OpenRouter request failed (${response.statusCode})',
       );

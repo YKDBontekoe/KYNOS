@@ -87,7 +87,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
     };
 
     if (useCloud) {
-      if (!cloudAvailable || apiKey == null || config.selectedModelId == null) {
+      if (!cloudAvailable) {
         throw StateError(
           'Cloud coach is not configured. Add an OpenRouter key and model in Settings.',
         );
