@@ -1,6 +1,7 @@
 import 'package:kynos/core/errors/failures.dart';
 import 'package:kynos/domain/usecases/health/import_workout_usecase.dart';
 import 'package:kynos/infrastructure/health/import/apple_health_export_isolate.dart';
+import 'package:kynos/infrastructure/health/import/apple_health_export_parser.dart';
 import 'package:kynos/infrastructure/health/imported_health_store.dart';
 
 /// Result of importing an Apple Health `export.zip` archive.
@@ -20,27 +21,73 @@ class ImportAppleHealthExportResult {
   final Failure? failure;
 }
 
+typedef ParseAppleHealthZip = Future<AppleHealthExportParseResult> Function({
+  String? zipPath,
+  List<int>? zipBytes,
+});
+
 /// Parses and persists an Apple Health export archive.
 class ImportAppleHealthExportUseCase {
   const ImportAppleHealthExportUseCase({
     required ImportedHealthStore store,
     required ImportWorkoutUseCase importWorkout,
+    ParseAppleHealthZip parseZip = parseAppleHealthZipAsync,
   })  : _store = store,
-        _importWorkout = importWorkout;
+        _importWorkout = importWorkout,
+        _parseZip = parseZip;
 
   final ImportedHealthStore _store;
   final ImportWorkoutUseCase _importWorkout;
+  final ParseAppleHealthZip _parseZip;
 
   Future<ImportAppleHealthExportResult> call({
     List<int>? zipBytes,
     String? zipPath,
+    AppleHealthExportParseResult? parsed,
     DateTime? now,
   }) async {
     try {
-      final parsed = await parseAppleHealthZipAsync(
-        zipPath: zipPath,
-        zipBytes: zipBytes,
+      final importData = parsed ??
+          await _parseZip(
+            zipPath: zipPath,
+            zipBytes: zipBytes,
+          );
+      return await importParsed(importData, now: now);
+    } on FormatException catch (e) {
+      return ImportAppleHealthExportResult(
+        importedWorkouts: 0,
+        skippedWorkouts: 0,
+        importedDays: 0,
+        recordCount: 0,
+        failure: HealthDataFailure(e.message),
       );
+    } on OutOfMemoryError {
+      return const ImportAppleHealthExportResult(
+        importedWorkouts: 0,
+        skippedWorkouts: 0,
+        importedDays: 0,
+        recordCount: 0,
+        failure: HealthDataFailure(
+          'This export is too large for available memory. '
+          'Try exporting a shorter date range from the Health app.',
+        ),
+      );
+    } on Object catch (e) {
+      return ImportAppleHealthExportResult(
+        importedWorkouts: 0,
+        skippedWorkouts: 0,
+        importedDays: 0,
+        recordCount: 0,
+        failure: StorageFailure(e.toString()),
+      );
+    }
+  }
+
+  Future<ImportAppleHealthExportResult> importParsed(
+    AppleHealthExportParseResult parsed, {
+    DateTime? now,
+  }) async {
+    try {
       await _store.saveSummaries(parsed.summaries);
 
       var importedWorkouts = 0;

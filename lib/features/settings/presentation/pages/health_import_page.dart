@@ -131,8 +131,11 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   Future<void> _confirmImport() async {
     setState(() => _isImporting = true);
 
-    if (_zipPreview != null && _pickedFile != null) {
-      await _importZip(_pickedFile!);
+    final pickedFile = _pickedFile;
+    final isZip = pickedFile?.extension?.toLowerCase() == 'zip';
+
+    if (pickedFile != null && (_zipPreview != null || isZip)) {
+      await _importZip(pickedFile);
     } else if (_gpxPreview != null) {
       await _importGpx();
     }
@@ -173,10 +176,14 @@ class _HealthImportPageState extends ConsumerState<HealthImportPage> {
   }
 
   Future<void> _importZip(PlatformFile file) async {
-    final bytes = file.path == null ? await readPickedFileBytes(file) : null;
+    final preview = _zipPreview;
+    final bytes = preview == null && file.path == null
+        ? await readPickedFileBytes(file)
+        : null;
     final useCase = ref.read(importAppleHealthExportUseCaseProvider);
     final result = await useCase(
-      zipPath: file.path,
+      parsed: preview,
+      zipPath: preview == null ? file.path : null,
       zipBytes: bytes,
     );
 
