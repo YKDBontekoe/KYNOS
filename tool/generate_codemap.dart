@@ -98,12 +98,12 @@ void main() {
     exit(1);
   }
 
-  final updated = existing.replaceRange(
-    start,
-    end + _endMarker.length,
-    buffer.toString().trimRight(),
-  );
-  codemapFile.writeAsStringSync('$updated\n');
+  final before = existing.substring(0, start);
+  final autoSection = buffer.toString().trimRight();
+
+  // Normalize EOF — do not preserve trailing blank lines after the end marker.
+  final updated = '$before$autoSection\n';
+  codemapFile.writeAsStringSync(updated);
   print('Updated $codemapPath (${files.length} files indexed).');
 }
 
