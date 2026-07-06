@@ -60,7 +60,7 @@ void main() {
               ),
             ),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             home: MediaQuery(
               data: const MediaQueryData(
                 size: Size(390, 640),
@@ -73,13 +73,16 @@ void main() {
       );
 
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Long Description Model'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Long Description Model'));
       await tester.pumpAndSettle();
 
       expect(find.text('Description'), findsOneWidget);
       expect(find.text(longDescription), findsOneWidget);
-      expect(find.text('Select model'), findsOneWidget);
-      expect(tester.getBottomLeft(find.text('Select model')).dy, lessThan(640));
+      final selectButton = find.widgetWithText(FilledButton, 'Select model');
+      expect(selectButton, findsOneWidget);
+      expect(tester.getRect(selectButton).bottom, lessThanOrEqualTo(640));
     },
   );
 }
