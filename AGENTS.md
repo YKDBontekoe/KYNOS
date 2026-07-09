@@ -438,3 +438,32 @@ flutter run --release   # AI inference benchmarks
 | `lib/infrastructure/ai/gemma/ai_isolate_bridge.dart` | Isolate message protocol |
 | `.github/workflows/ci.yml` | CI pipeline (analyze, test, build) |
 | `CLAUDE.md` | Quick-reference companion to this file |
+
+---
+
+## Cursor Cloud specific instructions
+
+Environment notes for Cloud Agents (the startup update script already runs
+`flutter pub get`; the Flutter SDK and Chrome are pre-installed in the VM snapshot).
+
+- **Toolchain:** Flutter `3.44.4` (stable, Dart 3.12) is installed at `/opt/flutter`
+  and added to `PATH` via `~/.bashrc` (matches the CI pin in `.github/workflows/ci.yml`).
+  Chrome is at `/usr/local/bin/google-chrome`; `flutter devices` lists `web` + `chrome`.
+- **Generated code is committed.** After changing `@freezed`/`@riverpod`/Drift/JSON
+  models, run `dart run build_runner build --delete-conflicting-outputs` and commit —
+  CI fails if generated files drift. The update script does NOT run build_runner.
+- **Running the web app on this headless VM:** `flutter run -d web-server` uses the
+  DDC debug compiler, which loads ~1,460 module scripts and can take **minutes** to
+  first render (often looks like a blank white page). For fast, reliable manual
+  verification, prefer `flutter build web` then serve the output, e.g.
+  `cd build/web && python3 -m http.server 8090`, which renders in seconds.
+- **Routing / deep links:** `go_router` uses the hash URL strategy, so deep links work
+  on a static server, e.g. `http://localhost:8090/#/settings`, `/#/settings/manual-run`.
+- **Web feature limits (expected, not bugs):** on-device Gemma/LiteRT-LM tries to fetch
+  a CDN module and AI inference is unavailable on web (coach uses deterministic
+  fallbacks); HealthKit is iOS-only. Exercise run data via Settings → "Log run manually"
+  or Apple Health/GPX import instead.
+- **Time-dependent test:** `test/domain/coach/coach_context_test.dart` →
+  "includes active quests only" hard-codes quest `expiresAt: DateTime(2026, 7, 7)`, so it
+  fails once the system clock is past that date. This is a pre-existing test bug, not an
+  environment issue; all other tests pass.
