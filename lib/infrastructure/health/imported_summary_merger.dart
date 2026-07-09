@@ -1,4 +1,5 @@
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/infrastructure/health/health_summary_merge.dart';
 
 /// Merges imported daily summaries, preferring stored metrics and adding
 /// workout rollups from both sources.
@@ -41,13 +42,18 @@ HealthSummary _combine(HealthSummary base, HealthSummary extra) {
     cadenceSpm: base.cadenceSpm ?? extra.cadenceSpm,
     strideLengthMeters: base.strideLengthMeters ?? extra.strideLengthMeters,
     exerciseMinutes: base.exerciseMinutes ?? extra.exerciseMinutes,
-    runningWorkoutCount:
-        (base.runningWorkoutCount ?? 0) + (extra.runningWorkoutCount ?? 0),
+    runningWorkoutCount: HealthSummaryMerge.runningWorkoutCount(
+      a: base.runningWorkoutCount,
+      b: extra.runningWorkoutCount,
+      distanceA: base.runningWorkoutDistanceMeters,
+      distanceB: extra.runningWorkoutDistanceMeters,
+    ),
     runningWorkoutMinutes: (base.runningWorkoutMinutes ?? 0) +
         (extra.runningWorkoutMinutes ?? 0),
-    runningWorkoutDistanceMeters:
-        (base.runningWorkoutDistanceMeters ?? 0) +
-            (extra.runningWorkoutDistanceMeters ?? 0),
+    runningWorkoutDistanceMeters: HealthSummaryMerge.runningWorkoutDistanceMeters(
+      base.runningWorkoutDistanceMeters,
+      extra.runningWorkoutDistanceMeters,
+    ),
     runningWorkoutCalories: (base.runningWorkoutCalories ?? 0) +
         (extra.runningWorkoutCalories ?? 0),
   );

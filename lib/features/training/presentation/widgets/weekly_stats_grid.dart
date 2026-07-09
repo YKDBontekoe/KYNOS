@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/health_summary.dart';
+import 'package:kynos/domain/utils/running_distance.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
 /// 2×2 grid of weekly training metrics.
@@ -16,12 +17,7 @@ class WeeklyStatsGrid extends StatelessWidget {
     final cutoff = DateTime.now().subtract(const Duration(days: 7));
     final week = history.where((s) => s.date.isAfter(cutoff)).toList();
 
-    final totalKm = week
-        .map(
-          (s) =>
-              (s.runningWorkoutDistanceMeters ?? s.distanceMeters ?? 0) / 1000,
-        )
-        .fold(0.0, (a, b) => a + b);
+    final totalKm = week.map(dailyRunningDistanceKm).fold(0.0, (a, b) => a + b);
 
     final runCount = week
         .map((s) => s.runningWorkoutCount ?? 0)

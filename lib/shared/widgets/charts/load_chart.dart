@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/core/theme/motion.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
-
-double? _toKm(double? meters) => meters == null ? null : meters / 1000;
+import 'package:kynos/domain/utils/running_distance.dart';
 
 /// Bar chart of recent running distance and active calories.
 class LoadChart extends StatelessWidget {
@@ -20,11 +19,7 @@ class LoadChart extends StatelessWidget {
 
     final bars = <BarChartGroupData>[];
     for (var i = 0; i < recent.length; i++) {
-      final km =
-          _toKm(
-            recent[i].runningWorkoutDistanceMeters ?? recent[i].distanceMeters,
-          ) ??
-          0;
+      final km = dailyRunningDistanceKm(recent[i]);
       final active = (recent[i].activeCalories ?? 0) / 150;
       bars.add(
         BarChartGroupData(

@@ -182,7 +182,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/usecases/health/import_workout_usecase.dart` | 48 | ImportWorkoutUseCase |
 | `lib/domain/usecases/insights/generate_post_run_debrief_usecase.dart` | 98 | PostRunDebrief, GeneratePostRunDebriefUseCase |
 | `lib/domain/usecases/insights/generate_today_insights_usecase.dart` | 69 | GenerateTodayInsightsUseCase |
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 292 | GenerateTrainingInsightsUseCase |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | GenerateTrainingInsightsUseCase |
 | `lib/domain/usecases/insights/today_insights_deterministic.dart` | 145 | Builds deterministic today insights from health metrics. |
 | `lib/domain/usecases/insights/today_insights_model_refiner.dart` | 128 | TodayInsightsModelRefiner |
 | `lib/domain/usecases/nexus_lab/calibrate_gait_model_usecase.dart` | 155 | CalibrateGaitModelUseCase, _SteadyStateExtractionTool |
@@ -204,8 +204,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/readiness_score.dart` | 123 | ReadinessDimensions |
 | `lib/domain/utils/run_route_analytics.dart` | 274 | PaceProfilePoint, KilometerSplit, RunRouteAnalytics, … |
 | `lib/domain/utils/run_streak.dart` | 65 | Dart module |
+| `lib/domain/utils/running_distance.dart` | 12 | Running-only distance in meters for a daily summary. |
 | `lib/domain/utils/seeded_roll.dart` | 17 | Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates). |
-| `lib/domain/utils/weekly_momentum.dart` | 88 | WeeklyMomentum |
+| `lib/domain/utils/weekly_momentum.dart` | 87 | WeeklyMomentum |
 | `lib/features/character/presentation/pages/character_page.dart` | 280 | CharacterPage, EmptyCharacterState |
 | `lib/features/character/presentation/widgets/camp_build_sheet.dart` | 133 | CampBuildSheet |
 | `lib/features/character/presentation/widgets/camp_game_panel.dart` | 145 | CampGamePanel, _CampGamePanelState |
@@ -304,7 +305,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/training/presentation/widgets/training_insight_list_card.dart` | 28 | TrainingInsightListCard |
 | `lib/features/training/presentation/widgets/training_insight_text_card.dart` | 34 | TrainingInsightTextCard |
 | `lib/features/training/presentation/widgets/trend_cards.dart` | 76 | TrendCards |
-| `lib/features/training/presentation/widgets/weekly_stats_grid.dart` | 90 | WeeklyStatsGrid |
+| `lib/features/training/presentation/widgets/weekly_stats_grid.dart` | 86 | WeeklyStatsGrid |
 | `lib/features/training/providers/training_insights_provider.dart` | 56 | TrainingInsightsState |
 | `lib/infrastructure/ai/ai_infrastructure_providers.dart` | 8 | Provides the [AiModelRepository] singleton. |
 | `lib/infrastructure/ai/biomechanics/biomechanics_coefficients_protobuf.dart` | 169 | BiomechanicsCoefficientsProtobuf |
@@ -333,12 +334,13 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/gamification/character_persistence_repository.dart` | 120 | CharacterPersistenceRepository |
 | `lib/infrastructure/gamification/gamekit_repository_impl.dart` | 80 | GameKitRepositoryImpl |
 | `lib/infrastructure/health/apple_workout_route_channel.dart` | 36 | AppleWorkoutRouteChannel |
-| `lib/infrastructure/health/composite_health_repository.dart` | 189 | CompositeHealthRepository |
+| `lib/infrastructure/health/composite_health_repository.dart` | 195 | CompositeHealthRepository |
 | `lib/infrastructure/health/drift_imported_health_store.dart` | 177 | DriftImportedHealthStore |
 | `lib/infrastructure/health/health_data_aggregator.dart` | 173 | _DailyAccumulator |
 | `lib/infrastructure/health/health_infrastructure_providers.dart` | 28 | Dart module |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | HealthKitRepository |
 | `lib/infrastructure/health/health_kit_workout_mapper.dart` | 110 | Returns true when [point] represents a running workout. |
+| `lib/infrastructure/health/health_summary_merge.dart` | 46 | HealthSummaryMerge |
 | `lib/infrastructure/health/import/apple_health_date_parser.dart` | 22 | Parses timestamps from Apple Health `export.xml` attributes. |
 | `lib/infrastructure/health/import/apple_health_export_isolate.dart` | 30 | Parses Apple Health zip archives off the UI isolate. |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | AppleHealthWorkoutImport, AppleHealthExportParseResult, AppleHealthExportParser |
@@ -353,7 +355,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/health/imported_health_database_providers.dart` | 8 | Dart module |
 | `lib/infrastructure/health/imported_health_repository.dart` | 109 | ImportedHealthRepository |
 | `lib/infrastructure/health/imported_health_store.dart` | 124 | Contract for locally persisted imported workouts. |
-| `lib/infrastructure/health/imported_summary_merger.dart` | 54 | Merges imported daily summaries, preferring stored metrics and adding |
+| `lib/infrastructure/health/imported_summary_merger.dart` | 60 | Merges imported daily summaries, preferring stored metrics and adding |
 | `lib/infrastructure/health/imported_workout_summary_aggregator.dart` | 59 | _DayRollup |
 | `lib/infrastructure/health/platform_imported_health_store_native.dart` | 8 | Dart module |
 | `lib/infrastructure/health/platform_imported_health_store_web.dart` | 8 | Dart module |
@@ -405,7 +407,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/animated_progress_bar.dart` | 43 | AnimatedProgressBar |
 | `lib/shared/widgets/charts/chart_placeholder.dart` | 15 | ChartPlaceholder |
 | `lib/shared/widgets/charts/hrv_chart.dart` | 86 | HrvChart |
-| `lib/shared/widgets/charts/load_chart.dart` | 90 | LoadChart |
+| `lib/shared/widgets/charts/load_chart.dart` | 85 | LoadChart |
 | `lib/shared/widgets/gait_model_card.dart` | 247 | GaitModelCard, _CoefficientsRow, GaitModelCardAsync |
 | `lib/shared/widgets/glass_card.dart` | 43 | GlassCard |
 | `lib/shared/widgets/insight_expandable_card.dart` | 221 | InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, … |
@@ -439,7 +441,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 367 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 358 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
-| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 292 | Split if > 250 lines |
+| `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
 | `lib/features/character/presentation/pages/character_page.dart` | 280 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 279 | Split if > 250 lines |
@@ -450,6 +452,6 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 337 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 308 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->

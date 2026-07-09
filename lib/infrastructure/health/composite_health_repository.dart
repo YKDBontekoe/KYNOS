@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/infrastructure/health/health_summary_merge.dart';
 
 /// Merges platform HealthKit data with locally imported workouts.
 class CompositeHealthRepository implements HealthRepository {
@@ -175,13 +176,18 @@ class CompositeHealthRepository implements HealthRepository {
       cadenceSpm: base.cadenceSpm ?? extra.cadenceSpm,
       strideLengthMeters: base.strideLengthMeters ?? extra.strideLengthMeters,
       exerciseMinutes: base.exerciseMinutes ?? extra.exerciseMinutes,
-      runningWorkoutCount:
-          (base.runningWorkoutCount ?? 0) + (extra.runningWorkoutCount ?? 0),
+      runningWorkoutCount: HealthSummaryMerge.runningWorkoutCount(
+        a: base.runningWorkoutCount,
+        b: extra.runningWorkoutCount,
+        distanceA: base.runningWorkoutDistanceMeters,
+        distanceB: extra.runningWorkoutDistanceMeters,
+      ),
       runningWorkoutMinutes: (base.runningWorkoutMinutes ?? 0) +
           (extra.runningWorkoutMinutes ?? 0),
-      runningWorkoutDistanceMeters:
-          (base.runningWorkoutDistanceMeters ?? 0) +
-              (extra.runningWorkoutDistanceMeters ?? 0),
+      runningWorkoutDistanceMeters: HealthSummaryMerge.runningWorkoutDistanceMeters(
+        base.runningWorkoutDistanceMeters,
+        extra.runningWorkoutDistanceMeters,
+      ),
       runningWorkoutCalories: (base.runningWorkoutCalories ?? 0) +
           (extra.runningWorkoutCalories ?? 0),
     );
