@@ -14,6 +14,7 @@ void openCoachChat(
   CoachSeedTopic topic = CoachSeedTopic.general,
   String? runId,
   String? questId,
+  String? threadId,
 }) {
   if (seed != null && seed.trim().isNotEmpty || runId != null || questId != null) {
     ref.read(coachChatSeedProvider.notifier).setSeed(
@@ -25,5 +26,8 @@ void openCoachChat(
           ),
         );
   }
-  context.push(Routes.coachChat);
+  final path = threadId == null
+      ? Routes.coachChat
+      : '${Routes.coachChat}?threadId=$threadId';
+  context.push(path);
 }

@@ -104,6 +104,38 @@ void main() {
       expect(result.summaries.first.hrvMs, 55);
       expect(result.summaries.first.runningWorkoutCount, 1);
     });
+
+    test('deduplicates running distance when sources overlap', () async {
+      final day = DateTime(2026, 4, 20);
+      final healthKit = _FakeHealthRepository(
+        summaries: [
+          HealthSummary(
+            date: day,
+            runningWorkoutCount: 1,
+            runningWorkoutDistanceMeters: 8000,
+          ),
+        ],
+      );
+      final imported = _FakeHealthRepository(
+        summaries: [
+          HealthSummary(
+            date: day,
+            runningWorkoutCount: 1,
+            runningWorkoutDistanceMeters: 8020,
+          ),
+        ],
+      );
+
+      final repo = CompositeHealthRepository(
+        healthKit: healthKit,
+        imported: imported,
+      );
+
+      final result = await repo.getSummaries(days: 7);
+
+      expect(result.summaries.first.runningWorkoutDistanceMeters, 8020);
+      expect(result.summaries.first.runningWorkoutCount, 1);
+    });
   });
 }
 
