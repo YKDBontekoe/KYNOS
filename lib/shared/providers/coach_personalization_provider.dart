@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CoachPersonalizationState {
   const CoachPersonalizationState({this.profile, this.morningCheckIn});

@@ -1,8 +1,8 @@
-import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
-import 'package:kynos/domain/entities/coach/morning_check_in.dart';
-import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
+import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
+import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
+import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
