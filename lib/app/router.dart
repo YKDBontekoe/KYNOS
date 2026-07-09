@@ -153,10 +153,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.coachChat,
-        pageBuilder: (context, state) => KynosPageTransitions.modalUp(
-          key: state.pageKey,
-          child: const CoachChatPage(),
-        ),
+        pageBuilder: (context, state) {
+          final threadId = state.uri.queryParameters['threadId'];
+          return KynosPageTransitions.modalUp(
+            key: state.pageKey,
+            child: CoachChatPage(threadId: threadId),
+          );
+        },
       ),
       GoRoute(
         path: Routes.nexusLab,

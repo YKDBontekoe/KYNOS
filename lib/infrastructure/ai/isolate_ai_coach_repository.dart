@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
@@ -50,6 +51,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     AiTaskKind taskKind = AiTaskKind.coachChat,
     int estimatedPromptTokens = 0,
     AiInferenceBackend? preferredBackend,
+    String? cloudModelIdOverride,
+    CloudDataLevel? cloudDataLevelOverride,
   }) {
     final completer = Completer<void>();
     final previous = _chatQueue;

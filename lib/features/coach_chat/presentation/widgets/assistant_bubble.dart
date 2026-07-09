@@ -19,6 +19,7 @@ class AssistantBubble extends StatelessWidget {
     this.onTryAlternateBackend,
     this.alternateBackend,
     this.alternateBackendLabel,
+    this.contextSnapshotIds,
   });
 
   final String content;
@@ -29,6 +30,7 @@ class AssistantBubble extends StatelessWidget {
   final VoidCallback? onTryAlternateBackend;
   final AiInferenceBackend? alternateBackend;
   final String? alternateBackendLabel;
+  final List<String>? contextSnapshotIds;
 
   String? get _errorLabel {
     if (!hasError) return null;
@@ -74,6 +76,17 @@ class AssistantBubble extends StatelessWidget {
                         style: textStyle,
                       ),
                     ),
+              if (!isStreaming &&
+                  contextSnapshotIds != null &&
+                  contextSnapshotIds!.isNotEmpty) ...[
+                const Gap(Spacing.sm),
+                Text(
+                  'Answered using: ${contextSnapshotIds!.join(', ')}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: kynos.secondaryLabel,
+                      ),
+                ),
+              ],
               if (hasError && (onRetry != null || onTryAlternateBackend != null)) ...[
                 const Gap(Spacing.sm),
                 Wrap(
