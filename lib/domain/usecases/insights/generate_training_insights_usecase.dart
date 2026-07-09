@@ -7,6 +7,7 @@ import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/ai_model_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/domain/utils/pace_format.dart';
+import 'package:kynos/domain/utils/running_distance.dart';
 
 class GenerateTrainingInsightsUseCase {
   const GenerateTrainingInsightsUseCase({
@@ -77,20 +78,14 @@ class GenerateTrainingInsightsUseCase {
 
     final thisWeekDistanceKm = history
         .where((s) => s.date.isAfter(weekCutoff))
-        .map(
-          (s) =>
-              (s.runningWorkoutDistanceMeters ?? s.distanceMeters ?? 0) / 1000,
-        )
+        .map(dailyRunningDistanceKm)
         .fold(0.0, (a, b) => a + b);
 
     final prevWeekDistanceKm = history
         .where(
           (s) => s.date.isAfter(prevWeekCutoff) && s.date.isBefore(weekCutoff),
         )
-        .map(
-          (s) =>
-              (s.runningWorkoutDistanceMeters ?? s.distanceMeters ?? 0) / 1000,
-        )
+        .map(dailyRunningDistanceKm)
         .fold(0.0, (a, b) => a + b);
 
     final distanceChangePct = prevWeekDistanceKm <= 0

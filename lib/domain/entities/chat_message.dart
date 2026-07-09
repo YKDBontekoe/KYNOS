@@ -22,6 +22,9 @@ class ChatMessage {
   /// Backend used for the last inference attempt on this message.
   final AiInferenceBackend? attemptedBackend;
 
+  /// Enabled coach data sources at send time (for per-message audit).
+  final List<String>? contextSnapshotIds;
+
   const ChatMessage({
     required this.id,
     required this.role,
@@ -31,6 +34,7 @@ class ChatMessage {
     this.hasError = false,
     this.userPromptForRetry,
     this.attemptedBackend,
+    this.contextSnapshotIds,
   });
 
   ChatMessage copyWith({
@@ -39,6 +43,7 @@ class ChatMessage {
     bool? hasError,
     String? userPromptForRetry,
     AiInferenceBackend? attemptedBackend,
+    List<String>? contextSnapshotIds,
   }) {
     return ChatMessage(
       id: id,
@@ -49,6 +54,7 @@ class ChatMessage {
       hasError: hasError ?? this.hasError,
       userPromptForRetry: userPromptForRetry ?? this.userPromptForRetry,
       attemptedBackend: attemptedBackend ?? this.attemptedBackend,
+      contextSnapshotIds: contextSnapshotIds ?? this.contextSnapshotIds,
     );
   }
 
@@ -64,7 +70,8 @@ class ChatMessage {
           isStreaming == other.isStreaming &&
           hasError == other.hasError &&
           userPromptForRetry == other.userPromptForRetry &&
-          attemptedBackend == other.attemptedBackend;
+          attemptedBackend == other.attemptedBackend &&
+          _listEquals(contextSnapshotIds, other.contextSnapshotIds);
 
   @override
   int get hashCode => Object.hash(
@@ -76,5 +83,18 @@ class ChatMessage {
         hasError,
         userPromptForRetry,
         attemptedBackend,
+        contextSnapshotIds == null
+            ? null
+            : Object.hashAll(contextSnapshotIds!),
       );
+}
+
+bool _listEquals<T>(List<T>? a, List<T>? b) {
+  if (identical(a, b)) return true;
+  if (a == null || b == null) return a == b;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }

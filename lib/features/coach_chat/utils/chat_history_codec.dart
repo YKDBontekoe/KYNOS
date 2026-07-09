@@ -61,11 +61,14 @@ abstract final class ChatHistoryCodec {
       'userPromptForRetry': message.userPromptForRetry,
       if (message.attemptedBackend != null)
         'attemptedBackend': message.attemptedBackend!.name,
+      if (message.contextSnapshotIds != null)
+        'contextSnapshotIds': message.contextSnapshotIds,
     };
   }
 
   static ChatMessage _fromMap(Map<String, dynamic> map) {
     final backendName = map['attemptedBackend'] as String?;
+    final snapshotRaw = map['contextSnapshotIds'] as List<dynamic>?;
     return ChatMessage(
       id: map['id'] as String,
       role: MessageRole.values.byName(map['role'] as String),
@@ -76,6 +79,7 @@ abstract final class ChatHistoryCodec {
       attemptedBackend: backendName == null
           ? null
           : AiInferenceBackend.values.byName(backendName),
+      contextSnapshotIds: snapshotRaw?.whereType<String>().toList(),
     );
   }
 }

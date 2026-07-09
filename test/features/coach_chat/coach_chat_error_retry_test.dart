@@ -162,7 +162,7 @@ void main() {
   });
 }
 
-class _RecordingCoachChatNotifier extends CoachChatNotifier {
+class _RecordingCoachChatNotifier extends CoachChat {
   String? retriedAssistantId;
   String? alternateRetriedAssistantId;
 
