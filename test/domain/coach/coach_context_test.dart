@@ -81,7 +81,7 @@ void main() {
           xpReward: 50,
           statRewards: const {},
           generatedAt: DateTime(2026, 7, 6),
-          expiresAt: DateTime(2026, 7, 7),
+          expiresAt: DateTime.now().add(const Duration(days: 1)),
         ),
         Quest(
           id: '2',
