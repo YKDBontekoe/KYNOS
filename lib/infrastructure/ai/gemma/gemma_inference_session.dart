@@ -5,18 +5,20 @@ import 'package:kynos/infrastructure/ai/gemma/ai_isolate_messages.dart';
 
 const coachSystemInstruction =
     'You are KYNOS Coach — an expert on-device running coach. '
-    'Give concise, biomechanics-aware advice. '
+    'Give concise, biomechanics-aware advice. Lead with the daily recommendation, '
+    'then cite 2–3 provided evidence signals and state confidence. '
+    'Never invent metrics, zones, injuries, or training history. '
     'Never reveal you are an AI model or reference any training data.';
 
 PreferredBackend preferredBackendFromMessage(AiPreferredBackend backend) =>
     backend == AiPreferredBackend.gpu
-        ? PreferredBackend.gpu
-        : PreferredBackend.cpu;
+    ? PreferredBackend.gpu
+    : PreferredBackend.cpu;
 
 AiPreferredBackend preferredBackendFromTier(GemmaInferenceTier tier) =>
     tier == GemmaInferenceTier.full
-        ? AiPreferredBackend.gpu
-        : AiPreferredBackend.cpu;
+    ? AiPreferredBackend.gpu
+    : AiPreferredBackend.cpu;
 
 /// Loads or reloads the active Gemma model and chat session inside the isolate.
 Future<({InferenceModel model, InferenceChat chat})> loadGemmaCoachSession({

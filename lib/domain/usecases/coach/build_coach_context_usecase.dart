@@ -1,4 +1,7 @@
 import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
+import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
+import 'package:kynos/domain/entities/coach/morning_check_in.dart';
+import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
@@ -22,11 +25,17 @@ class BuildCoachContextUseCase {
     TodayInsights? todayInsights,
     TrainingInsights? trainingInsights,
     WeeklyMomentum? weeklyMomentum,
-    ({double? b0, double? b1, double? b2}) gaitCoefficients =
-        const (b0: null, b1: null, b2: null),
+    ({double? b0, double? b1, double? b2}) gaitCoefficients = const (
+      b0: null,
+      b1: null,
+      b2: null,
+    ),
     bool isGaitCalibrated = false,
     CoachChatSeedData? seed,
     String? postRunDebriefSummary,
+    AthleteCoachProfile? athleteProfile,
+    MorningCheckIn? morningCheckIn,
+    DailyCoachBrief? dailyBrief,
   }) {
     final sortedHistory = List<HealthSummary>.from(healthHistory)
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -68,6 +77,9 @@ class BuildCoachContextUseCase {
       focusRunId: seedData.runId,
       focusQuestId: seedData.questId,
       postRunDebriefSummary: postRunDebriefSummary,
+      athleteProfile: athleteProfile,
+      morningCheckIn: morningCheckIn,
+      dailyBrief: dailyBrief,
     );
   }
 }

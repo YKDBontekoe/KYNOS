@@ -4,12 +4,14 @@ import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
+import 'package:kynos/shared/providers/coach_personalization_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/post_run_debrief_provider.dart';
 import 'package:kynos/shared/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
+import 'package:kynos/domain/utils/acwr.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_context_provider.g.dart';
@@ -25,29 +27,47 @@ Future<CoachContext> coachContextForConversation(
   Ref ref, {
   CoachChatSeedData? seed,
 }) async {
-  final healthHistory =
-      await ref.watch(healthHistoryProvider(days: 14).future);
-  final recentRuns =
-      await ref.watch(recentRunsProvider(days: 60, limit: 5).future);
+  final healthHistory = await ref.watch(healthHistoryProvider(days: 28).future);
+  final recentRuns = await ref.watch(
+    recentRunsProvider(days: 60, limit: 5).future,
+  );
   final character = await ref.watch(runnerCharacterProvider.future);
   final quests = await ref.watch(dailyQuestsProvider.future);
 
   final todayInsights = ref.watch(todayInsightsStateProvider).value?.insights;
-  final trainingInsights =
-      ref.watch(trainingInsightsStateProvider).value?.insights;
+  final trainingInsights = ref
+      .watch(trainingInsightsStateProvider)
+      .value
+      ?.insights;
 
-  var gaitCoefficients =
-      (b0: null as double?, b1: null as double?, b2: null as double?);
+  var gaitCoefficients = (
+    b0: null as double?,
+    b1: null as double?,
+    b2: null as double?,
+  );
   var isGaitCalibrated = false;
   if (!kIsWeb) {
     final lab = await ref.watch(nexusLabProvider.future);
     gaitCoefficients = lab.coefficients;
-    isGaitCalibrated = lab.coefficients.b0 != null &&
+    isGaitCalibrated =
+        lab.coefficients.b0 != null &&
         lab.coefficients.b1 != null &&
         lab.coefficients.b2 != null;
   }
 
   final weeklyMomentum = computeWeeklyMomentum(healthHistory);
+  final CoachPersonalizationState personalization = ref.watch(
+    coachPersonalizationProvider,
+  );
+  final dailyBrief = ref
+      .read(buildDailyCoachBriefUseCaseProvider)
+      .call(
+        history: healthHistory,
+        recentRuns: recentRuns,
+        profile: personalization.profile,
+        checkIn: personalization.morningCheckIn,
+        acwr: computeAcwr(healthHistory),
+      );
 
   String? postRunDebriefSummary;
   final debriefState = ref.watch(postRunDebriefProvider).value;
@@ -55,7 +75,9 @@ Future<CoachContext> coachContextForConversation(
     postRunDebriefSummary = debriefState.summaryText;
   }
 
-  return ref.read(buildCoachContextUseCaseProvider).call(
+  return ref
+      .read(buildCoachContextUseCaseProvider)
+      .call(
         healthHistory: healthHistory,
         recentRuns: recentRuns,
         character: character,
@@ -67,5 +89,8 @@ Future<CoachContext> coachContextForConversation(
         isGaitCalibrated: isGaitCalibrated,
         seed: seed,
         postRunDebriefSummary: postRunDebriefSummary,
+        athleteProfile: personalization.profile,
+        morningCheckIn: personalization.morningCheckIn,
+        dailyBrief: dailyBrief,
       );
 }

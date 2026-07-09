@@ -20,7 +20,6 @@ import 'package:kynos/features/dashboard/presentation/widgets/gait_teaser_card.d
 import 'package:kynos/features/dashboard/presentation/widgets/health_metrics_grid.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/last_run_preview.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/trend_carousel.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card.dart';
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/post_run_debrief_provider.dart';
@@ -32,6 +31,7 @@ import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
+import 'package:kynos/shared/widgets/charts/health_trend_chart.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';
@@ -39,11 +39,7 @@ import 'package:kynos/shared/widgets/kynos_section_row.dart';
 
 /// Today tab — readiness, AI insight, and today's health metrics.
 class DashboardPage extends ConsumerStatefulWidget {
-  const DashboardPage({
-    super.key,
-    this.onViewTraining,
-    this.onViewCharacter,
-  });
+  const DashboardPage({super.key, this.onViewTraining, this.onViewCharacter});
 
   final VoidCallback? onViewTraining;
   final VoidCallback? onViewCharacter;
@@ -133,8 +129,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool _shouldShowWeeklyGoalCoachNudge(WeeklyMomentum? momentum) {
     if (momentum == null) return false;
     final weekday = DateTime.now().weekday;
-    return weekday >= DateTime.wednesday &&
-        momentum.distanceGoalProgress < 0.5;
+    return weekday >= DateTime.wednesday && momentum.distanceGoalProgress < 0.5;
   }
 
   String _statusSubtitle({
@@ -170,9 +165,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final campSession = ref.watch(campSessionProvider);
     final dashboardSummaryAsync = ref.watch(dashboardSummaryProvider);
     final dash = dashboardSummaryAsync.value;
-    final showConnectCard = !kIsWeb &&
-        summary.hasValue &&
-        summary.requireValue == null;
+    final showConnectCard =
+        !kIsWeb && summary.hasValue && summary.requireValue == null;
 
     ref.listen(postRunDebriefProvider, (prev, next) {
       next.whenOrNull(
@@ -257,13 +251,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isLoading:
                       loadHistory.isLoading || dashboardSummaryAsync.isLoading,
                   onImportRun: () => context.push(Routes.healthImport),
-                  onAskCoach: _shouldShowWeeklyGoalCoachNudge(dash?.weeklyMomentum)
+                  onAskCoach:
+                      _shouldShowWeeklyGoalCoachNudge(dash?.weeklyMomentum)
                       ? () => _openCoachChat(
-                            seedMessage:
-                                'I am behind on my weekly distance goal. '
-                                'Help me plan the rest of the week.',
-                            topic: CoachSeedTopic.weeklyGoal,
-                          )
+                          seedMessage:
+                              'I am behind on my weekly distance goal. '
+                              'Help me plan the rest of the week.',
+                          topic: CoachSeedTopic.weeklyGoal,
+                        )
                       : null,
                 ),
                 const Gap(tokens.Spacing.xl),
@@ -280,7 +275,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 const Gap(tokens.Spacing.xl),
                 const KynosSectionRow(title: 'Trends'),
                 const Gap(tokens.Spacing.md),
-                TrendCarousel(history: weekHistory),
+                KynosCard(
+                  padding: const EdgeInsets.all(tokens.Spacing.lg),
+                  child: SizedBox(
+                    height: 238,
+                    child: HealthTrendChart(
+                      history: weekHistory,
+                      metric: HealthChartMetric.recovery,
+                      range: HealthChartRange.week,
+                    ),
+                  ),
+                ),
                 const Gap(tokens.Spacing.xl),
                 const KynosSectionRow(title: 'Coach Insight'),
                 const Gap(tokens.Spacing.md),

@@ -11,6 +11,7 @@ import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/settings_appearance_section.dart';
+import 'package:kynos/features/settings/presentation/widgets/coach_personalization_card.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/huggingface_token_provider.dart';
@@ -191,6 +192,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
+            const Gap(tokens.Spacing.lg),
+            const CoachPersonalizationCard(),
             const Gap(tokens.Spacing.lg),
             const KynosSectionHeader(title: 'AI & Cloud'),
             const Gap(tokens.Spacing.sm),

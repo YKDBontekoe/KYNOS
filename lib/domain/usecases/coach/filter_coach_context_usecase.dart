@@ -56,8 +56,13 @@ class FilterCoachContextUseCase {
       focusQuestId: context.focusQuestId,
       postRunDebriefSummary:
           preferences.isEnabled(CoachDataSource.postRunDebrief)
-              ? context.postRunDebriefSummary
-              : null,
+          ? context.postRunDebriefSummary
+          : null,
+      athleteProfile: preferences.isEnabled(CoachDataSource.athletePreferences)
+          ? context.athleteProfile
+          : null,
+      morningCheckIn: context.morningCheckIn,
+      dailyBrief: context.dailyBrief,
     );
   }
 

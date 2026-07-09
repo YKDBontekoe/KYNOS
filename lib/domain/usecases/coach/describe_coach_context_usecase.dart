@@ -14,7 +14,8 @@ class DescribeCoachContextUseCase {
     required CoachBackendMode backendMode,
     required bool cloudConfigured,
   }) {
-    final willUseCloud = backendMode == CoachBackendMode.cloud ||
+    final willUseCloud =
+        backendMode == CoachBackendMode.cloud ||
         (backendMode == CoachBackendMode.auto && cloudConfigured);
 
     return CoachDataSource.all.map((source) {
@@ -39,33 +40,42 @@ class DescribeCoachContextUseCase {
             ? 'No health data'
             : '${context.healthHistory.length} days of metrics',
       CoachDataSource.recentRuns => _runsPreview(context),
-      CoachDataSource.weeklyMomentum => context.weeklyMomentum == null
-          ? 'No weekly data'
-          : '${context.weeklyMomentum!.thisWeekDistanceKm.toStringAsFixed(1)} km this week',
-      CoachDataSource.todayInsights => context.todayInsights == null
-          ? 'No today insights'
-          : context.todayInsights!.readinessBrief,
-      CoachDataSource.trainingInsights => context.trainingInsights == null
-          ? 'No training insights'
-          : context.trainingInsights!.sessionIntent,
-      CoachDataSource.characterQuests => context.character == null
-          ? 'No character data'
-          : '${context.character!.characterClass.name} Lv${context.character!.level}'
-              '${context.activeQuests.isNotEmpty ? ' · ${context.activeQuests.length} quests' : ''}',
-      CoachDataSource.gaitBiomechanics => context.isGaitCalibrated
-          ? 'Gait model calibrated'
-          : 'Gait model not calibrated',
-      CoachDataSource.postRunDebrief => context.postRunDebriefSummary == null
-          ? 'No recent debrief'
-          : context.postRunDebriefSummary!,
+      CoachDataSource.weeklyMomentum =>
+        context.weeklyMomentum == null
+            ? 'No weekly data'
+            : '${context.weeklyMomentum!.thisWeekDistanceKm.toStringAsFixed(1)} km this week',
+      CoachDataSource.todayInsights =>
+        context.todayInsights == null
+            ? 'No today insights'
+            : context.todayInsights!.readinessBrief,
+      CoachDataSource.trainingInsights =>
+        context.trainingInsights == null
+            ? 'No training insights'
+            : context.trainingInsights!.sessionIntent,
+      CoachDataSource.characterQuests =>
+        context.character == null
+            ? 'No character data'
+            : '${context.character!.characterClass.name} Lv${context.character!.level}'
+                  '${context.activeQuests.isNotEmpty ? ' · ${context.activeQuests.length} quests' : ''}',
+      CoachDataSource.gaitBiomechanics =>
+        context.isGaitCalibrated
+            ? 'Gait model calibrated'
+            : 'Gait model not calibrated',
+      CoachDataSource.athletePreferences =>
+        context.athleteProfile == null
+            ? 'No preferences saved'
+            : '${context.athleteProfile!.goal} · ${context.athleteProfile!.experience}',
+      CoachDataSource.postRunDebrief =>
+        context.postRunDebriefSummary == null
+            ? 'No recent debrief'
+            : context.postRunDebriefSummary!,
     };
   }
 
   String _runsPreview(CoachContext context) {
     if (context.recentRuns.isEmpty) return 'No recent runs';
     final latest = context.recentRuns.first;
-    final date =
-        '${latest.start.month}/${latest.start.day}';
+    final date = '${latest.start.month}/${latest.start.day}';
     final km = (latest.distanceMeters ?? 0) / 1000;
     return '${context.recentRuns.length} runs · last ${km.toStringAsFixed(1)} km on $date';
   }

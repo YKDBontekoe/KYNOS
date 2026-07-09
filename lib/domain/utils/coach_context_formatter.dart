@@ -15,7 +15,8 @@ abstract final class CoachContextFormatter {
     CloudDataLevel cloudLevel = CloudDataLevel.full,
     GemmaInferenceTier tier = GemmaInferenceTier.full,
   }) {
-    final isCloud = cloudLevel != CloudDataLevel.minimal || tier == GemmaInferenceTier.full;
+    final isCloud =
+        cloudLevel != CloudDataLevel.minimal || tier == GemmaInferenceTier.full;
     final level = isCloud ? cloudLevel : _tierToCloudLevel(tier);
     final sections = <String>[];
 
@@ -26,6 +27,15 @@ abstract final class CoachContextFormatter {
     if (context.acwr != null && context.acwrRiskLabel != null) {
       sections.add(
         'ACWR: ${context.acwr!.toStringAsFixed(2)} — ${context.acwrRiskLabel}',
+      );
+    }
+
+    final brief = context.dailyBrief;
+    if (brief != null &&
+        (context.readinessScore > 0 || context.healthHistory.isNotEmpty)) {
+      sections.add(
+        'Daily decision: ${brief.recommendation} (${brief.confidence} confidence, '
+        '${brief.dataQuality} data)\nEvidence: ${brief.evidence.join('; ')}',
       );
     }
 
@@ -43,12 +53,25 @@ abstract final class CoachContextFormatter {
     }
 
     if (level != CloudDataLevel.minimal) {
+      final profile = context.athleteProfile;
+      if (profile != null) {
+        sections.add(
+          'Athlete preferences: goal ${profile.goal}, experience ${profile.experience}',
+        );
+      }
+      final checkIn = context.morningCheckIn;
+      if (checkIn != null) {
+        sections.add(
+          'Morning check-in: fatigue ${checkIn.fatigue}/10, '
+          'soreness ${checkIn.soreness}/10, motivation ${checkIn.motivation}/10',
+        );
+      }
       final momentum = context.weeklyMomentum;
       if (momentum != null) {
         sections.add(
           'Weekly goal: ${momentum.thisWeekDistanceKm.toStringAsFixed(1)} / '
           '${momentum.distanceGoalKm.toStringAsFixed(0)} km '
-          '(${ (momentum.distanceGoalProgress * 100).round()}%)',
+          '(${(momentum.distanceGoalProgress * 100).round()}%)',
         );
       }
 
@@ -119,8 +142,7 @@ abstract final class CoachContextFormatter {
 
   static List<String> _formatRuns(List<WorkoutSession> runs) {
     return runs.map((run) {
-      final date =
-          '${run.start.month}/${run.start.day}';
+      final date = '${run.start.month}/${run.start.day}';
       final parts = <String>[date, run.workoutType];
       if (run.distanceMeters != null && run.distanceMeters! > 0) {
         parts.add('${(run.distanceMeters! / 1000).toStringAsFixed(1)}km');
@@ -129,8 +151,7 @@ abstract final class CoachContextFormatter {
       if (mins > 0) {
         parts.add('${mins}min');
         if (run.distanceMeters != null && run.distanceMeters! > 0) {
-          final paceMinPerKm =
-              mins / (run.distanceMeters! / 1000);
+          final paceMinPerKm = mins / (run.distanceMeters! / 1000);
           parts.add('${paceMinPerKm.toStringAsFixed(1)} min/km');
         }
       }

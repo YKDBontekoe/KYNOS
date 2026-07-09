@@ -39,10 +39,10 @@ class HybridAiCoachRepository implements AiCoachRepository {
     required CloudAiRepository cloudRepository,
     required SecureApiKeyStorage keyStorage,
     required HybridAiCoachConfigReader configReader,
-  })  : _local = localRepository,
-        _cloud = cloudRepository,
-        _keyStorage = keyStorage,
-        _configReader = configReader;
+  }) : _local = localRepository,
+       _cloud = cloudRepository,
+       _keyStorage = keyStorage,
+       _configReader = configReader;
 
   final AiCoachRepository _local;
   final CloudAiRepository _cloud;
@@ -57,8 +57,9 @@ class HybridAiCoachRepository implements AiCoachRepository {
 
   static const _cloudSystemPrompt =
       'You are KYNOS Coach — an expert running coach. '
-      'Give actionable, biomechanics-aware advice. '
-      'Never invent metrics not provided in context.';
+      'Give actionable, biomechanics-aware advice. Lead with the daily '
+      'recommendation, then cite 2–3 provided evidence signals and confidence. '
+      'Never invent metrics, zones, injuries, or training history.';
 
   @override
   Stream<AiChunk> chat({

@@ -4,8 +4,7 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart' hide Radius;
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/shared/widgets/charts/chart_placeholder.dart';
-import 'package:kynos/shared/widgets/charts/hrv_chart.dart';
-import 'package:kynos/shared/widgets/charts/load_chart.dart';
+import 'package:kynos/shared/widgets/charts/health_trend_chart.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 enum MetricDetailKey {
@@ -91,9 +90,11 @@ class MetricDetailSheet extends StatelessWidget {
                 height: 200,
                 child: sorted.isEmpty
                     ? ChartPlaceholder(label: meta.emptyLabel)
-                    : meta.useLoadChart
-                    ? LoadChart(points: sorted)
-                    : HrvChart(points: sorted),
+                    : HealthTrendChart(
+                        history: sorted,
+                        metric: _chartMetric(metricKey),
+                        range: HealthChartRange.week,
+                      ),
               ),
             ),
             const Gap(tokens.Spacing.md),
@@ -167,6 +168,16 @@ class MetricDetailSheet extends StatelessWidget {
     ),
   };
 }
+
+HealthChartMetric _chartMetric(MetricDetailKey key) => switch (key) {
+  MetricDetailKey.hrv => HealthChartMetric.recovery,
+  MetricDetailKey.rhr => HealthChartMetric.restingPulse,
+  MetricDetailKey.sleep => HealthChartMetric.sleep,
+  MetricDetailKey.spo2 => HealthChartMetric.bloodOxygen,
+  MetricDetailKey.distance => HealthChartMetric.distance,
+  MetricDetailKey.activeCalories => HealthChartMetric.activeEnergy,
+  MetricDetailKey.exercise => HealthChartMetric.exercise,
+};
 
 class _MetricMeta {
   const _MetricMeta({

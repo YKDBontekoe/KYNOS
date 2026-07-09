@@ -1,4 +1,7 @@
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
+import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
+import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
+import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
@@ -27,6 +30,9 @@ class CoachContext {
     this.focusRunId,
     this.focusQuestId,
     this.postRunDebriefSummary,
+    this.athleteProfile,
+    this.morningCheckIn,
+    this.dailyBrief,
   });
 
   final double readinessScore;
@@ -46,12 +52,13 @@ class CoachContext {
   final String? focusRunId;
   final String? focusQuestId;
   final String? postRunDebriefSummary;
+  final AthleteCoachProfile? athleteProfile;
+  final MorningCheckIn? morningCheckIn;
+  final DailyCoachBrief? dailyBrief;
 
   /// Short badge line for the coach app bar.
   String get contextBadge {
-    final parts = <String>[
-      'Readiness ${readinessScore.round()}',
-    ];
+    final parts = <String>['Readiness ${readinessScore.round()}'];
     if (acwr != null) {
       parts.add('ACWR ${acwr!.toStringAsFixed(2)}');
     }
