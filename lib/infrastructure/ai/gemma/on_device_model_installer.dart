@@ -14,7 +14,11 @@ abstract final class OnDeviceModelInstaller {
     return switch (family) {
       OnDeviceModelFamily.gemma4 => ModelType.gemma4,
       OnDeviceModelFamily.gemma3 => ModelType.gemmaIt,
+      OnDeviceModelFamily.gemma3n => ModelType.gemmaIt,
       OnDeviceModelFamily.qwen3 => ModelType.qwen3,
+      OnDeviceModelFamily.qwen2 => ModelType.qwen,
+      OnDeviceModelFamily.phi => ModelType.phi,
+      OnDeviceModelFamily.functionGemma => ModelType.functionGemma,
     };
   }
 }

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/entities/on_device_model.dart';
+import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
@@ -50,6 +51,13 @@ class OnDeviceModelCard extends StatelessWidget {
                     color: kynos.secondaryLabel,
                   ),
             ),
+            const Gap(tokens.Spacing.xs),
+            Text(
+              model.bestFor,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.tertiaryLabel,
+                  ),
+            ),
             const Gap(tokens.Spacing.sm),
             Wrap(
               spacing: tokens.Spacing.xs,
@@ -66,6 +74,12 @@ class OnDeviceModelCard extends StatelessWidget {
                 KynosChip.accent(
                   label: _familyLabel(model.family),
                   color: kynos.purple,
+                ),
+                ...model.capabilities.map(
+                  (capability) => KynosChip.accent(
+                    label: OnDeviceModelCapabilityUi.label(capability),
+                    color: OnDeviceModelCapabilityUi.color(capability, kynos),
+                  ),
                 ),
                 if (model.requiresHuggingFaceToken)
                   KynosChip.accent(label: 'HF token', color: kynos.move)
@@ -92,7 +106,11 @@ class OnDeviceModelCard extends StatelessWidget {
     return switch (family) {
       OnDeviceModelFamily.gemma4 => 'Gemma 4',
       OnDeviceModelFamily.gemma3 => 'Gemma 3',
+      OnDeviceModelFamily.gemma3n => 'Gemma3n',
       OnDeviceModelFamily.qwen3 => 'Qwen3',
+      OnDeviceModelFamily.qwen2 => 'Qwen 2.5',
+      OnDeviceModelFamily.phi => 'Phi-4',
+      OnDeviceModelFamily.functionGemma => 'FunctionGemma',
     };
   }
 }
