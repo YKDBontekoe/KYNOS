@@ -104,7 +104,7 @@ class HealthImport extends _$HealthImport {
       clearImportedWorkout: true,
     );
 
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['gpx', 'zip'],
       withData: kIsWeb,
