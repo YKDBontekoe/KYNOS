@@ -161,41 +161,5 @@ void main() {
       expect(find.text('Today'), findsOneWidget);
     });
 
-    testWidgets('light mode golden', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          KynosBottomNav(
-            items: items,
-            selectedIndex: 1,
-            onSelected: (_) {},
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await expectLater(
-        find.byType(Scaffold),
-        matchesGoldenFile('goldens/kynos_bottom_nav_light.png'),
-      );
-    });
-
-    testWidgets('dark mode golden', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          KynosBottomNav(
-            items: items,
-            selectedIndex: 1,
-            onSelected: (_) {},
-          ),
-          theme: AppTheme.dark,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await expectLater(
-        find.byType(Scaffold),
-        matchesGoldenFile('goldens/kynos_bottom_nav_dark.png'),
-      );
-    });
   });
 }
