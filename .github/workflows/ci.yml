@@ -109,9 +109,7 @@ jobs:
         run: bash scripts/check_architecture.sh
 
       - name: Check CODEMAP freshness
-        run: |
-          dart run tool/generate_codemap.dart
-          git diff --exit-code CODEMAP.md || (echo "CODEMAP.md is out of date. Run: dart run tool/generate_codemap.dart" && exit 1)
+        run: dart run tool/generate_codemap.dart --check
 
   test:
     needs: bootstrap

@@ -2,7 +2,7 @@
 // Regenerates the auto-generated sections of CODEMAP.md.
 library;
 
-/// Usage: dart run tool/generate_codemap.dart
+/// Usage: dart run tool/generate_codemap.dart [--check]
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,7 +10,8 @@ const _beginMarker = '<!-- CODEMAP_AUTO_BEGIN -->';
 const _endMarker = '<!-- CODEMAP_AUTO_END -->';
 const _hotFileLineThreshold = 250;
 
-void main() {
+void main(List<String> args) {
+  final checkOnly = args.contains('--check');
   final libDir = Directory('lib');
   if (!libDir.existsSync()) {
     stderr.writeln('Run from repository root (lib/ not found).');
@@ -103,6 +104,17 @@ void main() {
 
   // Normalize EOF — do not preserve trailing blank lines after the end marker.
   final updated = '$before$autoSection\n';
+  if (checkOnly) {
+    if (existing != updated) {
+      stderr.writeln(
+        '$codemapPath is out of date. Run: dart run tool/generate_codemap.dart',
+      );
+      exit(1);
+    }
+    print('CODEMAP.md is up to date (${files.length} files indexed).');
+    return;
+  }
+
   codemapFile.writeAsStringSync(updated);
   print('Updated $codemapPath (${files.length} files indexed).');
 }
