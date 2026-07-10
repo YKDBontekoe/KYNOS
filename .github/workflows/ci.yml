@@ -2,20 +2,27 @@ name: KYNOS CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
 
 concurrency:
   group: kynos-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FLUTTER_VERSION: '3.44.4'
+
 jobs:
   validate-pr-title:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@e32d7e603df1aa1ba07e981f2a23455dee596825 # v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -32,75 +39,43 @@ jobs:
             chore
             revert
           requireScope: false
-          subjectPattern: ^(?![A-Z]).+$
+          subjectPattern: ^(?![A-Z]).+
           subjectPatternError: |
             PR titles must use Conventional Commits (for example, `feat: add coach widgets`).
             Keep the subject lowercase after the type prefix.
 
-  bootstrap:
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
-
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          flutter-version: '3.44.4' # Dart 3.12+ required by lottie 3.4 / flutter_gemma 1.2
-          channel: 'stable'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
 
       - name: Install dependencies
         run: |
           cp .env.example .env
-          flutter pub get
+          flutter pub get --enforce-lockfile
 
-      - name: Check code generation (build_runner)
+      - name: Check generated code
         run: |
           dart run build_runner build --delete-conflicting-outputs
-          git diff --exit-code || (echo "Generated files are out of sync. Please run build_runner and commit the changes." && exit 1)
-
-      - name: Upload generated code artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-code
-          retention-days: 1
-          if-no-files-found: error
-          path: |
-            lib/**/*.g.dart
-            lib/**/*.freezed.dart
-
-  analyze:
-    needs: bootstrap
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.4'
-          channel: 'stable'
-          cache: true
-
-      - name: Install dependencies
-        run: |
-          cp .env.example .env
-          flutter pub get
-
-      - name: Download generated code
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-code
+          git diff --exit-code -- lib || {
+            echo 'Generated files are out of sync. Run build_runner and commit the result.'
+            exit 1
+          }
 
       - name: Analyze code
         run: flutter analyze
-
-      - name: Install ripgrep
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
 
       - name: Check design system conventions
         run: bash scripts/check_design_system.sh
@@ -111,175 +86,129 @@ jobs:
       - name: Check CODEMAP freshness
         run: dart run tool/generate_codemap.dart --check
 
-  test:
-    needs: bootstrap
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
+      - name: Check workflow syntax
+        uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1
+        with:
+          reporter: github-check
+          fail_level: error
 
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          flutter-version: '3.44.4'
-          channel: 'stable'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
 
       - name: Install dependencies
         run: |
           cp .env.example .env
-          flutter pub get
+          flutter pub get --enforce-lockfile
 
-      - name: Download generated code
-        uses: actions/download-artifact@v4
+      - name: Run tests with coverage
+        run: flutter test --coverage --test-randomize-ordering-seed=random
+
+      - name: Enforce coverage baseline
+        run: dart run tool/check_coverage.dart coverage/lcov.info
+
+      - name: Upload coverage results
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+        continue-on-error: true
         with:
-          name: generated-code
-
-      - name: Run tests
-        run: flutter test --coverage
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          retention-days: 1
-          path: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          fail_ci_if_error: false
 
   build-web:
-    needs: bootstrap
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          flutter-version: '3.44.4'
-          channel: 'stable'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
-
       - name: Install dependencies
         run: |
           cp .env.example .env
-          flutter pub get
-
-      - name: Download generated code
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-code
-
+          flutter pub get --enforce-lockfile
       - name: Build web
-        run: flutter build web
+        run: flutter build web --release
 
-  # Disabled by default — a universal APK build adds ~15–25 min per PR on Ubuntu
-  # while build-web already validates compilation. IPA is only built on release.
-  # Re-enable by setting repository variable CI_BUILD_APK=true.
   build-apk:
-    needs: bootstrap
-    if: >-
-      vars.CI_BUILD_APK == 'true' &&
-      github.event_name == 'pull_request' &&
-      !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          flutter-version: '3.44.4'
-          channel: 'stable'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
           cache: true
-
-      - name: Install dependencies
-        run: |
-          cp .env.example .env
-          flutter pub get
-
-      - name: Download generated code
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-code
-
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: zulu
           java-version: '17'
           cache: gradle
-
-      - name: Build apk
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get --enforce-lockfile
+      - name: Build Android arm64 release
         run: flutter build apk --release --target-platform android-arm64
 
-  coverage:
-    needs: test
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
-
+  build-ios:
+    runs-on: macos-26
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
         with:
-          name: coverage
-
-      - name: Upload coverage results
-        uses: codecov/codecov-action@v4
+          xcode-version: '26.4.1'
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # Optional: Requires Codecov setup
-          fail_ci_if_error: false
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get --enforce-lockfile
+          cd ios && pod install
+      - name: Build unsigned iOS release
+        run: flutter build ios --release --no-codesign
 
   ci-success:
-    needs: [validate-pr-title, bootstrap, analyze, test, build-web, build-apk]
+    needs: [validate-pr-title, quality, test, build-web, build-apk, build-ios]
     if: always()
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - name: Verify all required jobs passed
         env:
-          SKIP_CI: ${{ contains(github.event.head_commit.message, '[skip ci]') }}
           PR_TITLE_RESULT: ${{ needs.validate-pr-title.result }}
-          BOOTSTRAP_RESULT: ${{ needs.bootstrap.result }}
-          ANALYZE_RESULT: ${{ needs.analyze.result }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
           TEST_RESULT: ${{ needs.test.result }}
-          BUILD_WEB_RESULT: ${{ needs['build-web'].result }}
-          BUILD_APK_RESULT: ${{ needs['build-apk'].result }}
+          WEB_RESULT: ${{ needs['build-web'].result }}
+          APK_RESULT: ${{ needs['build-apk'].result }}
+          IOS_RESULT: ${{ needs['build-ios'].result }}
         run: |
-          if [[ "$SKIP_CI" == "true" ]]; then
-            echo "CI skipped via commit message"
-            exit 0
-          fi
-
-          if [[ "$PR_TITLE_RESULT" != "success" && "$PR_TITLE_RESULT" != "skipped" ]]; then
-            echo "validate-pr-title did not succeed: $PR_TITLE_RESULT"
-            exit 1
-          fi
-
-          if [[ "$BOOTSTRAP_RESULT" != "success" ]]; then
-            echo "bootstrap did not succeed: $BOOTSTRAP_RESULT"
-            exit 1
-          fi
-
-          for result in "$ANALYZE_RESULT" "$TEST_RESULT" "$BUILD_WEB_RESULT"; do
-            if [[ "$result" != "success" ]]; then
-              echo "A required job did not succeed: $result"
-              exit 1
-            fi
+          [[ "$PR_TITLE_RESULT" == success || "$PR_TITLE_RESULT" == skipped ]] || { echo "PR title validation: $PR_TITLE_RESULT"; exit 1; }
+          for result in "$QUALITY_RESULT" "$TEST_RESULT" "$WEB_RESULT" "$APK_RESULT" "$IOS_RESULT"; do
+            [[ "$result" == success ]] || { echo "Required job did not succeed: $result"; exit 1; }
           done
 
-          if [[ "$BUILD_APK_RESULT" != "success" && "$BUILD_APK_RESULT" != "skipped" ]]; then
-            echo "build-apk did not succeed: $BUILD_APK_RESULT"
-            exit 1
-          fi
-
-      - name: Queue semantic release
-        if: >-
-          github.ref == 'refs/heads/main' &&
-          github.event_name == 'push' &&
-          !contains(github.event.head_commit.message, '[skip ci]')
-        run: echo "CI passed; KYNOS Release workflow will publish when conventional commits warrant a version bump."
+      - name: Confirm release workflow is queued on main
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: echo 'CI passed; the release workflow will preflight semantic versioning.'

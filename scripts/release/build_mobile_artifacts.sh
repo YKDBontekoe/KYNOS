@@ -7,7 +7,7 @@ cd "$ROOT_DIR"
 mkdir -p dist
 
 cp .env.example .env
-flutter pub get
+flutter pub get --enforce-lockfile
 
 echo "Building unsigned iOS IPA..."
 flutter build ios --release --no-codesign
@@ -27,6 +27,8 @@ ditto "${app_path}" "${ipa_staging}/Payload/Runner.app"
   cd "${ipa_staging}"
   zip -qr "${ROOT_DIR}/dist/kynos-ios-unsigned.ipa" Payload
 )
+
+shasum -a 256 "${ROOT_DIR}/dist/kynos-ios-unsigned.ipa" > "${ROOT_DIR}/dist/kynos-ios-unsigned.ipa.sha256"
 
 echo "Release artifacts prepared in dist/:"
 ls -la dist/

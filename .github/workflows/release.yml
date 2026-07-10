@@ -2,122 +2,172 @@ name: KYNOS Release
 
 on:
   workflow_run:
-    workflows: [KYNOS CI]
+    workflows: [KYNOS CI, Security Audit]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit or branch to dry-run
+        required: false
+        default: main
+        type: string
+      dry_run:
+        description: Analyze the release without publishing artifacts
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
 
 concurrency:
   group: kynos-release-main
   cancel-in-progress: false
 
+env:
+  FLUTTER_VERSION: '3.44.4'
+
 jobs:
-  release:
+  preflight:
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      !contains(github.event.workflow_run.head_commit.message, '[skip ci]')
-    runs-on: macos-latest
-    timeout-minutes: 90
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       actions: read
       contents: write
-      issues: write
-      pull-requests: write
-
+    outputs:
+      should_release: ${{ steps.release.outputs.should_release }}
+      next_version: ${{ steps.release.outputs.next_version }}
+      target_ref: ${{ steps.target.outputs.target_ref }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Resolve target ref
+        id: target
+        env:
+          DISPATCH_REF: ${{ inputs.ref }}
+          WORKFLOW_REF: ${{ github.event.workflow_run.head_sha }}
+        run: echo "target_ref=${DISPATCH_REF:-${WORKFLOW_REF:-main}}" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for both required main-branch workflows
+        if: github.event_name == 'workflow_run'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          for attempt in {1..10}; do
+            runs=$(gh run list --repo "$GITHUB_REPOSITORY" --commit "$HEAD_SHA" --limit 20 \
+              --json name,conclusion,event)
+            ci=$(jq -r '[.[] | select(.name == "KYNOS CI" and .event == "push") | .conclusion] | first // empty' <<<"$runs")
+            security=$(jq -r '[.[] | select(.name == "Security Audit" and .event == "push") | .conclusion] | first // empty' <<<"$runs")
+            if [[ "$ci" == success && "$security" == success ]]; then
+              exit 0
+            fi
+            echo "Waiting for KYNOS CI=$ci and Security Audit=$security (attempt $attempt/10)"
+            sleep 30
+          done
+          echo 'Both required workflows did not pass for the target commit.'
+          exit 1
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ steps.target.outputs.target_ref }}
           fetch-depth: 0
           fetch-tags: true
-          persist-credentials: true
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: npm
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: '17'
-          cache: gradle
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.4'
-          channel: stable
-          cache: true
-
-      - name: Configure Android release keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "No Android keystore secret configured; skipping signed release setup."
-            exit 0
-          fi
-
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-          cat > android/key.properties <<EOF
-          storeFile=app/upload-keystore.jks
-          storePassword=$ANDROID_KEYSTORE_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          keyPassword=$ANDROID_KEY_PASSWORD
-          EOF
-
-      - name: Install CocoaPods dependencies
-        run: |
-          cp .env.example .env
-          flutter pub get
-          dart run build_runner build --delete-conflicting-outputs
-          cd ios && pod install
-
-      - name: Install semantic-release tooling
-        run: npm ci
-
-      - name: Semantic release (unsigned IPA only)
-        id: semantic_release
+      - run: npm ci
+      - name: Semantic-release preflight
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -o pipefail
-          npx semantic-release 2>&1 | tee semantic-release.log
+          npx semantic-release --dry-run 2>&1 | tee semantic-release-dry-run.log || {
+            cat semantic-release-dry-run.log
+            exit 1
+          }
+          version=$(grep -Eo 'The next release version is [0-9]+\.[0-9]+\.[0-9]+' semantic-release-dry-run.log \
+            | tail -1 | awk '{print $6}' || true)
+          if [[ -n "$version" ]]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "next_version=$version" >> "$GITHUB_OUTPUT"
+            echo "Release candidate: $version"
+          else
+            echo 'should_release=false' >> "$GITHUB_OUTPUT"
+            echo 'next_version=' >> "$GITHUB_OUTPUT"
+            echo 'No semantic release is due.'
+          fi
+      - name: Publish preflight summary
+        if: always()
+        run: |
+          {
+            echo '## Semantic release preflight'
+            echo
+            echo "Target: ${{ steps.target.outputs.target_ref }}"
+            echo "Release due: ${{ steps.release.outputs.should_release }}"
+            echo "Next version: ${{ steps.release.outputs.next_version }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
+  publish:
+    needs: preflight
+    if: >-
+      needs.preflight.result == 'success' &&
+      needs.preflight.outputs.should_release == 'true' &&
+      (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
+    runs-on: macos-26
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ needs.preflight.outputs.target_ref }}
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: true
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
+        with:
+          xcode-version: '26.4.1'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        run: |
+          cp .env.example .env
+          flutter pub get --enforce-lockfile
+          dart run build_runner build --delete-conflicting-outputs
+          cd ios && pod install
+      - run: npm ci
+      - name: Semantic release and publish assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release 2>&1 | tee semantic-release.log
+      - name: Attest published IPA
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: dist/kynos-ios-unsigned.ipa
       - name: Publish release summary
         if: always()
         run: |
           {
-            echo "## Semantic release"
+            echo '## Semantic release'
             echo
-            if grep -q "no new version is released" semantic-release.log; then
-              echo "No GitHub release was published for this run."
-              echo
-              echo "Commits since the last tag did not match [Conventional Commits](https://www.conventionalcommits.org/)."
-              echo "Use PR titles like \`feat: add dashboard widgets\` or \`fix(ios): restore HealthKit prompt\`."
-              echo
-              echo "Recent analyzer output:"
-              echo '```'
-              rg "Analyzing commit|The release type|The commit should not|Analysis of" semantic-release.log 2>/dev/null \
-                || grep -E "Analyzing commit|The release type|The commit should not|Analysis of" semantic-release.log \
-                || true
-              echo '```'
-            elif grep -q "Published release" semantic-release.log; then
-              echo "A new release was published."
-              echo
-              echo '```'
-              rg "Published release|The next release version is" semantic-release.log 2>/dev/null \
-                || grep -E "Published release|The next release version is" semantic-release.log \
-                || true
-              echo '```'
-            else
-              echo "See the semantic-release step log for details."
-            fi
-          } >> "${GITHUB_STEP_SUMMARY}"
+            grep -E 'Published release|The next release version is|No new version' semantic-release.log || true
+            echo
+            shasum -a 256 dist/* 2>/dev/null || true
+          } >> "$GITHUB_STEP_SUMMARY"
