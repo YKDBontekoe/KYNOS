@@ -2,7 +2,9 @@ name: KYNOS Release
 
 on:
   workflow_run:
-    workflows: [KYNOS CI, Security Audit]
+    # CI is the single release trigger. Preflight still verifies Security Audit
+    # for the same commit, avoiding a duplicate release run when it completes.
+    workflows: [KYNOS CI]
     types: [completed]
     branches: [main]
   workflow_dispatch:
