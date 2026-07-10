@@ -45,6 +45,12 @@ jobs:
       next_version: ${{ steps.release.outputs.next_version }}
       target_ref: ${{ steps.target.outputs.target_ref }}
     steps:
+      - name: Mint KYNOS Release Bot token
+        id: release-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.1.4
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Resolve target ref
         id: target
         env:
@@ -86,8 +92,8 @@ jobs:
       - name: Semantic-release preflight
         id: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.release-token.outputs.token }}
+          GH_TOKEN: ${{ steps.release-token.outputs.token }}
         run: |
           set -o pipefail
           npx semantic-release --dry-run 2>&1 | tee semantic-release-dry-run.log || {
