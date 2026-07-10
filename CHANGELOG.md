@@ -1,3 +1,26 @@
+# [1.17.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.16.1...v1.17.0) (2026-07-10)
+
+
+### Bug Fixes
+
+* **deps:** migrate file picker api ([833c229](https://github.com/YKDBontekoe/KYNOS/commit/833c229d445cc4e47d44d5e5b26140d58920802b))
+* isolate dependabot pub updates ([#84](https://github.com/YKDBontekoe/KYNOS/issues/84)) ([e134c92](https://github.com/YKDBontekoe/KYNOS/commit/e134c927711b0826cfdf17e398e6d0656665c616))
+* make codemap freshness checks deterministic ([5329617](https://github.com/YKDBontekoe/KYNOS/commit/5329617f22234fccbc11d6d169a62ef56eea41d0))
+* **release:** publish with release bot ([#92](https://github.com/YKDBontekoe/KYNOS/issues/92)) ([b83bc72](https://github.com/YKDBontekoe/KYNOS/commit/b83bc72fe85920eff5c75064cf1fb725005445e9))
+* **release:** trigger once after ci ([#93](https://github.com/YKDBontekoe/KYNOS/issues/93)) ([56cfe28](https://github.com/YKDBontekoe/KYNOS/commit/56cfe28cd785e06c6a74d96f2ca2d9584ad95d14))
+* remove flaky bottom nav golden tests ([6d8894f](https://github.com/YKDBontekoe/KYNOS/commit/6d8894fdb45b68975143520da99d9ddd188bd1b0))
+* resolve directive ordering lint ([84683fb](https://github.com/YKDBontekoe/KYNOS/commit/84683fb98d65c471a55cf84debc58cabb4506329))
+* sync generated riverpod provider output ([c04052a](https://github.com/YKDBontekoe/KYNOS/commit/c04052ad66d1f12a68485ed08dacd96da98c4a9d))
+* update codemap and fix coach context expiration test failure ([f7dc2a5](https://github.com/YKDBontekoe/KYNOS/commit/f7dc2a5c721899256d48469197f2231f10c15a4c))
+
+
+### Features
+
+* add in-app privacy policy and terms of service pages ([#75](https://github.com/YKDBontekoe/KYNOS/issues/75)) ([cca2fe8](https://github.com/YKDBontekoe/KYNOS/commit/cca2fe85a5492e527a5381df76a9ece4ea886cc4))
+* add multi-thread coach chat with context controls ([#76](https://github.com/YKDBontekoe/KYNOS/issues/76)) ([5ed08ee](https://github.com/YKDBontekoe/KYNOS/commit/5ed08eeb8c2c4c9b5e20295dd2053b01a57a4e69))
+* enhance coach personalization and health insights ([857373e](https://github.com/YKDBontekoe/KYNOS/commit/857373e97f59849949f5c6a6102d2b27f2ad4094))
+* expand on-device model catalog with capabilities ([#77](https://github.com/YKDBontekoe/KYNOS/issues/77)) ([cf1fc2b](https://github.com/YKDBontekoe/KYNOS/commit/cf1fc2b918ab71dd4417494621e24b746d579c4b))
+
 ## [1.16.1](https://github.com/YKDBontekoe/KYNOS/compare/v1.16.0...v1.16.1) (2026-07-06)
 
 
