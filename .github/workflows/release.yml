@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 40
     permissions:
       actions: read
-      contents: write
+      contents: read
     outputs:
       should_release: ${{ steps.release.outputs.should_release }}
       next_version: ${{ steps.release.outputs.next_version }}
@@ -127,15 +127,22 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 90
     permissions:
-      contents: write
+      contents: read
       id-token: write
       attestations: write
     steps:
+      - name: Mint KYNOS Release Bot token
+        id: release-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.1.4
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.preflight.outputs.target_ref }}
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ steps.release-token.outputs.token }}
           persist-credentials: true
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
@@ -159,9 +166,11 @@ jobs:
       - run: npm ci
       - name: Semantic release and publish assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release 2>&1 | tee semantic-release.log
+          GITHUB_TOKEN: ${{ steps.release-token.outputs.token }}
+          GH_TOKEN: ${{ steps.release-token.outputs.token }}
+        run: |
+          set -o pipefail
+          npx semantic-release 2>&1 | tee semantic-release.log
       - name: Attest published IPA
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
@@ -172,9 +181,12 @@ jobs:
           {
             echo '## Semantic release'
             echo
-            grep -E 'Published release|The next release version is|No new version' semantic-release.log || true
+            [[ -f semantic-release.log ]] && \
+              grep -E 'Published release|The next release version is|No new version' semantic-release.log || true
             echo
-            for artifact in dist/*; do
-              [[ "$artifact" == *.sha256 ]] || shasum -a 256 "$artifact"
-            done
+            if compgen -G 'dist/*' > /dev/null; then
+              for artifact in dist/*; do
+                [[ "$artifact" == *.sha256 ]] || shasum -a 256 "$artifact"
+              done
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
