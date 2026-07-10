@@ -2,14 +2,14 @@ version: 2
 updates:
   - package-ecosystem: pub
     directory: "/"
+    # Dependabot opens PRs against main; branch protection then requires the
+    # full CI and security aggregates plus approval before merge. Keep Pub
+    # updates isolated because major plugin updates can require source changes.
+    target-branch: main
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
-    groups:
-      flutter-packages:
-        patterns:
-          - "*"
+    open-pull-requests-limit: 10
 
   - package-ecosystem: npm
     directory: "/"
