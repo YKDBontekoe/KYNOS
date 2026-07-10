@@ -38,7 +38,7 @@ dependencies:
   xml: ^6.5.0
   # 12.3 avoids the 12.4 iOS 26 selector regression while remaining compatible
   # with health 13.3.1's ^12.1.0 constraint.
-  device_info_plus: '>=12.3.0 <12.4.0'
+  device_info_plus: ^12.4.0
   archive: ^4.0.9
   url_launcher: ^6.3.1
 dev_dependencies:
