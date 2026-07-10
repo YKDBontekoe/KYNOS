@@ -39,15 +39,9 @@
       }
     ],
     [
-      "semantic-release-flutter-plugin",
-      {
-        "pubspecPath": "pubspec.yaml"
-      }
-    ],
-    [
       "@semantic-release/exec",
       {
-        "prepareCmd": "bash scripts/release/build_mobile_artifacts.sh"
+        "prepareCmd": "bash scripts/release/update_flutter_version.sh ${nextRelease.version} && bash scripts/release/build_mobile_artifacts.sh"
       }
     ],
     "@semantic-release/github",

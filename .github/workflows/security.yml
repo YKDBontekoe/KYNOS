@@ -2,86 +2,76 @@ name: Security Audit
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 0 * * 1' # Weekly audit on Mondays
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: kynos-security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   gitleaks:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          fetch-depth: 0 # Full history required for secret scanning (gitleaks)
-
-      - name: Secret Scanning (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2.3.9
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Secret scanning
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
+        with:
+          fail-on-severity: high
+
   osv-scan:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Dependency Vulnerability Audit (osv-scanner)
-        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          # Scan Flutter runtime deps only; npm lockfile is release-tooling only.
-          scan-args: --lockfile=pubspec.lock
-
-  pub-outdated:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+          persist-credentials: false
+      - name: Scan all repository lockfiles
+        uses: google/osv-scanner-action/osv-scanner-action@daa2c68f50d845057895a9c300e42478481c1d26 # v1.9.1
         with:
-          flutter-version: '3.44.4'
-          channel: 'stable'
-          cache: true
-
-      - name: Install dependencies
-        run: |
-          cp .env.example .env
-          flutter pub get
-
-      - name: Outdated Package Check
-        run: |
-          # Fails if any packages have major version updates (optional threshold)
-          flutter pub outdated --no-dev-dependencies --up-to-date --json > outdated.json
-          # You can add custom logic here to fail the build if critical packages are old
+          scan-args: |-
+            --recursive
+            ./
 
   security-success:
-    needs: [gitleaks, osv-scan, pub-outdated]
+    needs: [gitleaks, dependency-review, osv-scan]
     if: always()
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - name: Verify all security scans passed
         env:
           GITLEAKS_RESULT: ${{ needs.gitleaks.result }}
+          DEPENDENCY_REVIEW_RESULT: ${{ needs['dependency-review'].result }}
           OSV_RESULT: ${{ needs['osv-scan'].result }}
-          OUTDATED_RESULT: ${{ needs['pub-outdated'].result }}
         run: |
-          for result in "$GITLEAKS_RESULT" "$OSV_RESULT" "$OUTDATED_RESULT"; do
-            if [[ "$result" != "success" ]]; then
-              echo "A security scan did not succeed: $result"
-              exit 1
-            fi
-          done
+          [[ "$GITLEAKS_RESULT" == success ]] || { echo "Gitleaks: $GITLEAKS_RESULT"; exit 1; }
+          [[ "$OSV_RESULT" == success ]] || { echo "OSV scan: $OSV_RESULT"; exit 1; }
+          [[ "$DEPENDENCY_REVIEW_RESULT" == success || "$DEPENDENCY_REVIEW_RESULT" == skipped ]] || {
+            echo "Dependency review: $DEPENDENCY_REVIEW_RESULT"
+            exit 1
+          }
