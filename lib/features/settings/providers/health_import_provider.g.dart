@@ -41,7 +41,7 @@ final class HealthImportProvider
   }
 }
 
-String _$healthImportHash() => r'cf80ac628c4f869f6a73c6404368e554e7105b5f';
+String _$healthImportHash() => r'd10d98cf4aa580fab643b1ef06d2bd7c2e2855ae';
 
 abstract class _$HealthImport extends $Notifier<HealthImportState> {
   HealthImportState build();
