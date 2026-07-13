@@ -38,11 +38,13 @@ class CharacterPage extends ConsumerWidget {
     ref.invalidate(dailyQuestsProvider);
     ref.invalidate(campSessionProvider);
     ref.invalidate(nexusLabProvider);
+    ref.invalidate(healthCoachDataProvider);
     await Future.wait([
       ref.read(runnerCharacterProvider.future),
       ref.read(dailyQuestsProvider.future),
       ref.read(campSessionProvider.future),
       ref.read(nexusLabProvider.future),
+      ref.read(healthCoachDataProvider.future),
     ]);
   }
 
@@ -52,8 +54,7 @@ class CharacterPage extends ConsumerWidget {
     final characterAsync = ref.watch(runnerCharacterProvider);
     final questsAsync = ref.watch(dailyQuestsProvider);
     final campAsync = ref.watch(campSessionProvider);
-    final wellbeingExperiments =
-        ref.watch(healthCoachDataProvider).value?.experiments ?? const [];
+    final wellbeingState = ref.watch(healthCoachDataProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refreshCharacter(ref),
@@ -117,7 +118,15 @@ class CharacterPage extends ConsumerWidget {
                   children: [
                     const KynosSectionHeader(title: 'YOUR WELLBEING JOURNEY'),
                     const Gap(tokens.Spacing.sm),
-                    WellbeingQuestPanel(experiments: wellbeingExperiments),
+                    wellbeingState.when(
+                      loading: () => const KynosSkeleton.tile(height: 96),
+                      error: (_, _) => KynosInlineErrorCard(
+                        message: 'Could not load wellbeing quests.',
+                        onRetry: () => ref.invalidate(healthCoachDataProvider),
+                      ),
+                      data: (data) =>
+                          WellbeingQuestPanel(experiments: data.experiments),
+                    ),
                     const Gap(tokens.Spacing.lg),
                     campAsync.when(
                       loading: () => const KynosSkeleton.tile(height: 72),

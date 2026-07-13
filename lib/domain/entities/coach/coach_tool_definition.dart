@@ -81,7 +81,8 @@ abstract final class CoachAgentToolCatalog {
     CoachToolDefinition(
       name: 'propose_wellbeing_experiment',
       purpose: 'Propose one low-risk 3-14 day experiment; user must confirm',
-      argsHint: 'title, action, hypothesis, duration_days',
+      argsHint:
+          'title, action_id (morning_daylight|gentle_movement|movement_breaks|sleep_consistency|wind_down|recovery_pause|reflection), hypothesis, duration_days',
       actionLabel: 'Preparing an experiment',
     ),
     CoachToolDefinition(

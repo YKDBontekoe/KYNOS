@@ -18,6 +18,7 @@ class HealthCoachData extends _$HealthCoachData {
   @override
   Future<HealthCoachState> build() async {
     final result = await ref.watch(healthCoachRepositoryProvider).load();
+    if (result.failure != null) throw result.failure!;
     return result.value ?? const HealthCoachState();
   }
 
@@ -155,14 +156,25 @@ class HealthCoachData extends _$HealthCoachData {
   }
 
   Future<void> clearAll() async {
-    await ref.read(healthCoachRepositoryProvider).clear();
+    final previous = state.value ?? const HealthCoachState();
+    final result = await ref.read(healthCoachRepositoryProvider).clear();
+    if (result.failure != null) {
+      state = AsyncError(result.failure!, StackTrace.current);
+      if (state.value == null) state = AsyncData(previous);
+      return;
+    }
     state = const AsyncData(HealthCoachState());
   }
 
   Future<void> _persist(HealthCoachState next) async {
-    state = AsyncData(next);
+    final previous = state.value ?? const HealthCoachState();
     final result = await ref.read(healthCoachRepositoryProvider).save(next);
-    if (result.failure != null) throw StateError(result.failure!.message);
+    if (result.failure != null) {
+      state = AsyncError(result.failure!, StackTrace.current);
+      if (state.value == null) state = AsyncData(previous);
+      return;
+    }
+    state = AsyncData(next);
   }
 }
 

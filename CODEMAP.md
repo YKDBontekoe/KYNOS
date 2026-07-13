@@ -132,7 +132,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/entities/coach/coach_data_source_snapshot.dart` | 18 | `CoachDataSourceSnapshot` |
 | `lib/domain/entities/coach/coach_seed_topic.dart` | 13 | `Entry-point hint for tailoring coach context and seed prompts.` |
 | `lib/domain/entities/coach/coach_tool_call.dart` | 42 | `A structured tool invocation requested by the coach model mid-answer.` |
-| `lib/domain/entities/coach/coach_tool_definition.dart` | 155 | `CoachToolDefinition` |
+| `lib/domain/entities/coach/coach_tool_definition.dart` | 156 | `CoachToolDefinition` |
 | `lib/domain/entities/coach/daily_coach_brief.dart` | 21 | `DailyCoachBrief` |
 | `lib/domain/entities/coach/morning_check_in.dart` | 30 | `MorningCheckIn` |
 | `lib/domain/entities/dashboard/dashboard_summary.dart` | 60 | `DashboardSummary` |
@@ -172,8 +172,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/usecases/coach/build_coach_context_usecase.dart` | 94 | `BuildCoachContextUseCase` |
 | `lib/domain/usecases/coach/build_daily_coach_brief_usecase.dart` | 64 | `BuildDailyCoachBriefUseCase` |
 | `lib/domain/usecases/coach/coach_tool_context_queries.dart` | 150 | `CoachToolContextQueries` |
-| `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 515 | `CoachToolHealthQueries` |
-| `lib/domain/usecases/coach/coach_tool_wellbeing_queries.dart` | 382 | `CoachToolWellbeingQueries` |
+| `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | `CoachToolHealthQueries` |
+| `lib/domain/usecases/coach/coach_tool_wellbeing_queries.dart` | 387 | `CoachToolWellbeingQueries` |
 | `lib/domain/usecases/coach/create_coach_conversation_usecase.dart` | 35 | `CreateCoachConversationUseCase` |
 | `lib/domain/usecases/coach/delete_coach_conversation_usecase.dart` | 17 | `DeleteCoachConversationUseCase` |
 | `lib/domain/usecases/coach/describe_coach_context_usecase.dart` | 93 | `DescribeCoachContextUseCase` |
@@ -207,7 +207,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/acwr.dart` | 38 | `Acute:chronic workload ratio from daily running distance.` |
 | `lib/domain/utils/ai_inference_error_policy.dart` | 149 | `Classifies on-device LLM failures and maps them to user-facing copy.` |
 | `lib/domain/utils/ai_task_router.dart` | 37 | `Routes AI tasks to local Gemma or OpenRouter cloud backends.` |
-| `lib/domain/utils/cloud_health_text_redactor.dart` | 23 | `Removes free-form symptom wording before an explicitly selected cloud turn.` |
+| `lib/domain/utils/cloud_health_text_redactor.dart` | 28 | `Converts free-form text into an approved, non-identifying intent.` |
 | `lib/domain/utils/cloud_prompt_sanitizer.dart` | 29 | `Strips sensitive fields from cloud-bound prompts.` |
 | `lib/domain/utils/coach_backend_mode_mapper.dart` | 13 | `Maps per-conversation backend mode to repository preferred backend.` |
 | `lib/domain/utils/coach_context_formatter.dart` | 204 | `Formats [CoachContext] into a privacy-safe LLM prompt block.` |
@@ -230,7 +230,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/running_distance.dart` | 12 | `Running-only distance in meters for a daily summary.` |
 | `lib/domain/utils/seeded_roll.dart` | 17 | `Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates).` |
 | `lib/domain/utils/weekly_momentum.dart` | 87 | `WeeklyMomentum` |
-| `lib/features/character/presentation/pages/character_page.dart` | 288 | `CharacterPage, EmptyCharacterState` |
+| `lib/features/character/presentation/pages/character_page.dart` | 297 | `CharacterPage, EmptyCharacterState` |
 | `lib/features/character/presentation/widgets/camp_build_sheet.dart` | 133 | `CampBuildSheet` |
 | `lib/features/character/presentation/widgets/camp_game_panel.dart` | 145 | `CampGamePanel, _CampGamePanelState` |
 | `lib/features/character/presentation/widgets/camp_grid.dart` | 119 | `CampGrid, _CampTileCell` |
@@ -263,7 +263,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/follow_up_chips.dart` | 35 | `FollowUpChips` |
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
-| `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 396 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
+| `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
 | `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 94 | `InferenceModeBar` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 273 | `MessageList, _MessageListState, MessageBubble, …` |
@@ -335,7 +335,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/providers/manual_run_provider.dart` | 104 | `ManualRunState, ManualRun` |
 | `lib/features/settings/providers/openrouter_models_provider.dart` | 121 | `OpenRouterCatalogState, OpenRouterCatalog` |
 | `lib/features/settings/providers/settings_provider.dart` | 1 | `Dart module` |
-| `lib/features/training/presentation/pages/training_page.dart` | 302 | `TrainingPage, _TrainingPageState, _TrendAnalysis` |
+| `lib/features/training/presentation/pages/training_page.dart` | 323 | `TrainingPage, _TrainingPageState, _TrendAnalysis` |
 | `lib/features/training/presentation/widgets/past_runs_list.dart` | 73 | `PastRunsList` |
 | `lib/features/training/presentation/widgets/training_chip.dart` | 33 | `TrainingChip` |
 | `lib/features/training/presentation/widgets/training_insight_cards.dart` | 133 | `TrainingInsightsCards` |
@@ -415,7 +415,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/providers/coach_usecase_providers.dart` | 29 | `Dart module` |
 | `lib/shared/providers/daily_quests_provider.dart` | 56 | `Dart module` |
 | `lib/shared/providers/gamification_providers.dart` | 73 | `Dart module` |
-| `lib/shared/providers/health_coach_providers.dart` | 203 | `HealthCoachData` |
+| `lib/shared/providers/health_coach_providers.dart` | 215 | `HealthCoachData` |
 | `lib/shared/providers/health_import_providers.dart` | 23 | `Dart module` |
 | `lib/shared/providers/health_providers.dart` | 148 | `HealthPermissionsNotifier, ImportedHealthDataNotifier` |
 | `lib/shared/providers/health_repository_provider.dart` | 15 | `Dart module` |
@@ -469,7 +469,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/liquid_glass_surface.dart` | 103 | `LiquidGlassSurface` |
 | `lib/shared/widgets/metric_tile.dart` | 131 | `MetricTile` |
 | `lib/shared/widgets/nav_icon.dart` | 238 | `NavIconDefinition, NavIconPainter` |
-| `lib/shared/widgets/responsive_center.dart` | 31 | `ResponsiveCenter` |
+| `lib/shared/widgets/responsive_center.dart` | 30 | `ResponsiveCenter` |
 | `lib/shared/widgets/run_card.dart` | 113 | `RunCard` |
 | `lib/shared/widgets/widgets.dart` | 24 | `KYNOS shared widgets — barrel export.` |
 
@@ -479,16 +479,16 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 |------|------:|--------|
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 719 | Split if > 250 lines |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 689 | Split if > 250 lines |
-| `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 515 | Split if > 250 lines |
+| `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 425 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 396 | Split if > 250 lines |
-| `lib/domain/usecases/coach/coach_tool_wellbeing_queries.dart` | 382 | Split if > 250 lines |
+| `lib/domain/usecases/coach/coach_tool_wellbeing_queries.dart` | 387 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 375 | Split if > 250 lines |
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 357 | Split if > 250 lines |
-| `lib/features/training/presentation/pages/training_page.dart` | 302 | Split if > 250 lines |
+| `lib/features/training/presentation/pages/training_page.dart` | 323 | Split if > 250 lines |
+| `lib/features/character/presentation/pages/character_page.dart` | 297 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
-| `lib/features/character/presentation/pages/character_page.dart` | 288 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/shared/widgets/charts/health_trend_chart.dart` | 279 | Split if > 250 lines |

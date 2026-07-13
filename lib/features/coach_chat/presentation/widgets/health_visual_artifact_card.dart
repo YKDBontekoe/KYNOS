@@ -124,7 +124,15 @@ class _HealthVisualArtifactCardState extends State<HealthVisualArtifactCard> {
     final points = series.points
         .where((item) => !item.date.isBefore(cutoff))
         .toList();
-    final visible = points.isEmpty ? series.points : points;
+    final visible = points;
+    if (visible.isEmpty) {
+      return Column(
+        children: [
+          _trendControls(availableSeries),
+          const Text('No data available for the selected range.'),
+        ],
+      );
+    }
     if (_showTable) {
       return Column(
         children: [

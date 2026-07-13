@@ -67,4 +67,37 @@ void main() {
     await tester.tap(find.text('Ask KYNOS'));
     expect(followUp, contains('Sleep and energy'));
   });
+
+  testWidgets('does not fall back to old points for an empty range', (
+    tester,
+  ) async {
+    final oldArtifact = HealthVisualArtifact.trend(
+      meta: artifact.meta,
+      series: [
+        HealthSeries(
+          id: 'old-sleep',
+          label: 'Sleep',
+          metric: HealthMetric.sleep,
+          unit: 'h',
+          points: [HealthDataPoint(date: DateTime(2025, 1, 1), value: 7.0)],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: HealthVisualArtifactCard(
+            artifact: oldArtifact,
+            onExplore: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('No data available for the selected range.'),
+      findsOneWidget,
+    );
+  });
 }

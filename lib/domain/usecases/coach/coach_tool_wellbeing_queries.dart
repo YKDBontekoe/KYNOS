@@ -62,7 +62,9 @@ class CoachToolWellbeingQueries {
       min: 7,
       max: 60,
     );
-    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final cutoff = today.subtract(Duration(days: days - 1));
     final checkIns =
         context.healthCheckIns
             .where((item) => !item.date.isBefore(cutoff))
@@ -204,6 +206,8 @@ class CoachToolWellbeingQueries {
       );
     }
     final rows = <HealthTableRow>[];
+    var pairedHighCount = 0;
+    var pairedLowCount = 0;
     for (final metric in const [
       HealthMetric.sleep,
       HealthMetric.hrv,
@@ -211,7 +215,9 @@ class CoachToolWellbeingQueries {
     ]) {
       final highValues = _valuesForCheckIns(high, summaries, metric);
       final lowValues = _valuesForCheckIns(low, summaries, metric);
-      if (highValues.isEmpty || lowValues.isEmpty) continue;
+      if (highValues.length < 2 || lowValues.length < 2) continue;
+      pairedHighCount += highValues.length;
+      pairedLowCount += lowValues.length;
       rows.add(
         HealthTableRow(
           label: metric.label,
@@ -233,7 +239,8 @@ class CoachToolWellbeingQueries {
       toolCall: call,
       isError: false,
       promptSummary:
-          'Compared ${high.length} high-energy and ${low.length} low-energy days. '
+          'Compared measured signals from $pairedHighCount high-energy and '
+          '$pairedLowCount low-energy paired observations. '
           'Differences are descriptive associations only.',
       displayLabel: 'Compared high- and low-energy days',
       visualArtifacts: [
@@ -247,7 +254,7 @@ class CoachToolWellbeingQueries {
             end: dates.last,
             confidence: FindingConfidence.low,
             evidenceReferences: [
-              '${high.length + low.length} paired check-in days',
+              '${pairedHighCount + pairedLowCount} paired metric observations',
             ],
             limitations: const [
               'These differences do not establish cause and effect.',
@@ -262,7 +269,10 @@ class CoachToolWellbeingQueries {
 
   CoachToolResult proposeExperiment(CoachToolCall call) {
     final title = CoachToolResultHelpers.stringArg(call, 'title')?.trim();
-    final action = CoachToolResultHelpers.stringArg(call, 'action')?.trim();
+    final actionId = CoachToolResultHelpers.stringArg(
+      call,
+      'action_id',
+    )?.trim();
     final hypothesis = CoachToolResultHelpers.stringArg(
       call,
       'hypothesis',
@@ -274,13 +284,14 @@ class CoachToolWellbeingQueries {
       min: 3,
       max: 14,
     );
-    if (title == null || title.isEmpty || action == null || action.isEmpty) {
+    if (title == null || title.isEmpty || actionId == null) {
       return CoachToolResultHelpers.error(
         call,
         'A title and one low-risk action are required.',
       );
     }
-    if (!_isSafeExperiment(action)) {
+    final action = _safeExperimentCatalog[actionId];
+    if (action == null) {
       return CoachToolResultHelpers.error(
         call,
         'That experiment is outside the low-risk wellbeing catalog.',
@@ -347,21 +358,15 @@ class CoachToolWellbeingQueries {
         .toList(),
   );
 
-  bool _isSafeExperiment(String action) {
-    final normalised = action.toLowerCase();
-    const allowed = [
-      'daylight',
-      'walk',
-      'movement break',
-      'bedtime',
-      'wind-down',
-      'wind down',
-      'reflection',
-      'gentle movement',
-      'rest',
-    ];
-    return allowed.any(normalised.contains);
-  }
+  static const _safeExperimentCatalog = <String, String>{
+    'morning_daylight': 'Spend ten minutes in morning daylight.',
+    'gentle_movement': 'Take a ten-minute gentle walk or mobility break.',
+    'movement_breaks': 'Take a short movement break every two hours.',
+    'sleep_consistency': 'Keep bedtime within the same 30-minute window.',
+    'wind_down': 'Use a ten-minute screen-free wind-down before bed.',
+    'recovery_pause': 'Choose a quieter recovery period when energy is low.',
+    'reflection': 'Write a two-minute reflection on energy and mood.',
+  };
 
   List<double> _valuesForCheckIns(
     List<HealthCheckIn> checkIns,

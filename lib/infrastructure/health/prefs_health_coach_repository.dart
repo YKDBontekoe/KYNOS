@@ -39,7 +39,7 @@ class PrefsHealthCoachRepository implements HealthCoachRepository {
   }
 
   @override
-  Future<({bool value, Failure? failure})> save(HealthCoachState state) async {
+  Future<({bool? value, Failure? failure})> save(HealthCoachState state) async {
     try {
       final bounded = state.copyWith(
         checkIns: state.checkIns.take(_maxCheckIns).toList(growable: false),
@@ -55,20 +55,20 @@ class PrefsHealthCoachRepository implements HealthCoachRepository {
       return saved
           ? (value: true, failure: null)
           : (
-              value: false,
+              value: null,
               failure: const HealthCoachFailure('Could not save locally.'),
             );
     } on Object catch (error) {
-      return (value: false, failure: HealthCoachFailure(error.toString()));
+      return (value: null, failure: HealthCoachFailure(error.toString()));
     }
   }
 
   @override
-  Future<({bool value, Failure? failure})> clear() async {
+  Future<({bool? value, Failure? failure})> clear() async {
     try {
       return (value: await _prefs.remove(storageKey), failure: null);
     } on Object catch (error) {
-      return (value: false, failure: HealthCoachFailure(error.toString()));
+      return (value: null, failure: HealthCoachFailure(error.toString()));
     }
   }
 }

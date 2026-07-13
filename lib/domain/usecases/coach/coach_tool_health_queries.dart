@@ -305,11 +305,17 @@ class CoachToolHealthQueries {
       rows: [
         HealthTableRow(
           label: 'Recent',
-          values: ['$currentMedian ${metric.unit}', '${current.length}'],
+          values: [
+            '${currentMedian.toStringAsFixed(1)} ${metric.unit}',
+            '${current.length}',
+          ],
         ),
         HealthTableRow(
           label: 'Previous',
-          values: ['$previousMedian ${metric.unit}', '${previous.length}'],
+          values: [
+            '${previousMedian.toStringAsFixed(1)} ${metric.unit}',
+            '${previous.length}',
+          ],
         ),
       ],
     );

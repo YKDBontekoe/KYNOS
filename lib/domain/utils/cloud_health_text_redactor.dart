@@ -1,23 +1,28 @@
-/// Removes free-form symptom wording before an explicitly selected cloud turn.
+/// Converts free-form text into an approved, non-identifying intent.
 ///
-/// Structured, disclosure-level health summaries are handled separately. This
-/// guard prevents notes or symptom descriptions from being copied into a cloud
-/// prompt accidentally.
+/// No original wording, values, names, locations, notes, or symptom text is
+/// returned. Structured disclosure-level summaries are handled separately.
 abstract final class CloudHealthTextRedactor {
-  static final _symptomPattern = RegExp(
-    r'\b(pain|dizz(?:y|iness)|nausea|fever|cough|breath(?:ing)?|faint(?:ed|ing)?|'
-    r'weakness|bleed(?:ing)?|vomit(?:ing)?|headache|migraine|palpitation|'
-    r'injur(?:y|ed)|sick|unwell)\b',
-    caseSensitive: false,
-  );
+  static const _approvedTopics = <String, List<String>>{
+    'sleep and restoration': ['sleep', 'bedtime', 'rest', 'tired'],
+    'energy and recovery': ['energy', 'recovery', 'fatigue'],
+    'stress and mood': ['stress', 'mood', 'calm', 'anxious'],
+    'movement and exercise': ['movement', 'exercise', 'walk', 'run'],
+    'personal patterns': ['pattern', 'trend', 'change', 'compare'],
+  };
 
-  static bool containsSymptomText(String value) =>
-      _symptomPattern.hasMatch(value);
+  static bool containsSymptomText(String value) => true;
 
   static String redact(String value) {
-    if (!containsSymptomText(value)) return value;
-    return 'The person included private symptom details, which were withheld '
-        'from the cloud prompt. Give only general, non-diagnostic guidance and '
-        'encourage appropriate professional support.';
+    final lower = value.toLowerCase();
+    final topics = _approvedTopics.entries
+        .where((entry) => entry.value.any(lower.contains))
+        .map((entry) => entry.key)
+        .take(2)
+        .toList();
+    final intent = topics.isEmpty ? 'general wellbeing' : topics.join(' and ');
+    return 'The person asks for help with $intent. Their original wording and '
+        'any private health or location details were withheld. Use only the '
+        'separately authorized local summary.';
   }
 }

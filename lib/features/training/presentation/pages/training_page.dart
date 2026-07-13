@@ -44,11 +44,15 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     ref.invalidate(recentRunsProvider(days: 365, limit: 60));
     ref.invalidate(trainingInsightsStateProvider);
     ref.invalidate(nexusLabProvider);
+    ref.invalidate(dailyHealthBriefProvider);
+    ref.invalidate(healthCoachDataProvider);
     await Future.wait([
       ref.read(healthHistoryProvider(days: days).future),
       ref.read(recentRunsProvider(days: 365, limit: 60).future),
       ref.read(trainingInsightsStateProvider.future),
       ref.read(nexusLabProvider.future),
+      ref.read(dailyHealthBriefProvider.future),
+      ref.read(healthCoachDataProvider.future),
     ]);
   }
 
@@ -59,7 +63,7 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     final labState = kIsWeb ? null : ref.watch(nexusLabProvider);
     final insightsState = ref.watch(trainingInsightsStateProvider);
     final healthBrief = ref.watch(dailyHealthBriefProvider);
-    final coachData = ref.watch(healthCoachDataProvider).value;
+    final coachData = ref.watch(healthCoachDataProvider);
 
     final kynos = context.kynosTheme;
 
@@ -140,12 +144,29 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
                 const Gap(tokens.Spacing.lg),
                 const KynosSectionHeader(title: 'How you felt'),
                 const Gap(tokens.Spacing.sm),
-                CheckInHistoryPanel(checkIns: coachData?.checkIns ?? const []),
+                coachData.when(
+                  loading: () => const KynosCard(
+                    child: KynosLoadingLine(label: 'Loading check-ins...'),
+                  ),
+                  error: (_, _) => KynosInlineErrorCard(
+                    message: 'Could not load check-ins.',
+                    onRetry: () => ref.invalidate(healthCoachDataProvider),
+                  ),
+                  data: (data) => CheckInHistoryPanel(checkIns: data.checkIns),
+                ),
                 const Gap(tokens.Spacing.lg),
                 const KynosSectionHeader(title: 'Wellbeing experiments'),
                 const Gap(tokens.Spacing.sm),
-                WellbeingExperimentsPanel(
-                  experiments: coachData?.experiments ?? const [],
+                coachData.when(
+                  loading: () => const KynosCard(
+                    child: KynosLoadingLine(label: 'Loading experiments...'),
+                  ),
+                  error: (_, _) => KynosInlineErrorCard(
+                    message: 'Could not load wellbeing experiments.',
+                    onRetry: () => ref.invalidate(healthCoachDataProvider),
+                  ),
+                  data: (data) =>
+                      WellbeingExperimentsPanel(experiments: data.experiments),
                 ),
                 const Gap(tokens.Spacing.lg),
                 Row(

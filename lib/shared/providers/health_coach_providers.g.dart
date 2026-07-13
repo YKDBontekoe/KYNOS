@@ -81,7 +81,7 @@ final class HealthCoachDataProvider
   HealthCoachData create() => HealthCoachData();
 }
 
-String _$healthCoachDataHash() => r'f0f8b330b2cf1ea0a139f64cc74b8721c8b78513';
+String _$healthCoachDataHash() => r'19afdbede62f5892261de88094a8654a44acc5ba';
 
 abstract class _$HealthCoachData extends $AsyncNotifier<HealthCoachState> {
   FutureOr<HealthCoachState> build();

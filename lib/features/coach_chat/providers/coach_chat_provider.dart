@@ -518,8 +518,8 @@ class CoachChat extends _$CoachChat {
             'are not shared with cloud models.',
       CloudDataLevel.minimal =>
         summary
-            .replaceAll(RegExp(r'\b\d+(?:\.\d+)?\b'), 'a rounded value')
-            .replaceAll(RegExp(r'\b\d{4}-\d{2}-\d{2}\b'), 'a recent date'),
+            .replaceAll(RegExp(r'\b\d{4}-\d{2}-\d{2}\b'), 'a recent date')
+            .replaceAll(RegExp(r'\b\d+(?:\.\d+)?\b'), 'a rounded value'),
       CloudDataLevel.standard || CloudDataLevel.full => summary,
     };
   }
