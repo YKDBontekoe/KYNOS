@@ -26,6 +26,7 @@ import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
+import 'package:kynos/shared/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
@@ -108,11 +109,11 @@ class CharacterPage extends ConsumerWidget {
                 return const SliverFillRemaining(child: EmptyCharacterState());
               }
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   tokens.Spacing.md,
                   0,
                   tokens.Spacing.md,
-                  LayoutTokens.shellBottomPadding,
+                  LayoutTokens.shellBottomPadding(context),
                 ),
                 sliver: SliverList.list(
                   children: [
@@ -161,6 +162,10 @@ class CharacterPage extends ConsumerWidget {
                     ),
                     const Gap(tokens.Spacing.md),
                     XpBar(character: character),
+                    const Gap(tokens.Spacing.lg),
+                    const KynosSectionHeader(title: 'DAILY QUEST'),
+                    const Gap(tokens.Spacing.sm),
+                    DailyQuestTeaser(questsAsync: questsAsync),
                     const Gap(tokens.Spacing.lg),
                     const KynosSectionHeader(title: 'STATS'),
                     const Gap(tokens.Spacing.sm),

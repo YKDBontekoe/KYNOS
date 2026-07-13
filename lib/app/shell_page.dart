@@ -5,20 +5,20 @@ import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
-import 'package:kynos/shared/widgets/kynos_bottom_nav.dart';
+import 'package:kynos/shared/widgets/kynos_nav_rail.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — floating bottom nav with three focused tabs.
+/// Root app shell — left-edge nav rail with three focused tabs.
 class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   static const _navItems = [
-    KynosBottomNavItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosBottomNavItem(label: 'Health', icon: NavIconPaths.training),
-    KynosBottomNavItem(label: 'Journey', icon: NavIconPaths.character),
+    KynosNavRailItem(label: 'Coach', icon: NavIconPaths.coach),
+    KynosNavRailItem(label: 'Health', icon: NavIconPaths.training),
+    KynosNavRailItem(label: 'Journey', icon: NavIconPaths.character),
   ];
 
   void _onTabSelected(int index) {
@@ -36,41 +36,47 @@ class ShellPage extends ConsumerWidget {
       goToBranch: _onTabSelected,
       child: Scaffold(
         backgroundColor: kynos.background,
-        extendBody: true,
-        body: ResponsiveCenter(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: LayoutTokens.shellNavExtent(context),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned(
+              top: -120,
+              right: -80,
+              child: IgnorePointer(
+                child: Container(
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        kynos.purple.withValues(alpha: 0.08),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            child: _AnimatedShellBody(
-              tabIndex: navigationShell.currentIndex,
-              child: navigationShell,
-            ),
-          ),
-        ),
-        bottomNavigationBar: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: LayoutTokens.maxContentWidth,
-            ),
-            child: AnimatedSlide(
-              duration: Motion.fast,
-              curve: Motion.curve,
-              offset: MediaQuery.viewInsetsOf(context).bottom > 0
-                  ? const Offset(0, 1.4)
-                  : Offset.zero,
-              child: AnimatedOpacity(
-                duration: Motion.fast,
-                opacity: MediaQuery.viewInsetsOf(context).bottom > 0 ? 0 : 1,
-                child: KynosBottomNav(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                KynosNavRail(
                   items: _navItems,
                   selectedIndex: navigationShell.currentIndex,
                   onSelected: _onTabSelected,
                 ),
-              ),
+                Expanded(
+                  child: ResponsiveCenter(
+                    child: _AnimatedShellBody(
+                      tabIndex: navigationShell.currentIndex,
+                      child: navigationShell,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -106,7 +112,7 @@ class _AnimatedShellBodyState extends State<_AnimatedShellBody>
   }
 
   void _buildAnimations() {
-    final slideOffset = 0.15 * _direction;
+    final slideOffset = 0.08 * _direction;
     final curved = CurvedAnimation(parent: _controller, curve: Motion.curve);
     _slide = Tween<Offset>(
       begin: Offset(slideOffset, 0),
@@ -143,7 +149,7 @@ class _AnimatedShellBodyState extends State<_AnimatedShellBody>
   }
 }
 
-/// Health tab — sleep, recovery, movement, experiments, and activity detail.
+/// Health tab — unified health hub (dashboard + training).
 class HealthTab extends StatelessWidget {
   const HealthTab({super.key});
 
@@ -153,7 +159,7 @@ class HealthTab extends StatelessWidget {
   }
 }
 
-/// Journey tab — sustainable wellbeing progression and the existing camp.
+/// Journey tab — sustainable wellbeing progression and camp.
 class JourneyTab extends StatelessWidget {
   const JourneyTab({super.key});
 
