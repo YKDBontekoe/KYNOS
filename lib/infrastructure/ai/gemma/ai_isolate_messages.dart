@@ -13,10 +13,15 @@ class AiInitRequest implements AiIsolateRequest {
 }
 
 class AiChatRequest implements AiIsolateRequest {
-  AiChatRequest(this.userMessage, {required this.requestId});
+  AiChatRequest(
+    this.userMessage, {
+    required this.requestId,
+    this.maxOutputTokens = 256,
+  });
 
   final String userMessage;
   final int requestId;
+  final int maxOutputTokens;
 }
 
 class AiReloadChatRequest implements AiIsolateRequest {

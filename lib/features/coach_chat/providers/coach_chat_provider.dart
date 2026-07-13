@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/domain/entities/coach/coach_backend_mode.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation_settings.dart';
@@ -14,6 +15,7 @@ import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/domain/utils/coach_tool_call_parser.dart';
+import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/health_safety_policy.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
@@ -22,6 +24,7 @@ import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/coach_context_provider.dart';
 import 'package:kynos/shared/providers/coach_conversation_providers.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
+import 'package:kynos/shared/providers/gemma_tier_provider.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -240,6 +243,13 @@ class CoachChat extends _$CoachChat {
             preferences: settings.contextPreferences,
           );
 
+      final tier = await _resolveInferenceTier();
+      final prefersCloud =
+          preferredBackend == AiInferenceBackend.openRouter ||
+          settings.backendMode == CoachBackendMode.cloud;
+      final enableToolLoop =
+          prefersCloud || tier == GemmaInferenceTier.full;
+
       await _streamAgenticAnswer(
         assistantId: assistantId,
         userMessage: userMessage,
@@ -248,6 +258,7 @@ class CoachChat extends _$CoachChat {
         priorMessages: priorMessages,
         preferredBackend: preferredBackend,
         cloudLevel: cloudLevel,
+        enableToolLoop: enableToolLoop,
       );
 
       if (_cancelRequested) return;
@@ -325,6 +336,7 @@ class CoachChat extends _$CoachChat {
     required List<ChatMessage> priorMessages,
     required AiInferenceBackend? preferredBackend,
     required CloudDataLevel cloudLevel,
+    required bool enableToolLoop,
   }) async {
     final sendCoach = ref.read(sendCoachMessageUseCaseProvider);
     final executeTool = ref.read(executeCoachToolUseCaseProvider);
@@ -339,7 +351,9 @@ class CoachChat extends _$CoachChat {
     final pendingActions = <PendingCoachAction>[];
     final executedCalls = <String>{};
 
-    for (var step = 0; step <= _maxToolStepsPerTurn; step++) {
+    final maxSteps = enableToolLoop ? _maxToolStepsPerTurn : 0;
+
+    for (var step = 0; step <= maxSteps; step++) {
       if (_cancelRequested) return;
 
       final buffer = StringBuffer();
@@ -376,7 +390,7 @@ class CoachChat extends _$CoachChat {
       if (_cancelRequested) return;
 
       final fullText = buffer.toString();
-      final isLastAllowedStep = step == _maxToolStepsPerTurn;
+      final isLastAllowedStep = step == maxSteps;
       final toolCall = isLastAllowedStep
           ? null
           : CoachToolCallParser.tryParse(fullText);
@@ -415,7 +429,6 @@ class CoachChat extends _$CoachChat {
           backend: chatRepository.lastBackend,
           cloudLevel: cloudLevel,
         );
-        contextForThisCall = null;
         continue;
       }
 
@@ -470,11 +483,10 @@ class CoachChat extends _$CoachChat {
       nextUserMessage = _buildToolFollowUpPrompt(
         originalQuestion: userMessage,
         toolResults: toolResults,
-        isFinalAttempt: step == _maxToolStepsPerTurn - 1,
+        isFinalAttempt: step == maxSteps - 1,
         backend: chatRepository.lastBackend,
         cloudLevel: cloudLevel,
       );
-      contextForThisCall = null;
     }
   }
 
@@ -703,6 +715,11 @@ class CoachChat extends _$CoachChat {
   Future<CoachConversationSettings> _conversationSettings() async {
     final conversation = await _loadConversation();
     return conversation?.settings ?? CoachConversationSettings.defaults;
+  }
+
+  Future<GemmaInferenceTier> _resolveInferenceTier() async {
+    ref.invalidate(gemmaInferenceTierProvider);
+    return ref.read(gemmaInferenceTierProvider.future);
   }
 
   Future<void> _saveConversation(CoachConversation conversation) async {

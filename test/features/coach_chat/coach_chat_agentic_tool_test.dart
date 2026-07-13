@@ -12,9 +12,11 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/gemma_tier_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +37,9 @@ void main() {
         sharedPreferencesProvider.overrideWithValue(prefs),
         healthRepositoryProvider.overrideWithValue(_FakeHealthRepository()),
         chatAiCoachRepositoryProvider.overrideWithValue(fakeAi),
+        gemmaInferenceTierProvider.overrideWith(
+          (ref) async => GemmaInferenceTier.full,
+        ),
       ],
     );
     await container
@@ -98,6 +103,40 @@ void main() {
     expect(assistant.hasError, isFalse);
     expect(assistant.content, 'Rest today and hydrate well.');
     expect(assistant.toolSteps, isNull);
+    expect(fakeAi.capturedUserMessages, hasLength(1));
+  });
+
+  test('skips tool loop on constrained tier and answers directly', () async {
+    final fakeAi = _ScriptedAgenticAiCoachRepository(
+      scriptedTurns: [
+        'TOOL_CALL: {"name":"get_recent_runs","arguments":{"limit":2}}',
+      ],
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        healthRepositoryProvider.overrideWithValue(_FakeHealthRepository()),
+        chatAiCoachRepositoryProvider.overrideWithValue(fakeAi),
+        gemmaInferenceTierProvider.overrideWith(
+          (ref) async => GemmaInferenceTier.constrained,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(coachConversationsProvider.notifier)
+        .ensureActiveConversation();
+    await container.read(coachChatProvider.future);
+
+    await container
+        .read(coachChatProvider.notifier)
+        .sendMessage('How was my last run?');
+
+    final assistant = container.read(coachChatProvider).value!.last;
+    expect(assistant.toolSteps, isNull);
+    expect(assistant.content, isNot(contains('TOOL_CALL')));
+    expect(assistant.hasError, isTrue);
     expect(fakeAi.capturedUserMessages, hasLength(1));
   });
 

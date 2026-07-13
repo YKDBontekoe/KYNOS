@@ -9,8 +9,8 @@ abstract final class GemmaInferenceLimits {
       };
 
   static int maxOutputTokens(GemmaInferenceTier tier) => switch (tier) {
-        GemmaInferenceTier.full => 256,
-        GemmaInferenceTier.constrained => 128,
+        GemmaInferenceTier.full => 384,
+        GemmaInferenceTier.constrained => 192,
         GemmaInferenceTier.disabled => 0,
       };
 

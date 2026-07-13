@@ -3,8 +3,8 @@ import 'dart:isolate';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:kynos/domain/utils/coach_prompt_truncator.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
-import 'package:kynos/domain/utils/gemma_inference_limits.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_messages.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_inference_session.dart';
 import 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart';
@@ -102,19 +102,36 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
         continue;
       }
 
-      final prompt = _truncatePrompt(message.userMessage);
+      final prompt = message.userMessage;
 
       try {
         await chat!.addQueryChunk(
           Message.text(text: prompt, isUser: true),
         );
 
-        await for (final response in chat!.generateChatResponseAsync()) {
-          if (response is TextResponse && response.token.isNotEmpty) {
-            mainSendPort.send(
-              AiIsolateChunk(response.token, requestId: message.requestId),
-            );
-          }
+        final responseText = await _streamChatResponse(
+          chat: chat!,
+          requestId: message.requestId,
+          mainSendPort: mainSendPort,
+        );
+
+        if (coachResponseLooksTruncated(
+          responseText,
+          maxOutputTokens: message.maxOutputTokens,
+        )) {
+          await chat!.addQueryChunk(
+            Message.text(
+              text:
+                  'Continue your previous answer from where you stopped. '
+                  'Finish the thought in one or two short sentences.',
+              isUser: true,
+            ),
+          );
+          await _streamChatResponse(
+            chat: chat!,
+            requestId: message.requestId,
+            mainSendPort: mainSendPort,
+          );
         }
 
         mainSendPort.send(AiIsolateDone(requestId: message.requestId));
@@ -152,9 +169,19 @@ Future<void> aiIsolateEntrypoint(SendPort mainSendPort) async {
   }
 }
 
-String _truncatePrompt(String prompt) {
-  if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
-    return prompt;
+Future<String> _streamChatResponse({
+  required InferenceChat chat,
+  required int requestId,
+  required SendPort mainSendPort,
+}) async {
+  final buffer = StringBuffer();
+  await for (final response in chat.generateChatResponseAsync()) {
+    if (response is TextResponse && response.token.isNotEmpty) {
+      buffer.write(response.token);
+      mainSendPort.send(
+        AiIsolateChunk(response.token, requestId: requestId),
+      );
+    }
   }
-  return prompt.substring(0, GemmaInferenceLimits.maxPromptCharacters);
+  return buffer.toString();
 }

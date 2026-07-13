@@ -363,6 +363,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             controller: _textController,
             focusNode: _focusNode,
             isStreaming: isStreaming,
+            leftInset: LayoutTokens.coachFabLeftClearance,
             onSend: _handleSend,
             onCancel: isStreaming
                 ? () => ref.read(coachChatProvider.notifier).cancelGeneration()
