@@ -111,8 +111,15 @@ void main() {
     expect(find.text('Summary'), findsWidgets);
     expect(find.text('READINESS'), findsOneWidget);
     expect(find.text('Solid readiness. Tempo work fits today.'), findsOneWidget);
-    expect(find.text('THIS WEEK'), findsOneWidget);
     expect(find.text('Ask Coach'), findsWidgets);
+    expect(find.text('KYNOS Coach'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('THIS WEEK'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('THIS WEEK'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Run quality as planned. Start controlled.'),
