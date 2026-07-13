@@ -288,7 +288,6 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/coach_agent_hero_card.dart` | 128 | `CoachAgentHeroCard, _PromptChip` |
 | `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | `CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, …` |
 | `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 88 | `ConnectHealthkitCard` |
-| `lib/features/dashboard/presentation/widgets/daily_quest_teaser.dart` | 129 | `DailyQuestTeaser` |
 | `lib/features/dashboard/presentation/widgets/dashboard_header_sliver.dart` | 109 | `DashboardHeaderSliver` |
 | `lib/features/dashboard/presentation/widgets/gait_teaser_card.dart` | 94 | `GaitTeaserCard` |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | `HealthMetricsGrid` |
@@ -335,7 +334,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/providers/manual_run_provider.dart` | 104 | `ManualRunState, ManualRun` |
 | `lib/features/settings/providers/openrouter_models_provider.dart` | 121 | `OpenRouterCatalogState, OpenRouterCatalog` |
 | `lib/features/settings/providers/settings_provider.dart` | 1 | `Dart module` |
-| `lib/features/training/presentation/pages/training_page.dart` | 579 | `TrainingPage, _TrainingPageState, _SectionAnchor, …` |
+| `lib/features/training/presentation/pages/training_page.dart` | 582 | `TrainingPage, _TrainingPageState, _SectionAnchor, …` |
 | `lib/features/training/presentation/widgets/past_runs_list.dart` | 73 | `PastRunsList` |
 | `lib/features/training/presentation/widgets/training_chip.dart` | 33 | `TrainingChip` |
 | `lib/features/training/presentation/widgets/training_insight_cards.dart` | 133 | `TrainingInsightsCards` |
@@ -451,6 +450,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/charts/health_trend_chart.dart` | 279 | `HealthTrendPoint, HealthTrendChart, _HealthTrendChartState` |
 | `lib/shared/widgets/charts/hrv_chart.dart` | 86 | `HrvChart` |
 | `lib/shared/widgets/charts/load_chart.dart` | 85 | `LoadChart` |
+| `lib/shared/widgets/daily_quest_teaser.dart` | 129 | `DailyQuestTeaser` |
 | `lib/shared/widgets/gait_model_card.dart` | 247 | `GaitModelCard, _CoefficientsRow, GaitModelCardAsync` |
 | `lib/shared/widgets/glass_card.dart` | 43 | `GlassCard` |
 | `lib/shared/widgets/insight_expandable_card.dart` | 221 | `InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, …` |
@@ -468,7 +468,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_section_header.dart` | 21 | `KynosSectionHeader` |
 | `lib/shared/widgets/kynos_section_jump_bar.dart` | 87 | `KynosSectionJumpBar, _JumpChip` |
 | `lib/shared/widgets/kynos_section_row.dart` | 38 | `KynosSectionRow` |
-| `lib/shared/widgets/kynos_segmented_control.dart` | 92 | `KynosSegmentedControl, _Segment` |
+| `lib/shared/widgets/kynos_segmented_control.dart` | 98 | `KynosSegmentedControl, _Segment` |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | `KynosSkeleton` |
 | `lib/shared/widgets/kynos_user_bubble.dart` | 57 | `KynosUserBubble` |
 | `lib/shared/widgets/liquid_glass_button.dart` | 142 | `LiquidGlassButton, LiquidGlassIconButton` |
@@ -477,7 +477,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/nav_icon.dart` | 238 | `NavIconDefinition, NavIconPainter` |
 | `lib/shared/widgets/responsive_center.dart` | 30 | `ResponsiveCenter` |
 | `lib/shared/widgets/run_card.dart` | 113 | `RunCard` |
-| `lib/shared/widgets/widgets.dart` | 29 | `KYNOS shared widgets — barrel export.` |
+| `lib/shared/widgets/widgets.dart` | 30 | `KYNOS shared widgets — barrel export.` |
 
 ## Hot Files (do not grow)
 
@@ -485,7 +485,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 |------|------:|--------|
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 719 | Split if > 250 lines |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 689 | Split if > 250 lines |
-| `lib/features/training/presentation/pages/training_page.dart` | 579 | Split if > 250 lines |
+| `lib/features/training/presentation/pages/training_page.dart` | 582 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 425 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |

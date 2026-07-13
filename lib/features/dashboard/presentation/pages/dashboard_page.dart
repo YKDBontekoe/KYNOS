@@ -15,7 +15,6 @@ import 'package:kynos/features/dashboard/presentation/widgets/character_glance_c
 import 'package:kynos/features/dashboard/presentation/widgets/coach_agent_hero_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/dashboard_header_sliver.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/gait_teaser_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/health_metrics_grid.dart';
@@ -33,6 +32,7 @@ import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/charts/health_trend_chart.dart';
+import 'package:kynos/shared/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_privacy_footer.dart';

@@ -17,7 +17,6 @@ import 'package:kynos/features/character/presentation/widgets/summit_progress_ca
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/wellbeing_quest_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
-import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -27,6 +26,7 @@ import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/health_permission_feedback.dart';
 import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
+import 'package:kynos/shared/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';

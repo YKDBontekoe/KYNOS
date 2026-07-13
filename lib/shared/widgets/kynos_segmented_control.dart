@@ -67,24 +67,30 @@ class _Segment extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.fast,
-        curve: Motion.curve,
-        padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
-        decoration: BoxDecoration(
-          color: selected ? kynos.card : Colors.transparent,
-          borderRadius: BorderRadius.circular(Radius.sm),
-          boxShadow: selected ? kynos.cardShadow : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: selected ? kynos.label : kynos.secondaryLabel,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-              ),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: Motion.fast,
+          curve: Motion.curve,
+          padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
+          decoration: BoxDecoration(
+            color: selected ? kynos.card : Colors.transparent,
+            borderRadius: BorderRadius.circular(Radius.sm),
+            boxShadow: selected ? kynos.cardShadow : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: selected ? kynos.label : kynos.secondaryLabel,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+          ),
         ),
       ),
     );
