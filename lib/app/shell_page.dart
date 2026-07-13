@@ -48,20 +48,26 @@ class ShellPage extends ConsumerWidget {
             ),
           ),
         ),
-        bottomNavigationBar: ResponsiveCenter(
-          child: AnimatedSlide(
-            duration: Motion.fast,
-            curve: Motion.curve,
-            offset: MediaQuery.viewInsetsOf(context).bottom > 0
-                ? const Offset(0, 1.4)
-                : Offset.zero,
-            child: AnimatedOpacity(
+        bottomNavigationBar: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: LayoutTokens.maxContentWidth,
+            ),
+            child: AnimatedSlide(
               duration: Motion.fast,
-              opacity: MediaQuery.viewInsetsOf(context).bottom > 0 ? 0 : 1,
-              child: KynosBottomNav(
-                items: _navItems,
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: _onTabSelected,
+              curve: Motion.curve,
+              offset: MediaQuery.viewInsetsOf(context).bottom > 0
+                  ? const Offset(0, 1.4)
+                  : Offset.zero,
+              child: AnimatedOpacity(
+                duration: Motion.fast,
+                opacity: MediaQuery.viewInsetsOf(context).bottom > 0 ? 0 : 1,
+                child: KynosBottomNav(
+                  items: _navItems,
+                  selectedIndex: navigationShell.currentIndex,
+                  onSelected: _onTabSelected,
+                ),
               ),
             ),
           ),
