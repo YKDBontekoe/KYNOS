@@ -9,13 +9,27 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/shared/widgets/liquid_glass_surface.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 
-/// Configuration for a single destination in [KynosFloatingNav].
+/// Configuration for a single tab destination in [KynosFloatingNav].
 @immutable
 class KynosFloatingNavItem {
   const KynosFloatingNavItem({required this.label, required this.icon});
 
   final String label;
   final NavIconDefinition icon;
+}
+
+/// Secondary action shown below tab destinations when the nav menu expands.
+@immutable
+class KynosFloatingNavAction {
+  const KynosFloatingNavAction({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
 }
 
 /// Draggable bottom-left floating navigation button that expands into tab options.
@@ -25,11 +39,13 @@ class KynosFloatingNav extends StatefulWidget {
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
+    this.actions = const [],
   });
 
   final List<KynosFloatingNavItem> items;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final List<KynosFloatingNavAction> actions;
 
   static const double _fabSize = 52;
   static const double _itemSize = 44;
@@ -80,6 +96,12 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
 
   void _toggleExpanded() => _setExpanded(!_expanded);
 
+  void _handleActionTap(KynosFloatingNavAction action) {
+    HapticFeedback.selectionClick();
+    action.onTap();
+    _setExpanded(false);
+  }
+
   void _handleItemTap(int index) {
     if (index == widget.selectedIndex) {
       _setExpanded(false);
@@ -123,12 +145,13 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
   }
 
   double _stackHeight({required bool expanded}) {
-    if (!expanded || widget.items.isEmpty) return _fabSize;
-    final itemCount = widget.items.length;
+    if (!expanded) return _fabSize;
+    final menuItemCount = widget.items.length + widget.actions.length;
+    if (menuItemCount == 0) return _fabSize;
     return _fabSize +
         tokens.Spacing.xs +
-        (itemCount * _itemSize) +
-        ((itemCount - 1) * tokens.Spacing.xs);
+        (menuItemCount * _itemSize) +
+        ((menuItemCount - 1) * tokens.Spacing.xs);
   }
 
   Offset _clampPosition(
@@ -191,6 +214,7 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
               bottom: clamped.dy,
               child: _FloatingNavControl(
                 items: widget.items,
+                actions: widget.actions,
                 selectedIndex: widget.selectedIndex,
                 expanded: _expanded,
                 expandAnimation: _expandAnimation,
@@ -198,6 +222,7 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
                 unselected: kynos.navUnselected,
                 shadow: kynos.navBarShadow,
                 onItemTap: _handleItemTap,
+                onActionTap: _handleActionTap,
                 onFabTap: _toggleExpanded,
                 onPanStart: _onPanStart,
                 onPanUpdate: (details) => _onPanUpdate(details, parentSize),
@@ -214,6 +239,7 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
 class _FloatingNavControl extends StatelessWidget {
   const _FloatingNavControl({
     required this.items,
+    required this.actions,
     required this.selectedIndex,
     required this.expanded,
     required this.expandAnimation,
@@ -221,6 +247,7 @@ class _FloatingNavControl extends StatelessWidget {
     required this.unselected,
     required this.shadow,
     required this.onItemTap,
+    required this.onActionTap,
     required this.onFabTap,
     required this.onPanStart,
     required this.onPanUpdate,
@@ -228,6 +255,7 @@ class _FloatingNavControl extends StatelessWidget {
   });
 
   final List<KynosFloatingNavItem> items;
+  final List<KynosFloatingNavAction> actions;
   final int selectedIndex;
   final bool expanded;
   final Animation<double> expandAnimation;
@@ -235,6 +263,7 @@ class _FloatingNavControl extends StatelessWidget {
   final Color unselected;
   final List<BoxShadow> shadow;
   final ValueChanged<int> onItemTap;
+  final ValueChanged<KynosFloatingNavAction> onActionTap;
   final VoidCallback onFabTap;
   final GestureDragStartCallback onPanStart;
   final GestureDragUpdateCallback onPanUpdate;
@@ -275,6 +304,15 @@ class _FloatingNavControl extends StatelessWidget {
                       accent: accent,
                       unselected: unselected,
                       onTap: () => onItemTap(i),
+                    ),
+                  ],
+                  for (final action in actions) ...[
+                    if (items.isNotEmpty) const Gap(tokens.Spacing.xs),
+                    _NavActionOption(
+                      label: action.label,
+                      icon: action.icon,
+                      unselected: unselected,
+                      onTap: () => onActionTap(action),
                     ),
                   ],
                   const Gap(tokens.Spacing.xs),
@@ -318,6 +356,50 @@ class _FloatingNavControl extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NavActionOption extends StatelessWidget {
+  const _NavActionOption({
+    required this.label,
+    required this.icon,
+    required this.unselected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color unselected;
+  final VoidCallback onTap;
+
+  static const double _itemSize = KynosFloatingNav._itemSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Tooltip(
+        message: label,
+        waitDuration: const Duration(milliseconds: 400),
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: LiquidGlassSurface(
+            borderRadius: tokens.Radius.lg,
+            blurSigma: LiquidGlassTokens.navBlurSigma,
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              width: _itemSize,
+              height: _itemSize,
+              child: Center(
+                child: Icon(icon, size: 22, color: unselected),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

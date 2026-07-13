@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/constants/hero_tags.dart';
 import 'package:kynos/shared/utils/date_label.dart';
@@ -44,7 +42,7 @@ class DashboardHeaderSliver extends StatelessWidget {
           actions: [
             if (onAskCoach != null)
               Padding(
-                padding: const EdgeInsets.only(right: Spacing.xs),
+                padding: const EdgeInsets.only(right: Spacing.sm),
                 child: LiquidGlassButton(
                   label: 'Ask Coach',
                   icon: Icons.auto_awesome_rounded,
@@ -52,14 +50,6 @@ class DashboardHeaderSliver extends StatelessWidget {
                   onPressed: onAskCoach,
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.only(right: Spacing.sm),
-              child: LiquidGlassIconButton(
-                icon: Icons.settings_outlined,
-                onPressed: () => context.push(Routes.settings),
-                tooltip: 'Settings',
-              ),
-            ),
           ],
         ),
         SliverToBoxAdapter(

@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/shared/widgets/kynos_floating_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 
+void _noop() {}
+
 void main() {
   const items = [
     KynosFloatingNavItem(label: 'Coach', icon: NavIconPaths.coach),
@@ -35,6 +37,14 @@ void main() {
     });
 
     testWidgets('expands options when tapping the fab', (tester) async {
+      const actions = [
+        KynosFloatingNavAction(
+          label: 'Settings',
+          icon: Icons.settings_outlined,
+          onTap: _noop,
+        ),
+      ];
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -42,6 +52,7 @@ void main() {
               items: items,
               selectedIndex: 0,
               onSelected: (_) {},
+              actions: actions,
             ),
           ),
         ),
@@ -52,6 +63,35 @@ void main() {
       expect(find.byTooltip('Coach'), findsOneWidget);
       expect(find.byTooltip('Health'), findsOneWidget);
       expect(find.byTooltip('Journey'), findsOneWidget);
+      expect(find.byTooltip('Settings'), findsOneWidget);
+    });
+
+    testWidgets('calls action when tapping settings', (tester) async {
+      var settingsTapped = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KynosFloatingNav(
+              items: items,
+              selectedIndex: 0,
+              onSelected: (_) {},
+              actions: [
+                KynosFloatingNavAction(
+                  label: 'Settings',
+                  icon: Icons.settings_outlined,
+                  onTap: () => settingsTapped = true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await openMenu(tester);
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pump();
+
+      expect(settingsTapped, isTrue);
     });
 
     testWidgets('calls onSelected when tapping a different item', (tester) async {

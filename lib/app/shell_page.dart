@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
@@ -68,6 +69,13 @@ class ShellPage extends ConsumerWidget {
               items: _navItems,
               selectedIndex: navigationShell.currentIndex,
               onSelected: _onTabSelected,
+              actions: [
+                KynosFloatingNavAction(
+                  label: 'Settings',
+                  icon: Icons.settings_outlined,
+                  onTap: () => context.push(Routes.settings),
+                ),
+              ],
             ),
           ],
         ),

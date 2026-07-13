@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/shared/utils/date_label.dart';
 import 'package:kynos/shared/widgets/liquid_glass_button.dart';
@@ -14,14 +12,12 @@ class KynosPageHeader extends StatelessWidget {
     this.greeting,
     this.subtitle,
     this.onAskCoach,
-    this.showSettings = true,
   });
 
   final String title;
   final String? greeting;
   final String? subtitle;
   final VoidCallback? onAskCoach;
-  final bool showSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +43,11 @@ class KynosPageHeader extends StatelessWidget {
           actions: [
             if (onAskCoach != null)
               Padding(
-                padding: const EdgeInsets.only(right: Spacing.xs),
+                padding: const EdgeInsets.only(right: Spacing.sm),
                 child: LiquidGlassButton(
                   label: 'Ask Coach',
                   icon: Icons.auto_awesome_rounded,
                   onPressed: onAskCoach,
-                ),
-              ),
-            if (showSettings)
-              Padding(
-                padding: const EdgeInsets.only(right: Spacing.sm),
-                child: LiquidGlassIconButton(
-                  icon: Icons.settings_outlined,
-                  onPressed: () => context.push(Routes.settings),
-                  tooltip: 'Settings',
                 ),
               ),
           ],

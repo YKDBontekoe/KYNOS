@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/context_inspector_sheet.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/conversation_list_sheet.dart';
@@ -87,8 +85,6 @@ class CoachChatAppBar extends ConsumerWidget {
                         showFocusRunPickerSheet(context, ref);
                       case 'coach_settings':
                         showInferenceSettingsSheet(context);
-                      case 'settings':
-                        context.push(Routes.settings);
                       case 'export':
                         onExport();
                       case 'delete':
@@ -107,10 +103,6 @@ class CoachChatAppBar extends ConsumerWidget {
                     PopupMenuItem(
                       value: 'coach_settings',
                       child: Text('Coach settings'),
-                    ),
-                    PopupMenuItem(
-                      value: 'settings',
-                      child: Text('App settings'),
                     ),
                     PopupMenuItem(value: 'export', child: Text('Export chat')),
                     PopupMenuItem(
