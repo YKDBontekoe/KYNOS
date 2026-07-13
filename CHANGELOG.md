@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.17.0...v1.18.0) (2026-07-13)
+
+
+### Features
+
+* **coach:** make the AI coach agentic and the app's home-screen core ([#96](https://github.com/YKDBontekoe/KYNOS/issues/96)) ([cce79a5](https://github.com/YKDBontekoe/KYNOS/commit/cce79a592b83009f47bf91c56c86a50159a224be))
+
 # [1.17.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.16.1...v1.17.0) (2026-07-10)
 
 

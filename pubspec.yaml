@@ -3,7 +3,7 @@ description: >
   KYNOS — On-device AI running coach with personalised biomechanics
   and Zero-Knowledge privacy.
 publish_to: none
-version: 1.17.0+101700000
+version: 1.18.0+101800000
 environment:
   sdk: ^3.11.1
 dependencies:
