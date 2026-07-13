@@ -78,6 +78,7 @@ class MessageBubble extends ConsumerWidget {
           hasError: message.hasError,
           attemptedBackend: message.attemptedBackend,
           contextSnapshotIds: message.contextSnapshotIds,
+          toolSteps: message.toolSteps,
           onRetry: message.hasError && message.userPromptForRetry != null
               ? () => ref
                   .read(coachChatProvider.notifier)
