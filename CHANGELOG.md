@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.22.0...v1.23.0) (2026-07-13)
+
+
+### Features
+
+* **coach_chat:** overhaul chat UI and dropdown styling ([#103](https://github.com/YKDBontekoe/KYNOS/issues/103)) ([0b398d1](https://github.com/YKDBontekoe/KYNOS/commit/0b398d11e011b25642c8f2b2ca2c97a2727670a3))
+
 # [1.22.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.21.0...v1.22.0) (2026-07-13)
 
 
