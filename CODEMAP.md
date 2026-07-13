@@ -334,7 +334,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/providers/manual_run_provider.dart` | 104 | `ManualRunState, ManualRun` |
 | `lib/features/settings/providers/openrouter_models_provider.dart` | 121 | `OpenRouterCatalogState, OpenRouterCatalog` |
 | `lib/features/settings/providers/settings_provider.dart` | 1 | `Dart module` |
-| `lib/features/training/presentation/pages/training_page.dart` | 582 | `TrainingPage, _TrainingPageState, _SectionAnchor, …` |
+| `lib/features/training/presentation/pages/training_page.dart` | 581 | `TrainingPage, _TrainingPageState, _SectionAnchor, …` |
 | `lib/features/training/presentation/widgets/past_runs_list.dart` | 73 | `PastRunsList` |
 | `lib/features/training/presentation/widgets/training_chip.dart` | 33 | `TrainingChip` |
 | `lib/features/training/presentation/widgets/training_insight_cards.dart` | 133 | `TrainingInsightsCards` |
@@ -485,7 +485,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 |------|------:|--------|
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 719 | Split if > 250 lines |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 689 | Split if > 250 lines |
-| `lib/features/training/presentation/pages/training_page.dart` | 582 | Split if > 250 lines |
+| `lib/features/training/presentation/pages/training_page.dart` | 581 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 425 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |
