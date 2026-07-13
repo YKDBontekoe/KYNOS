@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.21.0...v1.22.0) (2026-07-13)
+
+
+### Features
+
+* improve on-device coach quality and orbiting shell FAB ([#102](https://github.com/YKDBontekoe/KYNOS/issues/102)) ([f9d4c87](https://github.com/YKDBontekoe/KYNOS/commit/f9d4c87f3a5bc39e4e3926ea75ef1df38364c876))
+
 # [1.21.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.20.0...v1.21.0) (2026-07-13)
 
 
