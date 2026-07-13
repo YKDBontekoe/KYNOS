@@ -14,6 +14,7 @@ import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/coach_context_provider.dart';
 import 'package:kynos/shared/providers/coach_conversation_providers.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
+import 'package:kynos/shared/widgets/kynos_dropdown_field.dart';
 
 void showContextInspectorSheet(BuildContext context) {
   showModalBottomSheet<void>(
@@ -128,16 +129,11 @@ class _ContextInspectorSheetState extends ConsumerState<ContextInspectorSheet> {
                         _toggleSource(settings, snapshot.source, enabled),
                   ),
                 const Gap(Spacing.sm),
-                DropdownButtonFormField<CloudDataLevel>(
-                  key: ValueKey(
-                    settings.contextPreferences.cloudLevelOverride ??
-                        globalSettings.cloudDataLevel,
-                  ),
-                  initialValue: settings.contextPreferences.cloudLevelOverride ??
+                KynosDropdownField<CloudDataLevel>(
+                  value: settings.contextPreferences.cloudLevelOverride ??
                       globalSettings.cloudDataLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'Cloud data level (this chat)',
-                  ),
+                  label: 'Cloud data level (this chat)',
+                  icon: Icons.cloud_outlined,
                   items: CloudDataLevel.values
                       .map(
                         (level) => DropdownMenuItem(

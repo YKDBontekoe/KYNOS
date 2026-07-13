@@ -33,21 +33,36 @@ class KynosUserBubble extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: Spacing.md,
-            vertical: Spacing.sm,
+            vertical: Spacing.sm + 2,
           ),
           decoration: BoxDecoration(
-            color: kynos.stand,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                kynos.stand,
+                Color.lerp(kynos.stand, kynos.purple, 0.22)!,
+              ],
+            ),
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(18),
+              bottomLeft: Radius.circular(18),
               bottomRight: Radius.circular(4),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: kynos.stand.withValues(alpha: 0.28),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: SelectableText(
             text,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: KynosColors.onAccent,
+                  height: 1.48,
                 ),
           ),
         ),

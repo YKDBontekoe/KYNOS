@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/motion.dart';
 
-/// Slide + fade entrance for list items (e.g. chat bubbles).
+/// Slide + fade + scale entrance for list items (e.g. chat bubbles).
 class AnimatedMessageEntrance extends StatefulWidget {
   const AnimatedMessageEntrance({
     super.key,
@@ -24,18 +24,32 @@ class _AnimatedMessageEntranceState extends State<AnimatedMessageEntrance>
   late final AnimationController _controller;
   late final Animation<Offset> _slide;
   late final Animation<double> _fade;
+  late final Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Motion.medium,
+      duration: Motion.slow,
     );
-    final curved = CurvedAnimation(parent: _controller, curve: Motion.curve);
-    final begin = widget.fromRight ? const Offset(0.12, 0) : const Offset(-0.12, 0);
-    _slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(curved);
-    _fade = curved;
+    final slideCurved = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0, 0.85, curve: Curves.easeOutCubic),
+    );
+    final scaleCurved = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    final begin = widget.fromRight
+        ? const Offset(0.08, 0.04)
+        : const Offset(-0.08, 0.04);
+    _slide = Tween<Offset>(begin: begin, end: Offset.zero).animate(slideCurved);
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0, 0.6, curve: Curves.easeOut),
+    );
+    _scale = Tween<double>(begin: 0.94, end: 1).animate(scaleCurved);
 
     if (widget.animate) {
       _controller.forward();
@@ -56,7 +70,13 @@ class _AnimatedMessageEntranceState extends State<AnimatedMessageEntrance>
       opacity: _fade,
       child: SlideTransition(
         position: _slide,
-        child: widget.child,
+        child: ScaleTransition(
+          scale: _scale,
+          alignment: widget.fromRight
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
+          child: widget.child,
+        ),
       ),
     );
   }

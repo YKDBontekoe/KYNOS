@@ -104,7 +104,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/core/constants/gamification_constants.dart` | 46 | `Gameplay tuning for Summit Camp.` |
 | `lib/core/constants/imported_workout_ids.dart` | 10 | `Prefix and helpers for locally imported workout identifiers.` |
 | `lib/core/errors/failures.dart` | 38 | `Base class for all domain-level failures in KYNOS.` |
-| `lib/core/theme/app_theme.dart` | 191 | `AppTheme` |
+| `lib/core/theme/app_theme.dart` | 219 | `AppTheme` |
 | `lib/core/theme/colors.dart` | 82 | `KYNOS colour palette — iOS system colours, Apple Fitness aesthetic.` |
 | `lib/core/theme/elevation.dart` | 33 | `Shadow presets for the KYNOS design system.` |
 | `lib/core/theme/kynos_theme_extension.dart` | 229 | `KynosThemeExtension` |
@@ -251,13 +251,13 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/providers/quest_provider.dart` | 48 | `QuestNotifier` |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 426 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
-| `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 63 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
-| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 192 | `AssistantBubble` |
-| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 84 | `ChatInputBar` |
+| `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
+| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 230 | `ChatInputBar, _ChatInputBarState, _SendButton` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 121 | `CoachChatAppBar` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 163 | `CoachChatAppBar` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
-| `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 233 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
+| `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
 | `lib/features/coach_chat/presentation/widgets/daily_health_brief_card.dart` | 91 | `DailyHealthBriefCard` |
 | `lib/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart` | 118 | `FocusRunPickerSheet` |
@@ -271,7 +271,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
 | `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 46 | `PendingCoachActionCard` |
 | `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | `StreamingTextPulse, _StreamingTextPulseState` |
-| `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 52 | `TypingIndicator, _TypingIndicatorState` |
+| `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 66 | `TypingIndicator, _TypingIndicatorState` |
 | `lib/features/coach_chat/providers/active_coach_conversation_provider.dart` | 23 | `ActiveCoachConversation` |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 736 | `CoachChat, LastAiInferenceBackend` |
 | `lib/features/coach_chat/providers/coach_chat_seed_provider.dart` | 1 | `Dart module` |
@@ -322,9 +322,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/pages/manual_run_page.dart` | 167 | `ManualRunPage, _ManualRunPageState` |
 | `lib/features/settings/presentation/pages/on_device_model_picker_page.dart` | 220 | `OnDeviceModelPickerPage, _OnDeviceModelPickerPageState, _FilterChip` |
 | `lib/features/settings/presentation/pages/openrouter_model_picker_page.dart` | 215 | `OpenRouterModelPickerPage` |
-| `lib/features/settings/presentation/pages/settings_page.dart` | 689 | `SettingsPage, _SettingsPageState, _SwitchTile, …` |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 712 | `SettingsPage, _SettingsPageState, _SwitchTile, …` |
 | `lib/features/settings/presentation/widgets/apple_health_export_preview_card.dart` | 104 | `AppleHealthExportPreviewCard` |
-| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 193 | `CoachPersonalizationCard` |
+| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 196 | `CoachPersonalizationCard` |
 | `lib/features/settings/presentation/widgets/gpx_import_preview_card.dart` | 82 | `GpxImportPreviewCard` |
 | `lib/features/settings/presentation/widgets/health_import_preview_row.dart` | 27 | `HealthImportPreviewRow` |
 | `lib/features/settings/presentation/widgets/health_import_progress_card.dart` | 58 | `HealthImportProgressCard` |
@@ -460,6 +460,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_card.dart` | 57 | `KynosCard` |
 | `lib/shared/widgets/kynos_chip.dart` | 128 | `KynosChip, _MetricChip, _AccentChip` |
 | `lib/shared/widgets/kynos_collapsible_section.dart` | 105 | `KynosCollapsibleSection, _KynosCollapsibleSectionState` |
+| `lib/shared/widgets/kynos_dropdown_field.dart` | 88 | `KynosDropdownField` |
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | `KynosFloatingNavItem, KynosFloatingNavAction, KynosFloatingNav, …` |
 | `lib/shared/widgets/kynos_hero_banner.dart` | 125 | `KynosHeroBanner` |
 | `lib/shared/widgets/kynos_inline_error_card.dart` | 53 | `KynosInlineErrorCard` |
@@ -472,21 +473,21 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_section_row.dart` | 38 | `KynosSectionRow` |
 | `lib/shared/widgets/kynos_segmented_control.dart` | 98 | `KynosSegmentedControl, _Segment` |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | `KynosSkeleton` |
-| `lib/shared/widgets/kynos_user_bubble.dart` | 57 | `KynosUserBubble` |
+| `lib/shared/widgets/kynos_user_bubble.dart` | 72 | `KynosUserBubble` |
 | `lib/shared/widgets/liquid_glass_button.dart` | 142 | `LiquidGlassButton, LiquidGlassIconButton` |
 | `lib/shared/widgets/liquid_glass_surface.dart` | 103 | `LiquidGlassSurface` |
 | `lib/shared/widgets/metric_tile.dart` | 131 | `MetricTile` |
 | `lib/shared/widgets/nav_icon.dart` | 238 | `NavIconDefinition, NavIconPainter` |
 | `lib/shared/widgets/responsive_center.dart` | 30 | `ResponsiveCenter` |
 | `lib/shared/widgets/run_card.dart` | 113 | `RunCard` |
-| `lib/shared/widgets/widgets.dart` | 30 | `KYNOS shared widgets — barrel export.` |
+| `lib/shared/widgets/widgets.dart` | 31 | `KYNOS shared widgets — barrel export.` |
 
 ## Hot Files (do not grow)
 
 | File | Lines | Target |
 |------|------:|--------|
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 736 | Split if > 250 lines |
-| `lib/features/settings/presentation/pages/settings_page.dart` | 689 | Split if > 250 lines |
+| `lib/features/settings/presentation/pages/settings_page.dart` | 712 | Split if > 250 lines |
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | Split if > 250 lines |
 | `lib/features/training/presentation/pages/training_page.dart` | 581 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
@@ -498,14 +499,14 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 357 | Split if > 250 lines |
 | `lib/features/character/presentation/pages/character_page.dart` | 302 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/shared/widgets/charts/health_trend_chart.dart` | 279 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 278 | Split if > 250 lines |
 | `lib/domain/catalog/on_device_model_catalog.dart` | 275 | Split if > 250 lines |
 | `lib/domain/utils/run_route_analytics.dart` | 274 | Split if > 250 lines |
-| `lib/features/character/presentation/widgets/quest_card.dart` | 269 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 386 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 387 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->

@@ -649,14 +649,37 @@ class _DropdownTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
     return ListTile(
-      leading: Icon(icon, color: context.kynosTheme.stand),
+      leading: Icon(icon, color: kynos.stand),
       title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-      trailing: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          items: items,
-          onChanged: onChanged,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: tokens.Spacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: kynos.background,
+          borderRadius: BorderRadius.circular(tokens.Radius.full),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            items: items,
+            onChanged: onChanged,
+            isDense: true,
+            borderRadius: BorderRadius.circular(tokens.Radius.md),
+            dropdownColor: kynos.card,
+            elevation: 6,
+            icon: Icon(
+              Icons.expand_more_rounded,
+              size: 18,
+              color: kynos.secondaryLabel,
+            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: kynos.label,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
       contentPadding: EdgeInsets.zero,

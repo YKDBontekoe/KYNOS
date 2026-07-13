@@ -6,6 +6,7 @@ import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/shared/providers/coach_personalization_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_dropdown_field.dart';
 
 class CoachPersonalizationCard extends ConsumerWidget {
   const CoachPersonalizationCard({super.key});
@@ -73,9 +74,11 @@ class CoachPersonalizationCard extends ConsumerWidget {
                 controller: goal,
                 decoration: const InputDecoration(labelText: 'Primary goal'),
               ),
-              DropdownButtonFormField<String>(
-                initialValue: experience,
-                decoration: const InputDecoration(labelText: 'Experience'),
+              const Gap(tokens.Spacing.sm),
+              KynosDropdownField<String>(
+                value: experience,
+                label: 'Experience',
+                icon: Icons.trending_up_rounded,
                 items: const [
                   DropdownMenuItem(value: 'beginner', child: Text('Beginner')),
                   DropdownMenuItem(
