@@ -27,13 +27,11 @@ class _GlassSuggestionChipState extends State<GlassSuggestionChip>
   @override
   void initState() {
     super.initState();
-    _pressController = AnimationController(
-      vsync: this,
-      duration: Motion.fast,
-    );
-    _scale = Tween<double>(begin: 1, end: 0.97).animate(
-      CurvedAnimation(parent: _pressController, curve: Motion.curve),
-    );
+    _pressController = AnimationController(vsync: this, duration: Motion.fast);
+    _scale = Tween<double>(
+      begin: 1,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _pressController, curve: Motion.curve));
   }
 
   @override
@@ -70,14 +68,16 @@ class _GlassSuggestionChipState extends State<GlassSuggestionChip>
             child: LiquidGlassSurface(
               borderRadius: tokens.Radius.full,
               padding: const EdgeInsets.symmetric(
-                horizontal: tokens.Spacing.lg,
-                vertical: tokens.Spacing.md,
+                horizontal: tokens.Spacing.md,
+                vertical: tokens.Spacing.sm,
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   widget.label,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
             ),

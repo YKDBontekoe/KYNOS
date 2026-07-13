@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart';
 
@@ -17,28 +16,19 @@ class FollowUpChips extends StatelessWidget {
   Widget build(BuildContext context) {
     if (suggestions.isEmpty) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Follow up',
-            style: Theme.of(context).textTheme.labelMedium,
+    return SizedBox(
+      height: 48,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+        scrollDirection: Axis.horizontal,
+        itemCount: suggestions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: Spacing.sm),
+        itemBuilder: (context, index) => Center(
+          child: GlassSuggestionChip(
+            label: suggestions[index],
+            onTap: () => onTap(suggestions[index]),
           ),
-          const Gap(Spacing.sm),
-          Wrap(
-            spacing: Spacing.sm,
-            runSpacing: Spacing.sm,
-            children: [
-              for (final suggestion in suggestions)
-                GlassSuggestionChip(
-                  label: suggestion,
-                  onTap: () => onTap(suggestion),
-                ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

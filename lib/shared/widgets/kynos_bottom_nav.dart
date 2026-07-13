@@ -13,10 +13,7 @@ import 'package:kynos/shared/widgets/nav_icon.dart';
 /// Configuration for a single tab in [KynosBottomNav].
 @immutable
 class KynosBottomNavItem {
-  const KynosBottomNavItem({
-    required this.label,
-    required this.icon,
-  });
+  const KynosBottomNavItem({required this.label, required this.icon});
 
   final String label;
   final NavIconDefinition icon;
@@ -71,15 +68,14 @@ class KynosBottomNav extends StatelessWidget {
                   vertical: tokens.Spacing.xs,
                 ),
                 child: SizedBox(
-                  height: 60,
+                  height: 56,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       AnimatedAlign(
                         duration: Motion.navIndicator,
                         curve: Motion.curve,
-                        alignment:
-                            _alignmentFor(selectedIndex, items.length),
+                        alignment: _alignmentFor(selectedIndex, items.length),
                         child: FractionallySizedBox(
                           widthFactor: 1 / items.length,
                           child: Padding(
@@ -91,8 +87,8 @@ class KynosBottomNav extends StatelessWidget {
                               blurSigma: LiquidGlassTokens.indicatorBlurSigma,
                               padding: EdgeInsets.zero,
                               applyVibrancy: false,
-                              tintColor: kynos.stand.withValues(alpha: 0.14),
-                              child: const SizedBox(height: 44),
+                              tintColor: kynos.purple.withValues(alpha: 0.15),
+                              child: const SizedBox(height: 42),
                             ),
                           ),
                         ),
@@ -138,7 +134,7 @@ class _NavBarItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    final color = selected ? kynos.stand : kynos.navUnselected;
+    final color = selected ? kynos.purple : kynos.navUnselected;
 
     return Semantics(
       button: true,
@@ -151,7 +147,7 @@ class _NavBarItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedScale(
-              scale: selected ? 1.05 : 1.0,
+              scale: selected ? 1.08 : 1.0,
               duration: Motion.navItem,
               curve: Motion.curve,
               child: SizedBox(
@@ -178,10 +174,7 @@ class _NavBarItem extends StatelessWidget {
             AnimatedDefaultTextStyle(
               duration: Motion.navItem,
               curve: Motion.curve,
-              style: KynosTypography.navLabel(
-                selected: selected,
-                color: color,
-              ),
+              style: KynosTypography.navLabel(selected: selected, color: color),
               child: Text(label),
             ),
           ],

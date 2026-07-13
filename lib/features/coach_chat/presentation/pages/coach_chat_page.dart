@@ -15,7 +15,6 @@ import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.da
 import 'package:kynos/features/coach_chat/presentation/widgets/cloud_consent_banner.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/follow_up_chips.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/inference_mode_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/model_setup_screen.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
@@ -179,15 +178,30 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
           .read(coachConversationsProvider.notifier)
           .deleteConversation(conversation.id);
     }
-    await ref.read(coachConversationsProvider.notifier).ensureActiveConversation();
+    await ref
+        .read(coachConversationsProvider.notifier)
+        .ensureActiveConversation();
     ref.invalidate(coachChatProvider);
     ref.invalidate(activeCoachConversationProvider);
+  }
+
+  Future<void> _createNewChat() async {
+    final id = await ref
+        .read(coachConversationsProvider.notifier)
+        .createConversation();
+    if (id == null) return;
+    ref.invalidate(coachChatProvider);
+    ref.invalidate(activeCoachConversationProvider);
+    _textController.clear();
+    _focusNode.requestFocus();
   }
 
   Future<void> _exportThread() async {
     final conversation = ref.read(activeCoachConversationProvider).value;
     if (conversation == null) return;
-    final text = ref.read(exportCoachConversationUseCaseProvider).call(conversation);
+    final text = ref
+        .read(exportCoachConversationUseCaseProvider)
+        .call(conversation);
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -219,21 +233,25 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final setupState = ref.watch(modelSetupProvider);
 
     return setupState.when(
-      loading: () => ModelSetupScreen.checking(),
+      loading: () => ModelSetupScreen.checking(showClose: false),
       error: (e, _) {
         final missingToken = e is MissingHuggingFaceTokenException;
         return ModelSetupScreen.error(
           message: _setupErrorMessage(e),
-          onRetry: () => ref.read(modelSetupProvider.notifier).checkAndInstall(),
-          onSecondaryAction:
-              missingToken ? () => context.push(Routes.settings) : null,
+          onRetry: () =>
+              ref.read(modelSetupProvider.notifier).checkAndInstall(),
+          onSecondaryAction: missingToken
+              ? () => context.push(Routes.settings)
+              : null,
           secondaryActionLabel: missingToken ? 'Open Settings' : null,
+          showClose: false,
         );
       },
       data: (setup) {
         if (!setup.isReady) {
           return ModelSetupScreen.checking(
             progressMessage: setup.progressMessage,
+            showClose: false,
           );
         }
         WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
@@ -260,6 +278,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             CoachChatAppBar(
               onDeleteThread: _confirmDeleteThread,
               onExport: _exportThread,
+              onNewChat: _createNewChat,
             ),
             Expanded(
               child: Center(
@@ -295,19 +314,22 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
     final messages = chatState.value ?? const [];
     final isStreaming = ref.watch(
-      coachChatProvider.select((s) => s.value?.any((m) => m.isStreaming) ?? false),
+      coachChatProvider.select(
+        (s) => s.value?.any((m) => m.isStreaming) ?? false,
+      ),
     );
 
     final followUps = !isStreaming && messages.isNotEmpty
         ? CoachFollowUpSuggestions.forContext(
             enabledSources:
                 conversation?.settings.contextPreferences.enabledSources ??
-                    CoachDataSource.all.toSet(),
+                CoachDataSource.all.toSet(),
             topic: conversation?.seed?.topic ?? CoachSeedTopic.general,
           )
         : const <String>[];
 
-    final enabledLabels = conversation?.settings.contextPreferences.enabledSources
+    final enabledLabels =
+        conversation?.settings.contextPreferences.enabledSources
             .map((s) => s.label)
             .toList() ??
         const <String>[];
@@ -320,8 +342,8 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
           CoachChatAppBar(
             onDeleteThread: _confirmDeleteThread,
             onExport: _exportThread,
+            onNewChat: _createNewChat,
           ),
-          const InferenceModeBar(),
           if (_showCloudConsent)
             CloudConsentBanner(
               enabledSourceLabels: enabledLabels,

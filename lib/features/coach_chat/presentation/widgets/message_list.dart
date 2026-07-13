@@ -68,36 +68,36 @@ class MessageBubble extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cloudConfigured = ref.watch(isCloudCoachConfiguredProvider).value ?? false;
+    final cloudConfigured =
+        ref.watch(isCloudCoachConfiguredProvider).value ?? false;
 
     return switch (message.role) {
       MessageRole.user => KynosUserBubble(text: message.content),
       MessageRole.assistant => AssistantBubble(
-          content: message.content,
-          isStreaming: message.isStreaming,
-          hasError: message.hasError,
-          attemptedBackend: message.attemptedBackend,
-          contextSnapshotIds: message.contextSnapshotIds,
-          toolSteps: message.toolSteps,
-          onRetry: message.hasError && message.userPromptForRetry != null
-              ? () => ref
-                  .read(coachChatProvider.notifier)
-                  .retryMessage(message.id)
-              : null,
-          onTryAlternateBackend: _alternateBackendAction(
-            ref: ref,
-            message: message,
-            cloudConfigured: cloudConfigured,
-          ),
-          alternateBackendLabel: _alternateBackendLabel(
-            message: message,
-            cloudConfigured: cloudConfigured,
-          ),
-          alternateBackend: _alternateBackend(
-            message: message,
-            cloudConfigured: cloudConfigured,
-          ),
+        content: message.content,
+        isStreaming: message.isStreaming,
+        hasError: message.hasError,
+        attemptedBackend: message.attemptedBackend,
+        contextSnapshotIds: message.contextSnapshotIds,
+        toolSteps: message.toolSteps,
+        onRetry: message.hasError && message.userPromptForRetry != null
+            ? () =>
+                  ref.read(coachChatProvider.notifier).retryMessage(message.id)
+            : null,
+        onTryAlternateBackend: _alternateBackendAction(
+          ref: ref,
+          message: message,
+          cloudConfigured: cloudConfigured,
         ),
+        alternateBackendLabel: _alternateBackendLabel(
+          message: message,
+          cloudConfigured: cloudConfigured,
+        ),
+        alternateBackend: _alternateBackend(
+          message: message,
+          cloudConfigured: cloudConfigured,
+        ),
+      ),
     };
   }
 
@@ -109,14 +109,15 @@ class MessageBubble extends ConsumerWidget {
     if (!message.hasError || message.userPromptForRetry == null) return null;
 
     final alternate = switch (message.attemptedBackend) {
-      AiInferenceBackend.onDevice ||
-      AiInferenceBackend.rulesOnly when cloudConfigured =>
+      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly
+          when cloudConfigured =>
         () => ref
             .read(coachChatProvider.notifier)
             .retryWithAlternateBackend(message.id),
-      AiInferenceBackend.openRouter => () => ref
-          .read(coachChatProvider.notifier)
-          .retryWithAlternateBackend(message.id),
+      AiInferenceBackend.openRouter =>
+        () => ref
+            .read(coachChatProvider.notifier)
+            .retryWithAlternateBackend(message.id),
       _ => null,
     };
     return alternate;
@@ -129,8 +130,7 @@ class MessageBubble extends ConsumerWidget {
     if (!message.hasError) return null;
     return switch (message.attemptedBackend) {
       AiInferenceBackend.onDevice ||
-      AiInferenceBackend.rulesOnly when cloudConfigured =>
-        'Try cloud coach',
+      AiInferenceBackend.rulesOnly when cloudConfigured => 'Try cloud coach',
       AiInferenceBackend.openRouter => 'Try on-device',
       _ => null,
     };
@@ -142,8 +142,8 @@ class MessageBubble extends ConsumerWidget {
   }) {
     if (!message.hasError) return null;
     return switch (message.attemptedBackend) {
-      AiInferenceBackend.onDevice ||
-      AiInferenceBackend.rulesOnly when cloudConfigured =>
+      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly
+          when cloudConfigured =>
         AiInferenceBackend.openRouter,
       AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
       _ => null,
@@ -158,46 +158,55 @@ class CoachChatEmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cloudConfigured =
-        ref.watch(isCloudCoachConfiguredProvider).value ?? false;
-    final subtitle = cloudConfigured
-        ? 'Ask about training or recovery.\nOn-device or cloud coach when configured.'
-        : 'Ask about training or recovery.\nRuns on-device when a model is installed.';
-
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.xl),
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 48,
-              color: context.kynosTheme.stand,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: context.kynosTheme.purple.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(Radius.lg),
+              ),
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                color: context.kynosTheme.purple,
+              ),
             ),
             const Gap(Spacing.md),
             Text(
-              'Your AI Coach',
+              'What can I help you with?',
               style: Theme.of(context).textTheme.displaySmall,
             ),
             const Gap(Spacing.sm),
             Text(
-              subtitle,
+              'Ask about your recovery, recent runs, or what to do next.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Gap(Spacing.lg),
-            for (final suggestion in [
-              'How is my recovery?',
-              'Am I ready for a workout?',
-            ])
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
-                child: GlassSuggestionChip(
-                  label: suggestion,
-                  onTap: () => onSuggestionTap(suggestion),
-                ),
-              ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: Spacing.sm,
+              runSpacing: Spacing.sm,
+              children:
+                  [
+                        'How is my recovery?',
+                        'What should I train today?',
+                        'How was my last run?',
+                        'Help me plan this week',
+                      ]
+                      .map(
+                        (suggestion) => GlassSuggestionChip(
+                          label: suggestion,
+                          onTap: () => onSuggestionTap(suggestion),
+                        ),
+                      )
+                      .toList(),
+            ),
           ],
         ),
       ),

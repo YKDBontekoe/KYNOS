@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:kynos/app/router.dart';
-import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dart';
 
 /// Exposes shell branch switching to descendant tab routes.
 class ShellNavigationScope extends InheritedWidget {
@@ -22,20 +20,14 @@ class ShellNavigationScope extends InheritedWidget {
       goToBranch != oldWidget.goToBranch;
 }
 
-/// Today tab — uses shell branch navigation to preserve nested stacks.
-class DashboardTab extends StatelessWidget {
-  const DashboardTab({super.key});
+/// Coach home tab — uses shell navigation to preserve the other tab stacks.
+class CoachTab extends StatelessWidget {
+  const CoachTab({super.key, this.threadId});
+
+  final String? threadId;
 
   @override
   Widget build(BuildContext context) {
-    final shell = ShellNavigationScope.maybeOf(context);
-    return DashboardPage(
-      onViewTraining: shell != null
-          ? () => shell.goToBranch(1)
-          : () => context.go(Routes.training),
-      onViewCharacter: shell != null
-          ? () => shell.goToBranch(2)
-          : () => context.go(Routes.character),
-    );
+    return CoachChatPage(threadId: threadId);
   }
 }

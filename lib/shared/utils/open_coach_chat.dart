@@ -16,8 +16,12 @@ void openCoachChat(
   String? questId,
   String? threadId,
 }) {
-  if (seed != null && seed.trim().isNotEmpty || runId != null || questId != null) {
-    ref.read(coachChatSeedProvider.notifier).setSeed(
+  if (seed != null && seed.trim().isNotEmpty ||
+      runId != null ||
+      questId != null) {
+    ref
+        .read(coachChatSeedProvider.notifier)
+        .setSeed(
           CoachChatSeedData(
             message: seed?.trim(),
             topic: topic,
@@ -27,7 +31,7 @@ void openCoachChat(
         );
   }
   final path = threadId == null
-      ? Routes.coachChat
-      : '${Routes.coachChat}?threadId=$threadId';
-  context.push(path);
+      ? Routes.dashboard
+      : '${Routes.dashboard}?threadId=$threadId';
+  context.go(path);
 }
