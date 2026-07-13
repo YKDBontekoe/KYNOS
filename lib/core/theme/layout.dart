@@ -3,17 +3,23 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 
 /// Layout constants for consistent page structure.
 abstract final class LayoutTokens {
-  /// Fixed height of the floating shell nav bar (excludes device safe-area).
-  static const double shellNavBarHeight =
-      tokens.Spacing.md + tokens.Spacing.xs + tokens.Spacing.xs * 2 + 56;
+  /// Width of the left-edge shell navigation rail.
+  static const double shellRailWidth = 56;
 
-  /// Total bottom inset required to clear the floating shell nav bar.
-  static double shellNavExtent(BuildContext context) =>
-      shellNavBarHeight + MediaQuery.viewPaddingOf(context).bottom;
+  /// @deprecated Use [shellRailWidth]. Kept for legacy bottom-nav references.
+  static const double shellNavBarHeight = shellRailWidth;
 
-  /// Bottom scroll padding to clear the floating shell nav bar.
-  static const double shellBottomPadding =
-      tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.lg;
+  /// Total bottom inset — rail layout no longer reserves bottom chrome.
+  static double shellNavExtent(BuildContext context) => 0;
+
+  /// Bottom scroll padding for tab content (safe-area aware).
+  static double shellBottomPadding(BuildContext context) =>
+      tokens.Spacing.xxxl +
+      MediaQuery.viewPaddingOf(context).bottom;
+
+  /// @deprecated Prefer [shellBottomPadding] with context for safe-area.
+  static const double shellBottomPaddingLegacy =
+      tokens.Spacing.xxxl + tokens.Spacing.lg;
 
   static const double heroBannerHeight =
       tokens.Spacing.xxxl * 2 + tokens.Spacing.sm - tokens.Spacing.xs;
@@ -34,6 +40,10 @@ abstract final class LayoutTokens {
     bottom: tokens.Spacing.md + tokens.Spacing.xs,
     left: tokens.Spacing.md,
     right: tokens.Spacing.md,
+  );
+
+  static const EdgeInsets shellRailPadding = EdgeInsets.only(
+    left: tokens.Spacing.xs,
   );
 
   static const EdgeInsets settingsSectionPadding = EdgeInsets.fromLTRB(

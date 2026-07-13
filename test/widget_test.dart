@@ -73,8 +73,8 @@ void main() {
     expect(tester.getSize(find.byType(EditableText)).height, greaterThan(20));
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
-    expect(find.text('Coach'), findsOneWidget);
-    expect(find.text('Health'), findsOneWidget);
-    expect(find.text('Journey'), findsOneWidget);
+    expect(find.byTooltip('Coach'), findsOneWidget);
+    expect(find.byTooltip('Health'), findsOneWidget);
+    expect(find.byTooltip('Journey'), findsOneWidget);
   });
 }

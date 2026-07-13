@@ -17,6 +17,7 @@ import 'package:kynos/features/character/presentation/widgets/summit_progress_ca
 import 'package:kynos/features/character/presentation/widgets/titles_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/wellbeing_quest_panel.dart';
 import 'package:kynos/features/character/presentation/widgets/xp_bar.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/providers/camp_providers.dart';
 import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -108,11 +109,11 @@ class CharacterPage extends ConsumerWidget {
                 return const SliverFillRemaining(child: EmptyCharacterState());
               }
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   tokens.Spacing.md,
                   0,
                   tokens.Spacing.md,
-                  LayoutTokens.shellBottomPadding,
+                  LayoutTokens.shellBottomPadding(context),
                 ),
                 sliver: SliverList.list(
                   children: [
@@ -161,6 +162,10 @@ class CharacterPage extends ConsumerWidget {
                     ),
                     const Gap(tokens.Spacing.md),
                     XpBar(character: character),
+                    const Gap(tokens.Spacing.lg),
+                    const KynosSectionHeader(title: 'DAILY QUEST'),
+                    const Gap(tokens.Spacing.sm),
+                    DailyQuestTeaser(questsAsync: questsAsync),
                     const Gap(tokens.Spacing.lg),
                     const KynosSectionHeader(title: 'STATS'),
                     const Gap(tokens.Spacing.sm),

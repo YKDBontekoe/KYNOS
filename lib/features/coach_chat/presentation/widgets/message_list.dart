@@ -7,12 +7,15 @@ import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
+import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
+import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
@@ -168,7 +171,9 @@ class CoachChatEmptyState extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final brief = ref.watch(dailyHealthBriefProvider);
+    final summary = ref.watch(healthSummaryProvider);
     final coachData = ref.watch(healthCoachDataProvider).value;
+    final kynos = context.kynosTheme;
     final now = DateTime.now();
     final todayCheckIn = coachData?.checkIns
         .where(
@@ -178,6 +183,11 @@ class CoachChatEmptyState extends ConsumerWidget {
               item.date.day == now.day,
         )
         .firstOrNull;
+    final readiness = readinessScore(summary.value);
+    final readinessLine = readiness > 0
+        ? readinessSummaryBrief(readiness).split('.').first
+        : null;
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
@@ -186,6 +196,13 @@ class CoachChatEmptyState extends ConsumerWidget {
         LayoutTokens.chatInputClearance,
       ),
       children: [
+        if (readinessLine != null) ...[
+          KynosChip.accent(
+            label: readinessLine,
+            color: kynos.purple,
+          ),
+          const Gap(Spacing.sm),
+        ],
         brief.when(
           loading: () =>
               const KynosLoadingLine(label: 'Building your health brief…'),
@@ -217,55 +234,34 @@ class CoachChatEmptyState extends ConsumerWidget {
           ),
         ),
         const Gap(Spacing.xl),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
-          child: Column(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: context.kynosTheme.purple.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(Radius.lg),
+        Text(
+          'What would you like to understand?',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const Gap(Spacing.xs),
+        Text(
+          'Ask about patterns, trends, or what to do next.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: kynos.secondaryLabel,
+              ),
+        ),
+        const Gap(Spacing.lg),
+        Wrap(
+          spacing: Spacing.sm,
+          runSpacing: Spacing.sm,
+          children: [
+            'Why has my energy changed?',
+            'Show my sleep trend',
+            'Compare this week with last week',
+            'What should I do today?',
+          ]
+              .map(
+                (suggestion) => GlassSuggestionChip(
+                  label: suggestion,
+                  onTap: () => onSuggestionTap(suggestion),
                 ),
-                child: Icon(
-                  Icons.auto_awesome_rounded,
-                  color: context.kynosTheme.purple,
-                ),
-              ),
-              const Gap(Spacing.md),
-              Text(
-                'What would you like to understand?',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const Gap(Spacing.sm),
-              Text(
-                'KYNOS can investigate patterns, build local visualisations, and explain uncertainty.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const Gap(Spacing.lg),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: Spacing.sm,
-                runSpacing: Spacing.sm,
-                children:
-                    [
-                          'Why has my energy changed?',
-                          'Show my sleep trend',
-                          'Compare this week with last week',
-                          'What seems to help my wellbeing?',
-                        ]
-                        .map(
-                          (suggestion) => GlassSuggestionChip(
-                            label: suggestion,
-                            onTap: () => onSuggestionTap(suggestion),
-                          ),
-                        )
-                        .toList(),
-              ),
-            ],
-          ),
+              )
+              .toList(),
         ),
       ],
     );

@@ -234,11 +234,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             onAskCoach: () => _openCoachChat(),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               tokens.Spacing.md,
               tokens.Spacing.lg,
               tokens.Spacing.md,
-              LayoutTokens.shellBottomPadding,
+              LayoutTokens.shellBottomPadding(context),
             ),
             sliver: SliverList.list(
               children: [
