@@ -52,10 +52,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 - **Entry:** [`lib/features/onboarding/presentation/onboarding_page.dart`](lib/features/onboarding/presentation/onboarding_page.dart)
 - **Route:** `/onboarding`
 
-### coach_chat (orphan — not routed)
+### coach_chat (the AI coach — core surface)
 - **Entry:** [`lib/features/coach_chat/presentation/pages/coach_chat_page.dart`](lib/features/coach_chat/presentation/pages/coach_chat_page.dart)
-- **Providers:** [`lib/features/coach_chat/providers/`](lib/features/coach_chat/providers/)
+- **Providers:** [`lib/features/coach_chat/providers/`](lib/features/coach_chat/providers/) — `coach_chat_provider.dart` runs the agentic ReAct tool-calling loop
+- **Routes:** `/coach` (modal push from the FAB, dashboard hero card, and insight cards)
 - **AI DI:** [`lib/shared/providers/ai_repository_providers.dart`](lib/shared/providers/ai_repository_providers.dart)
+- **Agentic tools:** [`lib/domain/entities/coach/coach_tool_definition.dart`](lib/domain/entities/coach/coach_tool_definition.dart) (catalog), [`lib/domain/usecases/coach/execute_coach_tool_usecase.dart`](lib/domain/usecases/coach/execute_coach_tool_usecase.dart) (execution), [`lib/domain/utils/coach_tool_call_parser.dart`](lib/domain/utils/coach_tool_call_parser.dart) (parsing)
 
 ### nexus_lab (orphan — embedded in Training tab, not routed)
 - **Entry:** [`lib/features/nexus_lab/presentation/nexus_lab_page.dart`](lib/features/nexus_lab/presentation/nexus_lab_page.dart)
@@ -76,6 +78,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | Nav icons | [`lib/shared/widgets/nav_icon.dart`](lib/shared/widgets/nav_icon.dart) |
 | Health providers | [`lib/shared/providers/health_providers.dart`](lib/shared/providers/health_providers.dart) |
 | AI repositories | [`lib/shared/providers/ai_repository_providers.dart`](lib/shared/providers/ai_repository_providers.dart) |
+| Coach agent tools | [`lib/domain/entities/coach/coach_tool_definition.dart`](lib/domain/entities/coach/coach_tool_definition.dart) |
 | Router constants | [`lib/app/router.dart`](lib/app/router.dart) → `Routes` |
 
 ## Dependency Rules (agents)
@@ -115,7 +118,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/entities/ai_inference_backend.dart` | 6 | Where the last coach inference ran. |
 | `lib/domain/entities/ai_task_kind.dart` | 9 | Classification for hybrid local/cloud AI routing. |
 | `lib/domain/entities/athlete_profile.dart` | 55 | AthleteProfile |
-| `lib/domain/entities/chat_message.dart` | 100 | ChatMessage |
+| `lib/domain/entities/chat_message.dart` | 110 | ChatMessage |
 | `lib/domain/entities/cloud_data_level.dart` | 9 | How much health context may be included in OpenRouter prompts. |
 | `lib/domain/entities/coach/athlete_coach_profile.dart` | 53 | AthleteCoachProfile |
 | `lib/domain/entities/coach/coach_backend_mode.dart` | 9 | Per-conversation inference routing preference. |
@@ -128,6 +131,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/entities/coach/coach_data_source.dart` | 18 | Data sections that may be included in coach prompts. |
 | `lib/domain/entities/coach/coach_data_source_snapshot.dart` | 18 | CoachDataSourceSnapshot |
 | `lib/domain/entities/coach/coach_seed_topic.dart` | 13 | Entry-point hint for tailoring coach context and seed prompts. |
+| `lib/domain/entities/coach/coach_tool_call.dart` | 90 | CoachToolCall, CoachToolResult, CoachToolStep |
+| `lib/domain/entities/coach/coach_tool_definition.dart` | 95 | CoachToolDefinition |
 | `lib/domain/entities/coach/daily_coach_brief.dart` | 21 | DailyCoachBrief |
 | `lib/domain/entities/coach/morning_check_in.dart` | 30 | MorningCheckIn |
 | `lib/domain/entities/dashboard/dashboard_summary.dart` | 60 | DashboardSummary |
@@ -162,9 +167,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/repositories/openrouter_models_repository.dart` | 12 | Contract for fetching the OpenRouter model catalog. |
 | `lib/domain/usecases/coach/build_coach_context_usecase.dart` | 85 | BuildCoachContextUseCase |
 | `lib/domain/usecases/coach/build_daily_coach_brief_usecase.dart` | 64 | BuildDailyCoachBriefUseCase |
+| `lib/domain/usecases/coach/coach_tool_context_queries.dart` | 138 | CoachToolContextQueries |
+| `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 182 | CoachToolHealthQueries |
 | `lib/domain/usecases/coach/create_coach_conversation_usecase.dart` | 35 | CreateCoachConversationUseCase |
 | `lib/domain/usecases/coach/delete_coach_conversation_usecase.dart` | 17 | DeleteCoachConversationUseCase |
 | `lib/domain/usecases/coach/describe_coach_context_usecase.dart` | 82 | DescribeCoachContextUseCase |
+| `lib/domain/usecases/coach/execute_coach_tool_usecase.dart` | 61 | ExecuteCoachToolUseCase |
 | `lib/domain/usecases/coach/export_coach_conversation_usecase.dart` | 33 | ExportCoachConversationUseCase |
 | `lib/domain/usecases/coach/filter_coach_context_usecase.dart` | 75 | FilterCoachContextUseCase |
 | `lib/domain/usecases/coach/get_coach_conversation_usecase.dart` | 20 | GetCoachConversationUseCase |
@@ -198,6 +206,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/coach_context_formatter.dart` | 178 | Formats [CoachContext] into a privacy-safe LLM prompt block. |
 | `lib/domain/utils/coach_fallback_reply.dart` | 28 | Deterministic coach reply when on-device Gemma is unavailable. |
 | `lib/domain/utils/coach_follow_up_suggestions.dart` | 34 | Deterministic follow-up suggestions after a coach reply. |
+| `lib/domain/utils/coach_tool_call_parser.dart` | 98 | Parses ReAct-style `TOOL_CALL: {...}` directives from coach model output. |
+| `lib/domain/utils/coach_tool_result_helpers.dart` | 61 | Shared argument coercion and result-factory helpers for coach tool |
 | `lib/domain/utils/gemma_device_capability.dart` | 62 | On-device Gemma inference tier based on device resources. |
 | `lib/domain/utils/gemma_inference_limits.dart` | 19 | Token budgets keyed by on-device Gemma inference tier. |
 | `lib/domain/utils/geo_distance.dart` | 40 | Haversine distance between two WGS-84 coordinates in meters. |
@@ -229,8 +239,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/providers/character_provider.dart` | 1 | Dart module |
 | `lib/features/character/providers/quest_provider.dart` | 48 | QuestNotifier |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 358 | CoachChatPage, _CoachChatPageState |
+| `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | AgentToolStepList, _AgentToolStepRow |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 63 | AnimatedMessageEntrance, _AnimatedMessageEntranceState |
-| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 122 | AssistantBubble |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 128 | AssistantBubble |
 | `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 64 | ChatInputBar |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | CloudConsentBanner |
 | `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 163 | CoachChatAppBar, _InferenceBadge |
@@ -242,24 +253,25 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | GlassSuggestionChip, _GlassSuggestionChipState |
 | `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 94 | InferenceModeBar |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | InferenceSettingsSheet |
-| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 205 | MessageList, _MessageListState, MessageBubble, … |
+| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 206 | MessageList, _MessageListState, MessageBubble, … |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 107 | ModelSetupScreen |
 | `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | StreamingTextPulse, _StreamingTextPulseState |
 | `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 52 | TypingIndicator, _TypingIndicatorState |
 | `lib/features/coach_chat/providers/active_coach_conversation_provider.dart` | 23 | ActiveCoachConversation |
-| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 431 | CoachChat, LastAiInferenceBackend |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 583 | CoachChat, LastAiInferenceBackend |
 | `lib/features/coach_chat/providers/coach_chat_seed_provider.dart` | 1 | Dart module |
 | `lib/features/coach_chat/providers/coach_conversations_provider.dart` | 116 | ActiveCoachConversationId, CoachConversations |
 | `lib/features/coach_chat/providers/last_coach_context_provider.dart` | 13 | LastCoachContext |
 | `lib/features/coach_chat/providers/model_setup_provider.dart` | 2 | Dart module |
 | `lib/features/coach_chat/providers/model_setup_state.dart` | 1 | Dart module |
 | `lib/features/coach_chat/utils/chat_history_codec.dart` | 85 | Serialises coach chat history to SharedPreferences JSON. |
-| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 386 | DashboardPage, _DashboardPageState |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | DashboardPage, _DashboardPageState |
 | `lib/features/dashboard/presentation/pages/run_history_page.dart` | 138 | RunHistoryPage |
 | `lib/features/dashboard/presentation/pages/run_route_missing_page.dart` | 53 | RunRouteMissingPage |
 | `lib/features/dashboard/presentation/pages/run_route_page.dart` | 183 | RunRoutePage, _RunRouteScaffold, _RouteContent |
 | `lib/features/dashboard/presentation/widgets/activity_ring.dart` | 214 | ActivityRing, AnimatedActivityRing, _AnimatedActivityRingState, … |
 | `lib/features/dashboard/presentation/widgets/character_glance_card.dart` | 116 | CharacterGlanceCard |
+| `lib/features/dashboard/presentation/widgets/coach_agent_hero_card.dart` | 128 | CoachAgentHeroCard, _PromptChip |
 | `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, … |
 | `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 88 | ConnectHealthkitCard |
 | `lib/features/dashboard/presentation/widgets/daily_quest_teaser.dart` | 129 | DailyQuestTeaser |
@@ -327,20 +339,20 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/gemma/ai_regression_math.dart` | 99 | Fits multivariate regression coefficients for stride length prediction. |
 | `lib/infrastructure/ai/gemma/coach_prompt_builder.dart` | 56 | Builds the user turn for coach chat (system instruction lives on [InferenceChat]). |
 | `lib/infrastructure/ai/gemma/gemma_device_ram_probe.dart` | 51 | Dart module |
-| `lib/infrastructure/ai/gemma/gemma_inference_session.dart` | 57 | Dart module |
+| `lib/infrastructure/ai/gemma/gemma_inference_session.dart` | 70 | Dart module |
 | `lib/infrastructure/ai/gemma/gemma_runtime.dart` | 80 | Central bootstrap for flutter_gemma 1.x opt-in inference engines. |
 | `lib/infrastructure/ai/gemma/gemma_runtime_tier.dart` | 18 | Resolves the current on-device Gemma tier from platform RAM and thermal probes. |
 | `lib/infrastructure/ai/gemma/gemma_thermal_probe.dart` | 19 | Reads platform thermal / power-save signals for conservative Gemma routing. |
 | `lib/infrastructure/ai/gemma/on_device_model_installer.dart` | 24 | Maps domain [OnDeviceModel] specs to flutter_gemma install APIs. |
 | `lib/infrastructure/ai/gemma/regression_isolate_entrypoint.dart` | 42 | Lightweight background worker for gait regression math (no LLM deps). |
-| `lib/infrastructure/ai/hybrid_ai_coach_repository.dart` | 186 | HybridAiCoachConfig, HybridAiCoachRepository |
+| `lib/infrastructure/ai/hybrid_ai_coach_repository.dart` | 188 | HybridAiCoachConfig, HybridAiCoachRepository |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 367 | IsolateAiCoachRepository |
 | `lib/infrastructure/ai/on_device_model_repository.dart` | 94 | OnDeviceModelRepository |
 | `lib/infrastructure/ai/openrouter/openrouter_api_client.dart` | 215 | OpenRouterApiClient |
 | `lib/infrastructure/ai/openrouter/openrouter_cloud_ai_repository.dart` | 53 | OpenRouterCloudAiRepository |
 | `lib/infrastructure/ai/openrouter/openrouter_models_repository_impl.dart` | 46 | OpenRouterModelsRepositoryImpl |
 | `lib/infrastructure/ai/secure_api_key_storage.dart` | 41 | SecureApiKeyStorage |
-| `lib/infrastructure/coach/coach_conversation_codec.dart` | 266 | Serialises coach conversations to SharedPreferences JSON. |
+| `lib/infrastructure/coach/coach_conversation_codec.dart` | 292 | Serialises coach conversations to SharedPreferences JSON. |
 | `lib/infrastructure/coach/coach_conversation_repository_impl.dart` | 213 | CoachConversationRepositoryImpl |
 | `lib/infrastructure/gamification/character_persistence_repository.dart` | 120 | CharacterPersistenceRepository |
 | `lib/infrastructure/gamification/gamekit_repository_impl.dart` | 80 | GameKitRepositoryImpl |
@@ -384,7 +396,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/providers/coach_context_provider.dart` | 96 | Builds unified runner context for coach inference. |
 | `lib/shared/providers/coach_conversation_providers.dart` | 76 | Dart module |
 | `lib/shared/providers/coach_personalization_provider.dart` | 74 | CoachPersonalizationState, CoachPersonalizationNotifier |
-| `lib/shared/providers/coach_usecase_providers.dart` | 20 | Dart module |
+| `lib/shared/providers/coach_usecase_providers.dart` | 29 | Dart module |
 | `lib/shared/providers/daily_quests_provider.dart` | 56 | Dart module |
 | `lib/shared/providers/gamification_providers.dart` | 73 | Dart module |
 | `lib/shared/providers/health_import_providers.dart` | 23 | Dart module |
@@ -449,11 +461,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | File | Lines | Target |
 |------|------:|--------|
 | `lib/features/settings/presentation/pages/settings_page.dart` | 599 | Split if > 250 lines |
-| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 431 | Split if > 250 lines |
-| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 386 | Split if > 250 lines |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 583 | Split if > 250 lines |
+| `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 367 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 358 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
+| `lib/infrastructure/coach/coach_conversation_codec.dart` | 292 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
 | `lib/features/training/presentation/pages/training_page.dart` | 284 | Split if > 250 lines |
 | `lib/features/character/presentation/pages/character_page.dart` | 280 | Split if > 250 lines |
@@ -463,11 +476,10 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/catalog/on_device_model_catalog.dart` | 275 | Split if > 250 lines |
 | `lib/domain/utils/run_route_analytics.dart` | 274 | Split if > 250 lines |
 | `lib/features/character/presentation/widgets/quest_card.dart` | 269 | Split if > 250 lines |
-| `lib/infrastructure/coach/coach_conversation_codec.dart` | 266 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | Split if > 250 lines |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 352 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 361 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->
