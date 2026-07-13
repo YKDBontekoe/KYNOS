@@ -273,7 +273,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | `StreamingTextPulse, _StreamingTextPulseState` |
 | `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 52 | `TypingIndicator, _TypingIndicatorState` |
 | `lib/features/coach_chat/providers/active_coach_conversation_provider.dart` | 23 | `ActiveCoachConversation` |
-| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 731 | `CoachChat, LastAiInferenceBackend` |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 736 | `CoachChat, LastAiInferenceBackend` |
 | `lib/features/coach_chat/providers/coach_chat_seed_provider.dart` | 1 | `Dart module` |
 | `lib/features/coach_chat/providers/coach_conversations_provider.dart` | 116 | `ActiveCoachConversationId, CoachConversations` |
 | `lib/features/coach_chat/providers/last_coach_context_provider.dart` | 13 | `LastCoachContext` |
@@ -485,7 +485,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 
 | File | Lines | Target |
 |------|------:|--------|
-| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 731 | Split if > 250 lines |
+| `lib/features/coach_chat/providers/coach_chat_provider.dart` | 736 | Split if > 250 lines |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 689 | Split if > 250 lines |
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | Split if > 250 lines |
 | `lib/features/training/presentation/pages/training_page.dart` | 581 | Split if > 250 lines |
