@@ -1,3 +1,11 @@
+# [1.20.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.19.0...v1.20.0) (2026-07-13)
+
+
+### Features
+
+* transform KYNOS into an agentic health coach ([#98](https://github.com/YKDBontekoe/KYNOS/issues/98)) ([6899ca1](https://github.com/YKDBontekoe/KYNOS/commit/6899ca14d7048d3135ef0b187c962c13c4ed6649))
+* **ui:** modernize shell nav and unify health hub ([#99](https://github.com/YKDBontekoe/KYNOS/issues/99)) ([ae2600f](https://github.com/YKDBontekoe/KYNOS/commit/ae2600f1a13e89c501ffc6c0ea9abcb10a208871))
+
 # [1.19.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.18.0...v1.19.0) (2026-07-13)
 
 
