@@ -3,13 +3,16 @@ import 'package:kynos/core/theme/spacing.dart' as tokens;
 
 /// Layout constants for consistent page structure.
 abstract final class LayoutTokens {
-  /// Width of the left-edge shell navigation rail.
-  static const double shellRailWidth = 56;
+  /// Diameter of the draggable shell floating navigation button.
+  static const double shellFloatingNavSize = 52;
 
-  /// @deprecated Use [shellRailWidth]. Kept for legacy bottom-nav references.
-  static const double shellNavBarHeight = shellRailWidth;
+  /// @deprecated Use [shellFloatingNavSize]. Kept for legacy nav references.
+  static const double shellRailWidth = shellFloatingNavSize;
 
-  /// Total bottom inset — rail layout no longer reserves bottom chrome.
+  /// @deprecated Use [shellFloatingNavSize]. Kept for legacy bottom-nav references.
+  static const double shellNavBarHeight = shellFloatingNavSize;
+
+  /// Total bottom inset — floating nav no longer reserves layout chrome.
   static double shellNavExtent(BuildContext context) => 0;
 
   /// Bottom scroll padding for tab content (safe-area aware).
