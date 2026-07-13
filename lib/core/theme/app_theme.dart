@@ -163,6 +163,34 @@ class AppTheme {
         color: extension.separator,
         thickness: 0.5,
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: extension.card,
+        surfaceTintColor: Colors.transparent,
+        elevation: 12,
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.5 : 0.16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.Radius.lg),
+          side: BorderSide(color: extension.separator, width: 0.75),
+        ),
+        textStyle: textTheme.bodyLarge?.copyWith(
+          color: extension.label,
+          fontWeight: FontWeight.w500,
+        ),
+        position: PopupMenuPosition.under,
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(extension.card),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          elevation: const WidgetStatePropertyAll(12),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(tokens.Radius.lg),
+              side: BorderSide(color: extension.separator, width: 0.75),
+            ),
+          ),
+        ),
+      ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return extension.stand;
