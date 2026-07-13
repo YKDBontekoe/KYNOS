@@ -1,3 +1,15 @@
+# [1.21.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.20.0...v1.21.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* remove ask coach button from health page header ([#100](https://github.com/YKDBontekoe/KYNOS/issues/100)) ([f337c84](https://github.com/YKDBontekoe/KYNOS/commit/f337c84a0d3ed8ee0593db57c482475c027db9ca))
+
+
+### Features
+
+* replace left nav rail with draggable floating nav fab ([#101](https://github.com/YKDBontekoe/KYNOS/issues/101)) ([40d9c92](https://github.com/YKDBontekoe/KYNOS/commit/40d9c9284f35dffe7431261808fe1d60e5a55698))
+
 # [1.20.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.19.0...v1.20.0) (2026-07-13)
 
 
