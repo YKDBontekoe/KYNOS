@@ -243,7 +243,7 @@ class CoachChat extends _$CoachChat {
             preferences: settings.contextPreferences,
           );
 
-      final tier = await ref.read(gemmaInferenceTierProvider.future);
+      final tier = await _resolveInferenceTier();
       final prefersCloud =
           preferredBackend == AiInferenceBackend.openRouter ||
           settings.backendMode == CoachBackendMode.cloud;
@@ -715,6 +715,11 @@ class CoachChat extends _$CoachChat {
   Future<CoachConversationSettings> _conversationSettings() async {
     final conversation = await _loadConversation();
     return conversation?.settings ?? CoachConversationSettings.defaults;
+  }
+
+  Future<GemmaInferenceTier> _resolveInferenceTier() async {
+    ref.invalidate(gemmaInferenceTierProvider);
+    return ref.read(gemmaInferenceTierProvider.future);
   }
 
   Future<void> _saveConversation(CoachConversation conversation) async {

@@ -106,6 +106,40 @@ void main() {
     expect(fakeAi.capturedUserMessages, hasLength(1));
   });
 
+  test('skips tool loop on constrained tier and answers directly', () async {
+    final fakeAi = _ScriptedAgenticAiCoachRepository(
+      scriptedTurns: [
+        'TOOL_CALL: {"name":"get_recent_runs","arguments":{"limit":2}}',
+      ],
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        healthRepositoryProvider.overrideWithValue(_FakeHealthRepository()),
+        chatAiCoachRepositoryProvider.overrideWithValue(fakeAi),
+        gemmaInferenceTierProvider.overrideWith(
+          (ref) async => GemmaInferenceTier.constrained,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(coachConversationsProvider.notifier)
+        .ensureActiveConversation();
+    await container.read(coachChatProvider.future);
+
+    await container
+        .read(coachChatProvider.notifier)
+        .sendMessage('How was my last run?');
+
+    final assistant = container.read(coachChatProvider).value!.last;
+    expect(assistant.toolSteps, isNull);
+    expect(assistant.content, isNot(contains('TOOL_CALL')));
+    expect(assistant.hasError, isTrue);
+    expect(fakeAi.capturedUserMessages, hasLength(1));
+  });
+
   test('stops looping after the max tool step budget and answers', () async {
     final fakeAi = _ScriptedAgenticAiCoachRepository(
       scriptedTurns: [
