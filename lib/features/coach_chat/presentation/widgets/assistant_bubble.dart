@@ -95,8 +95,12 @@ class AssistantBubble extends StatelessWidget {
                 ),
               if (toolSteps != null && toolSteps!.isNotEmpty)
                 Container(
-                  margin: const EdgeInsets.only(bottom: Spacing.sm),
-                  padding: const EdgeInsets.all(Spacing.sm),
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.sm,
+                    Spacing.sm,
+                    Spacing.sm,
+                    0,
+                  ),
                   decoration: BoxDecoration(
                     color: kynos.purple.withValues(alpha: 0.07),
                     borderRadius: BorderRadius.circular(Radius.md),

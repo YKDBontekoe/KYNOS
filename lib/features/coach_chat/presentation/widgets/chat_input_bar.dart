@@ -21,39 +21,42 @@ class ChatInputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(Spacing.md),
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-        borderRadius: Radius.full,
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                enabled: !isStreaming,
-                textInputAction: TextInputAction.send,
-                minLines: 1,
-                maxLines: 4,
-                keyboardType: TextInputType.multiline,
-                onSubmitted: isStreaming ? null : onSend,
-                decoration: const InputDecoration(
-                  hintText: 'Ask your coach...',
-                  border: InputBorder.none,
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(Spacing.md),
+        child: GlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          borderRadius: Radius.full,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  enabled: !isStreaming,
+                  textInputAction: TextInputAction.send,
+                  minLines: 1,
+                  maxLines: 4,
+                  keyboardType: TextInputType.multiline,
+                  onSubmitted: isStreaming ? null : onSend,
+                  decoration: const InputDecoration(
+                    hintText: 'Ask your coach...',
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
-            ),
-            if (isStreaming && onCancel != null)
-              TextButton(onPressed: onCancel, child: const Text('Stop')),
-            LiquidGlassIconButton(
-              icon: isStreaming ? Icons.hourglass_empty : Icons.send_rounded,
-              tooltip: isStreaming ? 'Sending message' : 'Send message',
-              onPressed: isStreaming ? null : () => onSend(controller.text),
-              size: 36,
-              iconSize: 20,
-            ),
-          ],
+              if (isStreaming && onCancel != null)
+                TextButton(onPressed: onCancel, child: const Text('Stop')),
+              LiquidGlassIconButton(
+                icon: isStreaming ? Icons.hourglass_empty : Icons.send_rounded,
+                tooltip: isStreaming ? 'Sending message' : 'Send message',
+                onPressed: isStreaming ? null : () => onSend(controller.text),
+                size: 36,
+                iconSize: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );

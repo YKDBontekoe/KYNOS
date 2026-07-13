@@ -238,13 +238,13 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 69 | `XpBar` |
 | `lib/features/character/providers/character_provider.dart` | 1 | `Dart module` |
 | `lib/features/character/providers/quest_provider.dart` | 48 | `QuestNotifier` |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 380 | `CoachChatPage, _CoachChatPageState` |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 381 | `CoachChatPage, _CoachChatPageState` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 63 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
-| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 157 | `AssistantBubble` |
-| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 61 | `ChatInputBar` |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 161 | `AssistantBubble` |
+| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 64 | `ChatInputBar` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 131 | `CoachChatAppBar` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 129 | `CoachChatAppBar` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 233 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
@@ -463,7 +463,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/pages/settings_page.dart` | 599 | Split if > 250 lines |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 591 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 380 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 381 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 367 | Split if > 250 lines |
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 298 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |

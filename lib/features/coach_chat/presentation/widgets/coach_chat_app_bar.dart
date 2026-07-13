@@ -25,7 +25,7 @@ class CoachChatAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conversation = ref.watch(activeCoachConversationProvider).value;
     final kynos = context.kynosTheme;
-    final title = conversation?.title;
+    final title = conversation?.title ?? 'KYNOS Coach';
 
     return SafeArea(
       bottom: false,
@@ -56,9 +56,7 @@ class CoachChatAppBar extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title == null || title == 'New conversation'
-                            ? 'KYNOS Coach'
-                            : title,
+                        title,
                         style: Theme.of(context).textTheme.titleMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

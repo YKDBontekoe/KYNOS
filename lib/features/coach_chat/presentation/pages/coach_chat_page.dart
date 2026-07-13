@@ -178,6 +178,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
           .read(coachConversationsProvider.notifier)
           .deleteConversation(conversation.id);
     }
+    if (!mounted) return;
     await ref
         .read(coachConversationsProvider.notifier)
         .ensureActiveConversation();
@@ -189,7 +190,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final id = await ref
         .read(coachConversationsProvider.notifier)
         .createConversation();
-    if (id == null) return;
+    if (id == null || !mounted) return;
     ref.invalidate(coachChatProvider);
     ref.invalidate(activeCoachConversationProvider);
     _textController.clear();

@@ -86,7 +86,7 @@ void main() {
       expect(coachSemantics.flagsCollection.isSelected, Tristate.isFalse);
     });
 
-    testWidgets('selected tab icon uses stand color and filled style', (
+    testWidgets('selected tab icon uses purple color and filled style', (
       tester,
     ) async {
       await tester.pumpWidget(
