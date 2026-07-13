@@ -10,6 +10,7 @@ import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
+import 'package:kynos/domain/utils/coach_prompt_truncator.dart';
 import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/gemma_inference_limits.dart';
 import 'package:kynos/infrastructure/ai/gemma/ai_isolate_bridge.dart';
@@ -81,10 +82,15 @@ class IsolateAiCoachRepository implements AiCoachRepository {
             final prompt = _buildPrompt(
               userMessage,
               healthContext,
+              tier: tier,
               coachContext: coachContext,
               conversationHistory: includeHistory ? conversationHistory : null,
             );
-            await _chatWithRecovery(prompt: prompt, controller: controller);
+            await _chatWithRecovery(
+              prompt: prompt,
+              tier: tier,
+              controller: controller,
+            );
             _warmChatSession = true;
           } catch (error, stackTrace) {
             if (!controller.isClosed) {
@@ -108,6 +114,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
   Future<void> _chatWithRecovery({
     required String prompt,
+    required GemmaInferenceTier tier,
     required StreamController<AiChunk> controller,
   }) async {
     Object? lastError;
@@ -115,7 +122,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
 
     for (var attempt = 0; attempt < AiChatRecoveryPlan.maxAttempts; attempt++) {
       try {
-        final chunks = await _runSingleChatAttempt(prompt);
+        final chunks = await _runSingleChatAttempt(prompt, tier: tier);
         for (final chunk in chunks) {
           if (!controller.isClosed) controller.add(chunk);
         }
@@ -160,7 +167,10 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     }
   }
 
-  Future<List<AiChunk>> _runSingleChatAttempt(String prompt) async {
+  Future<List<AiChunk>> _runSingleChatAttempt(
+    String prompt, {
+    required GemmaInferenceTier tier,
+  }) async {
     final requestId = _nextRequestId++;
     final buffer = <AiChunk>[];
     final completer = Completer<void>();
@@ -179,7 +189,13 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       }
     });
 
-    _isolateSendPort!.send(AiChatRequest(prompt, requestId: requestId));
+    _isolateSendPort!.send(
+      AiChatRequest(
+        prompt,
+        requestId: requestId,
+        maxOutputTokens: GemmaInferenceLimits.maxOutputTokens(tier),
+      ),
+    );
 
     try {
       await completer.future.timeout(const Duration(seconds: 120));
@@ -243,6 +259,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   String _buildPrompt(
     String userMessage,
     List<HealthSummary>? healthContext, {
+    required GemmaInferenceTier tier,
     CoachContext? coachContext,
     List<ChatMessage>? conversationHistory,
   }) {
@@ -250,13 +267,11 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       userMessage,
       healthContext,
       coachContext: coachContext,
+      tier: tier,
       includePrivateMemory: true,
       conversationHistory: conversationHistory,
     );
-    if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
-      return prompt;
-    }
-    return prompt.substring(0, GemmaInferenceLimits.maxPromptCharacters);
+    return truncateCoachPrompt(prompt);
   }
 
   Future<void> _ensureIsolate() async {

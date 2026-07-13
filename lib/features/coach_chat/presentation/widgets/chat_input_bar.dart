@@ -10,6 +10,7 @@ class ChatInputBar extends StatelessWidget {
     required this.isStreaming,
     required this.onSend,
     this.onCancel,
+    this.leftInset = 0,
   });
 
   final TextEditingController controller;
@@ -17,6 +18,7 @@ class ChatInputBar extends StatelessWidget {
   final bool isStreaming;
   final ValueChanged<String> onSend;
   final VoidCallback? onCancel;
+  final double leftInset;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class ChatInputBar extends StatelessWidget {
       height: 96 + safeBottom,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          Spacing.md,
+          Spacing.md + leftInset,
           Spacing.md,
           Spacing.md,
           Spacing.md + safeBottom,

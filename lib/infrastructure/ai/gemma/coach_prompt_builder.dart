@@ -3,6 +3,7 @@ import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/coach_context_formatter.dart';
+import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/domain/utils/health_context_formatter.dart';
 
 /// Builds the user turn for coach chat (system instruction lives on [InferenceChat]).
@@ -12,6 +13,7 @@ String buildCoachUserMessage(
   CoachContext? coachContext,
   List<ChatMessage>? conversationHistory,
   CloudDataLevel cloudLevel = CloudDataLevel.full,
+  GemmaInferenceTier tier = GemmaInferenceTier.full,
   bool includePrivateMemory = false,
 }) {
   final sections = <String>[];
@@ -25,6 +27,7 @@ String buildCoachUserMessage(
     final block = CoachContextFormatter.formatForPrompt(
       coachContext,
       cloudLevel: cloudLevel,
+      tier: tier,
       includePrivateMemory: includePrivateMemory,
     );
     if (block.isNotEmpty) {

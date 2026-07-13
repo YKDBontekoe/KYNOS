@@ -69,6 +69,9 @@ class ShellPage extends ConsumerWidget {
               items: _navItems,
               selectedIndex: navigationShell.currentIndex,
               onSelected: _onTabSelected,
+              bottomInset: navigationShell.currentIndex == 0
+                  ? LayoutTokens.coachChatFabBottomInset
+                  : 0,
               actions: [
                 KynosFloatingNavAction(
                   label: 'Settings',

@@ -152,11 +152,12 @@ abstract final class CoachContextFormatter {
       sections.add('Coach entry topic: ${context.seedTopic.name}');
     }
 
-    var block = sections.join('\n\n');
-    if (block.length > _maxOnDeviceChars) {
-      block = block.substring(0, _maxOnDeviceChars);
+    while (sections.isNotEmpty) {
+      final block = sections.join('\n\n');
+      if (block.length <= _maxOnDeviceChars) return block;
+      sections.removeLast();
     }
-    return block;
+    return '';
   }
 
   static CloudDataLevel _tierToCloudLevel(GemmaInferenceTier tier) =>

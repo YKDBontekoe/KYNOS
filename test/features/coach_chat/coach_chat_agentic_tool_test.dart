@@ -12,9 +12,11 @@ import 'package:kynos/domain/entities/workout_route_point.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
+import 'package:kynos/domain/utils/gemma_device_capability.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/gemma_tier_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +37,9 @@ void main() {
         sharedPreferencesProvider.overrideWithValue(prefs),
         healthRepositoryProvider.overrideWithValue(_FakeHealthRepository()),
         chatAiCoachRepositoryProvider.overrideWithValue(fakeAi),
+        gemmaInferenceTierProvider.overrideWith(
+          (ref) async => GemmaInferenceTier.full,
+        ),
       ],
     );
     await container

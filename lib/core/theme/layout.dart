@@ -63,6 +63,14 @@ abstract final class LayoutTokens {
   static const double chatInputClearance =
       tokens.Spacing.xxxl * 2 + tokens.Spacing.md;
 
+  /// Extra bottom offset for the shell FAB on the coach tab (above input bar).
+  static const double coachChatFabBottomInset =
+      tokens.Spacing.xxxl + tokens.Spacing.md;
+
+  /// Left inset for coach chat input so text does not sit under the shell FAB.
+  static const double coachFabLeftClearance =
+      shellFloatingNavSize + tokens.Spacing.md;
+
   /// Height for horizontal run-card carousels on the dashboard.
   static const double runCarouselHeight =
       tokens.Spacing.xxxl * 2 + tokens.Spacing.xl + tokens.Spacing.md;

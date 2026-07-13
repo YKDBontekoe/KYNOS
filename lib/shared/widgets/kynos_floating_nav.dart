@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/liquid_glass_tokens.dart';
 import 'package:kynos/core/theme/motion.dart';
@@ -42,15 +41,19 @@ class KynosFloatingNav extends StatefulWidget {
     required this.selectedIndex,
     required this.onSelected,
     this.actions = const [],
+    this.bottomInset = 0,
   });
 
   final List<KynosFloatingNavItem> items;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final List<KynosFloatingNavAction> actions;
+  /// Extra bottom offset — e.g. to clear the coach chat input bar.
+  final double bottomInset;
 
   static const double _fabSize = 52;
   static const double _itemSize = 44;
+  static const double _orbitRadius = 80;
   static const double _dragThreshold = 8;
 
   @override
@@ -61,6 +64,7 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
     with SingleTickerProviderStateMixin {
   static const double _fabSize = KynosFloatingNav._fabSize;
   static const double _itemSize = KynosFloatingNav._itemSize;
+  static const double _orbitRadius = KynosFloatingNav._orbitRadius;
 
   late final AnimationController _expandController;
   late final Animation<double> _expandAnimation;
@@ -78,6 +82,14 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
       curve: Motion.curve,
       reverseCurve: Motion.curveIn,
     );
+  }
+
+  @override
+  void didUpdateWidget(KynosFloatingNav oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.bottomInset != widget.bottomInset) {
+      _position = null;
+    }
   }
 
   @override
@@ -142,19 +154,16 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
     final viewPadding = MediaQuery.viewPaddingOf(context);
     return Offset(
       tokens.Spacing.md + viewPadding.left,
-      tokens.Spacing.md + viewPadding.bottom,
+      widget.bottomInset + tokens.Spacing.md + viewPadding.bottom,
     );
   }
 
-  double _stackHeight({required bool expanded}) {
+  double _controlExtent({required bool expanded}) {
     if (!expanded) return _fabSize;
-    final menuItemCount = widget.items.length + widget.actions.length;
-    if (menuItemCount == 0) return _fabSize;
-    return _fabSize +
-        tokens.Spacing.xs +
-        (menuItemCount * _itemSize) +
-        ((menuItemCount - 1) * tokens.Spacing.xs);
+    return _fabSize + _orbitRadius + _itemSize / 2;
   }
+
+  double _stackHeight({required bool expanded}) => _controlExtent(expanded: expanded);
 
   Offset _clampPosition(
     Offset position,
@@ -163,11 +172,12 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
   }) {
     final viewPadding = MediaQuery.viewPaddingOf(context);
     final stackHeight = _stackHeight(expanded: expanded);
+    final controlWidth = _controlExtent(expanded: expanded);
     final minLeft = viewPadding.left + tokens.Spacing.xs;
     final minBottom = viewPadding.bottom + tokens.Spacing.xs;
     final maxLeft = math.max(
       minLeft,
-      parentSize.width - _fabSize - viewPadding.right - tokens.Spacing.xs,
+      parentSize.width - controlWidth - viewPadding.right - tokens.Spacing.xs,
     );
     final maxBottom = math.max(
       minBottom,
@@ -273,6 +283,13 @@ class _FloatingNavControl extends StatelessWidget {
   final GestureDragEndCallback onPanEnd;
 
   static const double _fabSize = KynosFloatingNav._fabSize;
+  static const double _itemSize = KynosFloatingNav._itemSize;
+  static const double _orbitRadius = KynosFloatingNav._orbitRadius;
+
+  /// Arc from straight up (π/2) toward the right (0) — keeps items away from
+  /// the bottom-left input bar on coach chat.
+  static const double _orbitStartAngle = math.pi / 2;
+  static const double _orbitSweep = math.pi / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -280,6 +297,34 @@ class _FloatingNavControl extends StatelessWidget {
     final selectedItem = hasItems
         ? items[selectedIndex.clamp(0, items.length - 1)]
         : null;
+    final menuEntries = <_OrbitMenuEntry>[
+      for (var i = 0; i < items.length; i++)
+        _OrbitMenuEntry(
+          index: i,
+          child: _NavOption(
+            icon: items[i].icon,
+            label: items[i].label,
+            selected: selectedIndex == i,
+            accent: accent,
+            unselected: unselected,
+            onTap: () => onItemTap(i),
+          ),
+        ),
+      for (var i = 0; i < actions.length; i++)
+        _OrbitMenuEntry(
+          index: items.length + i,
+          child: _NavActionOption(
+            label: actions[i].label,
+            icon: actions[i].icon,
+            unselected: unselected,
+            onTap: () => onActionTap(actions[i]),
+          ),
+        ),
+    ];
+    final menuCount = menuEntries.length;
+    final controlExtent = expanded
+        ? _fabSize + _orbitRadius + _itemSize / 2
+        : _fabSize;
 
     return GestureDetector(
       key: const Key('kynos_floating_nav_control'),
@@ -288,95 +333,147 @@ class _FloatingNavControl extends StatelessWidget {
       onPanEnd: onPanEnd,
       dragStartBehavior: DragStartBehavior.down,
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizeTransition(
-            sizeFactor: expandAnimation,
-            alignment: Alignment.bottomCenter,
-            child: FadeTransition(
-              opacity: expandAnimation,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < items.length; i++) ...[
-                    if (i > 0) const Gap(tokens.Spacing.xs),
-                    _NavOption(
-                      icon: items[i].icon,
-                      label: items[i].label,
-                      selected: selectedIndex == i,
-                      accent: accent,
-                      unselected: unselected,
-                      onTap: () => onItemTap(i),
-                    ),
-                  ],
-                  for (var i = 0; i < actions.length; i++) ...[
-                    if (hasItems || i > 0) const Gap(tokens.Spacing.xs),
-                    _NavActionOption(
-                      label: actions[i].label,
-                      icon: actions[i].icon,
-                      unselected: unselected,
-                      onTap: () => onActionTap(actions[i]),
-                    ),
-                  ],
-                  const Gap(tokens.Spacing.xs),
-                ],
+      child: SizedBox(
+        width: controlExtent,
+        height: controlExtent,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (final entry in menuEntries)
+              _OrbitMenuItem(
+                index: entry.index,
+                total: menuCount,
+                expandAnimation: expandAnimation,
+                startAngle: _orbitStartAngle,
+                sweep: _orbitSweep,
+                radius: _orbitRadius,
+                fabSize: _fabSize,
+                itemSize: _itemSize,
+                child: entry.child,
               ),
-            ),
-          ),
-          Semantics(
-            button: true,
-            label: expanded
-                ? 'Collapse navigation menu'
-                : 'Open navigation menu',
-            child: GestureDetector(
-              onTap: onFabTap,
-              behavior: HitTestBehavior.opaque,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  boxShadow: shadow,
-                  borderRadius: BorderRadius.circular(tokens.Radius.full),
-                ),
-                child: LiquidGlassSurface(
-                  borderRadius: tokens.Radius.full,
-                  blurSigma: LiquidGlassTokens.navBlurSigma,
-                  padding: EdgeInsets.zero,
-                  child: SizedBox(
-                    width: _fabSize,
-                    height: _fabSize,
-                    child: Center(
-                      child: AnimatedRotation(
-                        turns: expanded ? 0.125 : 0,
-                        duration: Motion.navItem,
-                        curve: Motion.curve,
-                        child: selectedItem != null
-                            ? CustomPaint(
-                                size: const Size(24, 24),
-                                painter: NavIconPainter(
-                                  pathData: selectedItem.icon.filled,
-                                  color: accent,
-                                  strokeWidth: 2,
-                                  filled: true,
-                                ),
-                              )
-                            : Icon(
-                                actions.isNotEmpty
-                                    ? actions.first.icon
-                                    : Icons.menu_rounded,
-                                size: 24,
-                                color: accent,
-                              ),
+            Positioned(
+              left: 0,
+              bottom: 0,
+              child: Semantics(
+                button: true,
+                label: expanded
+                    ? 'Collapse navigation menu'
+                    : 'Open navigation menu',
+                child: GestureDetector(
+                  onTap: onFabTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      boxShadow: shadow,
+                      borderRadius: BorderRadius.circular(tokens.Radius.full),
+                    ),
+                    child: LiquidGlassSurface(
+                      borderRadius: tokens.Radius.full,
+                      blurSigma: LiquidGlassTokens.navBlurSigma,
+                      padding: EdgeInsets.zero,
+                      child: SizedBox(
+                        width: _fabSize,
+                        height: _fabSize,
+                        child: Center(
+                          child: AnimatedRotation(
+                            turns: expanded ? 0.125 : 0,
+                            duration: Motion.navItem,
+                            curve: Motion.curve,
+                            child: selectedItem != null
+                                ? CustomPaint(
+                                    size: const Size(24, 24),
+                                    painter: NavIconPainter(
+                                      pathData: selectedItem.icon.filled,
+                                      color: accent,
+                                      strokeWidth: 2,
+                                      filled: true,
+                                    ),
+                                  )
+                                : Icon(
+                                    actions.isNotEmpty
+                                        ? actions.first.icon
+                                        : Icons.menu_rounded,
+                                    size: 24,
+                                    color: accent,
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+@immutable
+class _OrbitMenuEntry {
+  const _OrbitMenuEntry({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+}
+
+class _OrbitMenuItem extends StatelessWidget {
+  const _OrbitMenuItem({
+    required this.index,
+    required this.total,
+    required this.expandAnimation,
+    required this.startAngle,
+    required this.sweep,
+    required this.radius,
+    required this.fabSize,
+    required this.itemSize,
+    required this.child,
+  });
+
+  final int index;
+  final int total;
+  final Animation<double> expandAnimation;
+  final double startAngle;
+  final double sweep;
+  final double radius;
+  final double fabSize;
+  final double itemSize;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final angleStep = total <= 1 ? 0.0 : sweep / (total - 1);
+    final angle = startAngle - index * angleStep;
+    final staggerStart = total <= 1 ? 0.0 : index / total * 0.35;
+    final staggerEnd = math.min(1.0, staggerStart + 0.65);
+
+    return AnimatedBuilder(
+      animation: expandAnimation,
+      builder: (context, child) {
+        final t = expandAnimation.value;
+        final itemT = Interval(staggerStart, staggerEnd, curve: Motion.curve)
+            .transform(t);
+        final r = radius * itemT;
+        final dx = r * math.cos(angle);
+        final dy = r * math.sin(angle);
+        final left = fabSize / 2 + dx - itemSize / 2;
+        final bottom = fabSize / 2 + dy - itemSize / 2;
+
+        return Positioned(
+          left: left,
+          bottom: bottom,
+          child: Opacity(
+            opacity: itemT,
+            child: Transform.scale(
+              scale: 0.6 + 0.4 * itemT,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
