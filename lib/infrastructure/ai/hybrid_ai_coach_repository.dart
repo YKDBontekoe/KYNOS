@@ -3,6 +3,7 @@ import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
@@ -55,11 +56,12 @@ class HybridAiCoachRepository implements AiCoachRepository {
   @override
   AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
 
-  static const _cloudSystemPrompt =
+  static final _cloudSystemPrompt =
       'You are KYNOS Coach — an expert running coach. '
       'Give actionable, biomechanics-aware advice. Lead with the daily '
       'recommendation, then cite 2–3 provided evidence signals and confidence. '
-      'Never invent metrics, zones, injuries, or training history.';
+      'Never invent metrics, zones, injuries, or training history.\n\n'
+      '${CoachAgentToolCatalog.systemPromptBlock}';
 
   @override
   Stream<AiChunk> chat({

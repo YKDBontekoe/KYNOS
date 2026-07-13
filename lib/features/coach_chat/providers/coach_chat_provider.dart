@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/cloud_data_level.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation_settings.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
+import 'package:kynos/domain/utils/coach_tool_call_parser.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/features/coach_chat/providers/last_coach_context_provider.dart';
@@ -22,6 +26,10 @@ part 'coach_chat_provider.g.dart';
 
 const _healthContextTimeout = Duration(seconds: 8);
 const _inferenceTimeout = Duration(seconds: 120);
+
+/// Maximum agentic tool calls per assistant turn — bounds latency and keeps
+/// on-device token budgets in check (see [GemmaInferenceLimits]).
+const _maxToolStepsPerTurn = 2;
 
 @Riverpod(keepAlive: true)
 class CoachChat extends _$CoachChat {
@@ -60,6 +68,7 @@ class CoachChat extends _$CoachChat {
         content: '',
         isStreaming: true,
         hasError: false,
+        clearToolSteps: true,
       );
     state = AsyncData(cleared);
 
@@ -90,6 +99,7 @@ class CoachChat extends _$CoachChat {
         content: '',
         isStreaming: true,
         hasError: false,
+        clearToolSteps: true,
       );
     state = AsyncData(cleared);
 
@@ -181,7 +191,6 @@ class CoachChat extends _$CoachChat {
 
     CoachContext? coachContext;
     try {
-      final sendCoach = ref.read(sendCoachMessageUseCaseProvider);
       final chatRepository = ref.read(chatAiCoachRepositoryProvider);
 
       coachContext = await _loadCoachContext(settings);
@@ -198,30 +207,15 @@ class CoachChat extends _$CoachChat {
             preferences: settings.contextPreferences,
           );
 
-      await for (final chunk in sendCoach(
+      await _streamAgenticAnswer(
+        assistantId: assistantId,
         userMessage: userMessage,
         coachContext: coachContext,
-        conversationHistory: priorMessages,
+        settings: settings,
+        priorMessages: priorMessages,
         preferredBackend: preferredBackend,
-        backendMode: settings.backendMode,
-        cloudModelIdOverride: settings.preferredCloudModelId,
-        cloudDataLevelOverride: cloudLevel,
-      ).timeout(_inferenceTimeout)) {
-        if (_cancelRequested) break;
-
-        ref.read(lastAiInferenceBackendProvider.notifier).set(
-              chatRepository.lastBackend,
-            );
-
-        final msgs = state.value!;
-        final idx = msgs.indexWhere((m) => m.id == assistantId);
-        if (idx == -1) break;
-
-        final updated = msgs[idx].copyWith(
-          content: msgs[idx].content + chunk,
-        );
-        state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
-      }
+        cloudLevel: cloudLevel,
+      );
 
       if (_cancelRequested) return;
 
@@ -279,6 +273,164 @@ class CoachChat extends _$CoachChat {
       );
       await _persist();
     }
+  }
+
+  /// Streams one assistant turn, transparently resolving agentic tool calls.
+  ///
+  /// The model may reply with a `TOOL_CALL` directive instead of an answer
+  /// (see [CoachAgentToolCatalog]). When it does, this executes the tool via
+  /// [ExecuteCoachToolUseCase] and re-prompts with the result — up to
+  /// [_maxToolStepsPerTurn] times — before falling back to a direct answer.
+  /// Non-tool-call output still streams live to the UI token-by-token.
+  Future<void> _streamAgenticAnswer({
+    required String assistantId,
+    required String userMessage,
+    required CoachContext coachContext,
+    required CoachConversationSettings settings,
+    required List<ChatMessage> priorMessages,
+    required AiInferenceBackend? preferredBackend,
+    required CloudDataLevel cloudLevel,
+  }) async {
+    final sendCoach = ref.read(sendCoachMessageUseCaseProvider);
+    final executeTool = ref.read(executeCoachToolUseCaseProvider);
+    final chatRepository = ref.read(chatAiCoachRepositoryProvider);
+
+    var nextUserMessage = userMessage;
+    CoachContext? contextForThisCall = coachContext;
+    final toolSteps = <CoachToolStep>[];
+
+    for (var step = 0; step <= _maxToolStepsPerTurn; step++) {
+      final buffer = StringBuffer();
+      var toolCallRuledOut = false;
+      var flushedLiveStart = false;
+
+      await for (final chunk in sendCoach(
+        userMessage: nextUserMessage,
+        coachContext: contextForThisCall,
+        conversationHistory: priorMessages,
+        preferredBackend: preferredBackend,
+        backendMode: settings.backendMode,
+        cloudModelIdOverride: settings.preferredCloudModelId,
+        cloudDataLevelOverride: cloudLevel,
+      ).timeout(_inferenceTimeout)) {
+        if (_cancelRequested) break;
+        buffer.write(chunk);
+
+        ref.read(lastAiInferenceBackendProvider.notifier).set(
+              chatRepository.lastBackend,
+            );
+
+        if (!toolCallRuledOut &&
+            CoachToolCallParser.isDefinitelyNotToolCall(buffer.toString())) {
+          toolCallRuledOut = true;
+        }
+        if (toolCallRuledOut) {
+          final toAppend = flushedLiveStart ? chunk : buffer.toString();
+          flushedLiveStart = true;
+          _appendAssistantContent(assistantId, toAppend);
+        }
+      }
+
+      if (_cancelRequested) return;
+
+      final fullText = buffer.toString();
+      final isLastAllowedStep = step == _maxToolStepsPerTurn;
+      final toolCall =
+          isLastAllowedStep ? null : CoachToolCallParser.tryParse(fullText);
+
+      if (toolCall == null) {
+        // Always strip — a leaked or malformed TOOL_CALL directive must never
+        // reach the athlete verbatim, even if that leaves an empty answer
+        // (surfaced upstream as a retryable "empty response" error).
+        final finalText = CoachToolCallParser.stripToolCallMarkup(fullText);
+        _setAssistantContent(assistantId, finalText, toolSteps: List.of(toolSteps));
+        return;
+      }
+
+      final runningStep = CoachToolStep(
+        toolName: toolCall.name,
+        status: CoachToolStatus.running,
+        displayLabel: CoachAgentToolCatalog.actionLabelFor(toolCall.name),
+      );
+      toolSteps.add(runningStep);
+      _setAssistantToolSteps(assistantId, List.of(toolSteps));
+
+      final result = await executeTool(
+        toolCall: toolCall,
+        context: coachContext,
+        preferences: settings.contextPreferences,
+      );
+
+      toolSteps[toolSteps.length - 1] = runningStep.copyWith(
+        status: result.isError ? CoachToolStatus.error : CoachToolStatus.success,
+        displayLabel: result.displayLabel,
+      );
+      _setAssistantToolSteps(assistantId, List.of(toolSteps));
+
+      nextUserMessage = _buildToolFollowUpPrompt(
+        originalQuestion: userMessage,
+        toolCall: toolCall,
+        result: result,
+        isFinalAttempt: step == _maxToolStepsPerTurn - 1,
+      );
+      contextForThisCall = null;
+    }
+  }
+
+  String _buildToolFollowUpPrompt({
+    required String originalQuestion,
+    required CoachToolCall toolCall,
+    required CoachToolResult result,
+    required bool isFinalAttempt,
+  }) {
+    final resultLine = result.isError
+        ? 'Tool `${toolCall.name}` could not run: ${result.promptSummary}'
+        : 'Tool `${toolCall.name}` result: ${result.promptSummary}';
+    final instruction = isFinalAttempt
+        ? 'Give your final answer to the athlete now. Do not call another tool.'
+        : 'If you still need more data, reply with another single TOOL_CALL '
+            'line. Otherwise answer the athlete now.';
+    return '$resultLine\n\n'
+        'Continue answering the athlete\'s question: "$originalQuestion"\n'
+        '$instruction Do not mention tools or TOOL_CALL in your reply.';
+  }
+
+  void _appendAssistantContent(String assistantId, String textToAppend) {
+    if (textToAppend.isEmpty) return;
+    final msgs = state.value;
+    if (msgs == null) return;
+    final idx = msgs.indexWhere((m) => m.id == assistantId);
+    if (idx == -1) return;
+    final updated = msgs[idx].copyWith(
+      content: msgs[idx].content + textToAppend,
+    );
+    state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
+  }
+
+  void _setAssistantContent(
+    String assistantId,
+    String content, {
+    required List<CoachToolStep> toolSteps,
+  }) {
+    final msgs = state.value;
+    if (msgs == null) return;
+    final idx = msgs.indexWhere((m) => m.id == assistantId);
+    if (idx == -1) return;
+    final updated = msgs[idx].copyWith(
+      content: content,
+      toolSteps: toolSteps.isEmpty ? null : toolSteps,
+      clearToolSteps: toolSteps.isEmpty,
+    );
+    state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
+  }
+
+  void _setAssistantToolSteps(String assistantId, List<CoachToolStep> toolSteps) {
+    final msgs = state.value;
+    if (msgs == null) return;
+    final idx = msgs.indexWhere((m) => m.id == assistantId);
+    if (idx == -1) return;
+    final updated = msgs[idx].copyWith(toolSteps: toolSteps);
+    state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
   }
 
   Future<void> _maybeAutoTitle(String userMessage, bool isFirstMessage) async {

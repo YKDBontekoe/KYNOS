@@ -1,4 +1,5 @@
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
 import 'package:meta/meta.dart';
 
 enum MessageRole { user, assistant }
@@ -25,6 +26,9 @@ class ChatMessage {
   /// Enabled coach data sources at send time (for per-message audit).
   final List<String>? contextSnapshotIds;
 
+  /// Agentic tool calls made by the coach while composing this message.
+  final List<CoachToolStep>? toolSteps;
+
   const ChatMessage({
     required this.id,
     required this.role,
@@ -35,6 +39,7 @@ class ChatMessage {
     this.userPromptForRetry,
     this.attemptedBackend,
     this.contextSnapshotIds,
+    this.toolSteps,
   });
 
   ChatMessage copyWith({
@@ -44,6 +49,8 @@ class ChatMessage {
     String? userPromptForRetry,
     AiInferenceBackend? attemptedBackend,
     List<String>? contextSnapshotIds,
+    List<CoachToolStep>? toolSteps,
+    bool clearToolSteps = false,
   }) {
     return ChatMessage(
       id: id,
@@ -55,6 +62,7 @@ class ChatMessage {
       userPromptForRetry: userPromptForRetry ?? this.userPromptForRetry,
       attemptedBackend: attemptedBackend ?? this.attemptedBackend,
       contextSnapshotIds: contextSnapshotIds ?? this.contextSnapshotIds,
+      toolSteps: clearToolSteps ? null : (toolSteps ?? this.toolSteps),
     );
   }
 
@@ -71,7 +79,8 @@ class ChatMessage {
           hasError == other.hasError &&
           userPromptForRetry == other.userPromptForRetry &&
           attemptedBackend == other.attemptedBackend &&
-          _listEquals(contextSnapshotIds, other.contextSnapshotIds);
+          _listEquals(contextSnapshotIds, other.contextSnapshotIds) &&
+          _listEquals(toolSteps, other.toolSteps);
 
   @override
   int get hashCode => Object.hash(
@@ -86,6 +95,7 @@ class ChatMessage {
         contextSnapshotIds == null
             ? null
             : Object.hashAll(contextSnapshotIds!),
+        toolSteps == null ? null : Object.hashAll(toolSteps!),
       );
 }
 
