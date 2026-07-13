@@ -17,8 +17,8 @@ class ShellPage extends ConsumerWidget {
 
   static const _navItems = [
     KynosBottomNavItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosBottomNavItem(label: 'Training', icon: NavIconPaths.training),
-    KynosBottomNavItem(label: 'Character', icon: NavIconPaths.character),
+    KynosBottomNavItem(label: 'Health', icon: NavIconPaths.training),
+    KynosBottomNavItem(label: 'Journey', icon: NavIconPaths.character),
   ];
 
   void _onTabSelected(int index) {
@@ -134,16 +134,18 @@ class _AnimatedShellBodyState extends State<_AnimatedShellBody>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fade,
-      child: SlideTransition(position: _slide, child: widget.child),
+    return SizedBox.expand(
+      child: FadeTransition(
+        opacity: _fade,
+        child: SlideTransition(position: _slide, child: widget.child),
+      ),
     );
   }
 }
 
-/// Training tab — extracted for [StatefulShellRoute].
-class TrainingTab extends StatelessWidget {
-  const TrainingTab({super.key});
+/// Health tab — sleep, recovery, movement, experiments, and activity detail.
+class HealthTab extends StatelessWidget {
+  const HealthTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +153,9 @@ class TrainingTab extends StatelessWidget {
   }
 }
 
-/// Character tab — extracted for [StatefulShellRoute].
-class CharacterTab extends StatelessWidget {
-  const CharacterTab({super.key});
+/// Journey tab — sustainable wellbeing progression and the existing camp.
+class JourneyTab extends StatelessWidget {
+  const JourneyTab({super.key});
 
   @override
   Widget build(BuildContext context) {

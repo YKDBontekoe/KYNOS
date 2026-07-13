@@ -4,11 +4,16 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/health_coach_providers.dart';
+import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
 class MessageList extends StatefulWidget {
@@ -80,6 +85,10 @@ class MessageBubble extends ConsumerWidget {
         attemptedBackend: message.attemptedBackend,
         contextSnapshotIds: message.contextSnapshotIds,
         toolSteps: message.toolSteps,
+        visualArtifacts: message.visualArtifacts,
+        pendingActions: message.pendingActions,
+        onExploreArtifact: (prompt) =>
+            ref.read(coachChatProvider.notifier).sendMessage(prompt),
         onRetry: message.hasError && message.userPromptForRetry != null
             ? () =>
                   ref.read(coachChatProvider.notifier).retryMessage(message.id)
@@ -158,58 +167,107 @@ class CoachChatEmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(Spacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: context.kynosTheme.purple.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(Radius.lg),
-              ),
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: context.kynosTheme.purple,
-              ),
-            ),
-            const Gap(Spacing.md),
-            Text(
-              'What can I help you with?',
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
-            const Gap(Spacing.sm),
-            Text(
-              'Ask about your recovery, recent runs, or what to do next.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const Gap(Spacing.lg),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: Spacing.sm,
-              runSpacing: Spacing.sm,
-              children:
-                  [
-                        'How is my recovery?',
-                        'What should I train today?',
-                        'How was my last run?',
-                        'Help me plan this week',
-                      ]
-                      .map(
-                        (suggestion) => GlassSuggestionChip(
-                          label: suggestion,
-                          onTap: () => onSuggestionTap(suggestion),
-                        ),
-                      )
-                      .toList(),
-            ),
-          ],
-        ),
+    final brief = ref.watch(dailyHealthBriefProvider);
+    final coachData = ref.watch(healthCoachDataProvider).value;
+    final now = DateTime.now();
+    final todayCheckIn = coachData?.checkIns
+        .where(
+          (item) =>
+              item.date.year == now.year &&
+              item.date.month == now.month &&
+              item.date.day == now.day,
+        )
+        .firstOrNull;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        LayoutTokens.chatInputClearance,
       ),
+      children: [
+        brief.when(
+          loading: () =>
+              const KynosLoadingLine(label: 'Building your health brief…'),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (value) => DailyHealthBriefCard(brief: value),
+        ),
+        const Gap(Spacing.sm),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final result = await showModalBottomSheet<HealthCheckIn>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: true,
+              builder: (_) => HealthCheckInSheet(initial: todayCheckIn),
+            );
+            if (result == null) return;
+            await ref
+                .read(healthCoachDataProvider.notifier)
+                .saveCheckIn(result);
+            ref.invalidate(dailyHealthBriefProvider);
+          },
+          icon: Icon(
+            todayCheckIn == null
+                ? Icons.add_reaction_outlined
+                : Icons.check_rounded,
+          ),
+          label: Text(
+            todayCheckIn == null ? 'Check in now' : 'Update today’s check-in',
+          ),
+        ),
+        const Gap(Spacing.xl),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.sm),
+          child: Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: context.kynosTheme.purple.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(Radius.lg),
+                ),
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: context.kynosTheme.purple,
+                ),
+              ),
+              const Gap(Spacing.md),
+              Text(
+                'What would you like to understand?',
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+              const Gap(Spacing.sm),
+              Text(
+                'KYNOS can investigate patterns, build local visualisations, and explain uncertainty.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const Gap(Spacing.lg),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: Spacing.sm,
+                runSpacing: Spacing.sm,
+                children:
+                    [
+                          'Why has my energy changed?',
+                          'Show my sleep trend',
+                          'Compare this week with last week',
+                          'What seems to help my wellbeing?',
+                        ]
+                        .map(
+                          (suggestion) => GlassSuggestionChip(
+                            label: suggestion,
+                            onTap: () => onSuggestionTap(suggestion),
+                          ),
+                        )
+                        .toList(),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

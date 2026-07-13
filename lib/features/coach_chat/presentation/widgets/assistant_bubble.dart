@@ -3,8 +3,12 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/agent_tool_step_list.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_markdown_text.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/pending_coach_action_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
@@ -22,6 +26,9 @@ class AssistantBubble extends StatelessWidget {
     this.alternateBackendLabel,
     this.contextSnapshotIds,
     this.toolSteps,
+    this.visualArtifacts,
+    this.pendingActions,
+    this.onExploreArtifact,
   });
 
   final String content;
@@ -34,6 +41,9 @@ class AssistantBubble extends StatelessWidget {
   final String? alternateBackendLabel;
   final List<String>? contextSnapshotIds;
   final List<CoachToolStep>? toolSteps;
+  final List<HealthVisualArtifact>? visualArtifacts;
+  final List<PendingCoachAction>? pendingActions;
+  final ValueChanged<String>? onExploreArtifact;
 
   String? get _errorLabel {
     if (!hasError) return null;
@@ -113,6 +123,27 @@ class AssistantBubble extends StatelessWidget {
                       isActive: isStreaming && content.isNotEmpty,
                       child: CoachMarkdownText(text: content, style: textStyle),
                     ),
+              if (!isStreaming &&
+                  visualArtifacts != null &&
+                  visualArtifacts!.isNotEmpty) ...[
+                const Gap(Spacing.md),
+                for (final artifact in visualArtifacts!) ...[
+                  HealthVisualArtifactCard(
+                    artifact: artifact,
+                    onExplore: onExploreArtifact ?? (_) {},
+                  ),
+                  const Gap(Spacing.sm),
+                ],
+              ],
+              if (!isStreaming &&
+                  pendingActions != null &&
+                  pendingActions!.isNotEmpty) ...[
+                const Gap(Spacing.sm),
+                for (final action in pendingActions!) ...[
+                  PendingCoachActionCard(action: action),
+                  const Gap(Spacing.sm),
+                ],
+              ],
               if (!isStreaming &&
                   contextSnapshotIds != null &&
                   contextSnapshotIds!.isNotEmpty) ...[

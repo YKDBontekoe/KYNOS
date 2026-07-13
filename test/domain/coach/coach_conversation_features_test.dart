@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/coach/coach_backend_mode.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/coach/coach_context_preferences.dart';
@@ -39,10 +40,10 @@ void main() {
       );
     });
 
-    test('auto mode returns null preferred backend', () {
+    test('auto mode stays on device', () {
       expect(
         CoachBackendModeMapper.toPreferredBackend(CoachBackendMode.auto),
-        isNull,
+        AiInferenceBackend.onDevice,
       );
     });
   });

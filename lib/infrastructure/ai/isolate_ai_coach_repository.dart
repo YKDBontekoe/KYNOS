@@ -21,7 +21,7 @@ import 'package:logger/logger.dart';
 /// On-device Gemma coach running in a background isolate.
 class IsolateAiCoachRepository implements AiCoachRepository {
   IsolateAiCoachRepository({SecureApiKeyStorage? keyStorage})
-      : _keyStorage = keyStorage ?? SecureApiKeyStorage();
+    : _keyStorage = keyStorage ?? SecureApiKeyStorage();
 
   final SecureApiKeyStorage _keyStorage;
   final _logger = Logger();
@@ -82,8 +82,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
               userMessage,
               healthContext,
               coachContext: coachContext,
-              conversationHistory:
-                  includeHistory ? conversationHistory : null,
+              conversationHistory: includeHistory ? conversationHistory : null,
             );
             await _chatWithRecovery(prompt: prompt, controller: controller);
             _warmChatSession = true;
@@ -131,7 +130,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
           stackTrace: stackTrace,
         );
 
-        final canRetry = attempt < AiChatRecoveryPlan.maxAttempts - 1 &&
+        final canRetry =
+            attempt < AiChatRecoveryPlan.maxAttempts - 1 &&
             AiInferenceErrorPolicy.isRecoverable(error);
         if (!canRetry) break;
 
@@ -152,7 +152,10 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     }
 
     if (!controller.isClosed) {
-      controller.addError(lastError ?? StateError('Unknown inference error'), lastStackTrace);
+      controller.addError(
+        lastError ?? StateError('Unknown inference error'),
+        lastStackTrace,
+      );
       await controller.close();
     }
   }
@@ -168,7 +171,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
         buffer.add(response.chunk);
       } else if (response is AiIsolateDone && response.requestId == requestId) {
         if (!completer.isCompleted) completer.complete();
-      } else if (response is AiIsolateError && response.requestId == requestId) {
+      } else if (response is AiIsolateError &&
+          response.requestId == requestId) {
         if (!completer.isCompleted) {
           completer.completeError(StateError(response.error));
         }
@@ -188,7 +192,9 @@ class IsolateAiCoachRepository implements AiCoachRepository {
   Future<void> _applyRecoveryAction(AiChatRecoveryAction action) async {
     switch (action) {
       case AiChatRecoveryAction.reloadChat:
-        await _sendControlRequest(AiReloadChatRequest(requestId: _nextRequestId++));
+        await _sendControlRequest(
+          AiReloadChatRequest(requestId: _nextRequestId++),
+        );
       case AiChatRecoveryAction.reloadModelCpu:
         await _sendControlRequest(
           AiReloadModelRequest(
@@ -217,7 +223,8 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     sub = _responseController!.stream.listen((response) {
       if (response is AiIsolateDone && response.requestId == requestId) {
         if (!completer.isCompleted) completer.complete();
-      } else if (response is AiIsolateError && response.requestId == requestId) {
+      } else if (response is AiIsolateError &&
+          response.requestId == requestId) {
         if (!completer.isCompleted) {
           completer.completeError(StateError(response.error));
         }
@@ -243,6 +250,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       userMessage,
       healthContext,
       coachContext: coachContext,
+      includePrivateMemory: true,
       conversationHistory: conversationHistory,
     );
     if (prompt.length <= GemmaInferenceLimits.maxPromptCharacters) {
@@ -280,9 +288,7 @@ class IsolateAiCoachRepository implements AiCoachRepository {
       if (message is SendPort) {
         _isolateSendPort = message;
         final token = RootIsolateToken.instance!;
-        _isolateSendPort!.send(
-          AiInitRequest(token, huggingFaceToken: hfToken),
-        );
+        _isolateSendPort!.send(AiInitRequest(token, huggingFaceToken: hfToken));
       } else if (message is AiIsolateResponse) {
         _responseController?.add(message);
         if (message is AiIsolateReady) {
@@ -332,7 +338,9 @@ class IsolateAiCoachRepository implements AiCoachRepository {
     _warmChatSession = false;
     if (_isolateSendPort == null) return;
     try {
-      await _sendControlRequest(AiResetSessionRequest(requestId: _nextRequestId++));
+      await _sendControlRequest(
+        AiResetSessionRequest(requestId: _nextRequestId++),
+      );
     } on Object catch (error, stackTrace) {
       _logger.w('resetSession failed', error: error, stackTrace: stackTrace);
     }

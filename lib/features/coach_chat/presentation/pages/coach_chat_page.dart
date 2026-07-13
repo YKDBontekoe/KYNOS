@@ -16,13 +16,11 @@ import 'package:kynos/features/coach_chat/presentation/widgets/cloud_consent_ban
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/follow_up_chips.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/model_setup_screen.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
-import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/coach_conversation_providers.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
@@ -110,9 +108,6 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     final settings = conversation.settings;
     if (settings.contextPreferences.cloudConsentGiven) return false;
     if (settings.backendMode == CoachBackendMode.cloud) return true;
-    if (settings.backendMode == CoachBackendMode.auto) {
-      return ref.read(isCloudCoachConfiguredProvider).value ?? false;
-    }
     return false;
   }
 
@@ -231,40 +226,15 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
       );
     });
 
-    final setupState = ref.watch(modelSetupProvider);
-
-    return setupState.when(
-      loading: () => ModelSetupScreen.checking(showClose: false),
-      error: (e, _) {
-        final missingToken = e is MissingHuggingFaceTokenException;
-        return ModelSetupScreen.error(
-          message: _setupErrorMessage(e),
-          onRetry: () =>
-              ref.read(modelSetupProvider.notifier).checkAndInstall(),
-          onSecondaryAction: missingToken
-              ? () => context.push(Routes.settings)
-              : null,
-          secondaryActionLabel: missingToken ? 'Open Settings' : null,
-          showClose: false,
-        );
-      },
-      data: (setup) {
-        if (!setup.isReady) {
-          return ModelSetupScreen.checking(
-            progressMessage: setup.progressMessage,
-            showClose: false,
-          );
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
-        return _buildChat();
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
+    return _buildChat();
   }
 
   Widget _buildChat() {
     final chatState = ref.watch(coachChatProvider);
     final conversation = ref.watch(activeCoachConversationProvider).value;
     final globalSettings = ref.watch(settingsProvider);
+    final setupState = ref.watch(modelSetupProvider);
 
     ref.listen(
       coachChatProvider.select((s) => s.value?.lastOrNull?.content),
@@ -345,6 +315,30 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             onExport: _exportThread,
             onNewChat: _createNewChat,
           ),
+          setupState.when(
+            loading: () => const _ModelProgressBanner(
+              message: 'Preparing the optional on-device AI in the background…',
+              onRetry: null,
+              onSettings: null,
+            ),
+            error: (error, _) => _ModelProgressBanner(
+              message:
+                  'Daily guidance still works locally. ${_setupErrorMessage(error)}',
+              onRetry: () =>
+                  ref.read(modelSetupProvider.notifier).checkAndInstall(),
+              onSettings: () => context.push(Routes.settings),
+            ),
+            data: (setup) => setup.isReady
+                ? const SizedBox.shrink()
+                : _ModelProgressBanner(
+                    message:
+                        setup.progressMessage ??
+                        'The optional on-device conversational model is not ready yet.',
+                    onRetry: () =>
+                        ref.read(modelSetupProvider.notifier).checkAndInstall(),
+                    onSettings: () => context.push(Routes.settings),
+                  ),
+          ),
           if (_showCloudConsent)
             CloudConsentBanner(
               enabledSourceLabels: enabledLabels,
@@ -374,6 +368,56 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
                 ? () => ref.read(coachChatProvider.notifier).cancelGeneration()
                 : null,
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ModelProgressBanner extends StatelessWidget {
+  const _ModelProgressBanner({
+    required this.message,
+    required this.onRetry,
+    required this.onSettings,
+  });
+
+  final String message;
+  final VoidCallback? onRetry;
+  final VoidCallback? onSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(Spacing.md, Spacing.xs, Spacing.md, 0),
+      padding: const EdgeInsets.all(Spacing.sm),
+      decoration: BoxDecoration(
+        color: context.kynosTheme.purple.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(Radius.md),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.memory_rounded,
+            size: 18,
+            color: context.kynosTheme.purple,
+          ),
+          const Gap(Spacing.sm),
+          Expanded(
+            child: Text(message, style: Theme.of(context).textTheme.bodySmall),
+          ),
+          if (onRetry != null)
+            IconButton(
+              tooltip: 'Retry local model setup',
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+            ),
+          if (onSettings != null)
+            IconButton(
+              tooltip: 'Open AI settings',
+              onPressed: onSettings,
+              icon: const Icon(Icons.settings_outlined, size: 18),
+            ),
         ],
       ),
     );

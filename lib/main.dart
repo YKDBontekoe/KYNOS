@@ -12,24 +12,27 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final keyStorage = SecureApiKeyStorage();
-  final hfToken = await keyStorage.readHuggingFaceToken();
+  String? hfToken;
+  try {
+    hfToken = await keyStorage.readHuggingFaceToken();
+  } on MissingPluginException {
+    // Some web hosts do not expose secure storage during early bootstrap.
+    // Local deterministic coaching must still be able to start.
+    hfToken = null;
+  }
   await GemmaRuntime.initialize(
     huggingFaceToken: hfToken != null && hfToken.isNotEmpty ? hfToken : null,
   );
 
   if (!kIsWeb) {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }
 
   final prefs = await SharedPreferences.getInstance();
 
   runApp(
     ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
       child: const KynosApp(),
     ),
   );

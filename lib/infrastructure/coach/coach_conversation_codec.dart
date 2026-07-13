@@ -12,6 +12,8 @@ import 'package:kynos/domain/entities/coach/coach_conversation_summary.dart';
 import 'package:kynos/domain/entities/coach/coach_data_source.dart';
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 import 'package:logger/logger.dart';
 
 /// Serialises coach conversations to SharedPreferences JSON.
@@ -33,7 +35,11 @@ abstract final class CoachConversationCodec {
           .map(_summaryFromMap)
           .toList();
     } on Object catch (error, stackTrace) {
-      _logger.w('Could not decode conversation index', error: error, stackTrace: stackTrace);
+      _logger.w(
+        'Could not decode conversation index',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return const [];
     }
   }
@@ -48,7 +54,11 @@ abstract final class CoachConversationCodec {
       final map = jsonDecode(raw) as Map<String, dynamic>;
       return _conversationFromMap(map);
     } on Object catch (error, stackTrace) {
-      _logger.w('Could not decode conversation thread', error: error, stackTrace: stackTrace);
+      _logger.w(
+        'Could not decode conversation thread',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -87,7 +97,9 @@ abstract final class CoachConversationCodec {
     );
   }
 
-  static Map<String, dynamic> _conversationToMap(CoachConversation conversation) {
+  static Map<String, dynamic> _conversationToMap(
+    CoachConversation conversation,
+  ) {
     return {
       'id': conversation.id,
       'title': conversation.title,
@@ -142,6 +154,20 @@ abstract final class CoachConversationCodec {
         'contextSnapshotIds': message.contextSnapshotIds,
       if (message.toolSteps != null && message.toolSteps!.isNotEmpty)
         'toolSteps': message.toolSteps!.map(_toolStepToMap).toList(),
+      if (message.visualArtifacts != null &&
+          message.visualArtifacts!.isNotEmpty)
+        'visualArtifacts': message.visualArtifacts!
+            .take(4)
+            .map((artifact) => artifact.toJson())
+            .toList(),
+      if (message.findings != null && message.findings!.isNotEmpty)
+        'findings': message.findings!
+            .map((finding) => finding.toJson())
+            .toList(),
+      if (message.pendingActions != null && message.pendingActions!.isNotEmpty)
+        'pendingActions': message.pendingActions!
+            .map((action) => action.toJson())
+            .toList(),
     };
   }
 
@@ -149,6 +175,9 @@ abstract final class CoachConversationCodec {
     final backendName = map['attemptedBackend'] as String?;
     final snapshotRaw = map['contextSnapshotIds'] as List<dynamic>?;
     final toolStepsRaw = map['toolSteps'] as List<dynamic>?;
+    final artifactsRaw = map['visualArtifacts'] as List<dynamic>?;
+    final findingsRaw = map['findings'] as List<dynamic>?;
+    final actionsRaw = map['pendingActions'] as List<dynamic>?;
     return ChatMessage(
       id: map['id'] as String,
       role: MessageRole.values.byName(map['role'] as String),
@@ -164,7 +193,34 @@ abstract final class CoachConversationCodec {
           ?.whereType<Map<String, dynamic>>()
           .map(_toolStepFromMap)
           .toList(),
+      visualArtifacts: _decodeSafely(
+        artifactsRaw,
+        HealthVisualArtifact.fromJson,
+      ),
+      findings: _decodeSafely(findingsRaw, HealthFinding.fromJson),
+      pendingActions: _decodeSafely(actionsRaw, PendingCoachAction.fromJson),
     );
+  }
+
+  static List<T>? _decodeSafely<T>(
+    List<dynamic>? values,
+    T Function(Map<String, Object?>) decode,
+  ) {
+    if (values == null) return null;
+    final decoded = <T>[];
+    for (final value in values) {
+      if (value is! Map) continue;
+      try {
+        decoded.add(decode(value.cast<String, Object?>()));
+      } on Object catch (error, stackTrace) {
+        _logger.w(
+          'Skipping malformed structured coach content',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
+    return decoded.isEmpty ? null : decoded;
   }
 
   static Map<String, dynamic> _toolStepToMap(CoachToolStep step) {
@@ -191,7 +247,9 @@ abstract final class CoachConversationCodec {
     return CoachToolStatus.success;
   }
 
-  static Map<String, dynamic> _settingsToMap(CoachConversationSettings settings) {
+  static Map<String, dynamic> _settingsToMap(
+    CoachConversationSettings settings,
+  ) {
     return {
       'backendMode': settings.backendMode.name,
       'preferredLocalModelId': settings.preferredLocalModelId,
@@ -201,7 +259,8 @@ abstract final class CoachConversationCodec {
   }
 
   static CoachConversationSettings _settingsFromMap(Map<String, dynamic> map) {
-    final prefsRaw = map['contextPreferences'] as Map<String, dynamic>? ?? const {};
+    final prefsRaw =
+        map['contextPreferences'] as Map<String, dynamic>? ?? const {};
     return CoachConversationSettings(
       backendMode: CoachBackendMode.values.byName(
         map['backendMode'] as String? ?? CoachBackendMode.auto.name,

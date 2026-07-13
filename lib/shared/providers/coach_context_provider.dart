@@ -7,6 +7,7 @@ import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_personalization_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
+import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/post_run_debrief_provider.dart';
@@ -33,6 +34,8 @@ Future<CoachContext> coachContextForConversation(
   );
   final character = await ref.watch(runnerCharacterProvider.future);
   final quests = await ref.watch(dailyQuestsProvider.future);
+  final healthCoachData = await ref.watch(healthCoachDataProvider.future);
+  final healthBrief = await ref.watch(dailyHealthBriefProvider.future);
 
   final todayInsights = ref.watch(todayInsightsStateProvider).value?.insights;
   final trainingInsights = ref
@@ -92,5 +95,9 @@ Future<CoachContext> coachContextForConversation(
         athleteProfile: personalization.profile,
         morningCheckIn: personalization.morningCheckIn,
         dailyBrief: dailyBrief,
+        dailyHealthBrief: healthBrief,
+        healthCheckIns: healthCoachData.checkIns,
+        coachMemories: healthCoachData.memories,
+        wellbeingExperiments: healthCoachData.experiments,
       );
 }

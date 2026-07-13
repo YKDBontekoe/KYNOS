@@ -1,7 +1,6 @@
 name: kynos
 description: >
-  KYNOS — On-device AI running coach with personalised biomechanics
-  and Zero-Knowledge privacy.
+  KYNOS — a private, local-first agentic health coach for daily wellbeing.
 publish_to: none
 version: 1.19.0+101900000
 environment:

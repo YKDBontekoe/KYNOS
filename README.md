@@ -1,11 +1,12 @@
 # KYNOS
 
-> On-device AI running coach — personalised biomechanics, Zero-Knowledge privacy, 120 Hz ProMotion.
+> Private, local-first agentic health coach — personal baselines, visual investigations, and Zero-Knowledge privacy.
 
-KYNOS runs a Gemma 4 E2B language model **on-device** via LiteRT-LM. It analyses
-your biometrics from Apple HealthKit or Google Health Connect and trains a
-personalised biomechanical stride model — all without your data ever leaving
-the device.
+KYNOS combines deterministic health analysis with an optional Gemma language
+model running **on-device** via LiteRT-LM. It connects sleep, cardiovascular
+signals, movement, exercise, and subjective check-ins into daily guidance and
+interactive visual investigations. OpenRouter is an explicit fallback; raw
+health history, notes, visual data, and coach memory remain local.
 
 ---
 

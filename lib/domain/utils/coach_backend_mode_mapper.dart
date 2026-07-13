@@ -5,7 +5,7 @@ import 'package:kynos/domain/entities/coach/coach_backend_mode.dart';
 abstract final class CoachBackendModeMapper {
   static AiInferenceBackend? toPreferredBackend(CoachBackendMode mode) {
     return switch (mode) {
-      CoachBackendMode.auto => null,
+      CoachBackendMode.auto => AiInferenceBackend.onDevice,
       CoachBackendMode.onDevice => AiInferenceBackend.onDevice,
       CoachBackendMode.cloud => AiInferenceBackend.openRouter,
     };

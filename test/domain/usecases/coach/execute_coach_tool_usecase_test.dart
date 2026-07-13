@@ -33,7 +33,10 @@ void main() {
   group('get_recent_runs', () {
     test('returns formatted recent runs', () async {
       final result = await useCase.call(
-        toolCall: const CoachToolCall(name: 'get_recent_runs', arguments: {'limit': 2}),
+        toolCall: const CoachToolCall(
+          name: 'get_recent_runs',
+          arguments: {'limit': 2},
+        ),
         context: context,
         preferences: allEnabled(),
       );
@@ -95,7 +98,8 @@ void main() {
       );
 
       expect(result.isError, isFalse);
-      expect(result.promptSummary, contains('Latest hrv'));
+      expect(result.promptSummary, contains('Latest HRV'));
+      expect(result.visualArtifacts, hasLength(1));
     });
 
     test('is disabled when healthMetrics data source is off', () async {
@@ -216,6 +220,51 @@ void main() {
       expect(result.isError, isTrue);
       expect(result.promptSummary, contains('Unsupported metric'));
     });
+  });
+
+  group('propose_wellbeing_experiment', () {
+    test('builds action text only from the safe catalog', () async {
+      final result = await useCase.call(
+        toolCall: const CoachToolCall(
+          name: 'propose_wellbeing_experiment',
+          arguments: {
+            'title': 'Morning light',
+            'action_id': 'morning_daylight',
+            'hypothesis': 'Energy may feel steadier.',
+            'duration_days': 7,
+          },
+        ),
+        context: context,
+        preferences: allEnabled(),
+      );
+
+      expect(result.isError, isFalse);
+      expect(
+        result.pendingActions.single.payload['action'],
+        'Spend ten minutes in morning daylight.',
+      );
+    });
+
+    test(
+      'rejects arbitrary action text even when it contains safe words',
+      () async {
+        final result = await useCase.call(
+          toolCall: const CoachToolCall(
+            name: 'propose_wellbeing_experiment',
+            arguments: {
+              'title': 'Unsafe proposal',
+              'action_id': 'take medication then walk',
+              'duration_days': 7,
+            },
+          ),
+          context: context,
+          preferences: allEnabled(),
+        );
+
+        expect(result.isError, isTrue);
+        expect(result.pendingActions, isEmpty);
+      },
+    );
   });
 
   test('unknown tool name returns an error result', () async {

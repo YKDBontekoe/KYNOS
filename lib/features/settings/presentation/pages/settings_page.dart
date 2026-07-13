@@ -13,6 +13,7 @@ import 'package:kynos/features/settings/presentation/on_device_model_selection_r
 import 'package:kynos/features/settings/presentation/widgets/coach_personalization_card.dart';
 import 'package:kynos/features/settings/presentation/widgets/settings_appearance_section.dart';
 import 'package:kynos/features/settings/providers/settings_provider.dart';
+import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/huggingface_token_provider.dart';
 import 'package:kynos/shared/providers/onboarding_provider.dart';
@@ -61,6 +62,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final kynos = context.kynosTheme;
     final permissionState = ref.watch(healthPermissionsProvider);
     final importedCountAsync = ref.watch(importedWorkoutCountProvider);
+    final healthCoachData = ref.watch(healthCoachDataProvider);
 
     ref.listen(openRouterApiKeyManagerProvider, (_, next) {
       next.whenData((key) {
@@ -82,338 +84,398 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       backgroundColor: kynos.background,
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
-          padding: const EdgeInsets.all(tokens.Spacing.md),
-          children: [
-            SettingsAppearanceSection(
-              settings: settings,
-              onThemeChanged: settingsNotifier.updateThemeMode,
-            ),
-            const Gap(tokens.Spacing.lg),
-            const KynosSectionHeader(title: 'Health & Data'),
-            const Gap(tokens.Spacing.sm),
-            KynosCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.favorite_outline, color: kynos.stand),
-                    title: Text(
-                      'Health connection',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    subtitle: Text(_healthStatusLabel(permissionState)),
+        padding: const EdgeInsets.all(tokens.Spacing.md),
+        children: [
+          SettingsAppearanceSection(
+            settings: settings,
+            onThemeChanged: settingsNotifier.updateThemeMode,
+          ),
+          const Gap(tokens.Spacing.lg),
+          const KynosSectionHeader(title: 'Health & Data'),
+          const Gap(tokens.Spacing.sm),
+          KynosCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.favorite_outline, color: kynos.stand),
+                  title: Text(
+                    'Health connection',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  if (!kIsWeb) ...[
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: permissionState.isLoading
-                            ? null
-                            : () async {
-                                await ref
-                                    .read(healthPermissionsProvider.notifier)
-                                    .request();
-                                if (!context.mounted) return;
-                                ref.read(healthPermissionsProvider).whenOrNull(
-                                  data: (granted) {
-                                    final platform =
-                                        HealthPlatformLabels.platformName();
-                                    final message = granted
-                                        ? HealthPermissionFeedback.connectedMessage(
-                                            platform,
-                                          )
-                                        : HealthPermissionFeedback
-                                            .permissionDeniedMessage(platform);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(message)),
-                                    );
-                                  },
-                                  error: (_, _) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          HealthPermissionFeedback
-                                              .connectionFailedMessage(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                        child: Text(
-                          permissionState.isLoading
-                              ? 'Connecting…'
-                              : HealthPlatformLabels.connectLabel(),
-                        ),
-                      ),
-                    ),
-                    Divider(color: kynos.separator, height: 1),
-                  ],
-                  _ActionTile(
-                    title: 'Import Apple Health export',
-                    icon: Icons.upload_file_outlined,
-                    onTap: () => context.push(Routes.healthImport),
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  _ActionTile(
-                    title: 'Log run manually',
-                    icon: Icons.edit_outlined,
-                    onTap: () => context.push(Routes.manualRun),
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.storage_outlined, color: kynos.stand),
-                    title: Text(
-                      'Imported runs',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    subtitle: importedCountAsync.when(
-                      data: (count) => Text('$count stored on this device'),
-                      loading: () => const Text('Loading…'),
-                      error: (_, _) => const Text('Unavailable'),
-                    ),
-                  ),
+                  subtitle: Text(_healthStatusLabel(permissionState)),
+                ),
+                if (!kIsWeb) ...[
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton(
-                      onPressed: () => _confirmClearImportedData(context),
-                      child: const Text('Clear imported data'),
+                      onPressed: permissionState.isLoading
+                          ? null
+                          : () async {
+                              await ref
+                                  .read(healthPermissionsProvider.notifier)
+                                  .request();
+                              if (!context.mounted) return;
+                              ref
+                                  .read(healthPermissionsProvider)
+                                  .whenOrNull(
+                                    data: (granted) {
+                                      final platform =
+                                          HealthPlatformLabels.platformName();
+                                      final message = granted
+                                          ? HealthPermissionFeedback.connectedMessage(
+                                              platform,
+                                            )
+                                          : HealthPermissionFeedback.permissionDeniedMessage(
+                                              platform,
+                                            );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(content: Text(message)),
+                                      );
+                                    },
+                                    error: (_, _) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            HealthPermissionFeedback.connectionFailedMessage(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                            },
+                      child: Text(
+                        permissionState.isLoading
+                            ? 'Connecting…'
+                            : HealthPlatformLabels.connectLabel(),
+                      ),
                     ),
                   ),
-                  const Gap(tokens.Spacing.xs),
-                  Text(
-                    HealthPlatformLabels.sideloadHint(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: kynos.secondaryLabel,
-                        ),
-                  ),
+                  Divider(color: kynos.separator, height: 1),
                 ],
-              ),
+                _ActionTile(
+                  title: 'Import Apple Health export',
+                  icon: Icons.upload_file_outlined,
+                  onTap: () => context.push(Routes.healthImport),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                _ActionTile(
+                  title: 'Log run manually',
+                  icon: Icons.edit_outlined,
+                  onTap: () => context.push(Routes.manualRun),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.storage_outlined, color: kynos.stand),
+                  title: Text(
+                    'Imported runs',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  subtitle: importedCountAsync.when(
+                    data: (count) => Text('$count stored on this device'),
+                    loading: () => const Text('Loading…'),
+                    error: (_, _) => const Text('Unavailable'),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => _confirmClearImportedData(context),
+                    child: const Text('Clear imported data'),
+                  ),
+                ),
+                const Gap(tokens.Spacing.xs),
+                Text(
+                  HealthPlatformLabels.sideloadHint(),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: kynos.secondaryLabel),
+                ),
+              ],
             ),
-            const Gap(tokens.Spacing.lg),
-            const CoachPersonalizationCard(),
-            const Gap(tokens.Spacing.lg),
-            const KynosSectionHeader(title: 'AI & Cloud'),
-            const Gap(tokens.Spacing.sm),
-            KynosCard(
-              child: Column(
+          ),
+          const Gap(tokens.Spacing.lg),
+          const CoachPersonalizationCard(),
+          const Gap(tokens.Spacing.lg),
+          const KynosSectionHeader(title: 'Health Coach Memory'),
+          const Gap(tokens.Spacing.sm),
+          KynosCard(
+            child: healthCoachData.when(
+              loading: () => const Text('Loading local coach data…'),
+              error: (_, _) => const Text('Local coach data is unavailable.'),
+              data: (data) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: tokens.Spacing.sm),
-                    child: Text(
-                      'HuggingFace access token',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                  Text(
+                    '${data.checkIns.length} check-ins · '
+                    '${data.experiments.length} experiments · '
+                    '${data.memories.length} confirmed memories',
                   ),
-                  TextField(
-                    controller: _hfTokenController,
-                    obscureText: _obscureHfToken,
-                    decoration: InputDecoration(
-                      hintText: 'hf_...',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureHfToken
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscureHfToken = !_obscureHfToken,
+                  if (data.memories.isNotEmpty) ...[
+                    const Gap(tokens.Spacing.sm),
+                    for (final memory in data.memories.take(5))
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(memory.fact),
+                        subtitle: Text(memory.provenance),
+                        trailing: IconButton(
+                          tooltip: 'Forget this',
+                          onPressed: () => ref
+                              .read(healthCoachDataProvider.notifier)
+                              .deleteMemory(memory.id),
+                          icon: const Icon(Icons.delete_outline),
                         ),
                       ),
-                    ),
-                    onSubmitted: (v) => _saveHfToken(v),
-                  ),
-                  const Gap(tokens.Spacing.sm),
+                  ],
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.centerLeft,
                     child: TextButton(
-                      onPressed: () => _saveHfToken(_hfTokenController.text),
-                      child: const Text('Save token'),
+                      onPressed: () => _confirmClearHealthCoachData(context),
+                      child: const Text('Clear health coach data'),
                     ),
                   ),
-                  const Gap(tokens.Spacing.xs),
                   Text(
-                    'Required for gated Gemma models. Public models like Qwen3 0.6B '
-                    'do not need a token. Create one at huggingface.co/settings/tokens.',
+                    'Check-ins, experiments, and confirmed memories stay on this device.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: kynos.secondaryLabel,
-                        ),
+                      color: kynos.secondaryLabel,
+                    ),
                   ),
-                  Divider(color: kynos.separator, height: 1),
-                  ListTile(
-                    leading: Icon(Icons.memory_rounded, color: kynos.purple),
-                    title: Text(
-                      'On-device model',
-                      style: Theme.of(context).textTheme.titleMedium,
+                ],
+              ),
+            ),
+          ),
+          const Gap(tokens.Spacing.lg),
+          const KynosSectionHeader(title: 'AI & Cloud'),
+          const Gap(tokens.Spacing.sm),
+          KynosCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: tokens.Spacing.sm),
+                  child: Text(
+                    'HuggingFace access token',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                TextField(
+                  controller: _hfTokenController,
+                  obscureText: _obscureHfToken,
+                  decoration: InputDecoration(
+                    hintText: 'hf_...',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureHfToken
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscureHfToken = !_obscureHfToken),
                     ),
-                    subtitle: Text(
-                      _onDeviceModelSubtitle(settings.selectedLocalModelId),
-                    ),
-                    trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
-                    onTap: () async {
-                      final result = await context
-                          .push<OnDeviceModelSelectionResult>(
-                        Routes.onDeviceModels,
-                      );
-                      if (result != null && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              result.needsDownload
-                                  ? 'Selected ${result.modelName}. '
+                  ),
+                  onSubmitted: (v) => _saveHfToken(v),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _saveHfToken(_hfTokenController.text),
+                    child: const Text('Save token'),
+                  ),
+                ),
+                const Gap(tokens.Spacing.xs),
+                Text(
+                  'Required for gated Gemma models. Public models like Qwen3 0.6B '
+                  'do not need a token. Create one at huggingface.co/settings/tokens.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: kynos.secondaryLabel),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                ListTile(
+                  leading: Icon(Icons.memory_rounded, color: kynos.purple),
+                  title: Text(
+                    'On-device model',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  subtitle: Text(
+                    _onDeviceModelSubtitle(settings.selectedLocalModelId),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: kynos.tertiaryLabel,
+                  ),
+                  onTap: () async {
+                    final result = await context
+                        .push<OnDeviceModelSelectionResult>(
+                          Routes.onDeviceModels,
+                        );
+                    if (result != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result.needsDownload
+                                ? 'Selected ${result.modelName}. '
                                       'It will download when you open Coach.'
-                                  : 'Selected ${result.modelName}',
-                            ),
+                                : 'Selected ${result.modelName}',
                           ),
-                        );
-                      }
-                    },
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  const Gap(tokens.Spacing.xs),
-                  Text(
-                    'Choose a lightweight local model for coach chat. '
-                    'Smaller models use less RAM on your phone.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: kynos.secondaryLabel,
                         ),
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: tokens.Spacing.sm,
-                      bottom: tokens.Spacing.sm,
-                    ),
-                    child: Text(
-                      'OpenRouter API key',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  TextField(
-                    controller: _apiKeyController,
-                    obscureText: _obscureKey,
-                    decoration: InputDecoration(
-                      hintText: 'sk-or-...',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureKey
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureKey = !_obscureKey),
-                      ),
-                    ),
-                    onSubmitted: (v) => _saveApiKey(v),
-                  ),
-                  const Gap(tokens.Spacing.sm),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => _saveApiKey(_apiKeyController.text),
-                      child: const Text('Save key'),
-                    ),
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  _SwitchTile(
-                    title: 'Advanced cloud tasks',
-                    icon: Icons.cloud_outlined,
-                    value: settings.cloudTasksEnabled,
-                    onChanged: settingsNotifier.updateCloudTasksEnabled,
-                  ),
-                  Divider(color: kynos.separator, height: 1),
-                  _DropdownTile(
-                    title: 'Cloud data level',
-                    icon: Icons.shield_outlined,
-                    value: settings.cloudDataLevel.name,
-                    items: CloudDataLevel.values
-                        .map(
-                          (l) => DropdownMenuItem(
-                            value: l.name,
-                            child: Text(l.label),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) {
-                      if (v == null) return;
-                      final level = CloudDataLevel.values.firstWhere(
-                        (l) => l.name == v,
                       );
-                      settingsNotifier.updateCloudDataLevel(level);
-                    },
+                    }
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const Gap(tokens.Spacing.xs),
+                Text(
+                  'Choose a lightweight local model for coach chat. '
+                  'Smaller models use less RAM on your phone.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: kynos.secondaryLabel),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: tokens.Spacing.sm,
+                    bottom: tokens.Spacing.sm,
                   ),
-                  Divider(color: kynos.separator, height: 1),
-                  ListTile(
-                    leading: Icon(Icons.hub_outlined, color: kynos.stand),
-                    title: Text(
-                      'Cloud model',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    subtitle: Text(
-                      settings.hasSelectedCloudModel
-                          ? settings.selectedCloudModelName!
-                          : 'Choose a model',
-                    ),
-                    trailing: Icon(Icons.chevron_right, color: kynos.tertiaryLabel),
-                    onTap: () async {
-                      final selected =
-                          await context.push<String>(Routes.openRouterModels);
-                      if (selected != null && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Selected $selected')),
-                        );
-                      }
-                    },
-                    contentPadding: EdgeInsets.zero,
+                  child: Text(
+                    'OpenRouter API key',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const Gap(tokens.Spacing.xs),
-                  Text(
-                    'Cloud inference sends summarized health metrics to '
-                    'your chosen OpenRouter model. Keys are stored securely '
-                    'on-device.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: kynos.secondaryLabel,
+                ),
+                TextField(
+                  controller: _apiKeyController,
+                  obscureText: _obscureKey,
+                  decoration: InputDecoration(
+                    hintText: 'sk-or-...',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureKey
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscureKey = !_obscureKey),
+                    ),
+                  ),
+                  onSubmitted: (v) => _saveApiKey(v),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _saveApiKey(_apiKeyController.text),
+                    child: const Text('Save key'),
+                  ),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                _SwitchTile(
+                  title: 'Allow explicit OpenRouter fallback',
+                  icon: Icons.cloud_outlined,
+                  value: settings.cloudTasksEnabled,
+                  onChanged: settingsNotifier.updateCloudTasksEnabled,
+                ),
+                Divider(color: kynos.separator, height: 1),
+                _DropdownTile(
+                  title: 'Cloud data level',
+                  icon: Icons.shield_outlined,
+                  value: settings.cloudDataLevel.name,
+                  items: CloudDataLevel.values
+                      .map(
+                        (l) => DropdownMenuItem(
+                          value: l.name,
+                          child: Text(l.label),
                         ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v == null) return;
+                    final level = CloudDataLevel.values.firstWhere(
+                      (l) => l.name == v,
+                    );
+                    settingsNotifier.updateCloudDataLevel(level);
+                  },
+                ),
+                Divider(color: kynos.separator, height: 1),
+                ListTile(
+                  leading: Icon(Icons.hub_outlined, color: kynos.stand),
+                  title: Text(
+                    'Cloud model',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                ],
-              ),
-            ),
-            const Gap(tokens.Spacing.lg),
-            const KynosSectionHeader(title: 'Onboarding'),
-            const Gap(tokens.Spacing.sm),
-            KynosCard(
-              child: _ActionTile(
-                title: 'Replay onboarding',
-                icon: Icons.replay_outlined,
-                onTap: () => _replayOnboarding(context),
-              ),
-            ),
-            const Gap(tokens.Spacing.lg),
-            const KynosSectionHeader(title: 'Legal'),
-            const Gap(tokens.Spacing.sm),
-            KynosCard(
-              child: Column(
-                children: [
-                  _ActionTile(
-                    title: 'Privacy Policy',
-                    icon: Icons.privacy_tip_outlined,
-                    onTap: () => context.push(Routes.privacyPolicy),
+                  subtitle: Text(
+                    settings.hasSelectedCloudModel
+                        ? settings.selectedCloudModelName!
+                        : 'Choose a model',
                   ),
-                  Divider(color: kynos.separator, height: 1),
-                  _ActionTile(
-                    title: 'Terms of Service',
-                    icon: Icons.description_outlined,
-                    onTap: () => context.push(Routes.termsOfService),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: kynos.tertiaryLabel,
                   ),
-                ],
-              ),
+                  onTap: () async {
+                    final selected = await context.push<String>(
+                      Routes.openRouterModels,
+                    );
+                    if (selected != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Selected $selected')),
+                      );
+                    }
+                  },
+                  contentPadding: EdgeInsets.zero,
+                ),
+                const Gap(tokens.Spacing.xs),
+                Text(
+                  'KYNOS never switches to OpenRouter automatically. When you '
+                  'explicitly choose cloud coaching, only the selected disclosure '
+                  'level is sent. Raw charts, notes, GPS, and local memory remain on-device.',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: kynos.secondaryLabel),
+                ),
+              ],
             ),
-            const Gap(tokens.Spacing.xl),
-          ],
-        ),
+          ),
+          const Gap(tokens.Spacing.lg),
+          const KynosSectionHeader(title: 'Onboarding'),
+          const Gap(tokens.Spacing.sm),
+          KynosCard(
+            child: _ActionTile(
+              title: 'Replay onboarding',
+              icon: Icons.replay_outlined,
+              onTap: () => _replayOnboarding(context),
+            ),
+          ),
+          const Gap(tokens.Spacing.lg),
+          const KynosSectionHeader(title: 'Legal'),
+          const Gap(tokens.Spacing.sm),
+          KynosCard(
+            child: Column(
+              children: [
+                _ActionTile(
+                  title: 'Privacy Policy',
+                  icon: Icons.privacy_tip_outlined,
+                  onTap: () => context.push(Routes.privacyPolicy),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                _ActionTile(
+                  title: 'Terms of Service',
+                  icon: Icons.description_outlined,
+                  onTap: () => context.push(Routes.termsOfService),
+                ),
+              ],
+            ),
+          ),
+          const Gap(tokens.Spacing.xl),
+        ],
+      ),
     );
   }
 
@@ -483,9 +545,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     await ref.read(importedHealthDataProvider.notifier).clearAll();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Imported data cleared')),
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Imported data cleared')));
+  }
+
+  Future<void> _confirmClearHealthCoachData(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear health coach data?'),
+        content: const Text(
+          'This removes locally stored check-ins, experiments, and confirmed coach memories. Health data in the system health store is not changed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
     );
+    if (confirmed != true || !mounted) return;
+    await ref.read(healthCoachDataProvider.notifier).clearAll();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Health coach data cleared')));
   }
 
   Future<void> _saveHfToken(String token) async {
@@ -496,9 +586,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await ref.read(huggingFaceTokenManagerProvider.notifier).save(trimmed);
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('HuggingFace token saved')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('HuggingFace token saved')));
     }
   }
 
@@ -510,9 +600,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await ref.read(openRouterApiKeyManagerProvider.notifier).save(trimmed);
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OpenRouter key saved')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('OpenRouter key saved')));
     }
   }
 }

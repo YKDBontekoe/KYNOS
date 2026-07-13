@@ -12,14 +12,12 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: const MaterialApp(home: OnboardingPage()),
       ),
     );
 
-    expect(find.text('Personalised Running'), findsOneWidget);
+    expect(find.text('Understand Your Energy'), findsOneWidget);
     expect(find.text('Skip'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
   });

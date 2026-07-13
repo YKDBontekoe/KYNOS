@@ -7,7 +7,7 @@ import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
-import 'package:kynos/domain/utils/ai_task_router.dart';
+import 'package:kynos/domain/utils/cloud_health_text_redactor.dart';
 import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
@@ -57,10 +57,11 @@ class HybridAiCoachRepository implements AiCoachRepository {
   AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
 
   static final _cloudSystemPrompt =
-      'You are KYNOS Coach — an expert running coach. '
-      'Give actionable, biomechanics-aware advice. Lead with the daily '
-      'recommendation, then cite 2–3 provided evidence signals and confidence. '
-      'Never invent metrics, zones, injuries, or training history.\n\n'
+      'You are KYNOS Coach — a careful daily wellbeing coach for generally '
+      'healthy adults. Explain patterns using only provided evidence, distinguish '
+      'measurement from self-report and inference, and suggest at most one '
+      'proportionate low-risk action. Never diagnose, prescribe, or claim that '
+      'an association proves causation. Never invent health history.\n\n'
       '${CoachAgentToolCatalog.systemPromptBlock}';
 
   @override
@@ -84,15 +85,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
     final useCloud = switch (preferredBackend) {
       AiInferenceBackend.openRouter => true,
       AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => false,
-      null =>
-        cloudAvailable &&
-            AiTaskRouter.shouldUseCloud(
-              kind: taskKind,
-              cloudTasksEnabled: config.cloudTasksEnabled,
-              hasApiKey: hasKey,
-              hasSelectedModel: config.selectedModelId != null,
-              estimatedPromptTokens: estimatedPromptTokens,
-            ),
+      null => false,
     };
 
     if (useCloud) {
@@ -138,6 +131,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
     required List<ChatMessage>? conversationHistory,
     required CloudDataLevel cloudDataLevel,
   }) async* {
+    final cloudSafeUserMessage = CloudHealthTextRedactor.redact(userMessage);
     final contextBlock = buildCoachUserMessage(
       '',
       healthContext,
@@ -145,30 +139,22 @@ class HybridAiCoachRepository implements AiCoachRepository {
       cloudLevel: cloudDataLevel,
     ).trim();
 
-    final userTurn = StringBuffer()..writeln(userMessage);
+    final userTurn = StringBuffer()..writeln(cloudSafeUserMessage);
     if (contextBlock.isNotEmpty) {
       userTurn
         ..writeln()
         ..writeln(contextBlock);
     }
 
-    final history = conversationHistory ?? const <ChatMessage>[];
-
     var emitted = false;
-    final stream = history.isEmpty
-        ? _cloud.streamCompletion(
-            apiKey: apiKey,
-            modelId: modelId,
-            systemPrompt: _cloudSystemPrompt,
-            userPrompt: userTurn.toString(),
-          )
-        : _cloud.streamChat(
-            apiKey: apiKey,
-            modelId: modelId,
-            systemPrompt: _cloudSystemPrompt,
-            conversationHistory: history,
-            userMessage: userTurn.toString(),
-          );
+    // Cloud turns are intentionally stateless: previous free-form messages may
+    // contain notes, symptom wording, or exact health values.
+    final stream = _cloud.streamCompletion(
+      apiKey: apiKey,
+      modelId: modelId,
+      systemPrompt: _cloudSystemPrompt,
+      userPrompt: userTurn.toString(),
+    );
 
     await for (final chunk in stream) {
       emitted = true;

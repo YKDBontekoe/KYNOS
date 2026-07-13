@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/domain/entities/insights/training_insights.dart';
@@ -33,6 +34,10 @@ class CoachContext {
     this.athleteProfile,
     this.morningCheckIn,
     this.dailyBrief,
+    this.dailyHealthBrief,
+    this.healthCheckIns = const [],
+    this.coachMemories = const [],
+    this.wellbeingExperiments = const [],
   });
 
   final double readinessScore;
@@ -55,10 +60,18 @@ class CoachContext {
   final AthleteCoachProfile? athleteProfile;
   final MorningCheckIn? morningCheckIn;
   final DailyCoachBrief? dailyBrief;
+  final DailyHealthBrief? dailyHealthBrief;
+  final List<HealthCheckIn> healthCheckIns;
+  final List<CoachMemory> coachMemories;
+  final List<WellbeingExperiment> wellbeingExperiments;
 
   /// Short badge line for the coach app bar.
   String get contextBadge {
-    final parts = <String>['Readiness ${readinessScore.round()}'];
+    final parts = <String>[
+      dailyHealthBrief?.baselineQuality == BaselineQuality.stable
+          ? 'Personal baseline ready'
+          : 'Learning your baseline',
+    ];
     if (acwr != null) {
       parts.add('ACWR ${acwr!.toStringAsFixed(2)}');
     }

@@ -35,29 +35,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   final List<OnboardingItem> items = const [
     OnboardingItem(
-      imagePath: 'assets/images/onboarding_biomechanics.png',
-      title: 'Personalised Running',
+      imagePath: 'assets/images/onboarding_health_data.png',
+      title: 'Understand Your Energy',
       description:
-          'Train smarter with AI-driven insights that adapt to your unique biomechanics.',
+          'Connect sleep, recovery, movement, and how you feel into one personal daily picture.',
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_privacy.png',
-      title: 'Zero Knowledge Privacy',
+      title: 'Private by Default',
       description:
-          'Your data stays on your device. Period. Powered by local AI and zk-SNARK proofs.',
+          'Your health history, check-ins, experiments, and coach memory stay on your device.',
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_health_data.png',
-      title: 'Connect Your Health',
+      title: 'Learn Your Own Normal',
       description:
-          'Grant HealthKit access or import runs so KYNOS can build your readiness baseline.',
+          'KYNOS learns your personal baseline instead of judging you against generic targets.',
     ),
     OnboardingItem(
-      imagePath: 'assets/images/onboarding_health_data.png',
-      title: 'Set Up AI Coach',
+      imagePath: 'assets/images/onboarding_biomechanics.png',
+      title: 'One Useful Action',
       description:
-          'Add a HuggingFace token in Settings to download the on-device Gemma coach model. '
-          'You can also enable cloud coaching with OpenRouter later.',
+          'Get a calm daily brief, investigate patterns visually, and try small changes only when you confirm them.',
     ),
   ];
 

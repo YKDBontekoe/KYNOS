@@ -15,6 +15,10 @@ final class HealthDataFailure extends Failure {
   const HealthDataFailure([super.message = 'Health data unavailable']);
 }
 
+final class HealthCoachFailure extends Failure {
+  const HealthCoachFailure([super.message = 'Health coach data unavailable']);
+}
+
 final class BiomechanicsModelFailure extends Failure {
   const BiomechanicsModelFailure([super.message = 'Biomechanics model error']);
 }
@@ -24,8 +28,9 @@ final class StorageFailure extends Failure {
 }
 
 final class PrivacyConstraintFailure extends Failure {
-  const PrivacyConstraintFailure(
-      [super.message = 'Operation blocked by Zero-Knowledge policy']);
+  const PrivacyConstraintFailure([
+    super.message = 'Operation blocked by Zero-Knowledge policy',
+  ]);
 }
 
 final class AiModelFailure extends Failure {

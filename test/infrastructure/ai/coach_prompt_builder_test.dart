@@ -7,27 +7,29 @@ import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 void main() {
   group('buildCoachUserMessage', () {
     test('returns user message unchanged when health context is absent', () {
-      expect(buildCoachUserMessage('How is my cadence?', null), 'Athlete question: How is my cadence?');
-      expect(buildCoachUserMessage('How is my cadence?', []), 'Athlete question: How is my cadence?');
+      expect(
+        buildCoachUserMessage('How is my cadence?', null),
+        'Person’s question: How is my cadence?',
+      );
+      expect(
+        buildCoachUserMessage('How is my cadence?', []),
+        'Person’s question: How is my cadence?',
+      );
     });
 
     test('prepends health metrics without system instruction', () {
-      final prompt = buildCoachUserMessage(
-        'Should I run today?',
-        [
-          HealthSummary(
-            date: DateTime(2026, 7, 5),
-            rhrBpm: 52,
-            hrvMs: 68,
-            sleepHours: 7.5,
-            distanceMeters: 28000,
-          ),
-        ],
-        cloudLevel: CloudDataLevel.full,
-      );
+      final prompt = buildCoachUserMessage('Should I run today?', [
+        HealthSummary(
+          date: DateTime(2026, 7, 5),
+          rhrBpm: 52,
+          hrvMs: 68,
+          sleepHours: 7.5,
+          distanceMeters: 28000,
+        ),
+      ], cloudLevel: CloudDataLevel.full);
 
-      expect(prompt, contains('Recent athlete metrics:'));
-      expect(prompt, contains('Athlete question: Should I run today?'));
+      expect(prompt, contains('Recent wellbeing metrics:'));
+      expect(prompt, contains('Person’s question: Should I run today?'));
       expect(prompt, isNot(contains('KYNOS Coach')));
       expect(prompt, isNot(contains('Never reveal you are an AI model')));
     });
