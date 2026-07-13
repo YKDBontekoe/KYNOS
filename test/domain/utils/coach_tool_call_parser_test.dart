@@ -12,15 +12,19 @@ void main() {
       expect(call.arguments['limit'], 5);
     });
 
-    test('parses a directive with nested argument objects', () {
+    test('rejects a directive embedded after preamble text', () {
       const text = 'Some preamble\n'
-          'TOOL_CALL: {"name":"compute_pace_plan","arguments":{"distance_km":10,"meta":{"x":1}}}';
+          'TOOL_CALL: {"name":"compute_pace_plan","arguments":{"distance_km":10}}';
+      expect(CoachToolCallParser.tryParse(text), isNull);
+    });
+
+    test('parses a directive with leading whitespace', () {
+      const text = '  TOOL_CALL: {"name":"get_recent_runs","arguments":{"limit":3}}';
       final call = CoachToolCallParser.tryParse(text);
 
       expect(call, isNotNull);
-      expect(call!.name, 'compute_pace_plan');
-      expect(call.arguments['distance_km'], 10);
-      expect(call.arguments['meta'], {'x': 1});
+      expect(call!.name, 'get_recent_runs');
+      expect(call.arguments['limit'], 3);
     });
 
     test('returns null when there is no directive', () {

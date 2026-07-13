@@ -26,8 +26,8 @@ abstract final class CoachToolCallParser {
 
       final rawArgs = decoded['arguments'];
       final arguments = rawArgs is Map
-          ? rawArgs.map((key, value) => MapEntry(key.toString(), value))
-          : <String, dynamic>{};
+          ? rawArgs.map((key, value) => MapEntry(key.toString(), value as Object?))
+          : <String, Object?>{};
       return CoachToolCall(name: name.trim(), arguments: arguments);
     } on FormatException {
       return null;
@@ -39,7 +39,7 @@ abstract final class CoachToolCallParser {
     final markerIndex = text.indexOf(_marker);
     if (markerIndex == -1) return text;
 
-    final braceStart = _braceStartAfterMarker(text);
+    final braceStart = _braceStartAfterMarkerAt(text, markerIndex);
     final braceEnd =
         braceStart == -1 ? -1 : _matchingBraceEnd(text, braceStart);
 
@@ -61,8 +61,17 @@ abstract final class CoachToolCallParser {
   }
 
   static int _braceStartAfterMarker(String text) {
-    final markerIndex = text.indexOf(_marker);
-    if (markerIndex == -1) return -1;
+    final markerIndex = text.length - text.trimLeft().length;
+    return _braceStartAfterMarkerAt(text, markerIndex);
+  }
+
+  static int _braceStartAfterMarkerAt(String text, int markerIndex) {
+    if (markerIndex < 0 || markerIndex >= text.length) return -1;
+    final fromMarker = text.substring(markerIndex);
+    if (fromMarker.length < _marker.length ||
+        fromMarker.substring(0, _marker.length).toUpperCase() != _marker) {
+      return -1;
+    }
     final colonIndex = text.indexOf(':', markerIndex);
     if (colonIndex == -1) return -1;
     return text.indexOf('{', colonIndex);

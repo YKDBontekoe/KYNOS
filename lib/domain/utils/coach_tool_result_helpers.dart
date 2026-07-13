@@ -41,7 +41,7 @@ abstract final class CoachToolResultHelpers {
 
   static CoachToolResult disabled(CoachToolCall call, CoachDataSource source) {
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: true,
       promptSummary:
           "${source.label} is disabled in this conversation's privacy settings; "
@@ -52,7 +52,7 @@ abstract final class CoachToolResultHelpers {
 
   static CoachToolResult error(CoachToolCall call, String message) {
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: true,
       promptSummary: message,
       displayLabel: 'Tool error',

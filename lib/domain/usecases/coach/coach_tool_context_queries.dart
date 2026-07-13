@@ -22,33 +22,37 @@ class CoachToolContextQueries {
     }
 
     final parts = <String>[];
-    if (context.acwr != null) {
+    if (prefs.isEnabled(CoachDataSource.readinessAcwr) && context.acwr != null) {
       parts.add(
         'ACWR ${context.acwr!.toStringAsFixed(2)} (${context.acwrRiskLabel ?? 'no label'})',
       );
     }
-    final momentum = context.weeklyMomentum;
-    if (momentum != null) {
-      parts.add(
-        '${momentum.thisWeekDistanceKm.toStringAsFixed(1)}/'
-        '${momentum.distanceGoalKm.toStringAsFixed(0)}km this week',
-      );
+    if (prefs.isEnabled(CoachDataSource.weeklyMomentum)) {
+      final momentum = context.weeklyMomentum;
+      if (momentum != null) {
+        parts.add(
+          '${momentum.thisWeekDistanceKm.toStringAsFixed(1)}/'
+          '${momentum.distanceGoalKm.toStringAsFixed(0)}km this week',
+        );
+      }
     }
-    final hints = context.trainingInsights?.adjustmentHints ?? const [];
-    if (hints.isNotEmpty) {
-      parts.add('Hints: ${hints.take(2).join('; ')}');
+    if (prefs.isEnabled(CoachDataSource.trainingInsights)) {
+      final hints = context.trainingInsights?.adjustmentHints ?? const [];
+      if (hints.isNotEmpty) {
+        parts.add('Hints: ${hints.take(2).join('; ')}');
+      }
     }
 
     if (parts.isEmpty) {
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary: 'Not enough data yet to assess training load.',
         displayLabel: 'Training load unavailable',
       );
     }
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: parts.join('. '),
       displayLabel: 'Training load reviewed',
@@ -67,7 +71,7 @@ class CoachToolContextQueries {
     final character = context.character;
     if (character == null) {
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary: 'No character data yet.',
         displayLabel: 'No character yet',
@@ -79,7 +83,7 @@ class CoachToolContextQueries {
         'weakest stat ${character.stats.weakest.fullName}.'
         '${quests.isEmpty ? '' : ' Active quests: $quests.'}';
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: summary,
       displayLabel: 'Character progress checked',
@@ -99,14 +103,14 @@ class CoachToolContextQueries {
     final callouts = findPersonalBestCallouts(context.healthHistory, today);
     if (callouts.isEmpty) {
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary: 'No new personal bests recently.',
         displayLabel: 'No new PBs',
       );
     }
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: callouts.join('; '),
       displayLabel: '${callouts.length} PB${callouts.length == 1 ? '' : 's'} found',
@@ -114,20 +118,28 @@ class CoachToolContextQueries {
   }
 
   CoachToolResult computePacePlan(CoachToolCall call) {
-    final distanceKm =
-        CoachToolResultHelpers.doubleArg(call, 'distance_km', fallback: 5.0, min: 0.5, max: 200);
+    final distanceKm = CoachToolResultHelpers.rawDoubleArg(call, 'distance_km');
     final targetMinutes = CoachToolResultHelpers.rawDoubleArg(call, 'target_time_minutes');
-    if (targetMinutes == null || targetMinutes <= 0) {
+    if (distanceKm == null ||
+        distanceKm <= 0 ||
+        targetMinutes == null ||
+        targetMinutes <= 0) {
       return CoachToolResultHelpers.error(
         call,
-        'Provide target_time_minutes to compute a pace plan.',
+        'Provide distance_km and target_time_minutes to compute a pace plan.',
+      );
+    }
+    if (distanceKm < 0.5 || distanceKm > 200) {
+      return CoachToolResultHelpers.error(
+        call,
+        'distance_km must be between 0.5 and 200.',
       );
     }
 
     final secondsPerKm = (targetMinutes * 60) / distanceKm;
     final pace = formatPacePerKm(secondsPerKm);
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary:
           'For ${distanceKm.toStringAsFixed(1)}km in ${targetMinutes.toStringAsFixed(0)} min, '

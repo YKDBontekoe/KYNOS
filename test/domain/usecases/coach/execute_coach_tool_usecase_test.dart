@@ -186,6 +186,36 @@ void main() {
 
       expect(result.isError, isTrue);
     });
+
+    test('errors without distance_km', () async {
+      final result = await useCase.call(
+        toolCall: const CoachToolCall(
+          name: 'compute_pace_plan',
+          arguments: {'target_time_minutes': 50},
+        ),
+        context: context,
+        preferences: allEnabled(),
+      );
+
+      expect(result.isError, isTrue);
+      expect(result.promptSummary, contains('distance_km'));
+    });
+  });
+
+  group('get_health_trend metric validation', () {
+    test('rejects unsupported metrics', () async {
+      final result = await useCase.call(
+        toolCall: const CoachToolCall(
+          name: 'get_health_trend',
+          arguments: {'metric': 'calories'},
+        ),
+        context: context,
+        preferences: allEnabled(),
+      );
+
+      expect(result.isError, isTrue);
+      expect(result.promptSummary, contains('Unsupported metric'));
+    });
   });
 
   test('unknown tool name returns an error result', () async {

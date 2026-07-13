@@ -116,6 +116,9 @@ void main() {
     expect(assistant.hasError, isFalse);
     expect(assistant.content, 'Final answer after the tool budget was reached.');
     expect(fakeAi.capturedUserMessages, hasLength(3));
+    expect(fakeAi.capturedUserMessages[1], contains('get_training_load'));
+    expect(fakeAi.capturedUserMessages[2], contains('get_training_load'));
+    expect(fakeAi.capturedUserMessages[2], contains('get_personal_bests'));
   });
 
   test('never leaks a raw TOOL_CALL directive if the model keeps trying past the budget', () async {

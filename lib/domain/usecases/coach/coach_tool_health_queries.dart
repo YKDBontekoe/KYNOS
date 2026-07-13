@@ -35,7 +35,7 @@ class CoachToolHealthQueries {
     final runs = result.runs;
     if (runs.isEmpty) {
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary: 'No runs found in the last $days days.',
         displayLabel: 'No runs in $days days',
@@ -44,7 +44,7 @@ class CoachToolHealthQueries {
 
     final lines = runs.take(limit).map(_formatRunLine).join('\n');
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: 'Runs (last $days days):\n$lines',
       displayLabel: '${runs.length} run${runs.length == 1 ? '' : 's'} found',
@@ -82,7 +82,7 @@ class CoachToolHealthQueries {
           ) ??
           'n/a';
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary:
             'Run $runId: ${formatRunDuration(workout.duration)}, avg pace $pace. '
@@ -95,7 +95,7 @@ class CoachToolHealthQueries {
         .map((s) => 'km${s.kilometer} ${formatPacePerKm(s.paceSecondsPerKm)}')
         .join(', ');
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: 'Run $runId splits — $splitLines',
       displayLabel: '${analytics.kilometerSplits.length} km splits',
@@ -110,6 +110,13 @@ class CoachToolHealthQueries {
       return CoachToolResultHelpers.disabled(call, CoachDataSource.healthMetrics);
     }
     final metric = (CoachToolResultHelpers.stringArg(call, 'metric') ?? 'hrv').toLowerCase();
+    const allowedMetrics = {'hrv', 'rhr', 'sleep', 'steps'};
+    if (!allowedMetrics.contains(metric)) {
+      return CoachToolResultHelpers.error(
+        call,
+        'Unsupported metric "$metric". Use hrv, rhr, sleep, or steps.',
+      );
+    }
     final days = CoachToolResultHelpers.intArg(call, 'days', fallback: 14, min: 3, max: 60);
     final result = await _health.getSummaries(days: days);
     if (result.failure != null || result.summaries.isEmpty) {
@@ -129,7 +136,7 @@ class CoachToolHealthQueries {
 
     if (today == null) {
       return CoachToolResult(
-        call: call,
+        toolCall: call,
         isError: false,
         promptSummary: 'No $metric readings in the last $days days.',
         displayLabel: '$metric trend unavailable',
@@ -143,7 +150,7 @@ class CoachToolHealthQueries {
     };
     final baselineText = baseline == null ? 'n/a' : '${baseline.toStringAsFixed(1)}$unit';
     return CoachToolResult(
-      call: call,
+      toolCall: call,
       isError: false,
       promptSummary: 'Latest $metric: ${today.toStringAsFixed(1)}$unit. '
           '$days-day avg: $baselineText.$trendPhrase',
@@ -170,7 +177,7 @@ class CoachToolHealthQueries {
         'rhr' => summary.rhrBpm,
         'sleep' => summary.sleepHours,
         'steps' => summary.steps?.toDouble(),
-        _ => summary.hrvMs,
+        _ => null,
       };
 
   String _metricUnit(String metric) => switch (metric) {

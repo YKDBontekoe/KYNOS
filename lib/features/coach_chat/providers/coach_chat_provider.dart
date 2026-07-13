@@ -298,8 +298,11 @@ class CoachChat extends _$CoachChat {
     var nextUserMessage = userMessage;
     CoachContext? contextForThisCall = coachContext;
     final toolSteps = <CoachToolStep>[];
+    final toolResults = <CoachToolResult>[];
 
     for (var step = 0; step <= _maxToolStepsPerTurn; step++) {
+      if (_cancelRequested) return;
+
       final buffer = StringBuffer();
       var toolCallRuledOut = false;
       var flushedLiveStart = false;
@@ -367,10 +370,12 @@ class CoachChat extends _$CoachChat {
       );
       _setAssistantToolSteps(assistantId, List.of(toolSteps));
 
+      if (_cancelRequested) return;
+
+      toolResults.add(result);
       nextUserMessage = _buildToolFollowUpPrompt(
         originalQuestion: userMessage,
-        toolCall: toolCall,
-        result: result,
+        toolResults: toolResults,
         isFinalAttempt: step == _maxToolStepsPerTurn - 1,
       );
       contextForThisCall = null;
@@ -379,18 +384,21 @@ class CoachChat extends _$CoachChat {
 
   String _buildToolFollowUpPrompt({
     required String originalQuestion,
-    required CoachToolCall toolCall,
-    required CoachToolResult result,
+    required List<CoachToolResult> toolResults,
     required bool isFinalAttempt,
   }) {
-    final resultLine = result.isError
-        ? 'Tool `${toolCall.name}` could not run: ${result.promptSummary}'
-        : 'Tool `${toolCall.name}` result: ${result.promptSummary}';
+    final resultLines = toolResults
+        .map(
+          (result) => result.isError
+              ? 'Tool `${result.toolCall.name}` could not run: ${result.promptSummary}'
+              : 'Tool `${result.toolCall.name}` result: ${result.promptSummary}',
+        )
+        .join('\n');
     final instruction = isFinalAttempt
         ? 'Give your final answer to the athlete now. Do not call another tool.'
         : 'If you still need more data, reply with another single TOOL_CALL '
             'line. Otherwise answer the athlete now.';
-    return '$resultLine\n\n'
+    return '$resultLines\n\n'
         'Continue answering the athlete\'s question: "$originalQuestion"\n'
         '$instruction Do not mention tools or TOOL_CALL in your reply.';
   }

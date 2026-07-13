@@ -43,7 +43,7 @@ class ExecuteCoachToolUseCase {
           return _contextQueries.computePacePlan(toolCall);
         default:
           return CoachToolResult(
-            call: toolCall,
+            toolCall: toolCall,
             isError: true,
             promptSummary: 'Unknown tool "${toolCall.name}".',
             displayLabel: 'Tool error',
@@ -51,7 +51,7 @@ class ExecuteCoachToolUseCase {
       }
     } on Object {
       return CoachToolResult(
-        call: toolCall,
+        toolCall: toolCall,
         isError: true,
         promptSummary: 'That tool could not complete right now.',
         displayLabel: 'Tool error',

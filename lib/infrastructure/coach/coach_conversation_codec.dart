@@ -178,11 +178,17 @@ abstract final class CoachConversationCodec {
   static CoachToolStep _toolStepFromMap(Map<String, dynamic> map) {
     return CoachToolStep(
       toolName: map['toolName'] as String,
-      status: CoachToolStatus.values.byName(
-        map['status'] as String? ?? CoachToolStatus.success.name,
-      ),
+      status: _toolStatusFromString(map['status'] as String?),
       displayLabel: map['displayLabel'] as String?,
     );
+  }
+
+  static CoachToolStatus _toolStatusFromString(String? raw) {
+    if (raw == null) return CoachToolStatus.success;
+    for (final status in CoachToolStatus.values) {
+      if (status.name == raw) return status;
+    }
+    return CoachToolStatus.success;
   }
 
   static Map<String, dynamic> _settingsToMap(CoachConversationSettings settings) {
