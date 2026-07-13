@@ -5,20 +5,20 @@ import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
-import 'package:kynos/shared/widgets/kynos_nav_rail.dart';
+import 'package:kynos/shared/widgets/kynos_floating_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — left-edge nav rail with three focused tabs.
+/// Root app shell — draggable floating nav with three focused tabs.
 class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   static const _navItems = [
-    KynosNavRailItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosNavRailItem(label: 'Health', icon: NavIconPaths.training),
-    KynosNavRailItem(label: 'Journey', icon: NavIconPaths.character),
+    KynosFloatingNavItem(label: 'Coach', icon: NavIconPaths.coach),
+    KynosFloatingNavItem(label: 'Health', icon: NavIconPaths.training),
+    KynosFloatingNavItem(label: 'Journey', icon: NavIconPaths.character),
   ];
 
   void _onTabSelected(int index) {
@@ -58,23 +58,16 @@ class ShellPage extends ConsumerWidget {
                 ),
               ),
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                KynosNavRail(
-                  items: _navItems,
-                  selectedIndex: navigationShell.currentIndex,
-                  onSelected: _onTabSelected,
-                ),
-                Expanded(
-                  child: ResponsiveCenter(
-                    child: _AnimatedShellBody(
-                      tabIndex: navigationShell.currentIndex,
-                      child: navigationShell,
-                    ),
-                  ),
-                ),
-              ],
+            ResponsiveCenter(
+              child: _AnimatedShellBody(
+                tabIndex: navigationShell.currentIndex,
+                child: navigationShell,
+              ),
+            ),
+            KynosFloatingNav(
+              items: _navItems,
+              selectedIndex: navigationShell.currentIndex,
+              onSelected: _onTabSelected,
             ),
           ],
         ),
