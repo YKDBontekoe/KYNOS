@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.18.0...v1.19.0) (2026-07-13)
+
+
+### Features
+
+* make coach the home experience ([#97](https://github.com/YKDBontekoe/KYNOS/issues/97)) ([fa90938](https://github.com/YKDBontekoe/KYNOS/commit/fa9093893a9a24714f11ae56e82db91ba6e01aae))
+
 # [1.18.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.17.0...v1.18.0) (2026-07-13)
 
 
