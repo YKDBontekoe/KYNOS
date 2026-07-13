@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -161,19 +163,20 @@ class _KynosFloatingNavState extends State<KynosFloatingNav>
   }) {
     final viewPadding = MediaQuery.viewPaddingOf(context);
     final stackHeight = _stackHeight(expanded: expanded);
-    final maxLeft = parentSize.width - _fabSize - viewPadding.right - tokens.Spacing.xs;
-    final maxBottom =
-        parentSize.height - stackHeight - viewPadding.top - tokens.Spacing.xs;
+    final minLeft = viewPadding.left + tokens.Spacing.xs;
+    final minBottom = viewPadding.bottom + tokens.Spacing.xs;
+    final maxLeft = math.max(
+      minLeft,
+      parentSize.width - _fabSize - viewPadding.right - tokens.Spacing.xs,
+    );
+    final maxBottom = math.max(
+      minBottom,
+      parentSize.height - stackHeight - viewPadding.top - tokens.Spacing.xs,
+    );
 
     return Offset(
-      position.dx.clamp(
-        viewPadding.left + tokens.Spacing.xs,
-        maxLeft,
-      ),
-      position.dy.clamp(
-        viewPadding.bottom + tokens.Spacing.xs,
-        maxBottom,
-      ),
+      position.dx.clamp(minLeft, maxLeft),
+      position.dy.clamp(minBottom, maxBottom),
     );
   }
 
@@ -273,7 +276,10 @@ class _FloatingNavControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedItem = items[selectedIndex.clamp(0, items.length - 1)];
+    final hasItems = items.isNotEmpty;
+    final selectedItem = hasItems
+        ? items[selectedIndex.clamp(0, items.length - 1)]
+        : null;
 
     return GestureDetector(
       key: const Key('kynos_floating_nav_control'),
@@ -306,13 +312,13 @@ class _FloatingNavControl extends StatelessWidget {
                       onTap: () => onItemTap(i),
                     ),
                   ],
-                  for (final action in actions) ...[
-                    if (items.isNotEmpty) const Gap(tokens.Spacing.xs),
+                  for (var i = 0; i < actions.length; i++) ...[
+                    if (hasItems || i > 0) const Gap(tokens.Spacing.xs),
                     _NavActionOption(
-                      label: action.label,
-                      icon: action.icon,
+                      label: actions[i].label,
+                      icon: actions[i].icon,
                       unselected: unselected,
-                      onTap: () => onActionTap(action),
+                      onTap: () => onActionTap(actions[i]),
                     ),
                   ],
                   const Gap(tokens.Spacing.xs),
@@ -320,34 +326,48 @@ class _FloatingNavControl extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onFabTap,
-            behavior: HitTestBehavior.opaque,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                boxShadow: shadow,
-                borderRadius: BorderRadius.circular(tokens.Radius.full),
-              ),
-              child: LiquidGlassSurface(
-                borderRadius: tokens.Radius.full,
-                blurSigma: LiquidGlassTokens.navBlurSigma,
-                padding: EdgeInsets.zero,
-                child: SizedBox(
-                  width: _fabSize,
-                  height: _fabSize,
-                  child: Center(
-                    child: AnimatedRotation(
-                      turns: expanded ? 0.125 : 0,
-                      duration: Motion.navItem,
-                      curve: Motion.curve,
-                      child: CustomPaint(
-                        size: const Size(24, 24),
-                        painter: NavIconPainter(
-                          pathData: selectedItem.icon.filled,
-                          color: accent,
-                          strokeWidth: 2,
-                          filled: true,
-                        ),
+          Semantics(
+            button: true,
+            label: expanded
+                ? 'Collapse navigation menu'
+                : 'Open navigation menu',
+            child: GestureDetector(
+              onTap: onFabTap,
+              behavior: HitTestBehavior.opaque,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  boxShadow: shadow,
+                  borderRadius: BorderRadius.circular(tokens.Radius.full),
+                ),
+                child: LiquidGlassSurface(
+                  borderRadius: tokens.Radius.full,
+                  blurSigma: LiquidGlassTokens.navBlurSigma,
+                  padding: EdgeInsets.zero,
+                  child: SizedBox(
+                    width: _fabSize,
+                    height: _fabSize,
+                    child: Center(
+                      child: AnimatedRotation(
+                        turns: expanded ? 0.125 : 0,
+                        duration: Motion.navItem,
+                        curve: Motion.curve,
+                        child: selectedItem != null
+                            ? CustomPaint(
+                                size: const Size(24, 24),
+                                painter: NavIconPainter(
+                                  pathData: selectedItem.icon.filled,
+                                  color: accent,
+                                  strokeWidth: 2,
+                                  filled: true,
+                                ),
+                              )
+                            : Icon(
+                                actions.isNotEmpty
+                                    ? actions.first.icon
+                                    : Icons.menu_rounded,
+                                size: 24,
+                                color: accent,
+                              ),
                       ),
                     ),
                   ),
