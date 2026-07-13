@@ -16,14 +16,14 @@ import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_
 import 'package:kynos/features/dashboard/presentation/widgets/last_run_preview.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/readiness_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/week_momentum_card.dart';
-import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
-import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/features/training/presentation/widgets/past_runs_list.dart';
 import 'package:kynos/features/training/presentation/widgets/weekly_stats_grid.dart';
 import 'package:kynos/features/training/presentation/widgets/wellbeing_panels.dart';
+import 'package:kynos/shared/providers/dashboard_summary_provider.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
+import 'package:kynos/shared/providers/today_insights_provider.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/charts/health_trend_chart.dart';
 import 'package:kynos/shared/widgets/gait_model_card.dart';
