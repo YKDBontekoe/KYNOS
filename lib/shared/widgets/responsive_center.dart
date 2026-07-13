@@ -21,8 +21,9 @@ class ResponsiveCenter extends StatelessWidget {
 
     return Align(
       alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
+      child: SizedBox(
+        width: maxWidth,
+        height: MediaQuery.sizeOf(context).height,
         child: child,
       ),
     );

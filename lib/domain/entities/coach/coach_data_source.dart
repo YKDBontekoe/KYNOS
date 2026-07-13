@@ -9,7 +9,10 @@ enum CoachDataSource {
   characterQuests('Character & quests'),
   gaitBiomechanics('Gait biomechanics'),
   athletePreferences('Athlete preferences'),
-  postRunDebrief('Post-run debrief');
+  postRunDebrief('Post-run debrief'),
+  healthCheckIns('Daily check-ins'),
+  coachMemory('Coach memory'),
+  wellbeingExperiments('Wellbeing experiments');
 
   const CoachDataSource(this.label);
   final String label;

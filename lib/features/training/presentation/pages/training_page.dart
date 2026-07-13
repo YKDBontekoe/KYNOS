@@ -11,7 +11,9 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/features/training/presentation/widgets/past_runs_list.dart';
 import 'package:kynos/features/training/presentation/widgets/training_insight_cards.dart';
 import 'package:kynos/features/training/presentation/widgets/weekly_stats_grid.dart';
+import 'package:kynos/features/training/presentation/widgets/wellbeing_panels.dart';
 import 'package:kynos/features/training/providers/training_insights_provider.dart';
+import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/utils/date_label.dart';
@@ -56,6 +58,8 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
     final recentRuns = ref.watch(recentRunsProvider(days: 365, limit: 60));
     final labState = kIsWeb ? null : ref.watch(nexusLabProvider);
     final insightsState = ref.watch(trainingInsightsStateProvider);
+    final healthBrief = ref.watch(dailyHealthBriefProvider);
+    final coachData = ref.watch(healthCoachDataProvider).value;
 
     final kynos = context.kynosTheme;
 
@@ -90,19 +94,23 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
             ),
             sliver: SliverList.list(
               children: [
-                Text('TRAINING', style: Theme.of(context).textTheme.labelSmall),
+                Text('HEALTH', style: Theme.of(context).textTheme.labelSmall),
                 const Gap(tokens.Spacing.xs),
                 Text(
-                  'Training',
+                  'Health',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const Gap(tokens.Spacing.xs),
                 Text(
-                  'Your running load, recovery, and progress',
+                  'Understand your sleep, recovery, movement, and lived experience',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const Gap(tokens.Spacing.lg),
-                const KynosSectionHeader(title: 'Training snapshot'),
+                const KynosSectionHeader(title: 'Today'),
+                const Gap(tokens.Spacing.sm),
+                DailyHealthOverview(brief: healthBrief),
+                const Gap(tokens.Spacing.lg),
+                const KynosSectionHeader(title: 'Body signals'),
                 const Gap(tokens.Spacing.sm),
                 history.when(
                   loading: () => const KynosCard(
@@ -130,10 +138,20 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
                 const Gap(tokens.Spacing.lg),
                 TrainingInsightsCards(insightsState: insightsState),
                 const Gap(tokens.Spacing.lg),
+                const KynosSectionHeader(title: 'How you felt'),
+                const Gap(tokens.Spacing.sm),
+                CheckInHistoryPanel(checkIns: coachData?.checkIns ?? const []),
+                const Gap(tokens.Spacing.lg),
+                const KynosSectionHeader(title: 'Wellbeing experiments'),
+                const Gap(tokens.Spacing.sm),
+                WellbeingExperimentsPanel(
+                  experiments: coachData?.experiments ?? const [],
+                ),
+                const Gap(tokens.Spacing.lg),
                 Row(
                   children: [
                     const Expanded(
-                      child: KynosSectionHeader(title: 'Recent Runs'),
+                      child: KynosSectionHeader(title: 'Movement & exercise'),
                     ),
                     TextButton(
                       onPressed: () => context.push(Routes.runHistory),
@@ -164,7 +182,7 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
                   ),
                 ),
                 const Gap(tokens.Spacing.lg),
-                const KynosSectionHeader(title: 'Gait Model'),
+                const KynosSectionHeader(title: 'Advanced movement analysis'),
                 const Gap(tokens.Spacing.sm),
                 GaitModelCardAsync(
                   labState: labState?.when(

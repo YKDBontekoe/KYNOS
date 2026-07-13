@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
@@ -8,9 +9,12 @@ import 'package:kynos/domain/entities/coach/coach_conversation.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation_settings.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/domain/utils/coach_tool_call_parser.dart';
+import 'package:kynos/domain/utils/health_safety_policy.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/features/coach_chat/providers/last_coach_context_provider.dart';
@@ -29,7 +33,8 @@ const _inferenceTimeout = Duration(seconds: 120);
 
 /// Maximum agentic tool calls per assistant turn — bounds latency and keeps
 /// on-device token budgets in check (see [GemmaInferenceLimits]).
-const _maxToolStepsPerTurn = 2;
+const _maxToolStepsPerTurn = 4;
+const _toolTimeout = Duration(seconds: 12);
 
 @Riverpod(keepAlive: true)
 class CoachChat extends _$CoachChat {
@@ -41,14 +46,41 @@ class CoachChat extends _$CoachChat {
   Future<List<ChatMessage>> build() async {
     final conversationId = ref.watch(activeCoachConversationIdProvider);
     if (conversationId == null) return const [];
-    final result =
-        await ref.read(getCoachConversationUseCaseProvider).call(conversationId);
+    final result = await ref
+        .read(getCoachConversationUseCaseProvider)
+        .call(conversationId);
     return result.conversation?.messages ?? const [];
   }
 
   Future<void> sendMessage(String userMessage) async {
     _cancelRequested = false;
+    if (HealthSafetyPolicy.hasUrgentText(userMessage)) {
+      await _respondToUrgentSymptom(userMessage);
+      return;
+    }
     await _runInference(userMessage: userMessage);
+  }
+
+  Future<void> _respondToUrgentSymptom(String userMessage) async {
+    final current = state.value ?? const [];
+    final timestamp = DateTime.now();
+    final user = ChatMessage(
+      id: '${timestamp.microsecondsSinceEpoch}_user',
+      role: MessageRole.user,
+      content: userMessage,
+      timestamp: timestamp,
+    );
+    final response = ChatMessage(
+      id: '${timestamp.microsecondsSinceEpoch}_assistant',
+      role: MessageRole.assistant,
+      content: HealthSafetyPolicy.urgentGuidance,
+      timestamp: timestamp,
+      attemptedBackend: AiInferenceBackend.rulesOnly,
+      userPromptForRetry: userMessage,
+    );
+    state = AsyncData([...current, user, response]);
+    await _maybeAutoTitle(userMessage, current.isEmpty);
+    await _persist();
   }
 
   Future<void> retryMessage(String assistantId) async {
@@ -69,6 +101,7 @@ class CoachChat extends _$CoachChat {
         isStreaming: true,
         hasError: false,
         clearToolSteps: true,
+        clearStructuredContent: true,
       );
     state = AsyncData(cleared);
 
@@ -100,6 +133,7 @@ class CoachChat extends _$CoachChat {
         isStreaming: true,
         hasError: false,
         clearToolSteps: true,
+        clearStructuredContent: true,
       );
     state = AsyncData(cleared);
 
@@ -145,10 +179,7 @@ class CoachChat extends _$CoachChat {
     final conversation = await _loadConversation();
     if (conversation != null) {
       await _saveConversation(
-        conversation.copyWith(
-          messages: const [],
-          updatedAt: DateTime.now(),
-        ),
+        conversation.copyWith(messages: const [], updatedAt: DateTime.now()),
       );
     }
   }
@@ -202,7 +233,9 @@ class CoachChat extends _$CoachChat {
       );
 
       final globalSettings = ref.read(settingsProvider);
-      final cloudLevel = ref.read(filterCoachContextUseCaseProvider).effectiveCloudLevel(
+      final cloudLevel = ref
+          .read(filterCoachContextUseCaseProvider)
+          .effectiveCloudLevel(
             globalLevel: globalSettings.cloudDataLevel,
             preferences: settings.contextPreferences,
           );
@@ -240,11 +273,13 @@ class CoachChat extends _$CoachChat {
       ref.read(lastCoachContextProvider.notifier).set(coachContext);
 
       final attemptedBackend =
-          preferredBackend ?? ref.read(chatAiCoachRepositoryProvider).lastBackend;
-      final cloudConfigured =
-          await ref.read(isCloudCoachConfiguredProvider.future);
-      final canSwitchToCloud = cloudConfigured &&
-          attemptedBackend != AiInferenceBackend.openRouter;
+          preferredBackend ??
+          ref.read(chatAiCoachRepositoryProvider).lastBackend;
+      final cloudConfigured = await ref.read(
+        isCloudCoachConfiguredProvider.future,
+      );
+      final canSwitchToCloud =
+          cloudConfigured && attemptedBackend != AiInferenceBackend.openRouter;
       final canSwitchToOnDevice =
           attemptedBackend == AiInferenceBackend.openRouter;
 
@@ -299,6 +334,10 @@ class CoachChat extends _$CoachChat {
     CoachContext? contextForThisCall = coachContext;
     final toolSteps = <CoachToolStep>[];
     final toolResults = <CoachToolResult>[];
+    final visualArtifacts = <HealthVisualArtifact>[];
+    final findings = <HealthFinding>[];
+    final pendingActions = <PendingCoachAction>[];
+    final executedCalls = <String>{};
 
     for (var step = 0; step <= _maxToolStepsPerTurn; step++) {
       if (_cancelRequested) return;
@@ -319,9 +358,9 @@ class CoachChat extends _$CoachChat {
         if (_cancelRequested) break;
         buffer.write(chunk);
 
-        ref.read(lastAiInferenceBackendProvider.notifier).set(
-              chatRepository.lastBackend,
-            );
+        ref
+            .read(lastAiInferenceBackendProvider.notifier)
+            .set(chatRepository.lastBackend);
 
         if (!toolCallRuledOut &&
             CoachToolCallParser.isDefinitelyNotToolCall(buffer.toString())) {
@@ -338,16 +377,46 @@ class CoachChat extends _$CoachChat {
 
       final fullText = buffer.toString();
       final isLastAllowedStep = step == _maxToolStepsPerTurn;
-      final toolCall =
-          isLastAllowedStep ? null : CoachToolCallParser.tryParse(fullText);
+      final toolCall = isLastAllowedStep
+          ? null
+          : CoachToolCallParser.tryParse(fullText);
 
       if (toolCall == null) {
         // Always strip — a leaked or malformed TOOL_CALL directive must never
         // reach the athlete verbatim, even if that leaves an empty answer
         // (surfaced upstream as a retryable "empty response" error).
         final finalText = CoachToolCallParser.stripToolCallMarkup(fullText);
-        _setAssistantContent(assistantId, finalText, toolSteps: List.of(toolSteps));
+        _setAssistantContent(
+          assistantId,
+          finalText,
+          toolSteps: List.of(toolSteps),
+          visualArtifacts: visualArtifacts,
+          findings: findings,
+          pendingActions: pendingActions,
+        );
         return;
+      }
+
+      final callKey = '${toolCall.name}:${jsonEncode(toolCall.arguments)}';
+      if (!executedCalls.add(callKey)) {
+        toolResults.add(
+          CoachToolResult(
+            toolCall: toolCall,
+            isError: true,
+            promptSummary:
+                'That exact tool request already ran. Answer using the existing result.',
+            displayLabel: 'Skipped duplicate analysis',
+          ),
+        );
+        nextUserMessage = _buildToolFollowUpPrompt(
+          originalQuestion: userMessage,
+          toolResults: toolResults,
+          isFinalAttempt: true,
+          backend: chatRepository.lastBackend,
+          cloudLevel: cloudLevel,
+        );
+        contextForThisCall = null;
+        continue;
       }
 
       final runningStep = CoachToolStep(
@@ -358,14 +427,26 @@ class CoachChat extends _$CoachChat {
       toolSteps.add(runningStep);
       _setAssistantToolSteps(assistantId, List.of(toolSteps));
 
-      final result = await executeTool(
-        toolCall: toolCall,
-        context: coachContext,
-        preferences: settings.contextPreferences,
-      );
+      late final CoachToolResult result;
+      try {
+        result = await executeTool(
+          toolCall: toolCall,
+          context: coachContext,
+          preferences: settings.contextPreferences,
+        ).timeout(_toolTimeout);
+      } on TimeoutException {
+        result = CoachToolResult(
+          toolCall: toolCall,
+          isError: true,
+          promptSummary: 'The local analysis timed out.',
+          displayLabel: 'Analysis timed out',
+        );
+      }
 
       toolSteps[toolSteps.length - 1] = runningStep.copyWith(
-        status: result.isError ? CoachToolStatus.error : CoachToolStatus.success,
+        status: result.isError
+            ? CoachToolStatus.error
+            : CoachToolStatus.success,
         displayLabel: result.displayLabel,
       );
       _setAssistantToolSteps(assistantId, List.of(toolSteps));
@@ -373,10 +454,25 @@ class CoachChat extends _$CoachChat {
       if (_cancelRequested) return;
 
       toolResults.add(result);
+      visualArtifacts.addAll(
+        result.visualArtifacts.take(4 - visualArtifacts.length),
+      );
+      findings.addAll(result.findings);
+      pendingActions.addAll(result.pendingActions);
+      _setAssistantContent(
+        assistantId,
+        _messageContent(assistantId),
+        toolSteps: List.of(toolSteps),
+        visualArtifacts: visualArtifacts,
+        findings: findings,
+        pendingActions: pendingActions,
+      );
       nextUserMessage = _buildToolFollowUpPrompt(
         originalQuestion: userMessage,
         toolResults: toolResults,
         isFinalAttempt: step == _maxToolStepsPerTurn - 1,
+        backend: chatRepository.lastBackend,
+        cloudLevel: cloudLevel,
       );
       contextForThisCall = null;
     }
@@ -386,21 +482,46 @@ class CoachChat extends _$CoachChat {
     required String originalQuestion,
     required List<CoachToolResult> toolResults,
     required bool isFinalAttempt,
+    required AiInferenceBackend backend,
+    required CloudDataLevel cloudLevel,
   }) {
     final resultLines = toolResults
-        .map(
-          (result) => result.isError
-              ? 'Tool `${result.toolCall.name}` could not run: ${result.promptSummary}'
-              : 'Tool `${result.toolCall.name}` result: ${result.promptSummary}',
-        )
+        .map((result) {
+          final summary = _toolSummaryForBackend(
+            result.promptSummary,
+            backend,
+            cloudLevel,
+          );
+          return result.isError
+              ? 'Tool `${result.toolCall.name}` could not run: $summary'
+              : 'Tool `${result.toolCall.name}` result: $summary';
+        })
         .join('\n');
     final instruction = isFinalAttempt
-        ? 'Give your final answer to the athlete now. Do not call another tool.'
+        ? 'Give your final answer to the person now. Do not call another tool.'
         : 'If you still need more data, reply with another single TOOL_CALL '
-            'line. Otherwise answer the athlete now.';
+              'line. Otherwise answer the person now.';
     return '$resultLines\n\n'
-        'Continue answering the athlete\'s question: "$originalQuestion"\n'
+        'Continue answering the person\'s question: "$originalQuestion"\n'
         '$instruction Do not mention tools or TOOL_CALL in your reply.';
+  }
+
+  String _toolSummaryForBackend(
+    String summary,
+    AiInferenceBackend backend,
+    CloudDataLevel cloudLevel,
+  ) {
+    if (backend != AiInferenceBackend.openRouter) return summary;
+    return switch (cloudLevel) {
+      CloudDataLevel.none =>
+        'The requested analysis completed locally, but health-derived results '
+            'are not shared with cloud models.',
+      CloudDataLevel.minimal =>
+        summary
+            .replaceAll(RegExp(r'\b\d+(?:\.\d+)?\b'), 'a rounded value')
+            .replaceAll(RegExp(r'\b\d{4}-\d{2}-\d{2}\b'), 'a recent date'),
+      CloudDataLevel.standard || CloudDataLevel.full => summary,
+    };
   }
 
   void _appendAssistantContent(String assistantId, String textToAppend) {
@@ -419,6 +540,9 @@ class CoachChat extends _$CoachChat {
     String assistantId,
     String content, {
     required List<CoachToolStep> toolSteps,
+    required List<HealthVisualArtifact> visualArtifacts,
+    required List<HealthFinding> findings,
+    required List<PendingCoachAction> pendingActions,
   }) {
     final msgs = state.value;
     if (msgs == null) return;
@@ -428,11 +552,19 @@ class CoachChat extends _$CoachChat {
       content: content,
       toolSteps: toolSteps.isEmpty ? null : toolSteps,
       clearToolSteps: toolSteps.isEmpty,
+      visualArtifacts: visualArtifacts.isEmpty
+          ? null
+          : List.of(visualArtifacts.take(4)),
+      findings: findings.isEmpty ? null : List.of(findings),
+      pendingActions: pendingActions.isEmpty ? null : List.of(pendingActions),
     );
     state = AsyncData(List<ChatMessage>.from(msgs)..[idx] = updated);
   }
 
-  void _setAssistantToolSteps(String assistantId, List<CoachToolStep> toolSteps) {
+  void _setAssistantToolSteps(
+    String assistantId,
+    List<CoachToolStep> toolSteps,
+  ) {
     final msgs = state.value;
     if (msgs == null) return;
     final idx = msgs.indexWhere((m) => m.id == assistantId);
@@ -465,14 +597,16 @@ class CoachChat extends _$CoachChat {
 
   AiInferenceBackend? _alternateBackend(AiInferenceBackend? attempted) {
     return switch (attempted) {
-      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly =>
-        AiInferenceBackend.openRouter,
+      AiInferenceBackend.onDevice ||
+      AiInferenceBackend.rulesOnly => AiInferenceBackend.openRouter,
       AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
       null => null,
     };
   }
 
-  Future<CoachContext> _loadCoachContext(CoachConversationSettings settings) async {
+  Future<CoachContext> _loadCoachContext(
+    CoachConversationSettings settings,
+  ) async {
     try {
       final conversation = await _loadConversation();
       final fullContext = await ref
@@ -482,33 +616,29 @@ class CoachChat extends _$CoachChat {
             ).future,
           )
           .timeout(_healthContextTimeout);
-      return ref.read(filterCoachContextUseCaseProvider).call(
-            context: fullContext,
-            preferences: settings.contextPreferences,
-          );
+      return ref
+          .read(filterCoachContextUseCaseProvider)
+          .call(context: fullContext, preferences: settings.contextPreferences);
     } on TimeoutException {
       _logger.w('Coach context timed out; using minimal context');
-      return ref.read(buildCoachContextUseCaseProvider).call(
-            healthHistory: const [],
-            recentRuns: const [],
-          );
+      return ref
+          .read(buildCoachContextUseCaseProvider)
+          .call(healthHistory: const [], recentRuns: const []);
     } on Object catch (error, stackTrace) {
       _logger.w(
         'Coach context unavailable; using minimal context',
         error: error,
         stackTrace: stackTrace,
       );
-      return ref.read(buildCoachContextUseCaseProvider).call(
-            healthHistory: const [],
-            recentRuns: const [],
-          );
+      return ref
+          .read(buildCoachContextUseCaseProvider)
+          .call(healthHistory: const [], recentRuns: const []);
     }
   }
 
   Future<CoachContext> _readCoachContextSafely(
     CoachConversationSettings settings,
-  ) =>
-      _loadCoachContext(settings);
+  ) => _loadCoachContext(settings);
 
   String _messageContent(String assistantId) {
     final msgs = state.value;
@@ -555,10 +685,7 @@ class CoachChat extends _$CoachChat {
     final conversation = await _loadConversation();
     if (conversation == null) return;
     await _saveConversation(
-      conversation.copyWith(
-        messages: messages,
-        updatedAt: DateTime.now(),
-      ),
+      conversation.copyWith(messages: messages, updatedAt: DateTime.now()),
     );
     await ref.read(coachConversationsProvider.notifier).refresh();
     ref.invalidate(activeCoachConversationProvider);
@@ -567,8 +694,9 @@ class CoachChat extends _$CoachChat {
   Future<CoachConversation?> _loadConversation() async {
     final conversationId = ref.read(activeCoachConversationIdProvider);
     if (conversationId == null) return null;
-    final result =
-        await ref.read(getCoachConversationUseCaseProvider).call(conversationId);
+    final result = await ref
+        .read(getCoachConversationUseCaseProvider)
+        .call(conversationId);
     return result.conversation;
   }
 

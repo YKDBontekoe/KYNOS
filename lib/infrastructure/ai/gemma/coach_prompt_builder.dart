@@ -12,6 +12,7 @@ String buildCoachUserMessage(
   CoachContext? coachContext,
   List<ChatMessage>? conversationHistory,
   CloudDataLevel cloudLevel = CloudDataLevel.full,
+  bool includePrivateMemory = false,
 }) {
   final sections = <String>[];
 
@@ -24,19 +25,20 @@ String buildCoachUserMessage(
     final block = CoachContextFormatter.formatForPrompt(
       coachContext,
       cloudLevel: cloudLevel,
+      includePrivateMemory: includePrivateMemory,
     );
     if (block.isNotEmpty) {
-      sections.add('Athlete context:\n$block');
+      sections.add('Private wellbeing context:\n$block');
     }
   } else if (healthContext != null && healthContext.isNotEmpty) {
     final lines = HealthContextFormatter.summarizeForPrompt(
       healthContext,
       level: cloudLevel,
     );
-    sections.add('Recent athlete metrics:\n${lines.join('\n')}');
+    sections.add('Recent wellbeing metrics:\n${lines.join('\n')}');
   }
 
-  sections.add('Athlete question: $userMessage');
+  sections.add('Person’s question: $userMessage');
   return sections.join('\n\n');
 }
 
@@ -46,7 +48,7 @@ String _formatHistoryBlock(List<ChatMessage>? history) {
       .where((m) => m.content.trim().isNotEmpty && !m.isStreaming)
       .map(
         (m) => switch (m.role) {
-          MessageRole.user => 'Athlete: ${m.content.trim()}',
+          MessageRole.user => 'Person: ${m.content.trim()}',
           MessageRole.assistant => 'Coach: ${m.content.trim()}',
         },
       )

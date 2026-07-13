@@ -5,6 +5,7 @@ import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
 import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/domain/entities/insights/training_insights.dart';
@@ -36,6 +37,10 @@ class BuildCoachContextUseCase {
     AthleteCoachProfile? athleteProfile,
     MorningCheckIn? morningCheckIn,
     DailyCoachBrief? dailyBrief,
+    DailyHealthBrief? dailyHealthBrief,
+    List<HealthCheckIn> healthCheckIns = const [],
+    List<CoachMemory> coachMemories = const [],
+    List<WellbeingExperiment> wellbeingExperiments = const [],
   }) {
     final sortedHistory = List<HealthSummary>.from(healthHistory)
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -80,6 +85,10 @@ class BuildCoachContextUseCase {
       athleteProfile: athleteProfile,
       morningCheckIn: morningCheckIn,
       dailyBrief: dailyBrief,
+      dailyHealthBrief: dailyHealthBrief,
+      healthCheckIns: healthCheckIns,
+      coachMemories: coachMemories,
+      wellbeingExperiments: wellbeingExperiments,
     );
   }
 }

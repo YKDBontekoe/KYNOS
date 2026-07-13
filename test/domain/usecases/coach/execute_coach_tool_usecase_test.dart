@@ -33,7 +33,10 @@ void main() {
   group('get_recent_runs', () {
     test('returns formatted recent runs', () async {
       final result = await useCase.call(
-        toolCall: const CoachToolCall(name: 'get_recent_runs', arguments: {'limit': 2}),
+        toolCall: const CoachToolCall(
+          name: 'get_recent_runs',
+          arguments: {'limit': 2},
+        ),
         context: context,
         preferences: allEnabled(),
       );
@@ -95,7 +98,8 @@ void main() {
       );
 
       expect(result.isError, isFalse);
-      expect(result.promptSummary, contains('Latest hrv'));
+      expect(result.promptSummary, contains('Latest HRV'));
+      expect(result.visualArtifacts, hasLength(1));
     });
 
     test('is disabled when healthMetrics data source is off', () async {

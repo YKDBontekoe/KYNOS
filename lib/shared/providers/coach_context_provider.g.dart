@@ -110,7 +110,7 @@ final class CoachContextForConversationProvider
 }
 
 String _$coachContextForConversationHash() =>
-    r'ba8fa99ac3d32ff9a4a9bf84fbf462f57f9fae07';
+    r'776972735ce7389bb72e4a503b37eb2540e984c1';
 
 final class CoachContextForConversationFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<CoachContext>, CoachChatSeedData?> {

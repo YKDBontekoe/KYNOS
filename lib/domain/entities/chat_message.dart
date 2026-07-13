@@ -1,5 +1,7 @@
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 import 'package:meta/meta.dart';
 
 enum MessageRole { user, assistant }
@@ -29,6 +31,15 @@ class ChatMessage {
   /// Agentic tool calls made by the coach while composing this message.
   final List<CoachToolStep>? toolSteps;
 
+  /// Validated, locally generated health visuals attached to this reply.
+  final List<HealthVisualArtifact>? visualArtifacts;
+
+  /// Structured findings supporting the coach's explanation.
+  final List<HealthFinding>? findings;
+
+  /// Mutating actions that require explicit user confirmation.
+  final List<PendingCoachAction>? pendingActions;
+
   const ChatMessage({
     required this.id,
     required this.role,
@@ -40,6 +51,9 @@ class ChatMessage {
     this.attemptedBackend,
     this.contextSnapshotIds,
     this.toolSteps,
+    this.visualArtifacts,
+    this.findings,
+    this.pendingActions,
   });
 
   ChatMessage copyWith({
@@ -50,7 +64,11 @@ class ChatMessage {
     AiInferenceBackend? attemptedBackend,
     List<String>? contextSnapshotIds,
     List<CoachToolStep>? toolSteps,
+    List<HealthVisualArtifact>? visualArtifacts,
+    List<HealthFinding>? findings,
+    List<PendingCoachAction>? pendingActions,
     bool clearToolSteps = false,
+    bool clearStructuredContent = false,
   }) {
     return ChatMessage(
       id: id,
@@ -63,6 +81,13 @@ class ChatMessage {
       attemptedBackend: attemptedBackend ?? this.attemptedBackend,
       contextSnapshotIds: contextSnapshotIds ?? this.contextSnapshotIds,
       toolSteps: clearToolSteps ? null : (toolSteps ?? this.toolSteps),
+      visualArtifacts: clearStructuredContent
+          ? null
+          : (visualArtifacts ?? this.visualArtifacts),
+      findings: clearStructuredContent ? null : (findings ?? this.findings),
+      pendingActions: clearStructuredContent
+          ? null
+          : (pendingActions ?? this.pendingActions),
     );
   }
 
@@ -80,23 +105,27 @@ class ChatMessage {
           userPromptForRetry == other.userPromptForRetry &&
           attemptedBackend == other.attemptedBackend &&
           _listEquals(contextSnapshotIds, other.contextSnapshotIds) &&
-          _listEquals(toolSteps, other.toolSteps);
+          _listEquals(toolSteps, other.toolSteps) &&
+          _listEquals(visualArtifacts, other.visualArtifacts) &&
+          _listEquals(findings, other.findings) &&
+          _listEquals(pendingActions, other.pendingActions);
 
   @override
   int get hashCode => Object.hash(
-        id,
-        role,
-        content,
-        timestamp,
-        isStreaming,
-        hasError,
-        userPromptForRetry,
-        attemptedBackend,
-        contextSnapshotIds == null
-            ? null
-            : Object.hashAll(contextSnapshotIds!),
-        toolSteps == null ? null : Object.hashAll(toolSteps!),
-      );
+    id,
+    role,
+    content,
+    timestamp,
+    isStreaming,
+    hasError,
+    userPromptForRetry,
+    attemptedBackend,
+    contextSnapshotIds == null ? null : Object.hashAll(contextSnapshotIds!),
+    toolSteps == null ? null : Object.hashAll(toolSteps!),
+    visualArtifacts == null ? null : Object.hashAll(visualArtifacts!),
+    findings == null ? null : Object.hashAll(findings!),
+    pendingActions == null ? null : Object.hashAll(pendingActions!),
+  );
 }
 
 bool _listEquals<T>(List<T>? a, List<T>? b) {

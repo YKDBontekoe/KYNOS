@@ -7,12 +7,13 @@ abstract final class HealthContextFormatter {
     List<HealthSummary> summaries, {
     CloudDataLevel level = CloudDataLevel.minimal,
   }) {
-    if (summaries.isEmpty) return const [];
+    if (summaries.isEmpty || level == CloudDataLevel.none) return const [];
 
     final sorted = List<HealthSummary>.from(summaries)
       ..sort((a, b) => b.date.compareTo(a.date));
 
     final take = switch (level) {
+      CloudDataLevel.none => 0,
       CloudDataLevel.minimal => 3,
       CloudDataLevel.standard => 7,
       CloudDataLevel.full => 14,

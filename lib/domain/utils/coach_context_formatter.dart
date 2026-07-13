@@ -14,7 +14,9 @@ abstract final class CoachContextFormatter {
     CoachContext context, {
     CloudDataLevel cloudLevel = CloudDataLevel.full,
     GemmaInferenceTier tier = GemmaInferenceTier.full,
+    bool includePrivateMemory = false,
   }) {
+    if (cloudLevel == CloudDataLevel.none) return '';
     final isCloud =
         cloudLevel != CloudDataLevel.minimal || tier == GemmaInferenceTier.full;
     final level = isCloud ? cloudLevel : _tierToCloudLevel(tier);
@@ -23,6 +25,14 @@ abstract final class CoachContextFormatter {
     sections.add(
       'Readiness: ${context.readinessScore.round()}/100 — ${context.readinessSummary}',
     );
+
+    final healthBrief = context.dailyHealthBrief;
+    if (healthBrief != null) {
+      sections.add(
+        'Daily wellbeing brief: ${healthBrief.bodyStateSummary}\n'
+        'One suggested action: ${healthBrief.primaryAction}',
+      );
+    }
 
     if (context.acwr != null && context.acwrRiskLabel != null) {
       sections.add(
@@ -64,6 +74,15 @@ abstract final class CoachContextFormatter {
         sections.add(
           'Morning check-in: fatigue ${checkIn.fatigue}/10, '
           'soreness ${checkIn.soreness}/10, motivation ${checkIn.motivation}/10',
+        );
+      }
+      final wellbeingCheckIn = context.healthCheckIns.firstOrNull;
+      if (wellbeingCheckIn != null) {
+        sections.add(
+          'Daily check-in: energy ${wellbeingCheckIn.energy}/5, '
+          'mood ${wellbeingCheckIn.mood}/5, stress ${wellbeingCheckIn.stress}/5, '
+          'soreness ${wellbeingCheckIn.soreness}/5, '
+          'feeling unwell ${wellbeingCheckIn.feelingUnwell ? 'yes' : 'no'}',
         );
       }
       final momentum = context.weeklyMomentum;
@@ -120,6 +139,13 @@ abstract final class CoachContextFormatter {
       if (debrief != null && debrief.isNotEmpty) {
         sections.add('Recent post-run debrief: $debrief');
       }
+    }
+
+    if (includePrivateMemory && context.coachMemories.isNotEmpty) {
+      sections.add(
+        'Confirmed local coach memory:\n'
+        '${context.coachMemories.take(8).map((item) => '- ${item.fact}').join('\n')}',
+      );
     }
 
     if (context.seedTopic != CoachSeedTopic.general) {

@@ -26,6 +26,8 @@ abstract final class Routes {
 
   /// The coach-first home tab.
   static const dashboard = '/';
+  static const health = '/health';
+  static const journey = '/journey';
   static const training = '/training';
   static const character = '/character';
   static const runRoute = '/run-route';
@@ -99,11 +101,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.training,
+                path: Routes.health,
                 pageBuilder: (context, state) =>
                     KynosPageTransitions.fadeThrough(
                       key: state.pageKey,
-                      child: const TrainingTab(),
+                      child: const HealthTab(),
                     ),
               ),
             ],
@@ -111,17 +113,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.character,
+                path: Routes.journey,
                 pageBuilder: (context, state) =>
                     KynosPageTransitions.fadeThrough(
                       key: state.pageKey,
-                      child: const CharacterTab(),
+                      child: const JourneyTab(),
                     ),
               ),
             ],
           ),
         ],
       ),
+      GoRoute(path: Routes.training, redirect: (_, _) => Routes.health),
+      GoRoute(path: Routes.character, redirect: (_, _) => Routes.journey),
       GoRoute(
         path: Routes.runHistory,
         pageBuilder: (context, state) => KynosPageTransitions.standard(

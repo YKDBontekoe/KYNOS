@@ -63,6 +63,19 @@ class FilterCoachContextUseCase {
           : null,
       morningCheckIn: context.morningCheckIn,
       dailyBrief: context.dailyBrief,
+      dailyHealthBrief: preferences.isEnabled(CoachDataSource.healthMetrics)
+          ? context.dailyHealthBrief
+          : null,
+      healthCheckIns: preferences.isEnabled(CoachDataSource.healthCheckIns)
+          ? context.healthCheckIns
+          : const [],
+      coachMemories: preferences.isEnabled(CoachDataSource.coachMemory)
+          ? context.coachMemories
+          : const [],
+      wellbeingExperiments:
+          preferences.isEnabled(CoachDataSource.wellbeingExperiments)
+          ? context.wellbeingExperiments
+          : const [],
     );
   }
 

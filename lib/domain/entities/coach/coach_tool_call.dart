@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
 
 part 'coach_tool_call.freezed.dart';
 
@@ -19,6 +21,10 @@ abstract class CoachToolResult with _$CoachToolResult {
     required bool isError,
     required String promptSummary,
     required String displayLabel,
+    @Default(<HealthVisualArtifact>[])
+    List<HealthVisualArtifact> visualArtifacts,
+    @Default(<HealthFinding>[]) List<HealthFinding> findings,
+    @Default(<PendingCoachAction>[]) List<PendingCoachAction> pendingActions,
   }) = _CoachToolResult;
 }
 

@@ -15,8 +15,7 @@ class DescribeCoachContextUseCase {
     required bool cloudConfigured,
   }) {
     final willUseCloud =
-        backendMode == CoachBackendMode.cloud ||
-        (backendMode == CoachBackendMode.auto && cloudConfigured);
+        backendMode == CoachBackendMode.cloud && cloudConfigured;
 
     return CoachDataSource.all.map((source) {
       final enabled = preferences.isEnabled(source);
@@ -69,6 +68,18 @@ class DescribeCoachContextUseCase {
         context.postRunDebriefSummary == null
             ? 'No recent debrief'
             : context.postRunDebriefSummary!,
+      CoachDataSource.healthCheckIns =>
+        context.healthCheckIns.isEmpty
+            ? 'No check-ins yet'
+            : '${context.healthCheckIns.length} local check-ins',
+      CoachDataSource.coachMemory =>
+        context.coachMemories.isEmpty
+            ? 'No confirmed memories'
+            : '${context.coachMemories.length} confirmed memories',
+      CoachDataSource.wellbeingExperiments =>
+        context.wellbeingExperiments.isEmpty
+            ? 'No wellbeing experiments'
+            : '${context.wellbeingExperiments.length} experiments',
     };
   }
 

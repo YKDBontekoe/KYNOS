@@ -1,6 +1,6 @@
 /// Per-conversation inference routing preference.
 enum CoachBackendMode {
-  auto('Auto'),
+  auto('Local-first'),
   onDevice('On-Device'),
   cloud('Cloud');
 

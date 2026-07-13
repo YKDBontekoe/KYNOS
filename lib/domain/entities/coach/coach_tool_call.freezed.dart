@@ -280,7 +280,7 @@ as Map<String, Object?>,
 /// @nodoc
 mixin _$CoachToolResult {
 
- CoachToolCall get toolCall; bool get isError; String get promptSummary; String get displayLabel;
+ CoachToolCall get toolCall; bool get isError; String get promptSummary; String get displayLabel; List<HealthVisualArtifact> get visualArtifacts; List<HealthFinding> get findings; List<PendingCoachAction> get pendingActions;
 /// Create a copy of CoachToolResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -291,16 +291,16 @@ $CoachToolResultCopyWith<CoachToolResult> get copyWith => _$CoachToolResultCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoachToolResult&&(identical(other.toolCall, toolCall) || other.toolCall == toolCall)&&(identical(other.isError, isError) || other.isError == isError)&&(identical(other.promptSummary, promptSummary) || other.promptSummary == promptSummary)&&(identical(other.displayLabel, displayLabel) || other.displayLabel == displayLabel));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoachToolResult&&(identical(other.toolCall, toolCall) || other.toolCall == toolCall)&&(identical(other.isError, isError) || other.isError == isError)&&(identical(other.promptSummary, promptSummary) || other.promptSummary == promptSummary)&&(identical(other.displayLabel, displayLabel) || other.displayLabel == displayLabel)&&const DeepCollectionEquality().equals(other.visualArtifacts, visualArtifacts)&&const DeepCollectionEquality().equals(other.findings, findings)&&const DeepCollectionEquality().equals(other.pendingActions, pendingActions));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,toolCall,isError,promptSummary,displayLabel);
+int get hashCode => Object.hash(runtimeType,toolCall,isError,promptSummary,displayLabel,const DeepCollectionEquality().hash(visualArtifacts),const DeepCollectionEquality().hash(findings),const DeepCollectionEquality().hash(pendingActions));
 
 @override
 String toString() {
-  return 'CoachToolResult(toolCall: $toolCall, isError: $isError, promptSummary: $promptSummary, displayLabel: $displayLabel)';
+  return 'CoachToolResult(toolCall: $toolCall, isError: $isError, promptSummary: $promptSummary, displayLabel: $displayLabel, visualArtifacts: $visualArtifacts, findings: $findings, pendingActions: $pendingActions)';
 }
 
 
@@ -311,7 +311,7 @@ abstract mixin class $CoachToolResultCopyWith<$Res>  {
   factory $CoachToolResultCopyWith(CoachToolResult value, $Res Function(CoachToolResult) _then) = _$CoachToolResultCopyWithImpl;
 @useResult
 $Res call({
- CoachToolCall toolCall, bool isError, String promptSummary, String displayLabel
+ CoachToolCall toolCall, bool isError, String promptSummary, String displayLabel, List<HealthVisualArtifact> visualArtifacts, List<HealthFinding> findings, List<PendingCoachAction> pendingActions
 });
 
 
@@ -328,13 +328,16 @@ class _$CoachToolResultCopyWithImpl<$Res>
 
 /// Create a copy of CoachToolResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? toolCall = null,Object? isError = null,Object? promptSummary = null,Object? displayLabel = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? toolCall = null,Object? isError = null,Object? promptSummary = null,Object? displayLabel = null,Object? visualArtifacts = null,Object? findings = null,Object? pendingActions = null,}) {
   return _then(_self.copyWith(
 toolCall: null == toolCall ? _self.toolCall : toolCall // ignore: cast_nullable_to_non_nullable
 as CoachToolCall,isError: null == isError ? _self.isError : isError // ignore: cast_nullable_to_non_nullable
 as bool,promptSummary: null == promptSummary ? _self.promptSummary : promptSummary // ignore: cast_nullable_to_non_nullable
 as String,displayLabel: null == displayLabel ? _self.displayLabel : displayLabel // ignore: cast_nullable_to_non_nullable
-as String,
+as String,visualArtifacts: null == visualArtifacts ? _self.visualArtifacts : visualArtifacts // ignore: cast_nullable_to_non_nullable
+as List<HealthVisualArtifact>,findings: null == findings ? _self.findings : findings // ignore: cast_nullable_to_non_nullable
+as List<HealthFinding>,pendingActions: null == pendingActions ? _self.pendingActions : pendingActions // ignore: cast_nullable_to_non_nullable
+as List<PendingCoachAction>,
   ));
 }
 /// Create a copy of CoachToolResult
@@ -428,10 +431,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel,  List<HealthVisualArtifact> visualArtifacts,  List<HealthFinding> findings,  List<PendingCoachAction> pendingActions)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CoachToolResult() when $default != null:
-return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel);case _:
+return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel,_that.visualArtifacts,_that.findings,_that.pendingActions);case _:
   return orElse();
 
 }
@@ -449,10 +452,10 @@ return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel,  List<HealthVisualArtifact> visualArtifacts,  List<HealthFinding> findings,  List<PendingCoachAction> pendingActions)  $default,) {final _that = this;
 switch (_that) {
 case _CoachToolResult():
-return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel);case _:
+return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel,_that.visualArtifacts,_that.findings,_that.pendingActions);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -469,10 +472,10 @@ return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CoachToolCall toolCall,  bool isError,  String promptSummary,  String displayLabel,  List<HealthVisualArtifact> visualArtifacts,  List<HealthFinding> findings,  List<PendingCoachAction> pendingActions)?  $default,) {final _that = this;
 switch (_that) {
 case _CoachToolResult() when $default != null:
-return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel);case _:
+return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLabel,_that.visualArtifacts,_that.findings,_that.pendingActions);case _:
   return null;
 
 }
@@ -484,13 +487,34 @@ return $default(_that.toolCall,_that.isError,_that.promptSummary,_that.displayLa
 
 
 class _CoachToolResult implements CoachToolResult {
-  const _CoachToolResult({required this.toolCall, required this.isError, required this.promptSummary, required this.displayLabel});
+  const _CoachToolResult({required this.toolCall, required this.isError, required this.promptSummary, required this.displayLabel, final  List<HealthVisualArtifact> visualArtifacts = const <HealthVisualArtifact>[], final  List<HealthFinding> findings = const <HealthFinding>[], final  List<PendingCoachAction> pendingActions = const <PendingCoachAction>[]}): _visualArtifacts = visualArtifacts,_findings = findings,_pendingActions = pendingActions;
   
 
 @override final  CoachToolCall toolCall;
 @override final  bool isError;
 @override final  String promptSummary;
 @override final  String displayLabel;
+ final  List<HealthVisualArtifact> _visualArtifacts;
+@override@JsonKey() List<HealthVisualArtifact> get visualArtifacts {
+  if (_visualArtifacts is EqualUnmodifiableListView) return _visualArtifacts;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_visualArtifacts);
+}
+
+ final  List<HealthFinding> _findings;
+@override@JsonKey() List<HealthFinding> get findings {
+  if (_findings is EqualUnmodifiableListView) return _findings;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_findings);
+}
+
+ final  List<PendingCoachAction> _pendingActions;
+@override@JsonKey() List<PendingCoachAction> get pendingActions {
+  if (_pendingActions is EqualUnmodifiableListView) return _pendingActions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_pendingActions);
+}
+
 
 /// Create a copy of CoachToolResult
 /// with the given fields replaced by the non-null parameter values.
@@ -502,16 +526,16 @@ _$CoachToolResultCopyWith<_CoachToolResult> get copyWith => __$CoachToolResultCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoachToolResult&&(identical(other.toolCall, toolCall) || other.toolCall == toolCall)&&(identical(other.isError, isError) || other.isError == isError)&&(identical(other.promptSummary, promptSummary) || other.promptSummary == promptSummary)&&(identical(other.displayLabel, displayLabel) || other.displayLabel == displayLabel));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoachToolResult&&(identical(other.toolCall, toolCall) || other.toolCall == toolCall)&&(identical(other.isError, isError) || other.isError == isError)&&(identical(other.promptSummary, promptSummary) || other.promptSummary == promptSummary)&&(identical(other.displayLabel, displayLabel) || other.displayLabel == displayLabel)&&const DeepCollectionEquality().equals(other._visualArtifacts, _visualArtifacts)&&const DeepCollectionEquality().equals(other._findings, _findings)&&const DeepCollectionEquality().equals(other._pendingActions, _pendingActions));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,toolCall,isError,promptSummary,displayLabel);
+int get hashCode => Object.hash(runtimeType,toolCall,isError,promptSummary,displayLabel,const DeepCollectionEquality().hash(_visualArtifacts),const DeepCollectionEquality().hash(_findings),const DeepCollectionEquality().hash(_pendingActions));
 
 @override
 String toString() {
-  return 'CoachToolResult(toolCall: $toolCall, isError: $isError, promptSummary: $promptSummary, displayLabel: $displayLabel)';
+  return 'CoachToolResult(toolCall: $toolCall, isError: $isError, promptSummary: $promptSummary, displayLabel: $displayLabel, visualArtifacts: $visualArtifacts, findings: $findings, pendingActions: $pendingActions)';
 }
 
 
@@ -522,7 +546,7 @@ abstract mixin class _$CoachToolResultCopyWith<$Res> implements $CoachToolResult
   factory _$CoachToolResultCopyWith(_CoachToolResult value, $Res Function(_CoachToolResult) _then) = __$CoachToolResultCopyWithImpl;
 @override @useResult
 $Res call({
- CoachToolCall toolCall, bool isError, String promptSummary, String displayLabel
+ CoachToolCall toolCall, bool isError, String promptSummary, String displayLabel, List<HealthVisualArtifact> visualArtifacts, List<HealthFinding> findings, List<PendingCoachAction> pendingActions
 });
 
 
@@ -539,13 +563,16 @@ class __$CoachToolResultCopyWithImpl<$Res>
 
 /// Create a copy of CoachToolResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? toolCall = null,Object? isError = null,Object? promptSummary = null,Object? displayLabel = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? toolCall = null,Object? isError = null,Object? promptSummary = null,Object? displayLabel = null,Object? visualArtifacts = null,Object? findings = null,Object? pendingActions = null,}) {
   return _then(_CoachToolResult(
 toolCall: null == toolCall ? _self.toolCall : toolCall // ignore: cast_nullable_to_non_nullable
 as CoachToolCall,isError: null == isError ? _self.isError : isError // ignore: cast_nullable_to_non_nullable
 as bool,promptSummary: null == promptSummary ? _self.promptSummary : promptSummary // ignore: cast_nullable_to_non_nullable
 as String,displayLabel: null == displayLabel ? _self.displayLabel : displayLabel // ignore: cast_nullable_to_non_nullable
-as String,
+as String,visualArtifacts: null == visualArtifacts ? _self._visualArtifacts : visualArtifacts // ignore: cast_nullable_to_non_nullable
+as List<HealthVisualArtifact>,findings: null == findings ? _self._findings : findings // ignore: cast_nullable_to_non_nullable
+as List<HealthFinding>,pendingActions: null == pendingActions ? _self._pendingActions : pendingActions // ignore: cast_nullable_to_non_nullable
+as List<PendingCoachAction>,
   ));
 }
 
