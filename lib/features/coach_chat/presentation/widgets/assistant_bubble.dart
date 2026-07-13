@@ -7,7 +7,6 @@ import 'package:kynos/features/coach_chat/presentation/widgets/agent_tool_step_l
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_markdown_text.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
-import 'package:kynos/shared/widgets/glass_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 
 class AssistantBubble extends StatelessWidget {
@@ -40,7 +39,8 @@ class AssistantBubble extends StatelessWidget {
     if (!hasError) return null;
     return switch (attemptedBackend) {
       AiInferenceBackend.openRouter => 'Cloud error',
-      AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => 'On-device error',
+      AiInferenceBackend.onDevice ||
+      AiInferenceBackend.rulesOnly => 'On-device error',
       null => 'Coach error',
     };
   }
@@ -48,21 +48,43 @@ class AssistantBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          height: 1.5,
-          color: kynos.label,
-        );
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(height: 1.5, color: kynos.label);
 
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.84),
-        child: GlassCard(
-          borderRadius: Radius.lg,
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.sm),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.92,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.xs,
+            vertical: Spacing.xs,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 14,
+                    color: kynos.purple,
+                  ),
+                  const Gap(Spacing.xs),
+                  Text(
+                    'KYNOS Coach',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: kynos.secondaryLabel,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(Spacing.xs),
               if (_errorLabel != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: Spacing.sm),
@@ -72,15 +94,24 @@ class AssistantBubble extends StatelessWidget {
                   ),
                 ),
               if (toolSteps != null && toolSteps!.isNotEmpty)
-                AgentToolStepList(steps: toolSteps!),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.sm,
+                    Spacing.sm,
+                    Spacing.sm,
+                    0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: kynos.purple.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(Radius.md),
+                  ),
+                  child: AgentToolStepList(steps: toolSteps!),
+                ),
               isStreaming && content.isEmpty
                   ? const TypingIndicator()
                   : StreamingTextPulse(
                       isActive: isStreaming && content.isNotEmpty,
-                      child: CoachMarkdownText(
-                        text: content,
-                        style: textStyle,
-                      ),
+                      child: CoachMarkdownText(text: content, style: textStyle),
                     ),
               if (!isStreaming &&
                   contextSnapshotIds != null &&
@@ -88,12 +119,13 @@ class AssistantBubble extends StatelessWidget {
                 const Gap(Spacing.sm),
                 Text(
                   'Answered using: ${contextSnapshotIds!.join(', ')}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: kynos.secondaryLabel,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: kynos.secondaryLabel),
                 ),
               ],
-              if (hasError && (onRetry != null || onTryAlternateBackend != null)) ...[
+              if (hasError &&
+                  (onRetry != null || onTryAlternateBackend != null)) ...[
                 const Gap(Spacing.sm),
                 Wrap(
                   spacing: Spacing.sm,
@@ -105,7 +137,8 @@ class AssistantBubble extends StatelessWidget {
                         icon: const Icon(Icons.refresh_rounded, size: 18),
                         label: const Text('Retry'),
                       ),
-                    if (onTryAlternateBackend != null && alternateBackendLabel != null)
+                    if (onTryAlternateBackend != null &&
+                        alternateBackendLabel != null)
                       TextButton.icon(
                         onPressed: onTryAlternateBackend,
                         icon: Icon(

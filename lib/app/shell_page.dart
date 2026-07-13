@@ -5,9 +5,6 @@ import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
-import 'package:kynos/shared/constants/hero_tags.dart';
-import 'package:kynos/shared/utils/open_coach_chat.dart';
-import 'package:kynos/shared/widgets/glass_card.dart';
 import 'package:kynos/shared/widgets/kynos_bottom_nav.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
@@ -19,7 +16,7 @@ class ShellPage extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _navItems = [
-    KynosBottomNavItem(label: 'Today', icon: NavIconPaths.today),
+    KynosBottomNavItem(label: 'Coach', icon: NavIconPaths.coach),
     KynosBottomNavItem(label: 'Training', icon: NavIconPaths.training),
     KynosBottomNavItem(label: 'Character', icon: NavIconPaths.character),
   ];
@@ -51,56 +48,28 @@ class ShellPage extends ConsumerWidget {
             ),
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: Padding(
-          padding: EdgeInsets.only(
-            bottom: LayoutTokens.shellNavExtent(context) - 8,
-          ),
-          child: Hero(
-            tag: CoachHeroTags.sparkle,
-            child: Semantics(
-              label: 'Ask Coach',
-              button: true,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => openCoachChat(context, ref),
-                  borderRadius: BorderRadius.circular(Radius.lg),
-                  child: GlassCard(
-                    borderRadius: Radius.lg,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.md,
-                      vertical: Spacing.sm,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 20,
-                          color: kynos.purple,
-                        ),
-                        const SizedBox(width: Spacing.xs),
-                        Text(
-                          'Coach',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: kynos.label,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
+        bottomNavigationBar: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: LayoutTokens.maxContentWidth,
+            ),
+            child: AnimatedSlide(
+              duration: Motion.fast,
+              curve: Motion.curve,
+              offset: MediaQuery.viewInsetsOf(context).bottom > 0
+                  ? const Offset(0, 1.4)
+                  : Offset.zero,
+              child: AnimatedOpacity(
+                duration: Motion.fast,
+                opacity: MediaQuery.viewInsetsOf(context).bottom > 0 ? 0 : 1,
+                child: KynosBottomNav(
+                  items: _navItems,
+                  selectedIndex: navigationShell.currentIndex,
+                  onSelected: _onTabSelected,
                 ),
               ),
             ),
-          ),
-        ),
-        bottomNavigationBar: ResponsiveCenter(
-          child: KynosBottomNav(
-            items: _navItems,
-            selectedIndex: navigationShell.currentIndex,
-            onSelected: _onTabSelected,
           ),
         ),
       ),
@@ -110,10 +79,7 @@ class ShellPage extends ConsumerWidget {
 
 /// Directional fade/slide on tab index change while preserving [IndexedStack] state.
 class _AnimatedShellBody extends StatefulWidget {
-  const _AnimatedShellBody({
-    required this.tabIndex,
-    required this.child,
-  });
+  const _AnimatedShellBody({required this.tabIndex, required this.child});
 
   final int tabIndex;
   final Widget child;
@@ -134,10 +100,8 @@ class _AnimatedShellBodyState extends State<_AnimatedShellBody>
   void initState() {
     super.initState();
     _previousIndex = widget.tabIndex;
-    _controller = AnimationController(
-      vsync: this,
-      duration: Motion.medium,
-    )..value = 1;
+    _controller = AnimationController(vsync: this, duration: Motion.medium)
+      ..value = 1;
     _buildAnimations();
   }
 
@@ -172,10 +136,7 @@ class _AnimatedShellBodyState extends State<_AnimatedShellBody>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fade,
-      child: SlideTransition(
-        position: _slide,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _slide, child: widget.child),
     );
   }
 }

@@ -6,7 +6,6 @@ import 'package:kynos/app/page_transitions.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/app/shell_page.dart';
 import 'package:kynos/domain/entities/workout_session.dart';
-import 'package:kynos/features/coach_chat/presentation/pages/coach_chat_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_history_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_route_missing_page.dart';
 import 'package:kynos/features/dashboard/presentation/pages/run_route_page.dart';
@@ -24,6 +23,8 @@ import 'package:kynos/shared/providers/onboarding_provider.dart';
 /// All named route paths — single source of truth.
 abstract final class Routes {
   static const onboarding = '/onboarding';
+
+  /// The coach-first home tab.
   static const dashboard = '/';
   static const training = '/training';
   static const character = '/character';
@@ -51,8 +52,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   final refresh = _RouterRefreshNotifier(ref);
 
   return GoRouter(
-    initialLocation:
-        hasCompletedOnboarding ? Routes.dashboard : Routes.onboarding,
+    initialLocation: hasCompletedOnboarding
+        ? Routes.dashboard
+        : Routes.onboarding,
     refreshListenable: refresh,
     redirect: (context, state) {
       final completed = ref.read(onboardingCompletedProvider);
@@ -83,10 +85,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.dashboard,
-                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
-                  key: state.pageKey,
-                  child: const DashboardTab(),
-                ),
+                pageBuilder: (context, state) =>
+                    KynosPageTransitions.fadeThrough(
+                      key: state.pageKey,
+                      child: CoachTab(
+                        key: ValueKey(state.uri.queryParameters['threadId']),
+                        threadId: state.uri.queryParameters['threadId'],
+                      ),
+                    ),
               ),
             ],
           ),
@@ -94,10 +100,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.training,
-                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
-                  key: state.pageKey,
-                  child: const TrainingTab(),
-                ),
+                pageBuilder: (context, state) =>
+                    KynosPageTransitions.fadeThrough(
+                      key: state.pageKey,
+                      child: const TrainingTab(),
+                    ),
               ),
             ],
           ),
@@ -105,10 +112,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.character,
-                pageBuilder: (context, state) => KynosPageTransitions.fadeThrough(
-                  key: state.pageKey,
-                  child: const CharacterTab(),
-                ),
+                pageBuilder: (context, state) =>
+                    KynosPageTransitions.fadeThrough(
+                      key: state.pageKey,
+                      child: const CharacterTab(),
+                    ),
               ),
             ],
           ),
@@ -157,12 +165,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.coachChat,
-        pageBuilder: (context, state) {
+        redirect: (context, state) {
           final threadId = state.uri.queryParameters['threadId'];
-          return KynosPageTransitions.modalUp(
-            key: state.pageKey,
-            child: CoachChatPage(threadId: threadId),
-          );
+          return threadId == null
+              ? Routes.dashboard
+              : '${Routes.dashboard}?threadId=$threadId';
         },
       ),
       GoRoute(
@@ -181,45 +188,51 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'on-device-models',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const OnDeviceModelPickerPage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const OnDeviceModelPickerPage(),
+                ),
           ),
           GoRoute(
             path: 'openrouter-models',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const OpenRouterModelPickerPage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const OpenRouterModelPickerPage(),
+                ),
           ),
           GoRoute(
             path: 'import',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const HealthImportPage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const HealthImportPage(),
+                ),
           ),
           GoRoute(
             path: 'manual-run',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const ManualRunPage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const ManualRunPage(),
+                ),
           ),
           GoRoute(
             path: 'privacy',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const PrivacyPolicyPage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const PrivacyPolicyPage(),
+                ),
           ),
           GoRoute(
             path: 'terms',
-            pageBuilder: (context, state) => KynosPageTransitions.horizontalDrill(
-              key: state.pageKey,
-              child: const TermsOfServicePage(),
-            ),
+            pageBuilder: (context, state) =>
+                KynosPageTransitions.horizontalDrill(
+                  key: state.pageKey,
+                  child: const TermsOfServicePage(),
+                ),
           ),
         ],
       ),

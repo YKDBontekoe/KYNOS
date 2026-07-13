@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 
 /// Lucide-style SVG path icons for bottom navigation.
 abstract final class NavIconPaths {
+  /// AI coach — speech bubble with a sparkle accent.
+  static const coach = NavIconDefinition(
+    outline:
+        'M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5z M18 3l.6 1.4L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z',
+    filled:
+        'M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5z M18 3l.6 1.4L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z',
+  );
+
   /// Daily dashboard — four-panel grid.
   static const today = NavIconDefinition(
-    outline:
-        'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
-    filled:
-        'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
+    outline: 'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
+    filled: 'M3 3h7v9H3z M14 3h7v5h-7z M14 12h7v9h-7z M3 16h7v5H3z',
   );
 
   /// Running route — winding path with finish pin.
@@ -32,10 +38,8 @@ abstract final class NavIconPaths {
 /// Outline and filled SVG paths for a single nav icon.
 @immutable
 class NavIconDefinition {
-  const NavIconDefinition({
-    required this.outline,
-    String? filled,
-  }) : filled = filled ?? outline;
+  const NavIconDefinition({required this.outline, String? filled})
+    : filled = filled ?? outline;
 
   final String outline;
   final String filled;
@@ -195,14 +199,7 @@ class NavIconPainter extends CustomPainter {
           final dx = next(), dy = next();
           final x2 = cx + dx2;
           final y2 = cy + dy2;
-          path.cubicTo(
-            cx + dx1,
-            cy + dy1,
-            x2,
-            y2,
-            cx + dx,
-            cy + dy,
-          );
+          path.cubicTo(cx + dx1, cy + dy1, x2, y2, cx + dx, cy + dy);
           cx += dx;
           cy += dy;
           recordCubicCtrl(x2, y2);

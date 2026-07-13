@@ -25,26 +25,30 @@ class ModelSetupScreen extends StatelessWidget {
   final bool isLoading;
   final bool showClose;
 
-  factory ModelSetupScreen.checking({String? progressMessage}) =>
-      ModelSetupScreen(
-        title: 'Preparing AI Coach',
-        subtitle: progressMessage ?? 'Checking for model…',
-        isLoading: true,
-      );
+  factory ModelSetupScreen.checking({
+    String? progressMessage,
+    bool showClose = true,
+  }) => ModelSetupScreen(
+    title: 'Preparing AI Coach',
+    subtitle: progressMessage ?? 'Checking for model…',
+    isLoading: true,
+    showClose: showClose,
+  );
 
   factory ModelSetupScreen.error({
     required String message,
     required VoidCallback onRetry,
     VoidCallback? onSecondaryAction,
     String? secondaryActionLabel,
-  }) =>
-      ModelSetupScreen(
-        title: 'Setup Failed',
-        subtitle: message,
-        onRetry: onRetry,
-        onSecondaryAction: onSecondaryAction,
-        secondaryActionLabel: secondaryActionLabel,
-      );
+    bool showClose = true,
+  }) => ModelSetupScreen(
+    title: 'Setup Failed',
+    subtitle: message,
+    onRetry: onRetry,
+    onSecondaryAction: onSecondaryAction,
+    secondaryActionLabel: secondaryActionLabel,
+    showClose: showClose,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +76,11 @@ class ModelSetupScreen extends StatelessWidget {
               if (isLoading)
                 const KynosSkeleton(height: 48, width: 48)
               else
-                Icon(Icons.error_outline, size: 48, color: context.kynosTheme.move),
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: context.kynosTheme.move,
+                ),
               const Gap(Spacing.lg),
               Text(
                 title ?? '',
@@ -91,7 +99,8 @@ class ModelSetupScreen extends StatelessWidget {
                   child: const Text('Try Again'),
                 ),
               ],
-              if (onSecondaryAction != null && secondaryActionLabel != null) ...[
+              if (onSecondaryAction != null &&
+                  secondaryActionLabel != null) ...[
                 const Gap(Spacing.sm),
                 TextButton(
                   onPressed: onSecondaryAction,

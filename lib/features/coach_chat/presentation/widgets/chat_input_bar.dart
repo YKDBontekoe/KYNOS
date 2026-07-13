@@ -36,6 +36,9 @@ class ChatInputBar extends StatelessWidget {
                   focusNode: focusNode,
                   enabled: !isStreaming,
                   textInputAction: TextInputAction.send,
+                  minLines: 1,
+                  maxLines: 4,
+                  keyboardType: TextInputType.multiline,
                   onSubmitted: isStreaming ? null : onSend,
                   decoration: const InputDecoration(
                     hintText: 'Ask your coach...',
@@ -44,10 +47,7 @@ class ChatInputBar extends StatelessWidget {
                 ),
               ),
               if (isStreaming && onCancel != null)
-                TextButton(
-                  onPressed: onCancel,
-                  child: const Text('Stop'),
-                ),
+                TextButton(onPressed: onCancel, child: const Text('Stop')),
               LiquidGlassIconButton(
                 icon: isStreaming ? Icons.hourglass_empty : Icons.send_rounded,
                 tooltip: isStreaming ? 'Sending message' : 'Send message',

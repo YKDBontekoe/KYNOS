@@ -12,6 +12,10 @@ import 'package:kynos/infrastructure/ai/gemma/on_device_model_installer.dart';
 abstract final class GemmaRuntime {
   static const _inferenceEngines = [LiteRtLmEngine()];
 
+  /// Cache API storage works in browsers without OPFS support. Streaming mode
+  /// requires OPFS and prevents the entire Flutter app from starting there.
+  static const _webStorageMode = WebStorageMode.cacheApi;
+
   static String? _installedCatalogId;
 
   static String? get installedCatalogId => _installedCatalogId;
@@ -19,11 +23,10 @@ abstract final class GemmaRuntime {
   static Future<void> initialize({String? huggingFaceToken}) async {
     await FlutterGemma.initialize(
       inferenceEngines: _inferenceEngines,
-      webStorageMode: WebStorageMode.streaming,
-      huggingFaceToken:
-          huggingFaceToken != null && huggingFaceToken.isNotEmpty
-              ? huggingFaceToken
-              : null,
+      webStorageMode: _webStorageMode,
+      huggingFaceToken: huggingFaceToken != null && huggingFaceToken.isNotEmpty
+          ? huggingFaceToken
+          : null,
     );
     await evictLegacyModelsIfNeeded();
   }
@@ -35,8 +38,7 @@ abstract final class GemmaRuntime {
   /// be cleared and the Gemma 4 `.litertlm` bundle reinstalled.
   static bool hasCompatibleActiveModel() {
     if (!FlutterGemma.hasActiveModel()) return false;
-    final spec =
-        FlutterGemmaPlugin.instance.modelManager.activeInferenceModel;
+    final spec = FlutterGemmaPlugin.instance.modelManager.activeInferenceModel;
     if (spec is! InferenceModelSpec) return false;
     return spec.fileType == ModelFileType.litertlm;
   }
@@ -76,5 +78,6 @@ abstract final class GemmaRuntime {
   static String get modelDownloadUrl =>
       downloadUrlFor(OnDeviceModelCatalog.gemma4E2b);
 
-  static void markInstalled(String catalogId) => _installedCatalogId = catalogId;
+  static void markInstalled(String catalogId) =>
+      _installedCatalogId = catalogId;
 }

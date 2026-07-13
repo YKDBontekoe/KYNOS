@@ -97,9 +97,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/app/app.dart` | 27 | `KynosApp` |
 | `lib/app/not_found_page.dart` | 46 | `NotFoundPage` |
 | `lib/app/page_transitions.dart` | 100 | `Route transition presets for [GoRouter] [pageBuilder] callbacks.` |
-| `lib/app/router.dart` | 228 | `_RouterRefreshNotifier` |
-| `lib/app/shell_navigation_scope.dart` | 41 | `ShellNavigationScope, DashboardTab` |
-| `lib/app/shell_page.dart` | 201 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
+| `lib/app/router.dart` | 241 | `_RouterRefreshNotifier` |
+| `lib/app/shell_navigation_scope.dart` | 33 | `ShellNavigationScope, CoachTab` |
+| `lib/app/shell_page.dart` | 162 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
 | `lib/core/constants/app_constants.dart` | 54 | `Compile-time constants for KYNOS.` |
 | `lib/core/constants/gamification_constants.dart` | 46 | `Gameplay tuning for Summit Camp.` |
 | `lib/core/constants/imported_workout_ids.dart` | 10 | `Prefix and helpers for locally imported workout identifiers.` |
@@ -108,7 +108,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/core/theme/colors.dart` | 82 | `KYNOS colour palette — iOS system colours, Apple Fitness aesthetic.` |
 | `lib/core/theme/elevation.dart` | 33 | `Shadow presets for the KYNOS design system.` |
 | `lib/core/theme/kynos_theme_extension.dart` | 229 | `KynosThemeExtension` |
-| `lib/core/theme/layout.dart` | 69 | `Layout constants for consistent page structure.` |
+| `lib/core/theme/layout.dart` | 64 | `Layout constants for consistent page structure.` |
 | `lib/core/theme/liquid_glass_tokens.dart` | 54 | `Design tokens for Apple Liquid Glass materials — blur, vibrancy, specular edges.` |
 | `lib/core/theme/motion.dart` | 17 | `Design token: motion durations and curves shared across the app.` |
 | `lib/core/theme/spacing.dart` | 20 | `Design token: spacing scale (4-point grid).` |
@@ -238,23 +238,23 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 69 | `XpBar` |
 | `lib/features/character/providers/character_provider.dart` | 1 | `Dart module` |
 | `lib/features/character/providers/quest_provider.dart` | 48 | `QuestNotifier` |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 358 | `CoachChatPage, _CoachChatPageState` |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 381 | `CoachChatPage, _CoachChatPageState` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 63 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
-| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 128 | `AssistantBubble` |
+| `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 161 | `AssistantBubble` |
 | `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 64 | `ChatInputBar` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 163 | `CoachChatAppBar, _InferenceBadge` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 129 | `CoachChatAppBar` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 233 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
 | `lib/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart` | 118 | `FocusRunPickerSheet` |
-| `lib/features/coach_chat/presentation/widgets/follow_up_chips.dart` | 45 | `FollowUpChips` |
+| `lib/features/coach_chat/presentation/widgets/follow_up_chips.dart` | 35 | `FollowUpChips` |
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 94 | `InferenceModeBar` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | `InferenceSettingsSheet` |
-| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 206 | `MessageList, _MessageListState, MessageBubble, …` |
-| `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 107 | `ModelSetupScreen` |
+| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 215 | `MessageList, _MessageListState, MessageBubble, …` |
+| `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
 | `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | `StreamingTextPulse, _StreamingTextPulseState` |
 | `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 52 | `TypingIndicator, _TypingIndicatorState` |
 | `lib/features/coach_chat/providers/active_coach_conversation_provider.dart` | 23 | `ActiveCoachConversation` |
@@ -340,7 +340,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/ai/gemma/coach_prompt_builder.dart` | 56 | `Builds the user turn for coach chat (system instruction lives on [InferenceChat]).` |
 | `lib/infrastructure/ai/gemma/gemma_device_ram_probe.dart` | 51 | `Dart module` |
 | `lib/infrastructure/ai/gemma/gemma_inference_session.dart` | 70 | `Dart module` |
-| `lib/infrastructure/ai/gemma/gemma_runtime.dart` | 80 | `Central bootstrap for flutter_gemma 1.x opt-in inference engines.` |
+| `lib/infrastructure/ai/gemma/gemma_runtime.dart` | 83 | `Central bootstrap for flutter_gemma 1.x opt-in inference engines.` |
 | `lib/infrastructure/ai/gemma/gemma_runtime_tier.dart` | 18 | `Resolves the current on-device Gemma tier from platform RAM and thermal probes.` |
 | `lib/infrastructure/ai/gemma/gemma_thermal_probe.dart` | 19 | `Reads platform thermal / power-save signals for conservative Gemma routing.` |
 | `lib/infrastructure/ai/gemma/on_device_model_installer.dart` | 24 | `Maps domain [OnDeviceModel] specs to flutter_gemma install APIs.` |
@@ -420,7 +420,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/utils/health_platform_labels.dart` | 41 | `Platform-aware labels for health data sources.` |
 | `lib/shared/utils/insight_text_formatter.dart` | 48 | `Formats coaching insight text for concise, beginner-friendly UI labels.` |
 | `lib/shared/utils/navigation_utils.dart` | 11 | `Pops the current route or navigates to [fallbackRoute] when nothing to pop.` |
-| `lib/shared/utils/open_coach_chat.dart` | 33 | `Opens coach chat with an optional structured seed.` |
+| `lib/shared/utils/open_coach_chat.dart` | 37 | `Opens coach chat with an optional structured seed.` |
 | `lib/shared/utils/picked_file_bytes.dart` | 2 | `Dart module` |
 | `lib/shared/utils/picked_file_bytes_io.dart` | 15 | `Dart module` |
 | `lib/shared/utils/picked_file_bytes_web.dart` | 9 | `Dart module` |
@@ -436,7 +436,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/gait_model_card.dart` | 247 | `GaitModelCard, _CoefficientsRow, GaitModelCardAsync` |
 | `lib/shared/widgets/glass_card.dart` | 43 | `GlassCard` |
 | `lib/shared/widgets/insight_expandable_card.dart` | 221 | `InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, …` |
-| `lib/shared/widgets/kynos_bottom_nav.dart` | 192 | `KynosBottomNavItem, KynosBottomNav, _NavBarItem` |
+| `lib/shared/widgets/kynos_bottom_nav.dart` | 185 | `KynosBottomNavItem, KynosBottomNav, _NavBarItem` |
 | `lib/shared/widgets/kynos_card.dart` | 57 | `KynosCard` |
 | `lib/shared/widgets/kynos_chip.dart` | 128 | `KynosChip, _MetricChip, _AccentChip` |
 | `lib/shared/widgets/kynos_hero_banner.dart` | 125 | `KynosHeroBanner` |
@@ -451,7 +451,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/liquid_glass_button.dart` | 142 | `LiquidGlassButton, LiquidGlassIconButton` |
 | `lib/shared/widgets/liquid_glass_surface.dart` | 103 | `LiquidGlassSurface` |
 | `lib/shared/widgets/metric_tile.dart` | 131 | `MetricTile` |
-| `lib/shared/widgets/nav_icon.dart` | 241 | `NavIconDefinition, NavIconPainter` |
+| `lib/shared/widgets/nav_icon.dart` | 238 | `NavIconDefinition, NavIconPainter` |
 | `lib/shared/widgets/responsive_center.dart` | 30 | `ResponsiveCenter` |
 | `lib/shared/widgets/run_card.dart` | 113 | `RunCard` |
 | `lib/shared/widgets/widgets.dart` | 24 | `KYNOS shared widgets — barrel export.` |
@@ -463,8 +463,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/pages/settings_page.dart` | 599 | Split if > 250 lines |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 591 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 381 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 367 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 358 | Split if > 250 lines |
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 298 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
