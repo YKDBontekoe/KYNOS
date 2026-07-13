@@ -12,6 +12,7 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/character_glance_card.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/coach_agent_hero_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/coach_insight_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/connect_healthkit_card.dart';
 import 'package:kynos/features/dashboard/presentation/widgets/daily_quest_teaser.dart';
@@ -112,6 +113,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       runId: runId,
       questId: questId,
     );
+  }
+
+  String _coachAgentInsightLine(TodayInsightsState? state) {
+    final actionNow = state?.insights?.actionNow;
+    if (actionNow != null && actionNow.isNotEmpty) return actionNow;
+    return 'Ask me anything about your training — I can look up your runs, '
+        'trends, and plan pacing on demand.';
   }
 
   String? _coachSeedFromInsights(TodayInsightsState? state) {
@@ -234,6 +242,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
             sliver: SliverList.list(
               children: [
+                CoachAgentHeroCard(
+                  insightLine: _coachAgentInsightLine(todayInsightsState.value),
+                  onAskCoach: (message, topic) => _openCoachChat(
+                    seedMessage: message.isEmpty ? null : message,
+                    topic: topic,
+                  ),
+                ),
+                const Gap(tokens.Spacing.xl),
                 ReadinessCard(
                   summaryAsync: summary,
                   todayInsightsState: todayInsightsState,

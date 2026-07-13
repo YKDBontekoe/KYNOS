@@ -11,6 +11,7 @@ import 'package:kynos/domain/entities/coach/coach_conversation_settings.dart';
 import 'package:kynos/domain/entities/coach/coach_conversation_summary.dart';
 import 'package:kynos/domain/entities/coach/coach_data_source.dart';
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
 import 'package:logger/logger.dart';
 
 /// Serialises coach conversations to SharedPreferences JSON.
@@ -139,12 +140,15 @@ abstract final class CoachConversationCodec {
         'attemptedBackend': message.attemptedBackend!.name,
       if (message.contextSnapshotIds != null)
         'contextSnapshotIds': message.contextSnapshotIds,
+      if (message.toolSteps != null && message.toolSteps!.isNotEmpty)
+        'toolSteps': message.toolSteps!.map(_toolStepToMap).toList(),
     };
   }
 
   static ChatMessage _messageFromMap(Map<String, dynamic> map) {
     final backendName = map['attemptedBackend'] as String?;
     final snapshotRaw = map['contextSnapshotIds'] as List<dynamic>?;
+    final toolStepsRaw = map['toolSteps'] as List<dynamic>?;
     return ChatMessage(
       id: map['id'] as String,
       role: MessageRole.values.byName(map['role'] as String),
@@ -156,7 +160,35 @@ abstract final class CoachConversationCodec {
           ? null
           : AiInferenceBackend.values.byName(backendName),
       contextSnapshotIds: snapshotRaw?.whereType<String>().toList(),
+      toolSteps: toolStepsRaw
+          ?.whereType<Map<String, dynamic>>()
+          .map(_toolStepFromMap)
+          .toList(),
     );
+  }
+
+  static Map<String, dynamic> _toolStepToMap(CoachToolStep step) {
+    return {
+      'toolName': step.toolName,
+      'status': step.status.name,
+      'displayLabel': step.displayLabel,
+    };
+  }
+
+  static CoachToolStep _toolStepFromMap(Map<String, dynamic> map) {
+    return CoachToolStep(
+      toolName: map['toolName'] as String,
+      status: _toolStatusFromString(map['status'] as String?),
+      displayLabel: map['displayLabel'] as String?,
+    );
+  }
+
+  static CoachToolStatus _toolStatusFromString(String? raw) {
+    if (raw == null) return CoachToolStatus.success;
+    for (final status in CoachToolStatus.values) {
+      if (status.name == raw) return status;
+    }
+    return CoachToolStatus.success;
   }
 
   static Map<String, dynamic> _settingsToMap(CoachConversationSettings settings) {

@@ -46,7 +46,7 @@ void main(List<String> args) {
     final summary = classes.isEmpty
         ? _firstCommentLine(content) ?? 'Dart module'
         : classes.take(3).join(', ') + (classes.length > 3 ? ', …' : '');
-    layerLines.add('| `$rel` | $lineCount | $summary |');
+    layerLines.add('| `$rel` | $lineCount | `$summary` |');
   }
 
   hotFiles.sort((a, b) => b.lines.compareTo(a.lines));

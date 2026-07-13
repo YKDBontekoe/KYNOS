@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
+import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/agent_tool_step_list.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_markdown_text.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/streaming_text_pulse.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/typing_indicator.dart';
@@ -20,6 +22,7 @@ class AssistantBubble extends StatelessWidget {
     this.alternateBackend,
     this.alternateBackendLabel,
     this.contextSnapshotIds,
+    this.toolSteps,
   });
 
   final String content;
@@ -31,6 +34,7 @@ class AssistantBubble extends StatelessWidget {
   final AiInferenceBackend? alternateBackend;
   final String? alternateBackendLabel;
   final List<String>? contextSnapshotIds;
+  final List<CoachToolStep>? toolSteps;
 
   String? get _errorLabel {
     if (!hasError) return null;
@@ -67,6 +71,8 @@ class AssistantBubble extends StatelessWidget {
                     color: Theme.of(context).colorScheme.error,
                   ),
                 ),
+              if (toolSteps != null && toolSteps!.isNotEmpty)
+                AgentToolStepList(steps: toolSteps!),
               isStreaming && content.isEmpty
                   ? const TypingIndicator()
                   : StreamingTextPulse(
