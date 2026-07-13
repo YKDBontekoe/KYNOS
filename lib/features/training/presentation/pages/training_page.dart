@@ -178,7 +178,6 @@ class _TrainingPageState extends ConsumerState<TrainingPage> {
             greeting: _greeting(),
             title: 'Health',
             subtitle: _statusSubtitle(summary: summary.value, dash: dash),
-            onAskCoach: () => _openCoachChat(),
           ),
           SliverPersistentHeader(
             pinned: true,
