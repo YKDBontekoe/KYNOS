@@ -71,24 +71,31 @@ class ShellPage extends ConsumerWidget {
               left: 0,
               right: 0,
               bottom: 0,
-              child: IgnorePointer(
-                ignoring: !chromeVisible,
-                child: AnimatedSlide(
-                  duration: Motion.medium,
-                  curve: Motion.curve,
-                  offset: chromeVisible ? Offset.zero : const Offset(0, 1.2),
-                  child: AnimatedOpacity(
-                    duration: Motion.medium,
-                    curve: Motion.curve,
-                    opacity: chromeVisible ? 1 : 0,
-                    child: KynosTabBar(
-                      items: _tabItems,
-                      selectedIndex: navigationShell.currentIndex,
-                      onSelected: _onTabSelected,
-                      onSettings: () => context.push(Routes.settings),
+              child: AnimatedSwitcher(
+                duration: Motion.medium,
+                switchInCurve: Motion.curve,
+                switchOutCurve: Motion.curve,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.35),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
                     ),
-                  ),
-                ),
+                  );
+                },
+                child: chromeVisible
+                    ? KynosTabBar(
+                        key: const ValueKey('shell-tab-bar'),
+                        items: _tabItems,
+                        selectedIndex: navigationShell.currentIndex,
+                        onSelected: _onTabSelected,
+                        onSettings: () => context.push(Routes.settings),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('shell-tab-bar-hidden')),
               ),
             ),
           ],
