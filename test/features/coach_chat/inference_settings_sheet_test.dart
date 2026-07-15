@@ -5,6 +5,7 @@ import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/inference_settings_sheet.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:kynos/shared/providers/shell_chrome_provider.dart';
+import 'package:kynos/shared/widgets/show_shell_modal_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -95,6 +96,71 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Model & mode'), findsNothing);
+    expect(container.read(shellChromeProvider), isTrue);
+  });
+
+  testWidgets('Chained coach sheets keep chrome hidden until the last closes', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    late ProviderContainer container;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: Builder(
+          builder: (context) {
+            container = ProviderScope.containerOf(context);
+            return MaterialApp(
+              theme: AppTheme.dark,
+              home: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: Center(
+                      child: FilledButton(
+                        onPressed: () {
+                          showShellModalBottomSheet<void>(
+                            context: context,
+                            builder: (_) => const SizedBox(
+                              height: 120,
+                              child: Center(child: Text('Sheet A')),
+                            ),
+                          );
+                        },
+                        child: const Text('Open A'),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open A'));
+    await tester.pumpAndSettle();
+    expect(container.read(shellChromeProvider), isFalse);
+
+    // Simulate pop-then-open without awaiting the first future's whenComplete
+    // before acquiring for the next sheet (reentrancy).
+    final navigator = Navigator.of(
+      tester.element(find.text('Sheet A')),
+      rootNavigator: true,
+    );
+    container.read(shellChromeProvider.notifier).acquire();
+    navigator.pop();
+    await tester.pump();
+    expect(
+      container.read(shellChromeProvider),
+      isFalse,
+      reason: 'chrome stays hidden while next sheet depth is held',
+    );
+
+    container.read(shellChromeProvider.notifier).release();
+    await tester.pumpAndSettle();
     expect(container.read(shellChromeProvider), isTrue);
   });
 }
