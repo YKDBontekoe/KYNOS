@@ -15,7 +15,6 @@ void showFocusRunPickerSheet(BuildContext context, WidgetRef ref) {
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
-    barrierColor: Colors.black.withValues(alpha: 0.45),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(tokens.Radius.xl)),
     ),
