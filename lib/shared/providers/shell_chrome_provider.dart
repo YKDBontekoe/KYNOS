@@ -4,15 +4,29 @@ part 'shell_chrome_provider.g.dart';
 
 /// Controls visibility of the shell floating tab dock.
 ///
-/// Modal sheets opened from nested branch navigators can sit under the dock
-/// unless they use the root navigator; explicitly hiding chrome also matches
-/// the product intent for focused menus like Model & mode.
+/// Tracks an open-sheet depth count so chained modal sheets
+/// (`pop` then immediately `show` another) stay chrome-hidden until the
+/// last sheet dismisses.
 @Riverpod(keepAlive: true)
 class ShellChrome extends _$ShellChrome {
+  int _openSheetCount = 0;
+
   @override
   bool build() => true;
 
-  void show() => state = true;
+  /// Increments open-sheet depth and hides chrome while any sheet is open.
+  void acquire() {
+    _openSheetCount += 1;
+    if (state) state = false;
+  }
 
-  void hide() => state = false;
+  /// Decrements open-sheet depth and shows chrome only when depth hits zero.
+  void release() {
+    if (_openSheetCount > 0) {
+      _openSheetCount -= 1;
+    }
+    if (_openSheetCount == 0 && !state) {
+      state = true;
+    }
+  }
 }

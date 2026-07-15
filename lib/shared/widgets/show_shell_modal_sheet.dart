@@ -4,8 +4,8 @@ import 'package:kynos/shared/providers/shell_chrome_provider.dart';
 
 /// Shows a modal bottom sheet while temporarily hiding the shell tab dock.
 ///
-/// Always prefer this for coach (and other shell-tab) menus so the floating
-/// nav cannot cover sheet actions like Delete thread.
+/// Uses acquire/release depth tracking so chained sheets (`pop` then open
+/// another) keep the floating nav hidden until the last sheet closes.
 Future<T?> showShellModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -15,7 +15,8 @@ Future<T?> showShellModalBottomSheet<T>({
   bool useRootNavigator = true,
 }) {
   final container = ProviderScope.containerOf(context);
-  container.read(shellChromeProvider.notifier).hide();
+  final chrome = container.read(shellChromeProvider.notifier);
+  chrome.acquire();
 
   return showModalBottomSheet<T>(
     context: context,
@@ -24,7 +25,5 @@ Future<T?> showShellModalBottomSheet<T>({
     backgroundColor: backgroundColor,
     shape: shape,
     builder: builder,
-  ).whenComplete(() {
-    container.read(shellChromeProvider.notifier).show();
-  });
+  ).whenComplete(chrome.release);
 }
