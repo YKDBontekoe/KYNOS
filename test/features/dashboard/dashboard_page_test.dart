@@ -111,7 +111,7 @@ void main() {
     expect(find.text('Summary'), findsWidgets);
     expect(find.text('READINESS'), findsOneWidget);
     expect(find.text('Solid readiness. Tempo work fits today.'), findsOneWidget);
-    expect(find.text('Ask Coach'), findsWidgets);
+    // Header coach CTA was removed; agent hero remains the primary coach entry.
     expect(find.text('KYNOS Coach'), findsOneWidget);
 
     await tester.scrollUntilVisible(
