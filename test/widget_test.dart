@@ -93,7 +93,7 @@ void main() {
       tester.getSize(find.byType(CoachChatPage)).height,
       greaterThan(500),
     );
-    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(100));
+    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(72));
     expect(
       tester.getSize(find.byType(CoachChatEmptyState)).height,
       greaterThan(300),

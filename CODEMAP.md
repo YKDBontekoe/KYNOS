@@ -255,7 +255,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
 | `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 232 | `ChatInputBar, _ChatInputBarState, _SendButton` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 166 | `CoachChatAppBar` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 180 | `CoachChatAppBar, _TitleModeControl` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
@@ -265,8 +265,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 88 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
-| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 215 | `InferenceModeBar` |
-| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | `InferenceSettingsSheet` |
+| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 110 | `InferenceModeBar` |
+| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 237 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 269 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
 | `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 46 | `PendingCoachActionCard` |
@@ -324,7 +324,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/pages/openrouter_model_picker_page.dart` | 215 | `OpenRouterModelPickerPage` |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 712 | `SettingsPage, _SettingsPageState, _SwitchTile, …` |
 | `lib/features/settings/presentation/widgets/apple_health_export_preview_card.dart` | 104 | `AppleHealthExportPreviewCard` |
-| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 209 | `CoachPersonalizationCard` |
+| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 211 | `CoachPersonalizationCard` |
 | `lib/features/settings/presentation/widgets/gpx_import_preview_card.dart` | 82 | `GpxImportPreviewCard` |
 | `lib/features/settings/presentation/widgets/health_import_preview_row.dart` | 27 | `HealthImportPreviewRow` |
 | `lib/features/settings/presentation/widgets/health_import_progress_card.dart` | 58 | `HealthImportProgressCard` |
