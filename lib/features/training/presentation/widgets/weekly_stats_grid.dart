@@ -47,7 +47,7 @@ class WeeklyStatsGrid extends StatelessWidget {
                 accentColor: AppTheme.stand,
               ),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(tokens.Spacing.md),
             Expanded(
               child: MetricTile(
                 label: 'Runs',
@@ -58,7 +58,7 @@ class WeeklyStatsGrid extends StatelessWidget {
             ),
           ],
         ),
-        const Gap(tokens.Spacing.sm),
+        const Gap(tokens.Spacing.md),
         Row(
           children: [
             Expanded(
@@ -69,7 +69,7 @@ class WeeklyStatsGrid extends StatelessWidget {
                 accentColor: AppTheme.purple,
               ),
             ),
-            const Gap(tokens.Spacing.sm),
+            const Gap(tokens.Spacing.md),
             Expanded(
               child: MetricTile(
                 label: 'Active kcal',

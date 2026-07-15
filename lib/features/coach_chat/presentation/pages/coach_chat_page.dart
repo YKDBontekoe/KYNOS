@@ -15,6 +15,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.da
 import 'package:kynos/features/coach_chat/presentation/widgets/cloud_consent_banner.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/follow_up_chips.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/inference_mode_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
@@ -42,6 +43,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   bool _initialized = false;
   String? _pendingMessage;
   bool _showCloudConsent = false;
+  bool _modelBannerDismissed = false;
 
   @override
   void initState() {
@@ -124,6 +126,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     }
 
     _textController.clear();
+    ref.read(aiReconnectStateProvider.notifier).clear();
     ref.read(coachChatProvider.notifier).sendMessage(text);
   }
 
@@ -214,18 +217,6 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(aiReconnectStateProvider, (previous, next) {
-      if (!next || !mounted) return;
-      ref.read(aiReconnectStateProvider.notifier).clear();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('On-device coach will reconnect on your next message.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-    });
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
     return _buildChat();
   }
@@ -315,30 +306,45 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             onExport: _exportThread,
             onNewChat: _createNewChat,
           ),
-          setupState.when(
-            loading: () => const _ModelProgressBanner(
-              message: 'Preparing the optional on-device AI in the background…',
-              onRetry: null,
-              onSettings: null,
-            ),
-            error: (error, _) => _ModelProgressBanner(
+          const InferenceModeBar(),
+          if (ref.watch(aiReconnectStateProvider))
+            _CoachStatusBanner(
               message:
-                  'Daily guidance still works locally. ${_setupErrorMessage(error)}',
-              onRetry: () =>
-                  ref.read(modelSetupProvider.notifier).checkAndInstall(),
-              onSettings: () => context.push(Routes.settings),
+                  'On-device coach will reconnect when you send your next message.',
+              onDismiss: () =>
+                  ref.read(aiReconnectStateProvider.notifier).clear(),
             ),
-            data: (setup) => setup.isReady
-                ? const SizedBox.shrink()
-                : _ModelProgressBanner(
-                    message:
-                        setup.progressMessage ??
-                        'The optional on-device conversational model is not ready yet.',
-                    onRetry: () =>
-                        ref.read(modelSetupProvider.notifier).checkAndInstall(),
-                    onSettings: () => context.push(Routes.settings),
-                  ),
-          ),
+          if (!_modelBannerDismissed)
+            setupState.when(
+              loading: () => const _ModelProgressBanner(
+                message:
+                    'Preparing the optional on-device AI in the background…',
+                onRetry: null,
+                onSettings: null,
+                onDismiss: null,
+              ),
+              error: (error, _) => _ModelProgressBanner(
+                message: _setupErrorMessage(error),
+                onRetry: () =>
+                    ref.read(modelSetupProvider.notifier).checkAndInstall(),
+                onSettings: () => context.push(Routes.settings),
+                onDismiss: () =>
+                    setState(() => _modelBannerDismissed = true),
+              ),
+              data: (setup) => setup.isReady
+                  ? const SizedBox.shrink()
+                  : _ModelProgressBanner(
+                      message:
+                          setup.progressMessage ??
+                          'The optional on-device conversational model is not ready yet.',
+                      onRetry: () => ref
+                          .read(modelSetupProvider.notifier)
+                          .checkAndInstall(),
+                      onSettings: () => context.push(Routes.settings),
+                      onDismiss: () =>
+                          setState(() => _modelBannerDismissed = true),
+                    ),
+            ),
           if (_showCloudConsent)
             CloudConsentBanner(
               enabledSourceLabels: enabledLabels,
@@ -363,7 +369,6 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             controller: _textController,
             focusNode: _focusNode,
             isStreaming: isStreaming,
-            leftInset: LayoutTokens.coachFabLeftClearance,
             onSend: _handleSend,
             onCancel: isStreaming
                 ? () => ref.read(coachChatProvider.notifier).cancelGeneration()
@@ -380,11 +385,13 @@ class _ModelProgressBanner extends StatelessWidget {
     required this.message,
     required this.onRetry,
     required this.onSettings,
+    required this.onDismiss,
   });
 
   final String message;
   final VoidCallback? onRetry;
   final VoidCallback? onSettings;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -397,11 +404,15 @@ class _ModelProgressBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(Radius.md),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.memory_rounded,
-            size: 18,
-            color: context.kynosTheme.purple,
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.memory_rounded,
+              size: 18,
+              color: context.kynosTheme.purple,
+            ),
           ),
           const Gap(Spacing.sm),
           Expanded(
@@ -419,6 +430,63 @@ class _ModelProgressBanner extends StatelessWidget {
               onPressed: onSettings,
               icon: const Icon(Icons.settings_outlined, size: 18),
             ),
+          if (onDismiss != null)
+            IconButton(
+              tooltip: 'Dismiss',
+              onPressed: onDismiss,
+              icon: const Icon(Icons.close_rounded, size: 18),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Subtle in-chat status strip — never a global snackbar that leaks onto other tabs.
+class _CoachStatusBanner extends StatelessWidget {
+  const _CoachStatusBanner({
+    required this.message,
+    required this.onDismiss,
+  });
+
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+        Spacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: kynos.card,
+        borderRadius: BorderRadius.circular(Radius.lg),
+        border: Border.all(color: kynos.separator),
+        boxShadow: kynos.cardShadow,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.sync_rounded, size: 16, color: kynos.stand),
+          const Gap(Spacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.secondaryLabel,
+                  ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Dismiss',
+            onPressed: onDismiss,
+            icon: Icon(Icons.close_rounded, size: 16, color: kynos.tertiaryLabel),
+          ),
         ],
       ),
     );

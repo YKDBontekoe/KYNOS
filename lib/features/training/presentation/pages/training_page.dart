@@ -482,11 +482,14 @@ class _JumpBarDelegate extends SliverPersistentHeaderDelegate {
 
   final Widget child;
 
-  @override
-  double get minExtent => 52;
+  /// Fits quiet jump links (label + underline) without clipping.
+  static const double _extent = 48;
 
   @override
-  double get maxExtent => 52;
+  double get minExtent => _extent;
+
+  @override
+  double get maxExtent => _extent;
 
   @override
   Widget build(
@@ -495,16 +498,14 @@ class _JumpBarDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     final kynos = context.kynosTheme;
-    return ColoredBox(
-      color: kynos.background.withValues(
-        alpha: overlapsContent ? 0.96 : 1,
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: tokens.Spacing.xs),
-          child: child,
+    return SizedBox(
+      height: _extent,
+      width: double.infinity,
+      child: ColoredBox(
+        color: kynos.background.withValues(
+          alpha: overlapsContent ? 0.96 : 1,
         ),
+        child: child,
       ),
     );
   }

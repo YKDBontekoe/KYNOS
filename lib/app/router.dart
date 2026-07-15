@@ -87,14 +87,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.dashboard,
-                pageBuilder: (context, state) =>
-                    KynosPageTransitions.fadeThrough(
-                      key: state.pageKey,
-                      child: CoachTab(
-                        key: ValueKey(state.uri.queryParameters['threadId']),
-                        threadId: state.uri.queryParameters['threadId'],
-                      ),
-                    ),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: CoachTab(
+                    key: ValueKey(state.uri.queryParameters['threadId']),
+                    threadId: state.uri.queryParameters['threadId'],
+                  ),
+                ),
               ),
             ],
           ),
@@ -102,11 +101,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.health,
-                pageBuilder: (context, state) =>
-                    KynosPageTransitions.fadeThrough(
-                      key: state.pageKey,
-                      child: const HealthTab(),
-                    ),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const HealthTab(),
+                ),
               ),
             ],
           ),
@@ -114,11 +112,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.journey,
-                pageBuilder: (context, state) =>
-                    KynosPageTransitions.fadeThrough(
-                      key: state.pageKey,
-                      child: const JourneyTab(),
-                    ),
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const JourneyTab(),
+                ),
               ),
             ],
           ),

@@ -12,6 +12,7 @@ import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:kynos/features/dashboard/presentation/widgets/dashboard_header_sliver.dart';
 import 'package:kynos/features/dashboard/providers/dashboard_summary_provider.dart';
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/daily_quests_provider.dart';
@@ -111,8 +112,15 @@ void main() {
     expect(find.text('Summary'), findsWidgets);
     expect(find.text('READINESS'), findsOneWidget);
     expect(find.text('Solid readiness. Tempo work fits today.'), findsOneWidget);
-    expect(find.text('Ask Coach'), findsWidgets);
+    // Header coach CTA was removed; agent hero remains the primary coach entry.
     expect(find.text('KYNOS Coach'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(DashboardHeaderSliver),
+        matching: find.text('Ask Coach'),
+      ),
+      findsNothing,
+    );
 
     await tester.scrollUntilVisible(
       find.text('THIS WEEK'),

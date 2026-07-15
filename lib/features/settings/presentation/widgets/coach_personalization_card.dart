@@ -29,24 +29,39 @@ class CoachPersonalizationCard extends ConsumerWidget {
                   : 'Goal: ${state.profile!.goal} · ${state.profile!.experience}',
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => _editProfile(context, ref, state.profile),
-                  child: const Text('Profile'),
-                ),
-              ),
-              const Gap(tokens.Spacing.sm),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () => _editCheckIn(context, ref, checkIn),
-                  child: Text(
-                    checkIn == null ? 'Morning check-in' : 'Update check-in',
-                  ),
-                ),
-              ),
-            ],
+          // Equal-width actions — stack on the narrowest cards so labels never
+          // fight for space.
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stack = constraints.maxWidth < 420;
+              final profileButton = OutlinedButton(
+                onPressed: () => _editProfile(context, ref, state.profile),
+                child: const Text('Profile'),
+              );
+              final checkInButton = FilledButton.tonal(
+                onPressed: () => _editCheckIn(context, ref, checkIn),
+                child: Text(checkIn == null ? 'Check-in' : 'Update check-in'),
+              );
+
+              if (stack) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    profileButton,
+                    const Gap(tokens.Spacing.sm),
+                    checkInButton,
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: profileButton),
+                  const Gap(tokens.Spacing.sm),
+                  Expanded(child: checkInButton),
+                ],
+              );
+            },
           ),
         ],
       ),

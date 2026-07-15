@@ -28,6 +28,7 @@ import 'package:kynos/shared/utils/health_platform_labels.dart';
 import 'package:kynos/shared/utils/open_coach_chat.dart';
 import 'package:kynos/shared/widgets/daily_quest_teaser.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
+import 'package:kynos/shared/widgets/kynos_page_header.dart';
 import 'package:kynos/shared/widgets/kynos_section_header.dart';
 import 'package:kynos/shared/widgets/kynos_skeleton.dart';
 
@@ -51,7 +52,6 @@ class CharacterPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final kynos = context.kynosTheme;
     final characterAsync = ref.watch(runnerCharacterProvider);
     final questsAsync = ref.watch(dailyQuestsProvider);
     final campAsync = ref.watch(campSessionProvider);
@@ -64,21 +64,9 @@ class CharacterPage extends ConsumerWidget {
           parent: BouncingScrollPhysics(),
         ),
         slivers: [
-          SliverAppBar(
-            backgroundColor: kynos.background,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            pinned: true,
-            toolbarHeight: 56,
-            titleSpacing: 20,
-            title: Text(
-              'JOURNEY',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: kynos.tertiaryLabel,
-                letterSpacing: 0.8,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+          const KynosPageHeader(
+            title: 'Journey',
+            subtitle: 'Progress, camp, and wellbeing quests',
           ),
           characterAsync.when(
             loading: () => const SliverFillRemaining(

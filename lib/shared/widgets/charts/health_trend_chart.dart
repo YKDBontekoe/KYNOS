@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/utils/running_distance.dart';
@@ -137,10 +138,34 @@ class _HealthTrendChartState extends State<HealthTrendChart> {
       range: widget.range,
     );
     if (points.isEmpty) {
+      final kynos = context.kynosTheme;
       return Center(
-        child: Text(
-          'No ${widget.metric.label.toLowerCase()} data yet',
-          style: Theme.of(context).textTheme.bodySmall,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.show_chart_rounded,
+                size: 36,
+                color: kynos.tertiaryLabel,
+              ),
+              const Gap(Spacing.sm),
+              Text(
+                'Your ${widget.metric.label.toLowerCase()} trend will appear here.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const Gap(Spacing.xs),
+              Text(
+                'Import a run or sync a few days of health data to unlock this chart.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: kynos.secondaryLabel,
+                    ),
+              ),
+            ],
+          ),
         ),
       );
     }

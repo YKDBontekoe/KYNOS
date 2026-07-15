@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/context_inspector_sheet.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/conversation_list_sheet.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/inference_settings_sheet.dart';
-import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
+import 'package:kynos/shared/widgets/liquid_glass_surface.dart';
 
-class CoachChatAppBar extends ConsumerWidget {
+/// Floating corner actions for Coach — not a top navigation bar.
+class CoachChatAppBar extends StatelessWidget {
   const CoachChatAppBar({
     super.key,
     required this.onDeleteThread,
@@ -20,142 +20,97 @@ class CoachChatAppBar extends ConsumerWidget {
   final VoidCallback onNewChat;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final conversation = ref.watch(activeCoachConversationProvider).value;
-    final kynos = context.kynosTheme;
-    final title = conversation?.title ?? 'KYNOS Coach';
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: kynos.background,
-        boxShadow: kynos.cardShadow,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.md,
+          Spacing.sm,
+          Spacing.md,
+          0,
+        ),
+        child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Spacing.xs,
-                Spacing.xs,
-                Spacing.sm,
-                Spacing.sm,
-              ),
-              child: Row(
-                children: [
-                  Semantics(
-                    label: 'Conversation history',
-                    button: true,
-                    child: IconButton(
-                      icon: const Icon(Icons.history_rounded),
-                      color: kynos.secondaryLabel,
-                      onPressed: () => showConversationListSheet(context),
-                      tooltip: 'Conversations',
-                    ),
-                  ),
-                  Container(
-                    width: 32,
-                    height: 32,
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.only(right: Spacing.sm),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [kynos.purple, kynos.stand],
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 16,
-                      color: KynosColors.onAccent,
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.lock_outline_rounded,
-                              size: 10,
-                              color: kynos.exercise,
-                            ),
-                            const SizedBox(width: 3),
-                            Expanded(
-                              child: Text(
-                                'Private coaching, on your terms',
-                                style: Theme.of(context).textTheme.labelSmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onNewChat,
-                    icon: const Icon(Icons.add_comment_outlined),
-                    color: kynos.secondaryLabel,
-                    tooltip: 'New conversation',
-                  ),
-                  PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_vert_rounded,
-                      color: kynos.secondaryLabel,
-                    ),
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'context':
-                          showContextInspectorSheet(context);
-                        case 'focus_run':
-                          showFocusRunPickerSheet(context, ref);
-                        case 'coach_settings':
-                          showInferenceSettingsSheet(context);
-                        case 'export':
-                          onExport();
-                        case 'delete':
-                          onDeleteThread();
-                      }
-                    },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: 'context',
-                        child: Text('Context sources'),
-                      ),
-                      PopupMenuItem(
-                        value: 'focus_run',
-                        child: Text('Attach focus run'),
-                      ),
-                      PopupMenuItem(
-                        value: 'coach_settings',
-                        child: Text('Coach settings'),
-                      ),
-                      PopupMenuItem(
-                        value: 'export',
-                        child: Text('Export chat'),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Delete thread'),
-                      ),
-                    ],
-                  ),
-                ],
+            _OrbButton(
+              tooltip: 'Conversations',
+              icon: Icons.chat_bubble_outline_rounded,
+              onTap: () => showConversationListSheet(context),
+            ),
+            const Spacer(),
+            _OrbButton(
+              tooltip: 'Model & mode',
+              icon: Icons.auto_awesome_rounded,
+              onTap: () => showInferenceSettingsSheet(
+                context,
+                onExport: onExport,
+                onDeleteThread: onDeleteThread,
               ),
             ),
+            const Gap(Spacing.sm),
+            _OrbButton(
+              tooltip: 'New conversation',
+              icon: Icons.edit_outlined,
+              onTap: onNewChat,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OrbButton extends StatelessWidget {
+  const _OrbButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: kynos.card.withValues(alpha: 0),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: kynos.cardShadow,
+                ),
+                child: LiquidGlassSurface(
+                  borderRadius: Radius.full,
+                  blurSigma: LiquidGlassTokens.buttonBlurSigma,
+                  border: Border.all(
+                    color: LiquidGlassTokens.borderColor(
+                      Theme.of(context).brightness,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(icon, size: 18, color: kynos.label),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

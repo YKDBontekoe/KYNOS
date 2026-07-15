@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
@@ -9,6 +11,7 @@ import 'package:kynos/features/dashboard/presentation/widgets/activity_ring.dart
 import 'package:kynos/features/dashboard/providers/today_insights_provider.dart';
 import 'package:kynos/shared/widgets/animated_async_content.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
+import 'package:kynos/shared/widgets/kynos_empty_cta.dart';
 import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
@@ -67,6 +70,7 @@ class _ReadinessCardContent extends StatelessWidget {
       kynos.stand,
       kynos.purple,
     ];
+    final isEmpty = summary == null;
 
     return KynosCard(
       padding: const EdgeInsets.all(Spacing.lg),
@@ -92,7 +96,7 @@ class _ReadinessCardContent extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                     const Gap(Spacing.xs),
-                    if (summary == null)
+                    if (isEmpty)
                       Text(
                         '—',
                         style: kynos.metricValueStyle.copyWith(
@@ -121,27 +125,40 @@ class _ReadinessCardContent extends StatelessWidget {
                           );
                         },
                       ),
-                    const Gap(Spacing.sm),
-                    Text(
-                      summary == null
-                          ? 'Connect health data to calculate a real readiness score.'
-                          : _readinessBrief(
-                              score: score,
-                              todayInsightsState: todayInsightsState,
-                            ),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    if (!isEmpty) ...[
+                      const Gap(Spacing.sm),
+                      Text(
+                        _readinessBrief(
+                          score: score,
+                          todayInsightsState: todayInsightsState,
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
-          ConfidenceBadgeRow(
-            todayInsightsState: todayInsightsState,
-            onRetry: onRetry,
-          ),
+          if (isEmpty) ...[
+            const Gap(Spacing.md),
+            KynosEmptyCta(
+              message:
+                  'Import a run or connect health data so KYNOS can calculate '
+                  'your readiness score.',
+              primaryLabel: 'Import a run',
+              icon: Icons.upload_file_outlined,
+              onPrimary: () => context.push(Routes.healthImport),
+              secondaryLabel: 'Log a run manually',
+              onSecondary: () => context.push(Routes.manualRun),
+            ),
+          ] else
+            ConfidenceBadgeRow(
+              todayInsightsState: todayInsightsState,
+              onRetry: onRetry,
+            ),
         ],
       ),
     );

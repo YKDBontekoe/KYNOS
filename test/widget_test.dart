@@ -7,6 +7,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.da
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
+import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -41,6 +42,40 @@ void main() {
     expect(find.byType(KynosApp), findsOneWidget);
   });
 
+  testWidgets('Coach shell fills a mobile viewport without overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const KynosApp(),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(CoachChatPage), findsOneWidget);
+    expect(find.byType(ChatInputBar), findsOneWidget);
+    // Composer includes shell dock clearance; the field itself stays compact.
+    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(220));
+    expect(find.byType(EditableText), findsOneWidget);
+    expect(find.byType(EditableText).hitTestable(), findsOneWidget);
+
+    // Full-width composer — input should share the same left inset as page content.
+    final inputLeft = tester.getTopLeft(find.byType(ChatInputBar)).dx;
+    expect(inputLeft, lessThan(20));
+    expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
+    expect(find.byTooltip('Conversations'), findsOneWidget);
+    expect(find.byType(KynosTabBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Coach shell fills a wide web-style viewport without overflow', (
     WidgetTester tester,
   ) async {
@@ -63,18 +98,48 @@ void main() {
       tester.getSize(find.byType(CoachChatPage)).height,
       greaterThan(500),
     );
-    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(100));
+    // Floating corner orbs — not a solid top navigation bar.
+    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(80));
     expect(
       tester.getSize(find.byType(CoachChatEmptyState)).height,
       greaterThan(300),
     );
-    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(100));
+    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(220));
     expect(find.byType(EditableText), findsOneWidget);
     expect(tester.getSize(find.byType(EditableText)).height, greaterThan(20));
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
-    expect(find.byTooltip('Coach'), findsOneWidget);
-    expect(find.byTooltip('Health'), findsOneWidget);
-    expect(find.byTooltip('Journey'), findsOneWidget);
+    expect(find.byTooltip('Conversations'), findsOneWidget);
+    expect(find.byTooltip('New conversation'), findsOneWidget);
+    expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
+    expect(find.byType(KynosTabBar), findsOneWidget);
+    expect(find.text('Health'), findsOneWidget);
+    expect(find.text('Journey'), findsOneWidget);
+  });
+
+  testWidgets('Health tab shows content under floating dock', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const KynosApp(),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('Health'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(KynosTabBar), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.textContaining('Sleep, recovery'), findsOneWidget);
   });
 }

@@ -10,6 +10,11 @@ import 'package:kynos/shared/widgets/kynos_inline_error_card.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 
 /// Compact daily quest preview for the Today tab.
+///
+/// [onViewCharacter] is provided when this teaser is shown outside the
+/// Character tab (e.g. on the dashboard) and links there. When `null`, the
+/// widget assumes it is already displayed on the Character tab and instead
+/// offers an in-place retry action for the empty state.
 class DailyQuestTeaser extends ConsumerWidget {
   const DailyQuestTeaser({
     super.key,
@@ -23,6 +28,7 @@ class DailyQuestTeaser extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
+    final isOnCharacterTab = onViewCharacter == null;
 
     return questsAsync.when(
       loading: () => const KynosCard(
@@ -45,18 +51,20 @@ class DailyQuestTeaser extends ConsumerWidget {
                 ),
                 const Gap(Spacing.xs),
                 Text(
-                  'Open Character to generate today\'s camp quests.',
+                  isOnCharacterTab
+                      ? 'Log a run or check in on your recovery to unlock '
+                            'today\'s camp quest.'
+                      : 'Open Character to generate today\'s camp quests.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: kynos.secondaryLabel,
                       ),
                 ),
-                if (onViewCharacter != null) ...[
-                  const Gap(Spacing.sm),
-                  TextButton(
-                    onPressed: onViewCharacter,
-                    child: const Text('View Character'),
-                  ),
-                ],
+                const Gap(Spacing.sm),
+                TextButton(
+                  onPressed: onViewCharacter ??
+                      () => ref.invalidate(dailyQuestsProvider),
+                  child: Text(isOnCharacterTab ? 'Refresh' : 'View Character'),
+                ),
               ],
             ),
           );

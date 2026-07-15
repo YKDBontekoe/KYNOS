@@ -117,6 +117,8 @@ class _AccentChip extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.w600,

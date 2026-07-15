@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
-import 'package:kynos/shared/widgets/kynos_floating_nav.dart';
+import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — draggable floating nav with three focused tabs.
-class ShellPage extends ConsumerWidget {
+/// Root app shell — content fills the screen with a floating glass tab dock.
+class ShellPage extends StatelessWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  static const _navItems = [
-    KynosFloatingNavItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosFloatingNavItem(label: 'Health', icon: NavIconPaths.training),
-    KynosFloatingNavItem(label: 'Journey', icon: NavIconPaths.character),
+  static const _tabItems = [
+    KynosTabItem(label: 'Coach', icon: NavIconPaths.coach),
+    KynosTabItem(label: 'Health', icon: NavIconPaths.health),
+    KynosTabItem(label: 'Journey', icon: NavIconPaths.journey),
   ];
 
   void _onTabSelected(int index) {
@@ -30,7 +29,7 @@ class ShellPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
     return ShellNavigationScope(
@@ -65,20 +64,16 @@ class ShellPage extends ConsumerWidget {
                 child: navigationShell,
               ),
             ),
-            KynosFloatingNav(
-              items: _navItems,
-              selectedIndex: navigationShell.currentIndex,
-              onSelected: _onTabSelected,
-              bottomInset: navigationShell.currentIndex == 0
-                  ? LayoutTokens.coachChatFabBottomInset
-                  : 0,
-              actions: [
-                KynosFloatingNavAction(
-                  label: 'Settings',
-                  icon: Icons.settings_outlined,
-                  onTap: () => context.push(Routes.settings),
-                ),
-              ],
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: KynosTabBar(
+                items: _tabItems,
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: _onTabSelected,
+                onSettings: () => context.push(Routes.settings),
+              ),
             ),
           ],
         ),

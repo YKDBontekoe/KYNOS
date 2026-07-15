@@ -15,9 +15,9 @@ class MissingHuggingFaceTokenException implements Exception {
 
   @override
   String toString() =>
-      'A HuggingFace access token is required to download $modelName. '
-      'Add your token in Settings → AI & Cloud, or choose a public model '
-      'such as Qwen3 0.6B.';
+      'The on-device model ($modelName) needs a free HuggingFace token to '
+      'download. Add one in Settings → AI & Cloud, or switch to a public '
+      'model like Qwen3 0.6B — no token needed.';
 }
 
 @Riverpod(keepAlive: true)

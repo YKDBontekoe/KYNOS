@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/runner_character.dart';
@@ -13,8 +12,12 @@ class XpBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
     final classColor = Color(character.characterClass.colorValue);
     final progress = character.levelProgress;
+    final levelSpan = character.xpForNextLevel - character.xpForCurrentLevel;
+    final earnedTowardNext =
+        (character.xp - character.xpForCurrentLevel).clamp(0, levelSpan);
 
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.md),
@@ -29,17 +32,16 @@ class XpBar extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelSmall,
               ),
               Text(
-                '${character.xpToNextLevel} XP to Level ${character.level + 1}',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: AppTheme.tertiaryLabel,
-                ),
+                'Level ${character.level}',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: kynos.secondaryLabel,
+                    ),
               ),
             ],
           ),
           const Gap(tokens.Spacing.sm),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(tokens.Radius.sm),
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: progress),
               duration: const Duration(milliseconds: 800),
@@ -48,7 +50,7 @@ class XpBar extends StatelessWidget {
                 return LinearProgressIndicator(
                   value: value,
                   minHeight: 8,
-                  backgroundColor: AppTheme.separator,
+                  backgroundColor: kynos.separator,
                   valueColor: AlwaysStoppedAnimation(classColor),
                 );
               },
@@ -56,11 +58,11 @@ class XpBar extends StatelessWidget {
           ),
           const Gap(tokens.Spacing.xs),
           Text(
-            '${character.xp} XP total',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: AppTheme.tertiaryLabel,
-            ),
+            '$earnedTowardNext / $levelSpan XP toward '
+            'Level ${character.level + 1}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: kynos.secondaryLabel,
+                ),
           ),
         ],
       ),

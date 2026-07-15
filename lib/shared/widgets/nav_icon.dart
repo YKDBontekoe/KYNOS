@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
 
-/// Lucide-style SVG path icons for bottom navigation.
+/// Lucide-style SVG path icons for shell navigation.
 abstract final class NavIconPaths {
-  /// AI coach — speech bubble with a sparkle accent.
+  /// AI coach — clean chat bubble.
   static const coach = NavIconDefinition(
     outline:
-        'M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5z M18 3l.6 1.4L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z',
+        'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
     filled:
-        'M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5z M18 3l.6 1.4L20 5l-1.4.6L18 7l-.6-1.4L16 5l1.4-.6z',
+        'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  );
+
+  /// Health — heart.
+  static const health = NavIconDefinition(
+    outline:
+        'M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z',
+    filled:
+        'M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z',
+  );
+
+  /// Journey — heraldic shield.
+  static const journey = NavIconDefinition(
+    outline: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+    filled: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
   );
 
   /// Daily dashboard — four-panel grid.
@@ -25,10 +39,7 @@ abstract final class NavIconPaths {
   );
 
   /// RPG character — heraldic shield.
-  static const character = NavIconDefinition(
-    outline: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
-    filled: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
-  );
+  static const character = journey;
 
   // Legacy aliases kept for tests and gradual migration.
   static const home = today;
