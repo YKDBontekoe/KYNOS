@@ -6,6 +6,7 @@ import 'package:kynos/domain/utils/weekly_momentum.dart';
 import 'package:kynos/shared/widgets/animated_progress_bar.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_empty_cta.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/metric_tile.dart';
 
@@ -28,7 +29,8 @@ class WeekMomentumCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
     final m = momentum;
-    final hasNoData = !isLoading && m == null;
+    final hasNoActivity = !isLoading &&
+        (m == null || (m.thisWeekRuns == 0 && m.thisWeekDistanceKm <= 0));
 
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.lg),
@@ -43,7 +45,7 @@ class WeekMomentumCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
-              if (!isLoading && m != null)
+              if (!isLoading && m != null && !hasNoActivity)
                 Text(
                   '${m.thisWeekDistanceKm.toStringAsFixed(1)} / ${m.distanceGoalKm.toStringAsFixed(0)} km',
                   style: kynos.metricValueStyle.copyWith(fontSize: 14),
@@ -55,23 +57,32 @@ class WeekMomentumCard extends StatelessWidget {
             const KynosLoadingLine(height: 10, widthFactor: 1)
           else
             AnimatedProgressBar(
-              value: m?.distanceGoalProgress ?? 0,
+              value: hasNoActivity ? 0 : (m?.distanceGoalProgress ?? 0),
               minHeight: 10,
               backgroundColor: kynos.separator,
               valueColor: kynos.stand,
             ),
-          if (hasNoData) ...[
+          if (hasNoActivity) ...[
             const Gap(tokens.Spacing.md),
-            Text(
-              'Connect health data or import a run to track weekly momentum.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: kynos.secondaryLabel,
-                  ),
-            ),
-            if (onImportRun != null) ...[
-              const Gap(tokens.Spacing.sm),
-              TextButton(onPressed: onImportRun, child: const Text('Import a run')),
-            ],
+            if (onImportRun != null)
+              KynosEmptyCta(
+                message:
+                    'Log or import a run to start tracking your weekly distance '
+                    'goal of ${m?.distanceGoalKm.toStringAsFixed(0) ?? '30'} km.',
+                primaryLabel: 'Import a run',
+                icon: Icons.upload_file_outlined,
+                onPrimary: onImportRun!,
+                secondaryLabel:
+                    onAskCoach == null ? null : 'Ask Coach for a plan',
+                onSecondary: onAskCoach,
+              )
+            else
+              Text(
+                'Connect health data or import a run to track weekly momentum.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: kynos.secondaryLabel,
+                    ),
+              ),
           ] else ...[
             const Gap(tokens.Spacing.lg),
             Row(

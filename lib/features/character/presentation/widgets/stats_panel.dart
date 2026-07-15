@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/gamification/character_stats.dart';
@@ -44,53 +43,58 @@ class StatRow extends StatelessWidget {
     final statColor = kynos.accentForKey(stat.colorKey);
     final pct = value / 100.0;
 
-    return Row(
-      children: [
-        SizedBox(
-          width: 36,
-          child: Text(
-            stat.label,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: statColor,
-              letterSpacing: 0.4,
+    return Tooltip(
+      message: '${stat.fullName} — ${stat.description}',
+      waitDuration: const Duration(milliseconds: 300),
+      child: Semantics(
+        label: '${stat.fullName}: $value. ${stat.description}',
+        child: Row(
+          children: [
+            SizedBox(
+              width: 40,
+              child: Text(
+                stat.label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: statColor,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
+                    ),
+              ),
             ),
-          ),
-        ),
-        const Gap(tokens.Spacing.sm),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: pct),
-              duration: const Duration(milliseconds: 900),
-              curve: Curves.easeOut,
-              builder: (context, val, _) {
-                return LinearProgressIndicator(
-                  value: val,
-                  minHeight: 6,
-                  backgroundColor: kynos.separator,
-                  valueColor: AlwaysStoppedAnimation(statColor),
-                );
-              },
+            const Gap(tokens.Spacing.sm),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(tokens.Radius.sm),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: pct),
+                  duration: const Duration(milliseconds: 900),
+                  curve: Curves.easeOut,
+                  builder: (context, val, _) {
+                    return LinearProgressIndicator(
+                      value: val,
+                      minHeight: 6,
+                      backgroundColor: kynos.separator,
+                      valueColor: AlwaysStoppedAnimation(statColor),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
-        const Gap(tokens.Spacing.sm),
-        SizedBox(
-          width: 30,
-          child: Text(
-            value.toString(),
-            textAlign: TextAlign.right,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.label,
+            const Gap(tokens.Spacing.sm),
+            SizedBox(
+              width: 30,
+              child: Text(
+                value.toString(),
+                textAlign: TextAlign.right,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: kynos.label,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

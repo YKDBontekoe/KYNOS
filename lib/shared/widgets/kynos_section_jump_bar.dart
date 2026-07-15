@@ -70,15 +70,21 @@ class _JumpChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? accent.withValues(alpha: 0.14)
-              : kynos.separator.withValues(alpha: 0.4),
+              ? accent.withValues(alpha: 0.16)
+              : kynos.card,
           borderRadius: BorderRadius.circular(Radius.full),
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: 0.28)
+                : kynos.separator,
+          ),
+          boxShadow: selected ? null : kynos.cardShadow,
         ),
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: selected ? accent : kynos.secondaryLabel,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? accent : kynos.label,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
               ),
         ),
       ),

@@ -37,6 +37,13 @@ class SummitProgressCard extends StatelessWidget {
                 ),
             ],
           ),
+          const Gap(tokens.Spacing.xs),
+          Text(
+            'Complete runs this week to climb toward the summit goal.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: kynos.secondaryLabel,
+                ),
+          ),
           const Gap(tokens.Spacing.sm),
           AnimatedProgressBar(
             value: camp.summitProgress,

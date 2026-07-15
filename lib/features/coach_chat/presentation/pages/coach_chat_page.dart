@@ -126,6 +126,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     }
 
     _textController.clear();
+    ref.read(aiReconnectStateProvider.notifier).clear();
     ref.read(coachChatProvider.notifier).sendMessage(text);
   }
 
@@ -216,18 +217,6 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(aiReconnectStateProvider, (previous, next) {
-      if (!next || !mounted) return;
-      ref.read(aiReconnectStateProvider.notifier).clear();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('On-device coach will reconnect on your next message.'),
-          duration: Duration(seconds: 3),
-        ),
-      );
-    });
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _applyCoachSeed());
     return _buildChat();
   }
@@ -318,6 +307,13 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             onNewChat: _createNewChat,
           ),
           const InferenceModeBar(),
+          if (ref.watch(aiReconnectStateProvider))
+            _CoachStatusBanner(
+              message:
+                  'On-device coach will reconnect when you send your next message.',
+              onDismiss: () =>
+                  ref.read(aiReconnectStateProvider.notifier).clear(),
+            ),
           if (!_modelBannerDismissed)
             setupState.when(
               loading: () => const _ModelProgressBanner(
@@ -441,6 +437,57 @@ class _ModelProgressBanner extends StatelessWidget {
               onPressed: onDismiss,
               icon: const Icon(Icons.close_rounded, size: 18),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Subtle in-chat status strip — never a global snackbar that leaks onto other tabs.
+class _CoachStatusBanner extends StatelessWidget {
+  const _CoachStatusBanner({
+    required this.message,
+    required this.onDismiss,
+  });
+
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.xs),
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.xs,
+        Spacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: kynos.card,
+        borderRadius: BorderRadius.circular(Radius.lg),
+        border: Border.all(color: kynos.separator),
+        boxShadow: kynos.cardShadow,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.sync_rounded, size: 16, color: kynos.stand),
+          const Gap(Spacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.secondaryLabel,
+                  ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Dismiss',
+            onPressed: onDismiss,
+            icon: Icon(Icons.close_rounded, size: 16, color: kynos.tertiaryLabel),
+          ),
         ],
       ),
     );

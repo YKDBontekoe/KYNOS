@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:kynos/core/constants/gamification_constants.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
+import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/widgets/camp_build_sheet.dart';
 import 'package:kynos/features/character/presentation/widgets/camp_grid.dart';
 import 'package:kynos/features/character/presentation/widgets/camp_resources_bar.dart';
@@ -46,6 +47,7 @@ class _CampGamePanelState extends ConsumerState<CampGamePanel> {
 
         final camp = viewState.camp;
         final resources = viewState.resources;
+        final kynos = context.kynosTheme;
         final hasRunToday = runsAsync.maybeWhen(
           data: (runs) {
             final today = DateTime.now();
@@ -60,7 +62,16 @@ class _CampGamePanelState extends ConsumerState<CampGamePanel> {
         );
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Spend Momentum to unlock tiles, Fuel to build, Focus to rest. '
+              'Locked tiles open as you train.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.secondaryLabel,
+                  ),
+            ),
+            const Gap(tokens.Spacing.sm),
             CampResourcesBar(
               resources: resources,
               isLoading: healthAsync.isLoading,
@@ -81,17 +92,22 @@ class _CampGamePanelState extends ConsumerState<CampGamePanel> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: resources.canSpendFocus(
-                      GamificationConstants.focusCostRest,
-                    )
-                        ? () => ref
-                            .read(campSessionProvider.notifier)
-                            .restCamp()
-                        : null,
-                    icon: const Icon(Icons.nightlight_round),
-                    label: const Text(
-                      'Rest (${GamificationConstants.focusCostRest} Focus)',
+                  child: Tooltip(
+                    message:
+                        'Spend ${GamificationConstants.focusCostRest} Focus '
+                        'to recover Fuel and Momentum overnight.',
+                    child: OutlinedButton.icon(
+                      onPressed: resources.canSpendFocus(
+                        GamificationConstants.focusCostRest,
+                      )
+                          ? () => ref
+                              .read(campSessionProvider.notifier)
+                              .restCamp()
+                          : null,
+                      icon: const Icon(Icons.nightlight_round),
+                      label: const Text(
+                        'Rest (${GamificationConstants.focusCostRest} Focus)',
+                      ),
                     ),
                   ),
                 ),

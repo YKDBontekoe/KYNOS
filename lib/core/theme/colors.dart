@@ -31,11 +31,11 @@ abstract final class KynosColors {
   /// Primary label (black)
   static const Color label = Color(0xFF000000);
 
-  /// Secondary label
-  static const Color secondaryLabel = Color(0xFF8E8E93);
+  /// Secondary label — slightly darker than system grey for AA contrast on white.
+  static const Color secondaryLabel = Color(0xFF6C6C70);
 
   /// Tertiary label / section header
-  static const Color tertiaryLabel = Color(0xFFAEAEB2);
+  static const Color tertiaryLabel = Color(0xFF8E8E93);
 
   /// Separator
   static const Color separator = Color(0xFFE5E5EA);

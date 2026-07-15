@@ -10,6 +10,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/inference_setting
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
+import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_segmented_control.dart';
@@ -17,13 +18,62 @@ import 'package:kynos/shared/widgets/kynos_segmented_control.dart';
 class InferenceModeBar extends ConsumerWidget {
   const InferenceModeBar({super.key});
 
+  Future<void> _selectMode(
+    BuildContext context,
+    WidgetRef ref,
+    CoachConversationSettings settings,
+    CoachBackendMode mode,
+  ) async {
+    await ref.read(coachChatProvider.notifier).updateSettings(
+          settings.copyWith(backendMode: mode),
+        );
+
+    if (mode != CoachBackendMode.cloud || !context.mounted) return;
+
+    final global = ref.read(settingsProvider);
+    if (!global.cloudTasksEnabled) {
+      await ref.read(settingsProvider.notifier).updateCloudTasksEnabled(true);
+    }
+
+    final apiKey = await ref.read(openRouterApiKeyManagerProvider.future);
+    final hasKey = apiKey != null && apiKey.isNotEmpty;
+    final hasModel = ref.read(settingsProvider).hasSelectedCloudModel;
+
+    if (!context.mounted) return;
+    if (!hasKey) {
+      await context.push(Routes.settings);
+      return;
+    }
+    if (!hasModel) {
+      await context.push(Routes.openRouterModels);
+    }
+  }
+
+  String _missingCloudStep(
+    SettingsState settings,
+    bool hasKey,
+  ) {
+    if (!settings.cloudTasksEnabled) {
+      return 'Turn on OpenRouter fallback in Settings, then pick a model.';
+    }
+    if (!hasKey) return 'Add your OpenRouter API key in Settings to continue.';
+    if (!settings.hasSelectedCloudModel) {
+      return 'Choose a cloud model to finish setup.';
+    }
+    return 'Add an OpenRouter key and model in Settings.';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
     final conversation = ref.watch(activeCoachConversationProvider).value;
-    final settings = conversation?.settings ?? CoachConversationSettings.defaults;
+    final settings =
+        conversation?.settings ?? CoachConversationSettings.defaults;
     final globalSettings = ref.watch(settingsProvider);
-    final cloudConfigured = ref.watch(isCloudCoachConfiguredProvider).value ?? false;
+    final cloudConfigured =
+        ref.watch(isCloudCoachConfiguredProvider).value ?? false;
+    final hasKey =
+        (ref.watch(openRouterApiKeyManagerProvider).value ?? '').isNotEmpty;
 
     final modelLabel = switch (settings.backendMode) {
       CoachBackendMode.cloud =>
@@ -31,8 +81,15 @@ class InferenceModeBar extends ConsumerWidget {
             ? globalSettings.selectedCloudModelName ?? 'Cloud model'
             : globalSettings.selectedCloudModelName ?? 'Cloud',
       CoachBackendMode.onDevice => globalSettings.selectedLocalModelName,
-      CoachBackendMode.auto => cloudConfigured ? 'Auto' : 'On-Device',
+      CoachBackendMode.auto => globalSettings.selectedLocalModelName,
     };
+
+    final missingStep = _missingCloudStep(globalSettings, hasKey);
+    final setupCtaLabel = !hasKey
+        ? 'Add key'
+        : !globalSettings.hasSelectedCloudModel
+            ? 'Pick model'
+            : 'Settings';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(Spacing.md, 0, Spacing.md, Spacing.sm),
@@ -70,19 +127,27 @@ class InferenceModeBar extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Cloud coach not configured',
+                              'Finish cloud setup',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             Text(
-                              'Add an OpenRouter key and model in Settings',
+                              missingStep,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],
                         ),
                       ),
                       TextButton(
-                        onPressed: () => context.push(Routes.settings),
-                        child: const Text('Settings'),
+                        onPressed: () {
+                          if (!hasKey) {
+                            context.push(Routes.settings);
+                          } else if (!globalSettings.hasSelectedCloudModel) {
+                            context.push(Routes.openRouterModels);
+                          } else {
+                            context.push(Routes.settings);
+                          }
+                        },
+                        child: Text(setupCtaLabel),
                       ),
                     ],
                   ),
@@ -96,11 +161,8 @@ class InferenceModeBar extends ConsumerWidget {
                   segments: CoachBackendMode.values,
                   selected: settings.backendMode,
                   labelBuilder: (mode) => mode.label,
-                  onChanged: (mode) async {
-                    await ref.read(coachChatProvider.notifier).updateSettings(
-                          settings.copyWith(backendMode: mode),
-                        );
-                  },
+                  onChanged: (mode) =>
+                      _selectMode(context, ref, settings, mode),
                 ),
               ),
               const Gap(Spacing.sm),

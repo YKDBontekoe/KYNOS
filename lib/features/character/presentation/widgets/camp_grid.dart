@@ -77,33 +77,45 @@ class _CampTileCell extends StatelessWidget {
       CampTileStatus.built => kynos.move.withValues(alpha: 0.15),
     };
 
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(tokens.Spacing.xs),
-      child: InkWell(
-        onTap: isLocked ? null : onTap,
+    return Tooltip(
+      message: isLocked
+          ? 'Locked — spend Momentum to expand this tile'
+          : building != null
+              ? building!.type.label
+              : 'Empty plot — tap to build',
+      waitDuration: const Duration(milliseconds: 400),
+      child: Material(
+        color: color,
         borderRadius: BorderRadius.circular(tokens.Spacing.xs),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(tokens.Spacing.xs),
-            border: isSelected
-                ? Border.all(color: kynos.purple, width: 2)
-                : null,
-          ),
-          child: Center(
-            child: isLocked
-                ? Icon(Icons.lock_outline, size: 14, color: kynos.tertiaryLabel)
-                : building != null
-                    ? Icon(
-                        _buildingIcon(building!.type),
-                        size: 18,
-                        color: kynos.label,
-                      )
-                    : Icon(
-                        Icons.terrain_outlined,
-                        size: 16,
-                        color: kynos.secondaryLabel,
-                      ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(tokens.Spacing.xs),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(tokens.Spacing.xs),
+              border: isSelected
+                  ? Border.all(color: kynos.purple, width: 2)
+                  : null,
+            ),
+            child: Center(
+              child: isLocked
+                  ? Icon(
+                      Icons.lock_outline,
+                      size: 14,
+                      color: kynos.tertiaryLabel,
+                    )
+                  : building != null
+                      ? Icon(
+                          _buildingIcon(building!.type),
+                          size: 18,
+                          color: kynos.label,
+                        )
+                      : Icon(
+                          Icons.terrain_outlined,
+                          size: 16,
+                          color: kynos.secondaryLabel,
+                        ),
+            ),
           ),
         ),
       ),
