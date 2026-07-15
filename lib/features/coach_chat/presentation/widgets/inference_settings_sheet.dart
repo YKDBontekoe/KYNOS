@@ -15,16 +15,15 @@ import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_segmented_control.dart';
+import 'package:kynos/shared/widgets/show_shell_modal_sheet.dart';
 
 void showInferenceSettingsSheet(
   BuildContext context, {
   VoidCallback? onExport,
   VoidCallback? onDeleteThread,
 }) {
-  // Root navigator: shell floating tab bar lives above nested branch routes.
-  showModalBottomSheet<void>(
+  showShellModalBottomSheet<void>(
     context: context,
-    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
     shape: const RoundedRectangleBorder(
@@ -132,16 +131,24 @@ class InferenceSettingsSheet extends ConsumerWidget {
                   color: kynos.secondaryLabel,
                 ),
               ),
-              const Gap(Spacing.md),
-              KynosSegmentedControl<CoachBackendMode>(
-                segments: CoachBackendMode.values,
-                selected: settings.backendMode,
-                labelBuilder: (mode) => mode.label,
-                onChanged: (mode) => _selectMode(context, ref, settings, mode),
-              ),
               const Gap(Spacing.lg),
               InferenceSheetGroup(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.sm,
+                      Spacing.sm,
+                      Spacing.sm,
+                      Spacing.xs,
+                    ),
+                    child: KynosSegmentedControl<CoachBackendMode>(
+                      segments: CoachBackendMode.values,
+                      selected: settings.backendMode,
+                      labelBuilder: (mode) => mode.label,
+                      onChanged: (mode) =>
+                          _selectMode(context, ref, settings, mode),
+                    ),
+                  ),
                   InferenceModelRow(
                     title: 'On-device model',
                     subtitle: globalSettings.selectedLocalModelName,
@@ -164,23 +171,29 @@ class InferenceSettingsSheet extends ConsumerWidget {
                       context.push(Routes.openRouterModels);
                     },
                   ),
+                  if (settings.preferredCloudModelId != null) ...[
+                    const InferenceSheetDivider(),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed: () async {
+                          await ref
+                              .read(coachChatProvider.notifier)
+                              .updateSettings(
+                                settings.copyWith(
+                                  clearPreferredCloudModelId: true,
+                                ),
+                              );
+                          if (context.mounted) Navigator.pop(context);
+                        },
+                        child: const Text(
+                          'Use global cloud model for this chat',
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              if (settings.preferredCloudModelId != null) ...[
-                const Gap(Spacing.sm),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () async {
-                      await ref.read(coachChatProvider.notifier).updateSettings(
-                            settings.copyWith(clearPreferredCloudModelId: true),
-                          );
-                      if (context.mounted) Navigator.pop(context);
-                    },
-                    child: const Text('Use global cloud model for this chat'),
-                  ),
-                ),
-              ],
               const Gap(Spacing.md),
               InferenceSheetGroup(
                 children: [
@@ -212,12 +225,8 @@ class InferenceSettingsSheet extends ConsumerWidget {
                       },
                     ),
                   ],
-                ],
-              ),
-              if (onDeleteThread != null) ...[
-                const Gap(Spacing.md),
-                InferenceSheetGroup(
-                  children: [
+                  if (onDeleteThread != null) ...[
+                    const InferenceSheetDivider(),
                     InferenceActionRow(
                       icon: Icons.delete_outline_rounded,
                       title: 'Delete thread',
@@ -228,8 +237,8 @@ class InferenceSettingsSheet extends ConsumerWidget {
                       },
                     ),
                   ],
-                ),
-              ],
+                ],
+              ),
             ],
           ),
         ),

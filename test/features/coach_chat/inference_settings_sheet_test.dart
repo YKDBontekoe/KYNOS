@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/core/theme/app_theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/inference_settings_sheet.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
+import 'package:kynos/shared/providers/shell_chrome_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -39,7 +40,7 @@ void main() {
     expect(find.text('Pick'), findsOneWidget);
   });
 
-  testWidgets('Model & mode sheet opens above shell floating tab overlay', (
+  testWidgets('Model & mode sheet hides shell chrome while open', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -49,18 +50,20 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    late ProviderContainer container;
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: MaterialApp(
-          theme: AppTheme.dark,
-          home: Builder(
-            builder: (context) {
-              return Scaffold(
-                body: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Center(
+        child: Builder(
+          builder: (context) {
+            container = ProviderScope.containerOf(context);
+            return MaterialApp(
+              theme: AppTheme.dark,
+              home: Builder(
+                builder: (context) {
+                  return Scaffold(
+                    body: Center(
                       child: FilledButton(
                         onPressed: () => showInferenceSettingsSheet(
                           context,
@@ -70,39 +73,28 @@ void main() {
                         child: const Text('Open sheet'),
                       ),
                     ),
-                    const Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: ColoredBox(
-                        color: Colors.green,
-                        child: SizedBox(
-                          height: 72,
-                          child: Center(child: Text('Shell Nav')),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );
+
+    expect(container.read(shellChromeProvider), isTrue);
 
     await tester.tap(find.text('Open sheet'));
     await tester.pumpAndSettle();
 
     expect(find.text('Model & mode'), findsOneWidget);
     expect(find.text('Delete thread'), findsOneWidget);
+    expect(container.read(shellChromeProvider), isFalse);
 
-    final deleteTopLeft = tester.getTopLeft(find.text('Delete thread'));
-    final navTopLeft = tester.getTopLeft(find.text('Shell Nav'));
-    expect(
-      deleteTopLeft.dy,
-      lessThan(navTopLeft.dy),
-      reason: 'Delete stays above the shell nav overlay when using root navigator',
-    );
+    await tester.tapAt(const Offset(8, 8));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Model & mode'), findsNothing);
+    expect(container.read(shellChromeProvider), isTrue);
   });
 }

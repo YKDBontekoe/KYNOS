@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
+import 'package:kynos/shared/providers/shell_chrome_provider.dart';
 import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
 /// Root app shell — content fills the screen with a floating glass tab dock.
-class ShellPage extends StatelessWidget {
+class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -29,8 +31,9 @@ class ShellPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
+    final chromeVisible = ref.watch(shellChromeProvider);
 
     return ShellNavigationScope(
       goToBranch: _onTabSelected,
@@ -68,11 +71,24 @@ class ShellPage extends StatelessWidget {
               left: 0,
               right: 0,
               bottom: 0,
-              child: KynosTabBar(
-                items: _tabItems,
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: _onTabSelected,
-                onSettings: () => context.push(Routes.settings),
+              child: IgnorePointer(
+                ignoring: !chromeVisible,
+                child: AnimatedSlide(
+                  duration: Motion.medium,
+                  curve: Motion.curve,
+                  offset: chromeVisible ? Offset.zero : const Offset(0, 1.2),
+                  child: AnimatedOpacity(
+                    duration: Motion.medium,
+                    curve: Motion.curve,
+                    opacity: chromeVisible ? 1 : 0,
+                    child: KynosTabBar(
+                      items: _tabItems,
+                      selectedIndex: navigationShell.currentIndex,
+                      onSelected: _onTabSelected,
+                      onSettings: () => context.push(Routes.settings),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
