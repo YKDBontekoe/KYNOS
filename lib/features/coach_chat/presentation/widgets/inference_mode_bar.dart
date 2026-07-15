@@ -33,12 +33,14 @@ class InferenceModeBar extends ConsumerWidget {
     final settings =
         conversation?.settings ?? CoachConversationSettings.defaults;
     final globalSettings = ref.watch(settingsProvider);
-    final cloudConfigured =
-        ref.watch(isCloudCoachConfiguredProvider).value ?? false;
+    final cloudConfiguredAsync = ref.watch(isCloudCoachConfiguredProvider);
     final hasKey =
         (ref.watch(openRouterApiKeyManagerProvider).value ?? '').isNotEmpty;
 
-    if (settings.backendMode != CoachBackendMode.cloud || cloudConfigured) {
+    // Avoid a transient banner while the cloud gate is still resolving.
+    if (settings.backendMode != CoachBackendMode.cloud ||
+        cloudConfiguredAsync.isLoading ||
+        (cloudConfiguredAsync.value ?? false)) {
       return const SizedBox.shrink();
     }
 

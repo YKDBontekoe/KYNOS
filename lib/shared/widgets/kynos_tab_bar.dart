@@ -30,8 +30,8 @@ class KynosTabBar extends StatelessWidget {
           icon: items[i].icon,
           selected: selectedIndex == i,
           onTap: () {
-            if (selectedIndex == i) return;
             HapticFeedback.selectionClick();
+            // Always forward — shell uses re-taps for initialLocation reset.
             onSelected(i);
           },
         ),

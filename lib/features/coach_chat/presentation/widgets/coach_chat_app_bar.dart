@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/conversation_list_sheet.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/inference_settings_sheet.dart';
@@ -46,7 +47,7 @@ class CoachChatAppBar extends StatelessWidget {
                 onDeleteThread: onDeleteThread,
               ),
             ),
-            const SizedBox(width: Spacing.sm),
+            const Gap(Spacing.sm),
             _OrbButton(
               tooltip: 'New conversation',
               icon: Icons.edit_outlined,
@@ -84,23 +85,29 @@ class _OrbButton extends StatelessWidget {
             onTap();
           },
           customBorder: const CircleBorder(),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: kynos.cardShadow,
-            ),
-            child: LiquidGlassSurface(
-              borderRadius: Radius.full,
-              blurSigma: LiquidGlassTokens.buttonBlurSigma,
-              border: Border.all(
-                color: LiquidGlassTokens.borderColor(
-                  Theme.of(context).brightness,
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: kynos.cardShadow,
                 ),
-              ),
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: Icon(icon, size: 18, color: kynos.label),
+                child: LiquidGlassSurface(
+                  borderRadius: Radius.full,
+                  blurSigma: LiquidGlassTokens.buttonBlurSigma,
+                  border: Border.all(
+                    color: LiquidGlassTokens.borderColor(
+                      Theme.of(context).brightness,
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Icon(icon, size: 18, color: kynos.label),
+                  ),
+                ),
               ),
             ),
           ),

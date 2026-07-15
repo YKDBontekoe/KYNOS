@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -53,32 +52,33 @@ class InferenceSettingsSheet extends ConsumerWidget {
     CoachConversationSettings settings,
     CoachBackendMode mode,
   ) async {
-    await HapticFeedback.selectionClick();
+    // Segmented control already fires selection haptics.
+    if (mode == CoachBackendMode.cloud) {
+      final global = ref.read(settingsProvider);
+      if (!global.cloudTasksEnabled) {
+        await ref.read(settingsProvider.notifier).updateCloudTasksEnabled(true);
+      }
+
+      final apiKey = await ref.read(openRouterApiKeyManagerProvider.future);
+      final hasKey = apiKey != null && apiKey.isNotEmpty;
+      final hasModel = ref.read(settingsProvider).hasSelectedCloudModel;
+
+      if (!context.mounted) return;
+      if (!hasKey) {
+        Navigator.pop(context);
+        await context.push(Routes.settings);
+        return;
+      }
+      if (!hasModel) {
+        Navigator.pop(context);
+        await context.push(Routes.openRouterModels);
+        return;
+      }
+    }
+
     await ref.read(coachChatProvider.notifier).updateSettings(
           settings.copyWith(backendMode: mode),
         );
-
-    if (mode != CoachBackendMode.cloud || !context.mounted) return;
-
-    final global = ref.read(settingsProvider);
-    if (!global.cloudTasksEnabled) {
-      await ref.read(settingsProvider.notifier).updateCloudTasksEnabled(true);
-    }
-
-    final apiKey = await ref.read(openRouterApiKeyManagerProvider.future);
-    final hasKey = apiKey != null && apiKey.isNotEmpty;
-    final hasModel = ref.read(settingsProvider).hasSelectedCloudModel;
-
-    if (!context.mounted) return;
-    if (!hasKey) {
-      Navigator.pop(context);
-      await context.push(Routes.settings);
-      return;
-    }
-    if (!hasModel) {
-      Navigator.pop(context);
-      await context.push(Routes.openRouterModels);
-    }
   }
 
   @override
@@ -96,7 +96,8 @@ class InferenceSettingsSheet extends ConsumerWidget {
         Spacing.md,
         MediaQuery.paddingOf(context).bottom + Spacing.lg,
       ),
-      child: Column(
+      child: SingleChildScrollView(
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -150,7 +151,7 @@ class InferenceSettingsSheet extends ConsumerWidget {
             title: const Text('Cloud model'),
             subtitle: Text(
               settings.preferredCloudModelId != null
-                  ? (globalSettings.selectedCloudModelName ?? 'Override set')
+                  ? 'Override: ${settings.preferredCloudModelId}'
                   : (globalSettings.selectedCloudModelName ??
                       'Uses global default'),
             ),
@@ -162,19 +163,6 @@ class InferenceSettingsSheet extends ConsumerWidget {
               child: const Text('Pick'),
             ),
           ),
-          if (globalSettings.selectedCloudModelId != null)
-            TextButton(
-              onPressed: () async {
-                await ref.read(coachChatProvider.notifier).updateSettings(
-                      settings.copyWith(
-                        preferredCloudModelId:
-                            globalSettings.selectedCloudModelId,
-                      ),
-                    );
-                if (context.mounted) Navigator.pop(context);
-              },
-              child: const Text('Use global cloud model for this chat'),
-            ),
           if (settings.preferredCloudModelId != null)
             TextButton(
               onPressed: () async {
@@ -183,7 +171,7 @@ class InferenceSettingsSheet extends ConsumerWidget {
                     );
                 if (context.mounted) Navigator.pop(context);
               },
-              child: const Text('Clear per-chat cloud override'),
+              child: const Text('Use global cloud model for this chat'),
             ),
           const Gap(Spacing.sm),
           Divider(color: kynos.separator.withValues(alpha: 0.6)),
@@ -231,6 +219,7 @@ class InferenceSettingsSheet extends ConsumerWidget {
               },
             ),
         ],
+        ),
       ),
     );
   }

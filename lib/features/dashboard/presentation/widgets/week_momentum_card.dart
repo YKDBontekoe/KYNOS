@@ -141,7 +141,8 @@ class WeekMomentumCard extends StatelessWidget {
               ],
             ),
           ],
-          if (onAskCoach != null) ...[
+          // Empty state already exposes Ask Coach via [KynosEmptyCta].
+          if (onAskCoach != null && !hasNoActivity) ...[
             const Gap(tokens.Spacing.md),
             Align(
               alignment: Alignment.centerLeft,

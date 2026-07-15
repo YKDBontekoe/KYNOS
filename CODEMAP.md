@@ -255,7 +255,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
 | `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 237 | `ChatInputBar, _ChatInputBarState, _SendButton` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 111 | `CoachChatAppBar, _OrbButton` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 118 | `CoachChatAppBar, _OrbButton` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
@@ -265,8 +265,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 88 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
-| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 110 | `InferenceModeBar` |
-| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 237 | `InferenceSettingsSheet` |
+| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 112 | `InferenceModeBar` |
+| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 226 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 311 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
 | `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 46 | `PendingCoachActionCard` |
@@ -303,7 +303,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/run_detail/run_split_list.dart` | 116 | `RunSplitList, _SplitRow` |
 | `lib/features/dashboard/presentation/widgets/run_detail/run_summary_metrics.dart` | 91 | `RunSummaryMetrics` |
 | `lib/features/dashboard/presentation/widgets/trend_carousel.dart` | 96 | `TrendCarousel, _TrendCarouselState, _TrendPage` |
-| `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 215 | `WeekMomentumCard` |
+| `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 216 | `WeekMomentumCard` |
 | `lib/features/dashboard/presentation/widgets/what_changed_chips.dart` | 45 | `WhatChangedChips` |
 | `lib/features/dashboard/providers/dashboard_summary_provider.dart` | 60 | `Dart module` |
 | `lib/features/dashboard/providers/post_run_debrief_provider.dart` | 123 | `PostRunDebriefState, PostRunDebriefNotifier` |
@@ -470,7 +470,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_page_header.dart` | 75 | `KynosPageHeader` |
 | `lib/shared/widgets/kynos_privacy_footer.dart` | 25 | `KynosPrivacyFooter` |
 | `lib/shared/widgets/kynos_section_header.dart` | 21 | `KynosSectionHeader` |
-| `lib/shared/widgets/kynos_section_jump_bar.dart` | 99 | `KynosSectionJumpBar, _JumpLink` |
+| `lib/shared/widgets/kynos_section_jump_bar.dart` | 104 | `KynosSectionJumpBar, _JumpLink` |
 | `lib/shared/widgets/kynos_section_row.dart` | 38 | `KynosSectionRow` |
 | `lib/shared/widgets/kynos_segmented_control.dart` | 101 | `KynosSegmentedControl, _Segment` |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | `KynosSkeleton` |

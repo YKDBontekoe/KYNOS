@@ -64,34 +64,39 @@ class _JumpLink extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: selected ? kynos.label : kynos.tertiaryLabel,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                    letterSpacing: -0.1,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            AnimatedContainer(
-              duration: Motion.fast,
-              curve: Motion.curve,
-              height: 2,
-              width: selected ? 18 : 0,
-              decoration: BoxDecoration(
-                color: kynos.purple,
-                borderRadius: BorderRadius.circular(Radius.full),
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: selected ? kynos.label : kynos.tertiaryLabel,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      letterSpacing: -0.1,
+                    ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: Motion.fast,
+                curve: Motion.curve,
+                height: 2,
+                width: selected ? 18 : 0,
+                decoration: BoxDecoration(
+                  color: kynos.purple,
+                  borderRadius: BorderRadius.circular(Radius.full),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

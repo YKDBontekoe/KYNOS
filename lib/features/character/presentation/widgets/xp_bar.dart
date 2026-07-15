@@ -15,9 +15,9 @@ class XpBar extends StatelessWidget {
     final kynos = context.kynosTheme;
     final classColor = Color(character.characterClass.colorValue);
     final progress = character.levelProgress;
+    final levelSpan = character.xpForNextLevel - character.xpForCurrentLevel;
     final earnedTowardNext =
-        (character.xpForNextLevel - character.xpToNextLevel)
-            .clamp(0, character.xpForNextLevel);
+        (character.xp - character.xpForCurrentLevel).clamp(0, levelSpan);
 
     return KynosCard(
       padding: const EdgeInsets.all(tokens.Spacing.md),
@@ -58,7 +58,7 @@ class XpBar extends StatelessWidget {
           ),
           const Gap(tokens.Spacing.xs),
           Text(
-            '$earnedTowardNext / ${character.xpForNextLevel} XP toward '
+            '$earnedTowardNext / $levelSpan XP toward '
             'Level ${character.level + 1}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: kynos.secondaryLabel,
