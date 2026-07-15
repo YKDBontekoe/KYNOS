@@ -68,6 +68,8 @@ void main() {
     // Full-width composer — input should share the same left inset as page content.
     final inputLeft = tester.getTopLeft(find.byType(ChatInputBar)).dx;
     expect(inputLeft, lessThan(20));
+    expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
+    expect(find.byTooltip('Menu'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -103,8 +105,8 @@ void main() {
     expect(tester.getSize(find.byType(EditableText)).height, greaterThan(20));
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
-    expect(find.byTooltip('Coach'), findsOneWidget);
-    expect(find.byTooltip('Health'), findsOneWidget);
-    expect(find.byTooltip('Journey'), findsOneWidget);
+    expect(find.byTooltip('Menu'), findsOneWidget);
+    expect(find.byTooltip('New conversation'), findsOneWidget);
+    expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
   });
 }

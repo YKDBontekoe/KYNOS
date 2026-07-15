@@ -9,13 +9,11 @@ import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
-import 'package:kynos/shared/widgets/kynos_chip.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
@@ -188,82 +186,126 @@ class CoachChatEmptyState extends ConsumerWidget {
         ? readinessSummaryBrief(readiness).split('.').first
         : null;
 
+    Future<void> openCheckIn() async {
+      final result = await showModalBottomSheet<HealthCheckIn>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (_) => HealthCheckInSheet(initial: todayCheckIn),
+      );
+      if (result == null) return;
+      await ref.read(healthCoachDataProvider.notifier).saveCheckIn(result);
+      ref.invalidate(dailyHealthBriefProvider);
+    }
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
-        Spacing.sm,
+        Spacing.lg,
         Spacing.md,
         LayoutTokens.chatListBottomPadding,
       ),
       children: [
-        if (readinessLine != null) ...[
-          KynosChip.accent(
-            label: readinessLine,
-            color: kynos.purple,
-          ),
-          const Gap(Spacing.sm),
-        ],
-        brief.when(
-          loading: () =>
-              const KynosLoadingLine(label: 'Building your health brief…'),
-          error: (_, _) => const SizedBox.shrink(),
-          data: (value) => DailyHealthBriefCard(brief: value),
-        ),
-        const Gap(Spacing.sm),
-        OutlinedButton.icon(
-          onPressed: () async {
-            final result = await showModalBottomSheet<HealthCheckIn>(
-              context: context,
-              isScrollControlled: true,
-              showDragHandle: true,
-              builder: (_) => HealthCheckInSheet(initial: todayCheckIn),
-            );
-            if (result == null) return;
-            await ref
-                .read(healthCoachDataProvider.notifier)
-                .saveCheckIn(result);
-            ref.invalidate(dailyHealthBriefProvider);
-          },
-          icon: Icon(
-            todayCheckIn == null
-                ? Icons.add_reaction_outlined
-                : Icons.check_rounded,
-          ),
-          label: Text(
-            todayCheckIn == null ? 'Check in now' : 'Update today’s check-in',
-          ),
-        ),
-        const Gap(Spacing.xl),
         Text(
-          'What would you like to understand?',
-          style: Theme.of(context).textTheme.titleLarge,
+          'How can I help?',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.6,
+              ),
         ),
         const Gap(Spacing.xs),
         Text(
-          'Ask about patterns, trends, or what to do next.',
+          readinessLine ?? 'Ask about your recovery, training, or next run.',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: kynos.secondaryLabel,
               ),
         ),
         const Gap(Spacing.lg),
-        Wrap(
-          spacing: Spacing.sm,
-          runSpacing: Spacing.sm,
-          children: [
-            'Why has my energy changed?',
-            'Show my sleep trend',
-            'Compare this week with last week',
-            'What should I do today?',
-          ]
-              .map(
-                (suggestion) => GlassSuggestionChip(
-                  label: suggestion,
-                  onTap: () => onSuggestionTap(suggestion),
-                ),
-              )
-              .toList(),
+        brief.when(
+          loading: () => const KynosLoadingLine(
+            label: 'Preparing today’s coaching note…',
+          ),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (value) => DailyHealthBriefCard(
+            brief: value,
+            onCheckIn: openCheckIn,
+            checkInLabel: todayCheckIn == null ? 'Check in' : 'Update',
+          ),
         ),
+        const Gap(Spacing.lg),
+        Text(
+          'Try asking',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: kynos.secondaryLabel,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const Gap(Spacing.sm),
+        for (final suggestion in const [
+          'What should I do today?',
+          'Why has my energy changed?',
+          'Compare this week with last week',
+        ]) ...[
+          _CoachPrompt(
+            label: suggestion,
+            onTap: () => onSuggestionTap(suggestion),
+          ),
+          const Gap(Spacing.sm),
+        ],
       ],
+    );
+  }
+}
+
+class _CoachPrompt extends StatelessWidget {
+  const _CoachPrompt({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
+    return Material(
+      color: kynos.card.withValues(alpha: 0.72),
+      borderRadius: BorderRadius.circular(Radius.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(Radius.md),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(
+            horizontal: Spacing.md,
+            vertical: Spacing.sm,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Radius.md),
+            border: Border.all(
+              color: kynos.separator.withValues(alpha: 0.55),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_upward_rounded,
+                size: 17,
+                color: kynos.tertiaryLabel,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

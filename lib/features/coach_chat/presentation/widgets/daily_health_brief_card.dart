@@ -3,86 +3,127 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
-import 'package:kynos/shared/widgets/kynos_chip.dart';
 
 class DailyHealthBriefCard extends StatelessWidget {
-  const DailyHealthBriefCard({super.key, required this.brief});
+  const DailyHealthBriefCard({
+    super.key,
+    required this.brief,
+    required this.onCheckIn,
+    required this.checkInLabel,
+  });
 
   final DailyHealthBrief brief;
+  final VoidCallback onCheckIn;
+  final String checkInLabel;
 
   @override
   Widget build(BuildContext context) {
+    final kynos = context.kynosTheme;
+
     return KynosCard(
-      padding: const EdgeInsets.all(Spacing.lg),
+      elevated: true,
+      padding: const EdgeInsets.all(Spacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: kynos.purple.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(Radius.md),
+                ),
+                child: Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 19,
+                  color: kynos.purple,
+                ),
+              ),
+              const Gap(Spacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Today',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: kynos.secondaryLabel,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const Gap(Spacing.xs),
+                    Text(
+                      brief.bodyStateSummary,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (brief.findings.isNotEmpty) ...[
+            const Gap(Spacing.sm),
+            Text(
+              brief.findings.first.observation,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: kynos.secondaryLabel,
+                  ),
+            ),
+          ],
+          const Gap(Spacing.md),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.md,
+              vertical: Spacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: kynos.purple.withValues(alpha: 0.07),
+              borderRadius: BorderRadius.circular(Radius.md),
+              border: Border.all(
+                color: kynos.purple.withValues(alpha: 0.12),
+              ),
+            ),
+            child: Text(
+              brief.primaryAction,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+          const Gap(Spacing.sm),
+          Row(
             children: [
               Expanded(
                 child: Text(
-                  'Your health brief',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  brief.baselineQuality == BaselineQuality.stable
+                      ? 'Based on your baseline'
+                      : 'Still learning your baseline',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: kynos.tertiaryLabel,
+                      ),
                 ),
               ),
-              KynosChip(
-                label: brief.baselineQuality == BaselineQuality.stable
-                    ? 'Personal baseline'
-                    : 'Learning',
-              ),
-            ],
-          ),
-          const Gap(Spacing.sm),
-          Text(
-            brief.bodyStateSummary,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          if (brief.findings.isNotEmpty) ...[
-            const Gap(Spacing.md),
-            for (final finding in brief.findings) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    finding.basis == FindingBasis.selfReported
-                        ? Icons.person_outline_rounded
-                        : Icons.monitor_heart_outlined,
-                    size: 18,
-                    color: context.kynosTheme.purple,
+              TextButton(
+                onPressed: onCheckIn,
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.sm,
                   ),
-                  const Gap(Spacing.sm),
-                  Expanded(child: Text(finding.observation)),
-                ],
-              ),
-              const Gap(Spacing.sm),
-            ],
-          ],
-          const Gap(Spacing.sm),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(Spacing.md),
-            decoration: BoxDecoration(
-              color: context.kynosTheme.purple.withValues(alpha: 0.09),
-              borderRadius: BorderRadius.circular(Radius.md),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ONE USEFUL ACTION',
-                  style: Theme.of(context).textTheme.labelSmall,
                 ),
-                const Gap(Spacing.xs),
-                Text(brief.primaryAction),
-              ],
-            ),
-          ),
-          const Gap(Spacing.sm),
-          Text(
-            'Alternative: ${brief.alternativeAction}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: context.kynosTheme.secondaryLabel,
-            ),
+                child: Text(checkInLabel),
+              ),
+            ],
           ),
         ],
       ),

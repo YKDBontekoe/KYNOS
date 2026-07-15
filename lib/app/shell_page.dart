@@ -65,21 +65,19 @@ class ShellPage extends ConsumerWidget {
                 child: navigationShell,
               ),
             ),
-            KynosFloatingNav(
-              items: _navItems,
-              selectedIndex: navigationShell.currentIndex,
-              onSelected: _onTabSelected,
-              bottomInset: navigationShell.currentIndex == 0
-                  ? LayoutTokens.coachChatFabBottomInset
-                  : 0,
-              actions: [
-                KynosFloatingNavAction(
-                  label: 'Settings',
-                  icon: Icons.settings_outlined,
-                  onTap: () => context.push(Routes.settings),
-                ),
-              ],
-            ),
+            if (navigationShell.currentIndex != 0)
+              KynosFloatingNav(
+                items: _navItems,
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: _onTabSelected,
+                actions: [
+                  KynosFloatingNavAction(
+                    label: 'Settings',
+                    icon: Icons.settings_outlined,
+                    onTap: () => context.push(Routes.settings),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

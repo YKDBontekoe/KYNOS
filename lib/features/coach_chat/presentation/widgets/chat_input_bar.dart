@@ -123,6 +123,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
                             .bodyLarge
                             ?.copyWith(color: kynos.tertiaryLabel),
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        filled: false,
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: Spacing.sm,
