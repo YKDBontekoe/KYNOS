@@ -106,12 +106,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/core/errors/failures.dart` | 38 | `Base class for all domain-level failures in KYNOS.` |
 | `lib/core/theme/app_theme.dart` | 219 | `AppTheme` |
 | `lib/core/theme/colors.dart` | 82 | `KYNOS colour palette — iOS system colours, Apple Fitness aesthetic.` |
-| `lib/core/theme/elevation.dart` | 33 | `Shadow presets for the KYNOS design system.` |
+| `lib/core/theme/elevation.dart` | 44 | `Shadow presets for the KYNOS design system.` |
 | `lib/core/theme/kynos_theme_extension.dart` | 229 | `KynosThemeExtension` |
 | `lib/core/theme/layout.dart` | 85 | `Layout constants for consistent page structure.` |
 | `lib/core/theme/liquid_glass_tokens.dart` | 54 | `Design tokens for Apple Liquid Glass materials — blur, vibrancy, specular edges.` |
 | `lib/core/theme/motion.dart` | 17 | `Design token: motion durations and curves shared across the app.` |
-| `lib/core/theme/spacing.dart` | 20 | `Design token: spacing scale (4-point grid).` |
+| `lib/core/theme/spacing.dart` | 23 | `Design token: spacing scale (4-point grid).` |
 | `lib/core/theme/theme.dart` | 12 | `KYNOS design system — barrel export.` |
 | `lib/core/theme/typography.dart` | 171 | `Named text styles for the KYNOS design system.` |
 | `lib/domain/catalog/on_device_model_catalog.dart` | 275 | `Curated catalog of LiteRT-LM models supported by KYNOS on-device coach.` |
@@ -265,7 +265,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
-| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 94 | `InferenceModeBar` |
+| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 121 | `InferenceModeBar` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 269 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |

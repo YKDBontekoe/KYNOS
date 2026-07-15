@@ -12,6 +12,7 @@ import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_chip.dart';
+import 'package:kynos/shared/widgets/kynos_segmented_control.dart';
 
 class InferenceModeBar extends ConsumerWidget {
   const InferenceModeBar({super.key});
@@ -41,16 +42,49 @@ class InferenceModeBar extends ConsumerWidget {
           if (settings.backendMode == CoachBackendMode.cloud && !cloudConfigured)
             Padding(
               padding: const EdgeInsets.only(bottom: Spacing.sm),
-              child: Material(
-                color: kynos.stand.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(Radius.md),
-                child: ListTile(
-                  dense: true,
-                  title: const Text('Cloud coach not configured'),
-                  subtitle: const Text('Add OpenRouter key and model in Settings'),
-                  trailing: TextButton(
-                    onPressed: () => context.push(Routes.settings),
-                    child: const Text('Settings'),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: kynos.stand.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(Radius.lg),
+                  border: Border.all(
+                    color: kynos.stand.withValues(alpha: 0.16),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Spacing.md,
+                    Spacing.sm,
+                    Spacing.sm,
+                    Spacing.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        size: 18,
+                        color: kynos.stand,
+                      ),
+                      const Gap(Spacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cloud coach not configured',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            Text(
+                              'Add an OpenRouter key and model in Settings',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.push(Routes.settings),
+                        child: const Text('Settings'),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -58,18 +92,11 @@ class InferenceModeBar extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: SegmentedButton<CoachBackendMode>(
-                  segments: CoachBackendMode.values
-                      .map(
-                        (mode) => ButtonSegment(
-                          value: mode,
-                          label: Text(mode.label, style: const TextStyle(fontSize: 12)),
-                        ),
-                      )
-                      .toList(),
-                  selected: {settings.backendMode},
-                  onSelectionChanged: (selection) async {
-                    final mode = selection.first;
+                child: KynosSegmentedControl<CoachBackendMode>(
+                  segments: CoachBackendMode.values,
+                  selected: settings.backendMode,
+                  labelBuilder: (mode) => mode.label,
+                  onChanged: (mode) async {
                     await ref.read(coachChatProvider.notifier).updateSettings(
                           settings.copyWith(backendMode: mode),
                         );
@@ -79,7 +106,7 @@ class InferenceModeBar extends ConsumerWidget {
               const Gap(Spacing.sm),
               InkWell(
                 onTap: () => showInferenceSettingsSheet(context),
-                borderRadius: BorderRadius.circular(Radius.md),
+                borderRadius: BorderRadius.circular(Radius.sm),
                 child: KynosChip.accent(
                   label: modelLabel,
                   color: kynos.purple,
