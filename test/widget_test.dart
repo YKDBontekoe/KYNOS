@@ -108,5 +108,6 @@ void main() {
     expect(find.byTooltip('Menu'), findsOneWidget);
     expect(find.byTooltip('New conversation'), findsOneWidget);
     expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
+    expect(find.text('Coach'), findsWidgets);
   });
 }

@@ -12,13 +12,18 @@ abstract final class LayoutTokens {
   /// @deprecated Use [shellFloatingNavSize]. Kept for legacy bottom-nav references.
   static const double shellNavBarHeight = shellFloatingNavSize;
 
-  /// Total bottom inset — floating nav no longer reserves layout chrome.
-  static double shellNavExtent(BuildContext context) => 0;
+  /// Height of the shell tab bar excluding device safe area.
+  static const double shellTabBarHeight = 56;
 
-  /// Bottom scroll padding for tab content (safe-area aware).
-  static double shellBottomPadding(BuildContext context) =>
-      tokens.Spacing.xxxl +
-      MediaQuery.viewPaddingOf(context).bottom;
+  /// Total bottom inset reserved by the shell tab bar.
+  static double shellNavExtent(BuildContext context) =>
+      shellTabBarHeight + MediaQuery.viewPaddingOf(context).bottom;
+
+  /// Bottom scroll padding for tab content.
+  ///
+  /// The tab bar sits outside the scroll view, so only modest breathing room
+  /// is needed here.
+  static double shellBottomPadding(BuildContext context) => tokens.Spacing.xl;
 
   /// @deprecated Prefer [shellBottomPadding] with context for safe-area.
   static const double shellBottomPaddingLegacy =

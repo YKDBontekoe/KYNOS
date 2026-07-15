@@ -6,20 +6,20 @@ import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/features/character/presentation/pages/character_page.dart';
 import 'package:kynos/features/training/presentation/pages/training_page.dart';
-import 'package:kynos/shared/widgets/kynos_floating_nav.dart';
+import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — draggable floating nav with three focused tabs.
+/// Root app shell — content-first tabs with a quiet bottom bar.
 class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  static const _navItems = [
-    KynosFloatingNavItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosFloatingNavItem(label: 'Health', icon: NavIconPaths.training),
-    KynosFloatingNavItem(label: 'Journey', icon: NavIconPaths.character),
+  static const _tabItems = [
+    KynosTabItem(label: 'Coach', icon: NavIconPaths.coach),
+    KynosTabItem(label: 'Health', icon: NavIconPaths.health),
+    KynosTabItem(label: 'Journey', icon: NavIconPaths.journey),
   ];
 
   void _onTabSelected(int index) {
@@ -32,51 +32,52 @@ class ShellPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kynos = context.kynosTheme;
+    final showTabBar = navigationShell.currentIndex != 0;
 
     return ShellNavigationScope(
       goToBranch: _onTabSelected,
       child: Scaffold(
         backgroundColor: kynos.background,
-        body: Stack(
-          fit: StackFit.expand,
+        body: Column(
           children: [
-            Positioned(
-              top: -120,
-              right: -80,
-              child: IgnorePointer(
-                child: Container(
-                  width: 280,
-                  height: 280,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        kynos.purple.withValues(alpha: 0.08),
-                        Colors.transparent,
-                      ],
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    top: -120,
+                    right: -80,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 280,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              kynos.purple.withValues(alpha: 0.08),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            ResponsiveCenter(
-              child: _AnimatedShellBody(
-                tabIndex: navigationShell.currentIndex,
-                child: navigationShell,
-              ),
-            ),
-            if (navigationShell.currentIndex != 0)
-              KynosFloatingNav(
-                items: _navItems,
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: _onTabSelected,
-                actions: [
-                  KynosFloatingNavAction(
-                    label: 'Settings',
-                    icon: Icons.settings_outlined,
-                    onTap: () => context.push(Routes.settings),
+                  ResponsiveCenter(
+                    child: _AnimatedShellBody(
+                      tabIndex: navigationShell.currentIndex,
+                      child: navigationShell,
+                    ),
                   ),
                 ],
+              ),
+            ),
+            if (showTabBar)
+              KynosTabBar(
+                items: _tabItems,
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: _onTabSelected,
+                onSettings: () => context.push(Routes.settings),
               ),
           ],
         ),
