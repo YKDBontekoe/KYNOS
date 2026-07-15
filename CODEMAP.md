@@ -254,7 +254,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
 | `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 237 | `ChatInputBar, _ChatInputBarState, _SendButton` |
-| `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
+| `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 71 | `CloudConsentBanner` |
 | `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 118 | `CoachChatAppBar, _OrbButton` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |

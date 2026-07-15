@@ -19,6 +19,9 @@ class CloudConsentBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
+    final sourceSummary = enabledSourceLabels.isEmpty
+        ? 'none selected'
+        : enabledSourceLabels.join(', ');
 
     return Material(
       color: kynos.stand.withValues(alpha: 0.1),
@@ -34,17 +37,28 @@ class CloudConsentBanner extends StatelessWidget {
             const Gap(Spacing.xs),
             Text(
               'Data level: $cloudDataLevelLabel. '
-              'Sources: ${enabledSourceLabels.join(', ')}. '
+              'Sources: $sourceSummary. '
               'Health context is sent to your OpenRouter model.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const Gap(Spacing.sm),
-            Row(
+            // Theme FilledButtons use an infinite min width (full-bleed CTAs).
+            // Override here so Cancel + Approve can share a Row on narrow screens.
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: Spacing.sm,
+              overflowSpacing: Spacing.xs,
               children: [
                 TextButton(onPressed: onCancel, child: const Text('Cancel')),
-                const Spacer(),
                 FilledButton(
                   onPressed: onConfirm,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.md,
+                      vertical: Spacing.sm,
+                    ),
+                  ),
                   child: const Text('Allow for this chat'),
                 ),
               ],
