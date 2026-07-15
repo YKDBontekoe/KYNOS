@@ -2,7 +2,7 @@ name: kynos
 description: >
   KYNOS — a private, local-first agentic health coach for daily wellbeing.
 publish_to: none
-version: 1.23.0+102300000
+version: 1.24.0+102400000
 environment:
   sdk: ^3.11.1
 dependencies:

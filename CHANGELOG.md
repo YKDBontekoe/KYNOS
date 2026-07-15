@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.23.0...v1.24.0) (2026-07-15)
+
+
+### Features
+
+* redesign KYNOS coach UX and mobile interface ([#105](https://github.com/YKDBontekoe/KYNOS/issues/105)) ([5896468](https://github.com/YKDBontekoe/KYNOS/commit/589646853841551e1a6c289b97bc2520d9e663c1))
+
 # [1.23.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.22.0...v1.23.0) (2026-07-13)
 
 
