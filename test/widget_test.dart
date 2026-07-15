@@ -62,7 +62,8 @@ void main() {
 
     expect(find.byType(CoachChatPage), findsOneWidget);
     expect(find.byType(ChatInputBar), findsOneWidget);
-    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(100));
+    // Composer includes shell dock clearance; the field itself stays compact.
+    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(220));
     expect(find.byType(EditableText), findsOneWidget);
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
 
@@ -97,12 +98,13 @@ void main() {
       tester.getSize(find.byType(CoachChatPage)).height,
       greaterThan(500),
     );
-    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(60));
+    // Floating corner orbs — not a solid top navigation bar.
+    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(80));
     expect(
       tester.getSize(find.byType(CoachChatEmptyState)).height,
       greaterThan(300),
     );
-    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(100));
+    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(220));
     expect(find.byType(EditableText), findsOneWidget);
     expect(tester.getSize(find.byType(EditableText)).height, greaterThan(20));
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
@@ -113,5 +115,31 @@ void main() {
     expect(find.byType(KynosTabBar), findsOneWidget);
     expect(find.text('Health'), findsOneWidget);
     expect(find.text('Journey'), findsOneWidget);
+  });
+
+  testWidgets('Health tab shows content under floating dock', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const KynosApp(),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('Health'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(KynosTabBar), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.textContaining('Sleep, recovery'), findsOneWidget);
   });
 }

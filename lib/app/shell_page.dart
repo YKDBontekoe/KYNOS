@@ -9,7 +9,7 @@ import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — one shared bottom tab bar across every page.
+/// Root app shell — content fills the screen with a floating glass tab dock.
 class ShellPage extends StatelessWidget {
   const ShellPage({super.key, required this.navigationShell});
 
@@ -36,45 +36,44 @@ class ShellPage extends StatelessWidget {
       goToBranch: _onTabSelected,
       child: Scaffold(
         backgroundColor: kynos.background,
-        body: Column(
+        body: Stack(
+          fit: StackFit.expand,
           children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned(
-                    top: -120,
-                    right: -80,
-                    child: IgnorePointer(
-                      child: Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              kynos.purple.withValues(alpha: 0.08),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
+            Positioned(
+              top: -120,
+              right: -80,
+              child: IgnorePointer(
+                child: Container(
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        kynos.purple.withValues(alpha: 0.08),
+                        Colors.transparent,
+                      ],
                     ),
                   ),
-                  ResponsiveCenter(
-                    child: _AnimatedShellBody(
-                      tabIndex: navigationShell.currentIndex,
-                      child: navigationShell,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            KynosTabBar(
-              items: _tabItems,
-              selectedIndex: navigationShell.currentIndex,
-              onSelected: _onTabSelected,
-              onSettings: () => context.push(Routes.settings),
+            ResponsiveCenter(
+              child: _AnimatedShellBody(
+                tabIndex: navigationShell.currentIndex,
+                child: navigationShell,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: KynosTabBar(
+                items: _tabItems,
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: _onTabSelected,
+                onSettings: () => context.push(Routes.settings),
+              ),
             ),
           ],
         ),

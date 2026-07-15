@@ -58,13 +58,16 @@ class _ChatInputBarState extends State<ChatInputBar> {
     final kynos = context.kynosTheme;
     final canSend = _hasText || widget.isStreaming;
 
+    // Leave room for the floating glass dock overlaid by the shell.
+    final bottomInset = LayoutTokens.shellNavExtent(context);
+
     return Padding(
-            padding: const EdgeInsets.fromLTRB(
-              Spacing.md,
-              Spacing.sm,
-              Spacing.md,
-              Spacing.sm,
-            ),
+      padding: EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        bottomInset,
+      ),
       child: SizedBox(
         height: LayoutTokens.chatComposerExtent - Spacing.sm * 2,
         child: AnimatedContainer(
