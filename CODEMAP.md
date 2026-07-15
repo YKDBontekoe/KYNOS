@@ -99,7 +99,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/app/page_transitions.dart` | 100 | `Route transition presets for [GoRouter] [pageBuilder] callbacks.` |
 | `lib/app/router.dart` | 242 | `_RouterRefreshNotifier` |
 | `lib/app/shell_navigation_scope.dart` | 33 | `ShellNavigationScope, CoachTab` |
-| `lib/app/shell_page.dart` | 169 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
+| `lib/app/shell_page.dart` | 192 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
 | `lib/core/constants/app_constants.dart` | 54 | `Compile-time constants for KYNOS.` |
 | `lib/core/constants/gamification_constants.dart` | 46 | `Gameplay tuning for Summit Camp.` |
 | `lib/core/constants/imported_workout_ids.dart` | 10 | `Prefix and helpers for locally imported workout identifiers.` |
@@ -257,16 +257,17 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 71 | `CloudConsentBanner` |
 | `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 118 | `CoachChatAppBar, _OrbButton` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
-| `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
-| `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
+| `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 230 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
+| `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 259 | `ConversationListSheet, _ConversationListSheetState` |
 | `lib/features/coach_chat/presentation/widgets/daily_health_brief_card.dart` | 132 | `DailyHealthBriefCard` |
-| `lib/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart` | 118 | `FocusRunPickerSheet` |
+| `lib/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart` | 119 | `FocusRunPickerSheet` |
 | `lib/features/coach_chat/presentation/widgets/follow_up_chips.dart` | 35 | `FollowUpChips` |
 | `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 88 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
 | `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 112 | `InferenceModeBar` |
-| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 226 | `InferenceSettingsSheet` |
+| `lib/features/coach_chat/presentation/widgets/inference_settings_rows.dart` | 173 | `InferenceSheetGroup, InferenceSheetDivider, InferenceModelRow, …` |
+| `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 248 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 311 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
 | `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 46 | `PendingCoachActionCard` |
@@ -431,6 +432,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/providers/post_run_debrief_provider.dart` | 1 | `Dart module` |
 | `lib/shared/providers/settings_provider.dart` | 186 | `SettingsState, Settings` |
 | `lib/shared/providers/shared_preferences_provider.dart` | 12 | `Synchronously accessible [SharedPreferences] — override at app startup.` |
+| `lib/shared/providers/shell_chrome_provider.dart` | 18 | `ShellChrome` |
 | `lib/shared/providers/today_insights_provider.dart` | 1 | `Dart module` |
 | `lib/shared/providers/training_insights_provider.dart` | 1 | `Dart module` |
 | `lib/shared/providers/workout_session_lookup_provider.dart` | 16 | `Resolves a [WorkoutSession] by id for deep-linked run routes.` |
@@ -482,6 +484,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/nav_icon.dart` | 249 | `NavIconDefinition, NavIconPainter` |
 | `lib/shared/widgets/responsive_center.dart` | 30 | `ResponsiveCenter` |
 | `lib/shared/widgets/run_card.dart` | 113 | `RunCard` |
+| `lib/shared/widgets/show_shell_modal_sheet.dart` | 30 | `Shows a modal bottom sheet while temporarily hiding the shell tab dock.` |
 | `lib/shared/widgets/widgets.dart` | 32 | `KYNOS shared widgets — barrel export.` |
 
 ## Hot Files (do not grow)
@@ -509,6 +512,6 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 278 | Split if > 250 lines |
 | `lib/domain/catalog/on_device_model_catalog.dart` | 275 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 389 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 392 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->
