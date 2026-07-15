@@ -303,7 +303,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/run_detail/run_split_list.dart` | 116 | `RunSplitList, _SplitRow` |
 | `lib/features/dashboard/presentation/widgets/run_detail/run_summary_metrics.dart` | 91 | `RunSummaryMetrics` |
 | `lib/features/dashboard/presentation/widgets/trend_carousel.dart` | 96 | `TrendCarousel, _TrendCarouselState, _TrendPage` |
-| `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 214 | `WeekMomentumCard` |
+| `lib/features/dashboard/presentation/widgets/week_momentum_card.dart` | 215 | `WeekMomentumCard` |
 | `lib/features/dashboard/presentation/widgets/what_changed_chips.dart` | 45 | `WhatChangedChips` |
 | `lib/features/dashboard/providers/dashboard_summary_provider.dart` | 60 | `Dart module` |
 | `lib/features/dashboard/providers/post_run_debrief_provider.dart` | 123 | `PostRunDebriefState, PostRunDebriefNotifier` |
