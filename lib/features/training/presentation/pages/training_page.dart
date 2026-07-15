@@ -483,10 +483,10 @@ class _JumpBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 
   @override
-  double get minExtent => 52;
+  double get minExtent => 40;
 
   @override
-  double get maxExtent => 52;
+  double get maxExtent => 40;
 
   @override
   Widget build(

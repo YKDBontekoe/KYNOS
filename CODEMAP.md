@@ -99,7 +99,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/app/page_transitions.dart` | 100 | `Route transition presets for [GoRouter] [pageBuilder] callbacks.` |
 | `lib/app/router.dart` | 245 | `_RouterRefreshNotifier` |
 | `lib/app/shell_navigation_scope.dart` | 33 | `ShellNavigationScope, CoachTab` |
-| `lib/app/shell_page.dart` | 173 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
+| `lib/app/shell_page.dart` | 170 | `ShellPage, _AnimatedShellBody, _AnimatedShellBodyState, …` |
 | `lib/core/constants/app_constants.dart` | 54 | `Compile-time constants for KYNOS.` |
 | `lib/core/constants/gamification_constants.dart` | 46 | `Gameplay tuning for Summit Camp.` |
 | `lib/core/constants/imported_workout_ids.dart` | 10 | `Prefix and helpers for locally imported workout identifiers.` |
@@ -231,7 +231,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/running_distance.dart` | 12 | `Running-only distance in meters for a daily summary.` |
 | `lib/domain/utils/seeded_roll.dart` | 17 | `Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates).` |
 | `lib/domain/utils/weekly_momentum.dart` | 87 | `WeeklyMomentum` |
-| `lib/features/character/presentation/pages/character_page.dart` | 302 | `CharacterPage, EmptyCharacterState` |
+| `lib/features/character/presentation/pages/character_page.dart` | 290 | `CharacterPage, EmptyCharacterState` |
 | `lib/features/character/presentation/widgets/camp_build_sheet.dart` | 133 | `CampBuildSheet` |
 | `lib/features/character/presentation/widgets/camp_game_panel.dart` | 161 | `CampGamePanel, _CampGamePanelState` |
 | `lib/features/character/presentation/widgets/camp_grid.dart` | 131 | `CampGrid, _CampTileCell` |
@@ -253,11 +253,10 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
-| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 235 | `ChatInputBar, _ChatInputBarState, _SendButton` |
+| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 234 | `ChatInputBar, _ChatInputBarState, _SendButton` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 73 | `CoachChatAppBar` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 75 | `CoachChatAppBar` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
-| `lib/features/coach_chat/presentation/widgets/coach_navigation_sheet.dart` | 284 | `CoachNavigationSheet, _NavGroup, _NavRow` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
 | `lib/features/coach_chat/presentation/widgets/daily_health_brief_card.dart` | 132 | `DailyHealthBriefCard` |
@@ -290,7 +289,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/dashboard/presentation/widgets/coach_agent_hero_card.dart` | 128 | `CoachAgentHeroCard, _PromptChip` |
 | `lib/features/dashboard/presentation/widgets/coach_insight_card.dart` | 214 | `CoachInsightCard, _CoachInsightContent, _AcwrOnlyCard, …` |
 | `lib/features/dashboard/presentation/widgets/connect_healthkit_card.dart` | 88 | `ConnectHealthkitCard` |
-| `lib/features/dashboard/presentation/widgets/dashboard_header_sliver.dart` | 99 | `DashboardHeaderSliver` |
+| `lib/features/dashboard/presentation/widgets/dashboard_header_sliver.dart` | 72 | `DashboardHeaderSliver` |
 | `lib/features/dashboard/presentation/widgets/gait_teaser_card.dart` | 94 | `GaitTeaserCard` |
 | `lib/features/dashboard/presentation/widgets/health_metrics_grid.dart` | 254 | `HealthMetricsGrid` |
 | `lib/features/dashboard/presentation/widgets/hrv_sparkline.dart` | 68 | `HrvSparkline` |
@@ -468,10 +467,10 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_inline_error_card.dart` | 53 | `KynosInlineErrorCard` |
 | `lib/shared/widgets/kynos_loading_line.dart` | 59 | `KynosLoadingLine` |
 | `lib/shared/widgets/kynos_page_dots.dart` | 45 | `KynosPageDots` |
-| `lib/shared/widgets/kynos_page_header.dart` | 101 | `KynosPageHeader` |
+| `lib/shared/widgets/kynos_page_header.dart` | 75 | `KynosPageHeader` |
 | `lib/shared/widgets/kynos_privacy_footer.dart` | 25 | `KynosPrivacyFooter` |
 | `lib/shared/widgets/kynos_section_header.dart` | 21 | `KynosSectionHeader` |
-| `lib/shared/widgets/kynos_section_jump_bar.dart` | 93 | `KynosSectionJumpBar, _JumpChip` |
+| `lib/shared/widgets/kynos_section_jump_bar.dart` | 99 | `KynosSectionJumpBar, _JumpLink` |
 | `lib/shared/widgets/kynos_section_row.dart` | 38 | `KynosSectionRow` |
 | `lib/shared/widgets/kynos_segmented_control.dart` | 101 | `KynosSegmentedControl, _Segment` |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | `KynosSkeleton` |
@@ -502,14 +501,14 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 357 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 311 | Split if > 250 lines |
 | `lib/shared/widgets/charts/health_trend_chart.dart` | 304 | Split if > 250 lines |
-| `lib/features/character/presentation/pages/character_page.dart` | 302 | Split if > 250 lines |
 | `lib/infrastructure/health/import/apple_health_export_parser.dart` | 296 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | Split if > 250 lines |
+| `lib/features/character/presentation/pages/character_page.dart` | 290 | Split if > 250 lines |
 | `lib/domain/usecases/insights/generate_training_insights_usecase.dart` | 287 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/widgets/coach_navigation_sheet.dart` | 284 | Split if > 250 lines |
 | `lib/features/settings/providers/health_import_provider.dart` | 280 | Split if > 250 lines |
 | `lib/features/onboarding/presentation/onboarding_page.dart` | 278 | Split if > 250 lines |
+| `lib/domain/catalog/on_device_model_catalog.dart` | 275 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 390 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 389 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->

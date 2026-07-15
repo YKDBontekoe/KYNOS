@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kynos/core/theme/theme.dart';
 
-/// Sticky horizontal chips for jumping between sections on long scroll pages.
+/// Quiet section jump links — deliberately not a second tab bar.
 class KynosSectionJumpBar extends StatelessWidget {
   const KynosSectionJumpBar({
     super.key,
@@ -19,40 +19,45 @@ class KynosSectionJumpBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
-      child: Row(
-        children: [
-          for (var i = 0; i < sections.length; i++) ...[
-            if (i > 0) const SizedBox(width: Spacing.xs),
-            _JumpChip(
-              label: sections[i],
-              selected: selectedIndex == i,
-              accent: kynos.purple,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onSelected(i);
-              },
-            ),
+    return ColoredBox(
+      color: kynos.background,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(
+          Spacing.md,
+          Spacing.xs,
+          Spacing.md,
+          Spacing.sm,
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < sections.length; i++) ...[
+              if (i > 0) const SizedBox(width: Spacing.md),
+              _JumpLink(
+                label: sections[i],
+                selected: selectedIndex == i,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onSelected(i);
+                },
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
-class _JumpChip extends StatelessWidget {
-  const _JumpChip({
+class _JumpLink extends StatelessWidget {
+  const _JumpLink({
     required this.label,
     required this.selected,
-    required this.accent,
     required this.onTap,
   });
 
   final String label;
   final bool selected;
-  final Color accent;
   final VoidCallback onTap;
 
   @override
@@ -61,31 +66,32 @@ class _JumpChip extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: Motion.fast,
-        curve: Motion.curve,
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.md,
-          vertical: Spacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: selected
-              ? accent.withValues(alpha: 0.16)
-              : kynos.card,
-          borderRadius: BorderRadius.circular(Radius.full),
-          border: Border.all(
-            color: selected
-                ? accent.withValues(alpha: 0.28)
-                : kynos.separator,
-          ),
-          boxShadow: selected ? null : kynos.cardShadow,
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: selected ? accent : kynos.label,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: selected ? kynos.label : kynos.tertiaryLabel,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    letterSpacing: -0.1,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            AnimatedContainer(
+              duration: Motion.fast,
+              curve: Motion.curve,
+              height: 2,
+              width: selected ? 18 : 0,
+              decoration: BoxDecoration(
+                color: kynos.purple,
+                borderRadius: BorderRadius.circular(Radius.full),
               ),
+            ),
+          ],
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.da
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
+import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -69,7 +70,8 @@ void main() {
     final inputLeft = tester.getTopLeft(find.byType(ChatInputBar)).dx;
     expect(inputLeft, lessThan(20));
     expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
-    expect(find.byTooltip('Menu'), findsOneWidget);
+    expect(find.byTooltip('Conversations'), findsOneWidget);
+    expect(find.byType(KynosTabBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -95,7 +97,7 @@ void main() {
       tester.getSize(find.byType(CoachChatPage)).height,
       greaterThan(500),
     );
-    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(72));
+    expect(tester.getSize(find.byType(CoachChatAppBar)).height, lessThan(60));
     expect(
       tester.getSize(find.byType(CoachChatEmptyState)).height,
       greaterThan(300),
@@ -105,9 +107,11 @@ void main() {
     expect(tester.getSize(find.byType(EditableText)).height, greaterThan(20));
     expect(find.byType(EditableText).hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
-    expect(find.byTooltip('Menu'), findsOneWidget);
+    expect(find.byTooltip('Conversations'), findsOneWidget);
     expect(find.byTooltip('New conversation'), findsOneWidget);
     expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
-    expect(find.text('Coach'), findsWidgets);
+    expect(find.byType(KynosTabBar), findsOneWidget);
+    expect(find.text('Health'), findsOneWidget);
+    expect(find.text('Journey'), findsOneWidget);
   });
 }

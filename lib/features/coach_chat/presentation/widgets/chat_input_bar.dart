@@ -56,16 +56,15 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
     final canSend = _hasText || widget.isStreaming;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        Spacing.md,
-        Spacing.sm,
-        Spacing.md,
-        Spacing.sm + safeBottom,
-      ),
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.md,
+              Spacing.sm,
+              Spacing.md,
+              Spacing.sm,
+            ),
       child: SizedBox(
         height: LayoutTokens.chatComposerExtent - Spacing.sm * 2,
         child: AnimatedContainer(

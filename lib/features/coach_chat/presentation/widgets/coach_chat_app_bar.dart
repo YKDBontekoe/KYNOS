@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/features/coach_chat/presentation/widgets/coach_navigation_sheet.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/conversation_list_sheet.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/inference_settings_sheet.dart';
 
-/// Quiet, one-line coach chrome.
+/// Minimal coach actions — page identity lives in the shared bottom tabs.
 class CoachChatAppBar extends StatelessWidget {
   const CoachChatAppBar({
     super.key,
@@ -24,33 +25,34 @@ class CoachChatAppBar extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: SizedBox(
-          height: 48,
+          height: 44,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
             child: Row(
               children: [
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  tooltip: 'Menu',
-                  onPressed: () => showCoachNavigationSheet(
+                  tooltip: 'Conversations',
+                  onPressed: () => showConversationListSheet(context),
+                  icon: Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: kynos.label,
+                    size: 22,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Model & mode',
+                  onPressed: () => showInferenceSettingsSheet(
                     context,
                     onExport: onExport,
                     onDeleteThread: onDeleteThread,
                   ),
                   icon: Icon(
-                    Icons.menu_rounded,
-                    color: kynos.label,
-                    size: 22,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Coach',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
-                        ),
+                    Icons.auto_awesome_rounded,
+                    color: kynos.secondaryLabel,
+                    size: 20,
                   ),
                 ),
                 IconButton(

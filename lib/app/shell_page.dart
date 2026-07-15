@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
@@ -10,8 +9,8 @@ import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — content-first tabs with a quiet bottom bar.
-class ShellPage extends ConsumerWidget {
+/// Root app shell — one shared bottom tab bar across every page.
+class ShellPage extends StatelessWidget {
   const ShellPage({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -30,9 +29,8 @@ class ShellPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final kynos = context.kynosTheme;
-    final showTabBar = navigationShell.currentIndex != 0;
 
     return ShellNavigationScope(
       goToBranch: _onTabSelected,
@@ -72,13 +70,12 @@ class ShellPage extends ConsumerWidget {
                 ],
               ),
             ),
-            if (showTabBar)
-              KynosTabBar(
-                items: _tabItems,
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: _onTabSelected,
-                onSettings: () => context.push(Routes.settings),
-              ),
+            KynosTabBar(
+              items: _tabItems,
+              selectedIndex: navigationShell.currentIndex,
+              onSelected: _onTabSelected,
+              onSettings: () => context.push(Routes.settings),
+            ),
           ],
         ),
       ),
