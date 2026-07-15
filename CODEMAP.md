@@ -108,7 +108,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/core/theme/colors.dart` | 82 | `KYNOS colour palette — iOS system colours, Apple Fitness aesthetic.` |
 | `lib/core/theme/elevation.dart` | 44 | `Shadow presets for the KYNOS design system.` |
 | `lib/core/theme/kynos_theme_extension.dart` | 229 | `KynosThemeExtension` |
-| `lib/core/theme/layout.dart` | 85 | `Layout constants for consistent page structure.` |
+| `lib/core/theme/layout.dart` | 99 | `Layout constants for consistent page structure.` |
 | `lib/core/theme/liquid_glass_tokens.dart` | 54 | `Design tokens for Apple Liquid Glass materials — blur, vibrancy, specular edges.` |
 | `lib/core/theme/motion.dart` | 17 | `Design token: motion durations and curves shared across the app.` |
 | `lib/core/theme/spacing.dart` | 23 | `Design token: spacing scale (4-point grid).` |
@@ -249,23 +249,23 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 71 | `XpBar` |
 | `lib/features/character/providers/character_provider.dart` | 1 | `Dart module` |
 | `lib/features/character/providers/quest_provider.dart` | 48 | `QuestNotifier` |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 495 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner, …` |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 494 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner, …` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
-| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 230 | `ChatInputBar, _ChatInputBarState, _SendButton` |
+| `lib/features/coach_chat/presentation/widgets/chat_input_bar.dart` | 232 | `ChatInputBar, _ChatInputBarState, _SendButton` |
 | `lib/features/coach_chat/presentation/widgets/cloud_consent_banner.dart` | 57 | `CloudConsentBanner` |
-| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 163 | `CoachChatAppBar` |
+| `lib/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart` | 166 | `CoachChatAppBar` |
 | `lib/features/coach_chat/presentation/widgets/coach_markdown_text.dart` | 62 | `CoachMarkdownText` |
 | `lib/features/coach_chat/presentation/widgets/context_inspector_sheet.dart` | 229 | `ContextInspectorSheet, _ContextInspectorSheetState, _BudgetMeter` |
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 258 | `ConversationListSheet, _ConversationListSheetState` |
 | `lib/features/coach_chat/presentation/widgets/daily_health_brief_card.dart` | 91 | `DailyHealthBriefCard` |
 | `lib/features/coach_chat/presentation/widgets/focus_run_picker_sheet.dart` | 118 | `FocusRunPickerSheet` |
 | `lib/features/coach_chat/presentation/widgets/follow_up_chips.dart` | 35 | `FollowUpChips` |
-| `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 89 | `GlassSuggestionChip, _GlassSuggestionChipState` |
+| `lib/features/coach_chat/presentation/widgets/glass_suggestion_chip.dart` | 88 | `GlassSuggestionChip, _GlassSuggestionChipState` |
 | `lib/features/coach_chat/presentation/widgets/health_check_in_sheet.dart` | 134 | `HealthCheckInSheet, _HealthCheckInSheetState` |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | `HealthVisualArtifactCard, _HealthVisualArtifactCardState, _ValueRow` |
-| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 183 | `InferenceModeBar` |
+| `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 215 | `InferenceModeBar` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 104 | `InferenceSettingsSheet` |
 | `lib/features/coach_chat/presentation/widgets/message_list.dart` | 269 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
@@ -324,7 +324,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/presentation/pages/openrouter_model_picker_page.dart` | 215 | `OpenRouterModelPickerPage` |
 | `lib/features/settings/presentation/pages/settings_page.dart` | 712 | `SettingsPage, _SettingsPageState, _SwitchTile, …` |
 | `lib/features/settings/presentation/widgets/apple_health_export_preview_card.dart` | 104 | `AppleHealthExportPreviewCard` |
-| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 196 | `CoachPersonalizationCard` |
+| `lib/features/settings/presentation/widgets/coach_personalization_card.dart` | 209 | `CoachPersonalizationCard` |
 | `lib/features/settings/presentation/widgets/gpx_import_preview_card.dart` | 82 | `GpxImportPreviewCard` |
 | `lib/features/settings/presentation/widgets/health_import_preview_row.dart` | 27 | `HealthImportPreviewRow` |
 | `lib/features/settings/presentation/widgets/health_import_progress_card.dart` | 58 | `HealthImportProgressCard` |
@@ -458,7 +458,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/insight_expandable_card.dart` | 221 | `InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, …` |
 | `lib/shared/widgets/kynos_bottom_nav.dart` | 185 | `KynosBottomNavItem, KynosBottomNav, _NavBarItem` |
 | `lib/shared/widgets/kynos_card.dart` | 57 | `KynosCard` |
-| `lib/shared/widgets/kynos_chip.dart` | 128 | `KynosChip, _MetricChip, _AccentChip` |
+| `lib/shared/widgets/kynos_chip.dart` | 130 | `KynosChip, _MetricChip, _AccentChip` |
 | `lib/shared/widgets/kynos_collapsible_section.dart` | 105 | `KynosCollapsibleSection, _KynosCollapsibleSectionState` |
 | `lib/shared/widgets/kynos_dropdown_field.dart` | 88 | `KynosDropdownField` |
 | `lib/shared/widgets/kynos_empty_cta.dart` | 60 | `KynosEmptyCta` |
@@ -472,7 +472,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_section_header.dart` | 21 | `KynosSectionHeader` |
 | `lib/shared/widgets/kynos_section_jump_bar.dart` | 93 | `KynosSectionJumpBar, _JumpChip` |
 | `lib/shared/widgets/kynos_section_row.dart` | 38 | `KynosSectionRow` |
-| `lib/shared/widgets/kynos_segmented_control.dart` | 98 | `KynosSegmentedControl, _Segment` |
+| `lib/shared/widgets/kynos_segmented_control.dart` | 101 | `KynosSegmentedControl, _Segment` |
 | `lib/shared/widgets/kynos_skeleton.dart` | 41 | `KynosSkeleton` |
 | `lib/shared/widgets/kynos_user_bubble.dart` | 72 | `KynosUserBubble` |
 | `lib/shared/widgets/liquid_glass_button.dart` | 142 | `LiquidGlassButton, LiquidGlassIconButton` |
@@ -492,7 +492,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | Split if > 250 lines |
 | `lib/features/training/presentation/pages/training_page.dart` | 581 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 495 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 494 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 390 | Split if > 250 lines |

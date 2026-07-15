@@ -154,24 +154,31 @@ class InferenceModeBar extends ConsumerWidget {
                 ),
               ),
             ),
-          Row(
+          // Always give the segmented control a full row on phones/tablets so
+          // the model chip never crushes Auto / On-device / Cloud.
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: KynosSegmentedControl<CoachBackendMode>(
-                  segments: CoachBackendMode.values,
-                  selected: settings.backendMode,
-                  labelBuilder: (mode) => mode.label,
-                  onChanged: (mode) =>
-                      _selectMode(context, ref, settings, mode),
-                ),
+              KynosSegmentedControl<CoachBackendMode>(
+                segments: CoachBackendMode.values,
+                selected: settings.backendMode,
+                labelBuilder: (mode) => mode.label,
+                onChanged: (mode) =>
+                    _selectMode(context, ref, settings, mode),
               ),
               const Gap(Spacing.sm),
-              InkWell(
-                onTap: () => showInferenceSettingsSheet(context),
-                borderRadius: BorderRadius.circular(Radius.sm),
-                child: KynosChip.accent(
-                  label: modelLabel,
-                  color: kynos.purple,
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: () => showInferenceSettingsSheet(context),
+                  borderRadius: BorderRadius.circular(Radius.sm),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 220),
+                    child: KynosChip.accent(
+                      label: modelLabel,
+                      color: kynos.purple,
+                    ),
+                  ),
                 ),
               ),
             ],

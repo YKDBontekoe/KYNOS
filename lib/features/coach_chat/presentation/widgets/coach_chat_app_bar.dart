@@ -48,6 +48,7 @@ class CoachChatAppBar extends ConsumerWidget {
                     label: 'Conversation history',
                     button: true,
                     child: IconButton(
+                      visualDensity: VisualDensity.compact,
                       icon: const Icon(Icons.history_rounded),
                       color: kynos.secondaryLabel,
                       onPressed: () => showConversationListSheet(context),
@@ -55,8 +56,8 @@ class CoachChatAppBar extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: 28,
+                    height: 28,
                     alignment: Alignment.center,
                     margin: const EdgeInsets.only(right: Spacing.sm),
                     decoration: BoxDecoration(
@@ -69,7 +70,7 @@ class CoachChatAppBar extends ConsumerWidget {
                     ),
                     child: const Icon(
                       Icons.auto_awesome_rounded,
-                      size: 16,
+                      size: 14,
                       color: KynosColors.onAccent,
                     ),
                   ),
@@ -105,6 +106,7 @@ class CoachChatAppBar extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
+                    visualDensity: VisualDensity.compact,
                     onPressed: onNewChat,
                     icon: const Icon(Icons.add_comment_outlined),
                     color: kynos.secondaryLabel,
@@ -115,6 +117,7 @@ class CoachChatAppBar extends ConsumerWidget {
                       Icons.more_vert_rounded,
                       color: kynos.secondaryLabel,
                     ),
+                    tooltip: 'More',
                     onSelected: (value) {
                       switch (value) {
                         case 'context':

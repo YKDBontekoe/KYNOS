@@ -59,17 +59,31 @@ abstract final class LayoutTokens {
   /// Max content width for web and wide viewports.
   static const double maxContentWidth = 560;
 
-  /// Bottom padding to clear the coach chat input bar.
-  static const double chatInputClearance =
-      tokens.Spacing.xxxl * 2 + tokens.Spacing.md;
+  /// Bottom padding inside coach message lists.
+  ///
+  /// Composer is laid out in-column (not overlayed), so this only needs a
+  /// modest breathing room — not a full input-bar clearance.
+  static const double chatListBottomPadding = tokens.Spacing.md;
 
-  /// Extra bottom offset for the shell FAB on the coach tab (above input bar).
-  static const double coachChatFabBottomInset =
-      tokens.Spacing.xxxl + tokens.Spacing.md;
+  /// @deprecated Prefer [chatListBottomPadding]. Composer is not overlayed.
+  static const double chatInputClearance = chatListBottomPadding;
 
-  /// Left inset for coach chat input so text does not sit under the shell FAB.
-  static const double coachFabLeftClearance =
-      shellFloatingNavSize + tokens.Spacing.md;
+  /// Coach composer extent (padding + field), excluding device safe area.
+  static const double chatComposerExtent =
+      tokens.Spacing.sm + 52 + tokens.Spacing.sm;
+
+  /// Follow-up suggestion strip height on coach chat.
+  static const double chatFollowUpChipsExtent = 48;
+
+  /// Extra FAB lift so it sits above composer + follow-ups and input can stay
+  /// full-width. Combined with the nav's default [Spacing.md] edge padding.
+  static const double coachChatFabBottomInset = chatComposerExtent +
+      chatFollowUpChipsExtent +
+      tokens.Spacing.sm -
+      tokens.Spacing.md;
+
+  /// @deprecated FAB now clears above the composer; keep for any leftover refs.
+  static const double coachFabLeftClearance = 0;
 
   /// Height for horizontal run-card carousels on the dashboard.
   static const double runCarouselHeight =

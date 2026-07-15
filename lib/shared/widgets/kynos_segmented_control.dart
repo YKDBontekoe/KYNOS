@@ -86,6 +86,9 @@ class _Segment extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: selected ? kynos.label : kynos.secondaryLabel,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,

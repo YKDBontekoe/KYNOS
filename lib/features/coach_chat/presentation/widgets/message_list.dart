@@ -44,7 +44,7 @@ class _MessageListState extends State<MessageList> {
         Spacing.md,
         Spacing.sm,
         Spacing.md,
-        LayoutTokens.chatInputClearance,
+        LayoutTokens.chatListBottomPadding,
       ),
       itemCount: widget.messages.length,
       itemBuilder: (context, index) {
@@ -193,7 +193,7 @@ class CoachChatEmptyState extends ConsumerWidget {
         Spacing.md,
         Spacing.sm,
         Spacing.md,
-        LayoutTokens.chatInputClearance,
+        LayoutTokens.chatListBottomPadding,
       ),
       children: [
         if (readinessLine != null) ...[

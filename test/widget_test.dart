@@ -41,6 +41,36 @@ void main() {
     expect(find.byType(KynosApp), findsOneWidget);
   });
 
+  testWidgets('Coach shell fills a mobile viewport without overflow', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const KynosApp(),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(CoachChatPage), findsOneWidget);
+    expect(find.byType(ChatInputBar), findsOneWidget);
+    expect(tester.getSize(find.byType(ChatInputBar)).height, lessThan(100));
+    expect(find.byType(EditableText), findsOneWidget);
+    expect(find.byType(EditableText).hitTestable(), findsOneWidget);
+
+    // Full-width composer — input should share the same left inset as page content.
+    final inputLeft = tester.getTopLeft(find.byType(ChatInputBar)).dx;
+    expect(inputLeft, lessThan(20));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Coach shell fills a wide web-style viewport without overflow', (
     WidgetTester tester,
   ) async {

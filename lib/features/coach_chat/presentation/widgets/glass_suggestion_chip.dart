@@ -71,14 +71,13 @@ class _GlassSuggestionChipState extends State<GlassSuggestionChip>
                 horizontal: tokens.Spacing.md,
                 vertical: tokens.Spacing.sm,
               ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.label,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
+              child: Text(
+                widget.label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),

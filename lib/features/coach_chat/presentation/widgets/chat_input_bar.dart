@@ -11,7 +11,6 @@ class ChatInputBar extends StatefulWidget {
     required this.isStreaming,
     required this.onSend,
     this.onCancel,
-    this.leftInset = 0,
   });
 
   final TextEditingController controller;
@@ -19,7 +18,6 @@ class ChatInputBar extends StatefulWidget {
   final bool isStreaming;
   final ValueChanged<String> onSend;
   final VoidCallback? onCancel;
-  final double leftInset;
 
   @override
   State<ChatInputBar> createState() => _ChatInputBarState();
@@ -61,92 +59,96 @@ class _ChatInputBarState extends State<ChatInputBar> {
     final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
     final canSend = _hasText || widget.isStreaming;
 
-    return SizedBox(
-      height: 96 + safeBottom,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          Spacing.md + widget.leftInset,
-          Spacing.sm,
-          Spacing.md,
-          Spacing.sm + safeBottom,
-        ),
-        child: SizedBox(
-          height: 60,
-          child: AnimatedContainer(
-            duration: Motion.fast,
-            curve: Motion.curve,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Radius.full),
-              boxShadow: _hasFocus
-                  ? [
-                      BoxShadow(
-                        color: kynos.stand.withValues(alpha: 0.18),
-                        blurRadius: 22,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : kynos.cardShadow,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Spacing.md,
+        Spacing.sm,
+        Spacing.md,
+        Spacing.sm + safeBottom,
+      ),
+      child: SizedBox(
+        height: LayoutTokens.chatComposerExtent - Spacing.sm * 2,
+        child: AnimatedContainer(
+          duration: Motion.fast,
+          curve: Motion.curve,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Radius.full),
+            boxShadow: _hasFocus
+                ? [
+                    BoxShadow(
+                      color: kynos.stand.withValues(alpha: 0.18),
+                      blurRadius: 22,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : kynos.cardShadow,
+          ),
+          child: LiquidGlassSurface(
+            borderRadius: Radius.full,
+            blurSigma: LiquidGlassTokens.surfaceBlurSigma,
+            border: Border.all(
+              color: _hasFocus
+                  ? kynos.stand.withValues(alpha: 0.55)
+                  : LiquidGlassTokens.borderColor(
+                      Theme.of(context).brightness,
+                    ),
+              width: _hasFocus ? 1.4 : 0.5,
             ),
-            child: LiquidGlassSurface(
-              borderRadius: Radius.full,
-              blurSigma: LiquidGlassTokens.surfaceBlurSigma,
-              border: Border.all(
-                color: _hasFocus
-                    ? kynos.stand.withValues(alpha: 0.55)
-                    : LiquidGlassTokens.borderColor(
-                        Theme.of(context).brightness,
-                      ),
-                width: _hasFocus ? 1.4 : 0.5,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: Spacing.md,
+                right: Spacing.xs,
               ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: Spacing.md, right: Spacing.xs),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: widget.controller,
-                        focusNode: widget.focusNode,
-                        enabled: !widget.isStreaming,
-                        textInputAction: TextInputAction.send,
-                        minLines: 1,
-                        maxLines: 3,
-                        keyboardType: TextInputType.multiline,
-                        onSubmitted: widget.isStreaming ? null : widget.onSend,
-                        style: Theme.of(context).textTheme.bodyLarge
-                            ?.copyWith(color: kynos.label),
-                        cursorColor: kynos.stand,
-                        decoration: InputDecoration(
-                          hintText: 'Ask your coach…',
-                          hintStyle: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(color: kynos.tertiaryLabel),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: Spacing.sm,
-                          ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: widget.controller,
+                      focusNode: widget.focusNode,
+                      enabled: !widget.isStreaming,
+                      textInputAction: TextInputAction.send,
+                      minLines: 1,
+                      maxLines: 3,
+                      keyboardType: TextInputType.multiline,
+                      onSubmitted: widget.isStreaming ? null : widget.onSend,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.copyWith(color: kynos.label),
+                      cursorColor: kynos.stand,
+                      decoration: InputDecoration(
+                        hintText: 'Ask your coach…',
+                        hintStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(color: kynos.tertiaryLabel),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: Spacing.sm,
                         ),
                       ),
                     ),
-                    if (widget.isStreaming && widget.onCancel != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: Spacing.xs),
-                        child: TextButton(
-                          onPressed: widget.onCancel,
-                          style: TextButton.styleFrom(
-                            foregroundColor: kynos.move,
-                          ),
-                          child: const Text('Stop'),
+                  ),
+                  if (widget.isStreaming && widget.onCancel != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: Spacing.xs),
+                      child: TextButton(
+                        onPressed: widget.onCancel,
+                        style: TextButton.styleFrom(
+                          foregroundColor: kynos.move,
                         ),
+                        child: const Text('Stop'),
                       ),
-                    _SendButton(
-                      isStreaming: widget.isStreaming,
-                      canSend: canSend,
-                      onPressed: widget.isStreaming
-                          ? null
-                          : () => widget.onSend(widget.controller.text),
                     ),
-                  ],
-                ),
+                  _SendButton(
+                    isStreaming: widget.isStreaming,
+                    canSend: canSend,
+                    onPressed: widget.isStreaming
+                        ? null
+                        : () => widget.onSend(widget.controller.text),
+                  ),
+                ],
               ),
             ),
           ),
