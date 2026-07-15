@@ -249,7 +249,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/character/presentation/widgets/xp_bar.dart` | 69 | `XpBar` |
 | `lib/features/character/providers/character_provider.dart` | 1 | `Dart module` |
 | `lib/features/character/providers/quest_provider.dart` | 48 | `QuestNotifier` |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 426 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner` |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 448 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
@@ -452,7 +452,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/charts/health_trend_chart.dart` | 279 | `HealthTrendPoint, HealthTrendChart, _HealthTrendChartState` |
 | `lib/shared/widgets/charts/hrv_chart.dart` | 86 | `HrvChart` |
 | `lib/shared/widgets/charts/load_chart.dart` | 85 | `LoadChart` |
-| `lib/shared/widgets/daily_quest_teaser.dart` | 129 | `DailyQuestTeaser` |
+| `lib/shared/widgets/daily_quest_teaser.dart` | 137 | `DailyQuestTeaser` |
 | `lib/shared/widgets/gait_model_card.dart` | 247 | `GaitModelCard, _CoefficientsRow, GaitModelCardAsync` |
 | `lib/shared/widgets/glass_card.dart` | 43 | `GlassCard` |
 | `lib/shared/widgets/insight_expandable_card.dart` | 221 | `InsightExpandableCard, _InsightExpandableCardState, InsightTextExpandableCard, …` |
@@ -491,7 +491,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | Split if > 250 lines |
 | `lib/features/training/presentation/pages/training_page.dart` | 581 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 426 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 448 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |
 | `lib/features/dashboard/presentation/pages/dashboard_page.dart` | 402 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 390 | Split if > 250 lines |
