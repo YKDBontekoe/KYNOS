@@ -15,11 +15,11 @@ import 'package:kynos/shared/providers/coach_context_provider.dart';
 import 'package:kynos/shared/providers/coach_conversation_providers.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 import 'package:kynos/shared/widgets/kynos_dropdown_field.dart';
+import 'package:kynos/shared/widgets/show_shell_modal_sheet.dart';
 
 void showContextInspectorSheet(BuildContext context) {
-  showModalBottomSheet<void>(
+  showShellModalBottomSheet<void>(
     context: context,
-    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
     shape: const RoundedRectangleBorder(

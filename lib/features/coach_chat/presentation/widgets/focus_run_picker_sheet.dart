@@ -8,11 +8,11 @@ import 'package:kynos/domain/entities/workout_session.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/widgets/show_shell_modal_sheet.dart';
 
 void showFocusRunPickerSheet(BuildContext context, WidgetRef ref) {
-  showModalBottomSheet<void>(
+  showShellModalBottomSheet<void>(
     context: context,
-    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
     shape: const RoundedRectangleBorder(

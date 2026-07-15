@@ -15,11 +15,10 @@ class InferenceSheetGroup extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: kynos.card,
-        borderRadius: BorderRadius.circular(tokens.Radius.xl),
-        boxShadow: kynos.cardShadow,
+        borderRadius: BorderRadius.circular(tokens.Radius.hero),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(tokens.Radius.xl),
+        borderRadius: BorderRadius.circular(tokens.Radius.hero),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: children,

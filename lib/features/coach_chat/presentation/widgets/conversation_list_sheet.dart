@@ -8,11 +8,11 @@ import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_conversations_provider.dart';
+import 'package:kynos/shared/widgets/show_shell_modal_sheet.dart';
 
 void showConversationListSheet(BuildContext context) {
-  showModalBottomSheet<void>(
+  showShellModalBottomSheet<void>(
     context: context,
-    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
     shape: const RoundedRectangleBorder(
