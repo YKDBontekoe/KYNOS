@@ -15,6 +15,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/chat_input_bar.da
 import 'package:kynos/features/coach_chat/presentation/widgets/cloud_consent_banner.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/coach_chat_app_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/follow_up_chips.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/inference_mode_bar.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/message_list.dart';
 import 'package:kynos/features/coach_chat/providers/active_coach_conversation_provider.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
@@ -42,6 +43,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   bool _initialized = false;
   String? _pendingMessage;
   bool _showCloudConsent = false;
+  bool _modelBannerDismissed = false;
 
   @override
   void initState() {
@@ -315,30 +317,38 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
             onExport: _exportThread,
             onNewChat: _createNewChat,
           ),
-          setupState.when(
-            loading: () => const _ModelProgressBanner(
-              message: 'Preparing the optional on-device AI in the background…',
-              onRetry: null,
-              onSettings: null,
+          const InferenceModeBar(),
+          if (!_modelBannerDismissed)
+            setupState.when(
+              loading: () => const _ModelProgressBanner(
+                message:
+                    'Preparing the optional on-device AI in the background…',
+                onRetry: null,
+                onSettings: null,
+                onDismiss: null,
+              ),
+              error: (error, _) => _ModelProgressBanner(
+                message: _setupErrorMessage(error),
+                onRetry: () =>
+                    ref.read(modelSetupProvider.notifier).checkAndInstall(),
+                onSettings: () => context.push(Routes.settings),
+                onDismiss: () =>
+                    setState(() => _modelBannerDismissed = true),
+              ),
+              data: (setup) => setup.isReady
+                  ? const SizedBox.shrink()
+                  : _ModelProgressBanner(
+                      message:
+                          setup.progressMessage ??
+                          'The optional on-device conversational model is not ready yet.',
+                      onRetry: () => ref
+                          .read(modelSetupProvider.notifier)
+                          .checkAndInstall(),
+                      onSettings: () => context.push(Routes.settings),
+                      onDismiss: () =>
+                          setState(() => _modelBannerDismissed = true),
+                    ),
             ),
-            error: (error, _) => _ModelProgressBanner(
-              message:
-                  'Daily guidance still works locally. ${_setupErrorMessage(error)}',
-              onRetry: () =>
-                  ref.read(modelSetupProvider.notifier).checkAndInstall(),
-              onSettings: () => context.push(Routes.settings),
-            ),
-            data: (setup) => setup.isReady
-                ? const SizedBox.shrink()
-                : _ModelProgressBanner(
-                    message:
-                        setup.progressMessage ??
-                        'The optional on-device conversational model is not ready yet.',
-                    onRetry: () =>
-                        ref.read(modelSetupProvider.notifier).checkAndInstall(),
-                    onSettings: () => context.push(Routes.settings),
-                  ),
-          ),
           if (_showCloudConsent)
             CloudConsentBanner(
               enabledSourceLabels: enabledLabels,
@@ -380,11 +390,13 @@ class _ModelProgressBanner extends StatelessWidget {
     required this.message,
     required this.onRetry,
     required this.onSettings,
+    required this.onDismiss,
   });
 
   final String message;
   final VoidCallback? onRetry;
   final VoidCallback? onSettings;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -397,11 +409,15 @@ class _ModelProgressBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(Radius.md),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.memory_rounded,
-            size: 18,
-            color: context.kynosTheme.purple,
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.memory_rounded,
+              size: 18,
+              color: context.kynosTheme.purple,
+            ),
           ),
           const Gap(Spacing.sm),
           Expanded(
@@ -418,6 +434,12 @@ class _ModelProgressBanner extends StatelessWidget {
               tooltip: 'Open AI settings',
               onPressed: onSettings,
               icon: const Icon(Icons.settings_outlined, size: 18),
+            ),
+          if (onDismiss != null)
+            IconButton(
+              tooltip: 'Dismiss',
+              onPressed: onDismiss,
+              icon: const Icon(Icons.close_rounded, size: 18),
             ),
         ],
       ),
