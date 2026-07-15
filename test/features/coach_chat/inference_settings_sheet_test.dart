@@ -17,7 +17,7 @@ void main() {
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: MaterialApp(
-          theme: AppTheme.dark(),
+          theme: AppTheme.dark,
           home: Scaffold(
             body: InferenceSettingsSheet(
               onExport: () {},
@@ -53,7 +53,7 @@ void main() {
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: MaterialApp(
-          theme: AppTheme.dark(),
+          theme: AppTheme.dark,
           home: Builder(
             builder: (context) {
               return Scaffold(
