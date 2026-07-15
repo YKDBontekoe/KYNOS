@@ -25,7 +25,7 @@ class KynosSegmentedControl<T> extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: kynos.separator.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(Radius.md),
+        borderRadius: BorderRadius.circular(Radius.full),
       ),
       child: Padding(
         padding: const EdgeInsets.all(Spacing.xs),
@@ -80,7 +80,7 @@ class _Segment extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: Spacing.sm),
           decoration: BoxDecoration(
             color: selected ? kynos.card : Colors.transparent,
-            borderRadius: BorderRadius.circular(Radius.sm),
+            borderRadius: BorderRadius.circular(Radius.full),
             boxShadow: selected ? kynos.cardShadow : null,
           ),
           alignment: Alignment.center,

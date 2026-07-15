@@ -12,10 +12,12 @@ import 'package:kynos/features/coach_chat/providers/coach_conversations_provider
 void showConversationListSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: context.kynosTheme.background,
+    barrierColor: Colors.black.withValues(alpha: 0.45),
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(tokens.Radius.lg)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(tokens.Radius.xl)),
     ),
     builder: (context) => const ConversationListSheet(),
   );
