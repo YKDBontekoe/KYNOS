@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.25.0...v1.26.0) (2026-07-16)
+
+
+### Features
+
+* openai-compatible cloud coach and constrained health micro-agent ([#109](https://github.com/YKDBontekoe/KYNOS/issues/109)) ([660a081](https://github.com/YKDBontekoe/KYNOS/commit/660a0819767d65dccfa063b492f1542438b8ee19))
+
 # [1.25.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.24.0...v1.25.0) (2026-07-16)
 
 
