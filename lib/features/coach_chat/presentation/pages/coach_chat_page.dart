@@ -24,6 +24,7 @@ import 'package:kynos/features/coach_chat/providers/model_setup_provider.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 import 'package:kynos/shared/providers/coach_chat_seed_provider.dart';
 import 'package:kynos/shared/providers/coach_conversation_providers.dart';
+import 'package:kynos/shared/providers/plan_health_sync_provider.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
 
 class CoachChatPage extends ConsumerStatefulWidget {
@@ -51,6 +52,7 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(modelSetupProvider.notifier).checkAndInstall();
+      ref.read(planHealthSyncProvider.notifier).syncAfterHealthRefresh();
       _initializeConversation();
     });
   }
@@ -222,6 +224,8 @@ class _CoachChatPageState extends ConsumerState<CoachChatPage> {
   }
 
   Widget _buildChat() {
+    // Keep plan sync subscribed while coach home is visible.
+    ref.watch(planHealthSyncProvider);
     final chatState = ref.watch(coachChatProvider);
     final conversation = ref.watch(activeCoachConversationProvider).value;
     final globalSettings = ref.watch(settingsProvider);

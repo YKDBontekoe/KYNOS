@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/coach/today_directive.dart';
 import 'package:kynos/domain/entities/coach/training_plan.dart';
@@ -24,6 +26,7 @@ class TodayDirectiveCard extends ConsumerWidget {
     final isBuildCta = directive.source == TodayDirectiveSource.buildPlanCta;
     final isDone = directive.adherence == PlanAdherenceStatus.done;
     final isSkipped = directive.adherence == PlanAdherenceStatus.skipped;
+    final hasPlan = ref.watch(trainingPlanDataProvider).value != null;
 
     return KynosCard(
       elevated: true,
@@ -31,12 +34,23 @@ class TodayDirectiveCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Today’s session',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: kynos.secondaryLabel,
-                  fontWeight: FontWeight.w600,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Today’s session',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: kynos.secondaryLabel,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
+              ),
+              if (hasPlan)
+                TextButton(
+                  onPressed: () => context.push(Routes.plan),
+                  child: const Text('This week'),
+                ),
+            ],
           ),
           const Gap(Spacing.xs),
           Text(

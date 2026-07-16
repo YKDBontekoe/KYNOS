@@ -18,6 +18,7 @@ import 'package:kynos/features/settings/presentation/pages/manual_run_page.dart'
 import 'package:kynos/features/settings/presentation/pages/on_device_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/openrouter_model_picker_page.dart';
 import 'package:kynos/features/settings/presentation/pages/settings_page.dart';
+import 'package:kynos/features/training_plan/presentation/pages/training_plan_page.dart';
 import 'package:kynos/shared/providers/onboarding_provider.dart';
 
 /// All named route paths — single source of truth.
@@ -30,6 +31,7 @@ abstract final class Routes {
   static const journey = '/journey';
   static const training = '/training';
   static const character = '/character';
+  static const plan = '/plan';
   static const runRoute = '/run-route';
   static const runHistory = '/run-history';
   static const coachChat = '/coach';
@@ -109,6 +111,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => KynosPageTransitions.standard(
           key: state.pageKey,
           child: const RunHistoryPage(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.plan,
+        pageBuilder: (context, state) => KynosPageTransitions.standard(
+          key: state.pageKey,
+          child: const TrainingPlanPage(),
         ),
       ),
       GoRoute(

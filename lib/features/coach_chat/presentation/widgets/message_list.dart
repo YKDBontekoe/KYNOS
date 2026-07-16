@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kynos/app/router.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
@@ -13,6 +15,7 @@ import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/pending_coach_action_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/proactive_health_agent_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/today_directive_card.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
@@ -20,7 +23,9 @@ import 'package:kynos/features/coach_chat/providers/proactive_health_agent_provi
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/plan_health_sync_provider.dart';
 import 'package:kynos/shared/providers/training_plan_providers.dart';
+import 'package:kynos/shared/providers/weekly_adaptation_provider.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
@@ -175,12 +180,15 @@ class CoachChatEmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keep plan sync (auto-adherence + post-run debrief) subscribed on coach home.
+    ref.watch(planHealthSyncProvider);
     final brief = ref.watch(dailyHealthBriefProvider);
     final summary = ref.watch(healthSummaryProvider);
     final coachData = ref.watch(healthCoachDataProvider).value;
     final directive = ref.watch(todayDirectiveProvider);
     final accountability = ref.watch(coachAccountabilityProvider);
     final plan = ref.watch(trainingPlanDataProvider).value;
+    final weeklyAdapt = ref.watch(weeklyAdaptationProvider);
     final kynos = context.kynosTheme;
     final now = DateTime.now();
     final todayCheckIn = coachData?.checkIns
@@ -251,6 +259,29 @@ class CoachChatEmptyState extends ConsumerWidget {
             onSuggestionTap(prompt);
           },
         ),
+        if (plan != null) ...[
+          const Gap(Spacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => context.push(Routes.plan),
+              icon: const Icon(Icons.calendar_view_week_rounded, size: 18),
+              label: const Text('View this week'),
+            ),
+          ),
+        ],
+        if (weeklyAdapt != null) ...[
+          const Gap(Spacing.md),
+          PendingCoachActionCard(action: weeklyAdapt),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () =>
+                  ref.read(weeklyAdaptationProvider.notifier).dismiss(),
+              child: const Text('Not now'),
+            ),
+          ),
+        ],
         const Gap(Spacing.md),
         brief.when(
           loading: () => const KynosLoadingLine(
@@ -336,7 +367,7 @@ class CoachChatEmptyState extends ConsumerWidget {
       suggestions.add('Why is today’s session prescribed this way?');
     }
     if (plan != null) {
-      suggestions.add('Show me this week on my plan');
+      suggestions.add('How is my week tracking against the plan?');
     } else if (!suggestions.contains(
       'Build my multi-week training plan based on my goals.',
     )) {

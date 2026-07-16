@@ -28,44 +28,44 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 
 ## Feature Index
 
-### dashboard (Today tab)
-- **Entry:** [`lib/features/dashboard/presentation/pages/dashboard_page.dart`](lib/features/dashboard/presentation/pages/dashboard_page.dart)
-- **Providers:** [`lib/features/dashboard/providers/`](lib/features/dashboard/providers/)
-- **Widgets:** [`lib/features/dashboard/presentation/widgets/`](lib/features/dashboard/presentation/widgets/)
-- **Routes:** `/` (shell tab 0), `/run-history`, `/run-route`
+### coach_chat (the AI coach — home)
+- **Entry:** [`lib/features/coach_chat/presentation/pages/coach_chat_page.dart`](lib/features/coach_chat/presentation/pages/coach_chat_page.dart)
+- **Providers:** [`lib/features/coach_chat/providers/`](lib/features/coach_chat/providers/) — `coach_chat_provider.dart` runs the agentic ReAct tool-calling loop
+- **Routes:** `/` (shell home), `/coach` redirects to `/`
+- **AI DI:** [`lib/shared/providers/ai_repository_providers.dart`](lib/shared/providers/ai_repository_providers.dart)
+- **Agentic tools:** [`lib/domain/entities/coach/coach_tool_definition.dart`](lib/domain/entities/coach/coach_tool_definition.dart) (catalog), [`lib/domain/usecases/coach/execute_coach_tool_usecase.dart`](lib/domain/usecases/coach/execute_coach_tool_usecase.dart) (execution), [`lib/domain/utils/coach_tool_call_parser.dart`](lib/domain/utils/coach_tool_call_parser.dart) (parsing)
+- **Plan loop:** today directive + weekly adaptation on empty state; post-run debrief via [`plan_health_sync_provider.dart`](lib/shared/providers/plan_health_sync_provider.dart)
+
+### training_plan (Living Training Plan OS)
+- **Entry:** [`lib/features/training_plan/presentation/pages/training_plan_page.dart`](lib/features/training_plan/presentation/pages/training_plan_page.dart)
+- **Widgets:** [`lib/features/training_plan/presentation/widgets/`](lib/features/training_plan/presentation/widgets/) — week calendar + day cells
+- **Routes:** `/plan`
+- **Providers:** [`lib/shared/providers/training_plan_providers.dart`](lib/shared/providers/training_plan_providers.dart), [`weekly_adaptation_provider.dart`](lib/shared/providers/weekly_adaptation_provider.dart), [`plan_health_sync_provider.dart`](lib/shared/providers/plan_health_sync_provider.dart)
+- **Domain:** [`match_workout_to_plan_day_usecase.dart`](lib/domain/usecases/coach/match_workout_to_plan_day_usecase.dart), [`build_weekly_adaptation_action_usecase.dart`](lib/domain/usecases/coach/build_weekly_adaptation_action_usecase.dart), [`training_plan_week.dart`](lib/domain/utils/training_plan_week.dart)
+
+### dashboard (run history / route detail)
+- **Entry:** [`lib/features/dashboard/presentation/pages/run_history_page.dart`](lib/features/dashboard/presentation/pages/run_history_page.dart)
+- **Providers:** [`lib/features/dashboard/providers/`](lib/features/dashboard/providers/) — insights + post-run debrief feeding coach context
+- **Routes:** `/run-history`, `/run-route`
 - **Shared health data:** [`lib/shared/providers/health_providers.dart`](lib/shared/providers/health_providers.dart)
-
-### training (Training tab)
-- **Entry:** [`lib/features/training/presentation/pages/training_page.dart`](lib/features/training/presentation/pages/training_page.dart)
-- **Providers:** [`lib/features/training/providers/training_insights_provider.dart`](lib/features/training/providers/training_insights_provider.dart)
-- **Widgets:** [`lib/features/training/presentation/widgets/`](lib/features/training/presentation/widgets/)
-- **Routes:** shell tab 1
-
-### character (Character tab)
-- **Entry:** [`lib/features/character/presentation/pages/character_page.dart`](lib/features/character/presentation/pages/character_page.dart)
-- **Providers:** [`lib/features/character/providers/`](lib/features/character/providers/)
-- **Widgets:** [`lib/features/character/presentation/widgets/`](lib/features/character/presentation/widgets/)
-- **Routes:** shell tab 2
-- **Gamification DI:** [`lib/shared/providers/gamification_providers.dart`](lib/shared/providers/gamification_providers.dart)
 
 ### onboarding
 - **Entry:** [`lib/features/onboarding/presentation/onboarding_page.dart`](lib/features/onboarding/presentation/onboarding_page.dart)
 - **Route:** `/onboarding`
 
-### coach_chat (the AI coach — core surface)
-- **Entry:** [`lib/features/coach_chat/presentation/pages/coach_chat_page.dart`](lib/features/coach_chat/presentation/pages/coach_chat_page.dart)
-- **Providers:** [`lib/features/coach_chat/providers/`](lib/features/coach_chat/providers/) — `coach_chat_provider.dart` runs the agentic ReAct tool-calling loop
-- **Routes:** `/coach` (modal push from the FAB, dashboard hero card, and insight cards)
-- **AI DI:** [`lib/shared/providers/ai_repository_providers.dart`](lib/shared/providers/ai_repository_providers.dart)
-- **Agentic tools:** [`lib/domain/entities/coach/coach_tool_definition.dart`](lib/domain/entities/coach/coach_tool_definition.dart) (catalog), [`lib/domain/usecases/coach/execute_coach_tool_usecase.dart`](lib/domain/usecases/coach/execute_coach_tool_usecase.dart) (execution), [`lib/domain/utils/coach_tool_call_parser.dart`](lib/domain/utils/coach_tool_call_parser.dart) (parsing)
-
-### nexus_lab (orphan — embedded in Training tab, not routed)
-- **Entry:** [`lib/features/nexus_lab/presentation/nexus_lab_page.dart`](lib/features/nexus_lab/presentation/nexus_lab_page.dart)
-- **State:** [`lib/shared/providers/nexus_lab_provider.dart`](lib/shared/providers/nexus_lab_provider.dart)
-
-### settings (orphan — not routed)
+### settings
 - **Entry:** [`lib/features/settings/presentation/pages/settings_page.dart`](lib/features/settings/presentation/pages/settings_page.dart)
 - **Providers:** [`lib/features/settings/providers/settings_provider.dart`](lib/features/settings/providers/settings_provider.dart)
+- **Routes:** `/settings` (+ nested model pickers, import, manual run, legal)
+
+### nexus_lab
+- **Entry:** [`lib/features/nexus_lab/presentation/nexus_lab_page.dart`](lib/features/nexus_lab/presentation/nexus_lab_page.dart)
+- **State:** [`lib/shared/providers/nexus_lab_provider.dart`](lib/shared/providers/nexus_lab_provider.dart)
+- **Route:** `/nexus-lab` (from Settings)
+
+### legal
+- **Entry:** [`lib/features/legal/presentation/pages/`](lib/features/legal/presentation/pages/)
+- **Routes:** `/settings/privacy`, `/settings/terms`
 
 ## Cross-Cutting Concerns
 
@@ -79,6 +79,8 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | Health providers | [`lib/shared/providers/health_providers.dart`](lib/shared/providers/health_providers.dart) |
 | AI repositories | [`lib/shared/providers/ai_repository_providers.dart`](lib/shared/providers/ai_repository_providers.dart) |
 | Coach agent tools | [`lib/domain/entities/coach/coach_tool_definition.dart`](lib/domain/entities/coach/coach_tool_definition.dart) |
+| Training plan week | [`lib/domain/utils/training_plan_week.dart`](lib/domain/utils/training_plan_week.dart) |
+| Plan health sync | [`lib/shared/providers/plan_health_sync_provider.dart`](lib/shared/providers/plan_health_sync_provider.dart) |
 | Router constants | [`lib/app/router.dart`](lib/app/router.dart) → `Routes` |
 
 ## Dependency Rules (agents)
@@ -97,7 +99,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/app/app.dart` | 27 | `KynosApp` |
 | `lib/app/not_found_page.dart` | 46 | `NotFoundPage` |
 | `lib/app/page_transitions.dart` | 100 | `Route transition presets for [GoRouter] [pageBuilder] callbacks.` |
-| `lib/app/router.dart` | 223 | `_RouterRefreshNotifier` |
+| `lib/app/router.dart` | 232 | `_RouterRefreshNotifier` |
 | `lib/app/shell_navigation_scope.dart` | 33 | `ShellNavigationScope, CoachTab` |
 | `lib/app/shell_page.dart` | 92 | `ShellPage` |
 | `lib/core/constants/app_constants.dart` | 54 | `Compile-time constants for KYNOS.` |
@@ -163,6 +165,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/usecases/coach/build_morning_fact_pack_usecase.dart` | 110 | `MorningFactPack, BuildMorningFactPackUseCase` |
 | `lib/domain/usecases/coach/build_proactive_health_agent_run_usecase.dart` | 147 | `ProactiveHealthAgentRun, BuildProactiveHealthAgentRunUseCase` |
 | `lib/domain/usecases/coach/build_today_directive_usecase.dart` | 157 | `BuildTodayDirectiveUseCase` |
+| `lib/domain/usecases/coach/build_weekly_adaptation_action_usecase.dart` | 110 | `BuildWeeklyAdaptationActionUseCase` |
 | `lib/domain/usecases/coach/coach_tool_context_queries.dart` | 119 | `CoachToolContextQueries` |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | `CoachToolHealthQueries` |
 | `lib/domain/usecases/coach/coach_tool_plan_queries.dart` | 214 | `CoachToolPlanQueries` |
@@ -176,6 +179,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/usecases/coach/get_coach_conversation_usecase.dart` | 20 | `GetCoachConversationUseCase` |
 | `lib/domain/usecases/coach/list_coach_conversations_usecase.dart` | 44 | `ListCoachConversationsUseCase` |
 | `lib/domain/usecases/coach/log_plan_adherence_usecase.dart` | 28 | `LogPlanAdherenceUseCase` |
+| `lib/domain/usecases/coach/match_workout_to_plan_day_usecase.dart` | 111 | `PlanWorkoutMatch, MatchWorkoutToPlanDayUseCase` |
 | `lib/domain/usecases/coach/migrate_legacy_coach_chat_usecase.dart` | 26 | `MigrateLegacyCoachChatUseCase` |
 | `lib/domain/usecases/coach/propose_training_plan_usecase.dart` | 130 | `ProposeTrainingPlanUseCase` |
 | `lib/domain/usecases/coach/send_coach_message_usecase.dart` | 74 | `SendCoachMessageUseCase` |
@@ -216,8 +220,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/domain/utils/run_streak.dart` | 65 | `Dart module` |
 | `lib/domain/utils/running_distance.dart` | 12 | `Running-only distance in meters for a daily summary.` |
 | `lib/domain/utils/seeded_roll.dart` | 17 | `Deterministic 32-bit roll safe for VM and JavaScript (no >53-bit intermediates).` |
+| `lib/domain/utils/training_plan_week.dart` | 54 | `Monday-start calendar day for [date] (time stripped).` |
 | `lib/domain/utils/weekly_momentum.dart` | 87 | `WeeklyMomentum` |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 494 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner, …` |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 498 | `CoachChatPage, _CoachChatPageState, _ModelProgressBanner, …` |
 | `lib/features/coach_chat/presentation/widgets/agent_tool_step_list.dart` | 89 | `AgentToolStepList, _AgentToolStepRow` |
 | `lib/features/coach_chat/presentation/widgets/animated_message_entrance.dart` | 83 | `AnimatedMessageEntrance, _AnimatedMessageEntranceState` |
 | `lib/features/coach_chat/presentation/widgets/assistant_bubble.dart` | 293 | `AssistantBubble, _PillActionButton` |
@@ -236,12 +241,12 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/inference_mode_bar.dart` | 112 | `InferenceModeBar` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_rows.dart` | 173 | `InferenceSheetGroup, InferenceSheetDivider, InferenceModelRow, …` |
 | `lib/features/coach_chat/presentation/widgets/inference_settings_sheet.dart` | 248 | `InferenceSettingsSheet` |
-| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 398 | `MessageList, _MessageListState, MessageBubble, …` |
+| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 429 | `MessageList, _MessageListState, MessageBubble, …` |
 | `lib/features/coach_chat/presentation/widgets/model_setup_screen.dart` | 116 | `ModelSetupScreen` |
-| `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 77 | `PendingCoachActionCard` |
+| `lib/features/coach_chat/presentation/widgets/pending_coach_action_card.dart` | 105 | `PendingCoachActionCard` |
 | `lib/features/coach_chat/presentation/widgets/proactive_health_agent_card.dart` | 74 | `ProactiveHealthAgentCard` |
 | `lib/features/coach_chat/presentation/widgets/streaming_text_pulse.dart` | 67 | `StreamingTextPulse, _StreamingTextPulseState` |
-| `lib/features/coach_chat/presentation/widgets/today_directive_card.dart` | 113 | `TodayDirectiveCard` |
+| `lib/features/coach_chat/presentation/widgets/today_directive_card.dart` | 127 | `TodayDirectiveCard` |
 | `lib/features/coach_chat/presentation/widgets/typing_indicator.dart` | 66 | `TypingIndicator, _TypingIndicatorState` |
 | `lib/features/coach_chat/providers/active_coach_conversation_provider.dart` | 23 | `ActiveCoachConversation` |
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 777 | `CoachChat, LastAiInferenceBackend` |
@@ -290,6 +295,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/settings/providers/manual_run_provider.dart` | 104 | `ManualRunState, ManualRun` |
 | `lib/features/settings/providers/openrouter_models_provider.dart` | 121 | `OpenRouterCatalogState, OpenRouterCatalog` |
 | `lib/features/settings/providers/settings_provider.dart` | 1 | `Dart module` |
+| `lib/features/training_plan/presentation/pages/training_plan_page.dart` | 236 | `TrainingPlanPage, _PlanLoadingScaffold` |
+| `lib/features/training_plan/presentation/widgets/plan_week_calendar.dart` | 84 | `PlanWeekCalendar` |
+| `lib/features/training_plan/presentation/widgets/plan_week_day_cell.dart` | 107 | `PlanWeekDayCell` |
 | `lib/infrastructure/ai/ai_infrastructure_providers.dart` | 8 | `Provides the [AiModelRepository] singleton.` |
 | `lib/infrastructure/ai/biomechanics/biomechanics_coefficients_protobuf.dart` | 169 | `BiomechanicsCoefficientsProtobuf` |
 | `lib/infrastructure/ai/biomechanics/on_device_biomechanics_repository.dart` | 238 | `OnDeviceBiomechanicsRepository` |
@@ -368,13 +376,15 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/providers/nexus_lab_provider.dart` | 74 | `NexusLabState, NexusLabNotifier` |
 | `lib/shared/providers/onboarding_provider.dart` | 27 | `OnboardingCompleted` |
 | `lib/shared/providers/openrouter_api_key_provider.dart` | 28 | `OpenRouterApiKeyManager` |
+| `lib/shared/providers/plan_health_sync_provider.dart` | 93 | `PlanHealthSync` |
 | `lib/shared/providers/post_run_debrief_provider.dart` | 1 | `Dart module` |
 | `lib/shared/providers/settings_provider.dart` | 208 | `SettingsState, Settings` |
 | `lib/shared/providers/shared_preferences_provider.dart` | 12 | `Synchronously accessible [SharedPreferences] — override at app startup.` |
 | `lib/shared/providers/shell_chrome_provider.dart` | 32 | `ShellChrome` |
 | `lib/shared/providers/today_insights_provider.dart` | 1 | `Dart module` |
 | `lib/shared/providers/training_insights_provider.dart` | 56 | `TrainingInsightsState` |
-| `lib/shared/providers/training_plan_providers.dart` | 184 | `TrainingPlanData, CoachAccountabilityState, CoachAccountability` |
+| `lib/shared/providers/training_plan_providers.dart` | 194 | `TrainingPlanData, CoachAccountabilityState, CoachAccountability` |
+| `lib/shared/providers/weekly_adaptation_provider.dart` | 62 | `WeeklyAdaptation` |
 | `lib/shared/providers/workout_session_lookup_provider.dart` | 16 | `Resolves a [WorkoutSession] by id for deep-linked run routes.` |
 | `lib/shared/utils/date_label.dart` | 20 | `Formats today's date as "Mon, Jan 5".` |
 | `lib/shared/utils/health_permission_feedback.dart` | 14 | `User-facing copy for health permission flows — never expose raw exceptions.` |
@@ -387,7 +397,7 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/shared/utils/picked_file_bytes_web.dart` | 9 | `Dart module` |
 | `lib/shared/utils/run_date_label.dart` | 18 | `Formats a workout date for run cards and Hero transitions.` |
 | `lib/shared/utils/url_opener.dart` | 20 | `Opens an external URL in the platform browser.` |
-| `lib/shared/widgets/ai_lifecycle_guard.dart` | 72 | `AiLifecycleGuard, _AiLifecycleGuardState` |
+| `lib/shared/widgets/ai_lifecycle_guard.dart` | 75 | `AiLifecycleGuard, _AiLifecycleGuardState` |
 | `lib/shared/widgets/animated_async_content.dart` | 84 | `AnimatedAsyncContent, FadeInOnAppear, _FadeInOnAppearState` |
 | `lib/shared/widgets/animated_progress_bar.dart` | 43 | `AnimatedProgressBar` |
 | `lib/shared/widgets/charts/chart_placeholder.dart` | 15 | `ChartPlaceholder` |
@@ -434,9 +444,9 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/providers/coach_chat_provider.dart` | 777 | Split if > 250 lines |
 | `lib/shared/widgets/kynos_floating_nav.dart` | 593 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_health_queries.dart` | 521 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 494 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/pages/coach_chat_page.dart` | 498 | Split if > 250 lines |
+| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 429 | Split if > 250 lines |
 | `lib/features/coach_chat/presentation/widgets/health_visual_artifact_card.dart` | 404 | Split if > 250 lines |
-| `lib/features/coach_chat/presentation/widgets/message_list.dart` | 398 | Split if > 250 lines |
 | `lib/infrastructure/ai/isolate_ai_coach_repository.dart` | 390 | Split if > 250 lines |
 | `lib/domain/usecases/coach/coach_tool_wellbeing_queries.dart` | 387 | Split if > 250 lines |
 | `lib/infrastructure/coach/coach_conversation_codec.dart` | 369 | Split if > 250 lines |
@@ -451,6 +461,6 @@ There is **no `data/` layer yet**. Repository implementations live in `infrastru
 | `lib/features/coach_chat/presentation/widgets/conversation_list_sheet.dart` | 257 | Split if > 250 lines |
 | `lib/infrastructure/health/health_kit_repository.dart` | 251 | Split if > 250 lines |
 
-_Generated by `dart run tool/generate_codemap.dart` — 331 hand-written Dart files._
+_Generated by `dart run tool/generate_codemap.dart` — 339 hand-written Dart files._
 
 <!-- CODEMAP_AUTO_END -->
