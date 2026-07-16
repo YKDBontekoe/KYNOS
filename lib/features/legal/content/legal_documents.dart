@@ -39,7 +39,8 @@ abstract final class LegalDocuments {
       LegalSection(
         title: 'Optional Cloud Features',
         body:
-            'If you choose to enable cloud coaching through OpenRouter, only the '
+            'If you choose to enable cloud coaching through an OpenAI-compatible '
+            'endpoint (including OpenRouter), only the '
             'prompt text required to answer your question is sent to the provider '
             'you select. You control whether this feature is enabled and which API '
             'key is used. KYNOS does not sell your health data.',

@@ -7,7 +7,7 @@ abstract final class CoachBackendModeMapper {
     return switch (mode) {
       CoachBackendMode.auto => AiInferenceBackend.onDevice,
       CoachBackendMode.onDevice => AiInferenceBackend.onDevice,
-      CoachBackendMode.cloud => AiInferenceBackend.openRouter,
+      CoachBackendMode.cloud => AiInferenceBackend.cloud,
     };
   }
 }

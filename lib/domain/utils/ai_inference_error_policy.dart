@@ -54,7 +54,7 @@ abstract final class AiInferenceErrorPolicy {
     final message = _messageFor(error);
     if (_isCloudError(message)) {
       if (message.contains('401') || message.toLowerCase().contains('unauthorized')) {
-        return 'Your OpenRouter API key was rejected. Check Settings → AI & Cloud, then tap Retry.';
+        return 'Your cloud API key was rejected. Check Settings → AI & Cloud, then tap Retry.';
       }
       if (error is TimeoutException ||
           message.toLowerCase().contains('timed out') ||
@@ -73,7 +73,7 @@ abstract final class AiInferenceErrorPolicy {
     if (isResourceLimitError(error)) {
       return canSwitchToCloud
           ? 'The on-device model used too many resources on this device. '
-              'Tap Retry to try a lighter on-device mode, or use Try cloud coach if you have OpenRouter configured.'
+              'Tap Retry to try a lighter on-device mode, or use Try cloud coach if you have a cloud endpoint configured.'
           : 'The on-device model used too many resources on this device. '
               'Close other apps, wait a moment, then tap Retry to try a lighter on-device mode.';
     }
@@ -115,6 +115,7 @@ abstract final class AiInferenceErrorPolicy {
   static bool _isCloudError(String message) {
     final lower = message.toLowerCase();
     return lower.contains('openrouter') ||
+        lower.contains('cloud llm') ||
         lower.contains('dioexception') ||
         lower.contains('cloud coach');
   }

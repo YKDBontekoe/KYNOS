@@ -8,6 +8,7 @@ import 'package:kynos/core/theme/kynos_theme_extension.dart';
 import 'package:kynos/core/theme/spacing.dart' as tokens;
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/domain/entities/cloud_llm_endpoint.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_capability_ui.dart';
 import 'package:kynos/features/settings/presentation/on_device_model_selection_result.dart';
 import 'package:kynos/features/settings/presentation/widgets/coach_personalization_card.dart';
@@ -44,13 +45,18 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _apiKeyController = TextEditingController();
+  final _baseUrlController = TextEditingController();
+  final _cloudModelController = TextEditingController();
   final _hfTokenController = TextEditingController();
   bool _obscureKey = true;
   bool _obscureHfToken = true;
+  bool _seededCloudFields = false;
 
   @override
   void dispose() {
     _apiKeyController.dispose();
+    _baseUrlController.dispose();
+    _cloudModelController.dispose();
     _hfTokenController.dispose();
     super.dispose();
   }
@@ -64,12 +70,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final importedCountAsync = ref.watch(importedWorkoutCountProvider);
     final healthCoachData = ref.watch(healthCoachDataProvider);
 
+    if (!_seededCloudFields) {
+      _seededCloudFields = true;
+      _baseUrlController.text = settings.cloudBaseUrl;
+      _cloudModelController.text = settings.selectedCloudModelId ?? '';
+    }
+
     ref.listen(openRouterApiKeyManagerProvider, (_, next) {
       next.whenData((key) {
         if (key != null && _apiKeyController.text != key) {
           _apiKeyController.text = key;
         }
       });
+    });
+
+    ref.listen(settingsProvider, (previous, next) {
+      if (previous?.cloudBaseUrl != next.cloudBaseUrl &&
+          _baseUrlController.text != next.cloudBaseUrl) {
+        _baseUrlController.text = next.cloudBaseUrl;
+      }
+      if (previous?.selectedCloudModelId != next.selectedCloudModelId) {
+        final id = next.selectedCloudModelId ?? '';
+        if (_cloudModelController.text != id) {
+          _cloudModelController.text = id;
+        }
+      }
     });
 
     ref.listen(huggingFaceTokenManagerProvider, (_, next) {
@@ -360,7 +385,59 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     bottom: tokens.Spacing.sm,
                   ),
                   child: Text(
-                    'OpenRouter API key',
+                    'Cloud LLM endpoint',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                DropdownButtonFormField<String>(
+                  initialValue: CloudLlmEndpoint.presets.any(
+                        (p) => p.baseUrl == settings.cloudBaseUrl,
+                      )
+                      ? settings.cloudBaseUrl
+                      : 'custom',
+                  decoration: const InputDecoration(labelText: 'Preset'),
+                  items: [
+                    for (final preset in CloudLlmEndpoint.presets)
+                      DropdownMenuItem(
+                        value: preset.baseUrl,
+                        child: Text(preset.label),
+                      ),
+                    const DropdownMenuItem(
+                      value: 'custom',
+                      child: Text('Custom base URL'),
+                    ),
+                  ],
+                  onChanged: (value) async {
+                    if (value == null || value == 'custom') return;
+                    await settingsNotifier.updateCloudBaseUrl(value);
+                    _baseUrlController.text = value;
+                  },
+                ),
+                const Gap(tokens.Spacing.sm),
+                TextField(
+                  controller: _baseUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Base URL',
+                    hintText: 'https://api.openai.com/v1',
+                  ),
+                  onSubmitted: (v) => _saveBaseUrl(v),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _saveBaseUrl(_baseUrlController.text),
+                    child: const Text('Save base URL'),
+                  ),
+                ),
+                Divider(color: kynos.separator, height: 1),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: tokens.Spacing.sm,
+                    bottom: tokens.Spacing.sm,
+                  ),
+                  child: Text(
+                    'Cloud API key',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -368,7 +445,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   controller: _apiKeyController,
                   obscureText: _obscureKey,
                   decoration: InputDecoration(
-                    hintText: 'sk-or-...',
+                    hintText: 'sk-...',
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureKey
@@ -391,7 +468,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 Divider(color: kynos.separator, height: 1),
                 _SwitchTile(
-                  title: 'Allow explicit OpenRouter fallback',
+                  title: 'Allow explicit cloud coaching',
                   icon: Icons.cloud_outlined,
                   value: settings.cloudTasksEnabled,
                   onChanged: settingsNotifier.updateCloudTasksEnabled,
@@ -418,37 +495,70 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   },
                 ),
                 Divider(color: kynos.separator, height: 1),
-                ListTile(
-                  leading: Icon(Icons.hub_outlined, color: kynos.stand),
-                  title: Text(
-                    'Cloud model',
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: tokens.Spacing.sm,
+                    bottom: tokens.Spacing.sm,
+                  ),
+                  child: Text(
+                    'Cloud model ID',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  subtitle: Text(
-                    settings.hasSelectedCloudModel
-                        ? settings.selectedCloudModelName!
-                        : 'Choose a model',
-                  ),
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: kynos.tertiaryLabel,
-                  ),
-                  onTap: () async {
-                    final selected = await context.push<String>(
-                      Routes.openRouterModels,
-                    );
-                    if (selected != null && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Selected $selected')),
-                      );
-                    }
-                  },
-                  contentPadding: EdgeInsets.zero,
                 ),
+                TextField(
+                  controller: _cloudModelController,
+                  decoration: InputDecoration(
+                    hintText: settings.isOpenRouterEndpoint
+                        ? 'openai/gpt-4o-mini'
+                        : 'gpt-4o-mini',
+                  ),
+                  onSubmitted: (v) => _saveCloudModelId(v),
+                ),
+                const Gap(tokens.Spacing.sm),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () =>
+                        _saveCloudModelId(_cloudModelController.text),
+                    child: const Text('Save model'),
+                  ),
+                ),
+                if (settings.isOpenRouterEndpoint) ...[
+                  Divider(color: kynos.separator, height: 1),
+                  ListTile(
+                    leading: Icon(Icons.hub_outlined, color: kynos.stand),
+                    title: Text(
+                      'Browse OpenRouter models',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    subtitle: Text(
+                      settings.hasSelectedCloudModel
+                          ? settings.selectedCloudModelName!
+                          : 'Optional catalog for OpenRouter',
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: kynos.tertiaryLabel,
+                    ),
+                    onTap: () async {
+                      final selected = await context.push<String>(
+                        Routes.openRouterModels,
+                      );
+                      if (selected != null && context.mounted) {
+                        _cloudModelController.text = selected;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Selected $selected')),
+                        );
+                      }
+                    },
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ],
                 const Gap(tokens.Spacing.xs),
                 Text(
-                  'KYNOS never switches to OpenRouter automatically. When you '
-                  'explicitly choose cloud coaching, only the selected disclosure '
+                  'KYNOS never switches to cloud automatically. When you '
+                  'explicitly choose cloud coaching, prompts go to your '
+                  'OpenAI-compatible endpoint. Only the selected disclosure '
                   'level is sent. Raw charts, notes, GPS, and local memory remain on-device.',
                   style: Theme.of(
                     context,
@@ -616,7 +726,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('OpenRouter key saved')));
+      ).showSnackBar(const SnackBar(content: Text('Cloud API key saved')));
+    }
+  }
+
+  Future<void> _saveBaseUrl(String baseUrl) async {
+    final trimmed = baseUrl.trim();
+    if (trimmed.isEmpty) return;
+    await ref.read(settingsProvider.notifier).updateCloudBaseUrl(trimmed);
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Cloud base URL saved')));
+    }
+  }
+
+  Future<void> _saveCloudModelId(String modelId) async {
+    final trimmed = modelId.trim();
+    if (trimmed.isEmpty) {
+      await ref.read(settingsProvider.notifier).clearSelectedCloudModel();
+    } else {
+      await ref.read(settingsProvider.notifier).updateSelectedCloudModel(
+            id: trimmed,
+            name: trimmed,
+          );
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Cloud model saved')));
     }
   }
 }

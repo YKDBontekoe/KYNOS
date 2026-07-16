@@ -38,7 +38,7 @@ class CloudConsentBanner extends StatelessWidget {
             Text(
               'Data level: $cloudDataLevelLabel. '
               'Sources: $sourceSummary. '
-              'Health context is sent to your OpenRouter model.',
+              'Health context is sent to your cloud model.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const Gap(Spacing.sm),

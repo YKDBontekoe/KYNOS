@@ -1,6 +1,9 @@
 /// Where the last coach inference ran.
 enum AiInferenceBackend {
   onDevice,
-  openRouter,
+
+  /// Any OpenAI-compatible cloud endpoint (OpenRouter, OpenAI, Groq, etc.).
+  cloud,
+
   rulesOnly,
 }

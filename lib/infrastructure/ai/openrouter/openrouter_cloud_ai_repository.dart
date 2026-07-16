@@ -1,12 +1,13 @@
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
-import 'package:kynos/infrastructure/ai/openrouter/openrouter_api_client.dart';
+import 'package:kynos/infrastructure/ai/openai_compatible/openai_compatible_cloud_ai_repository.dart';
 
+/// @Deprecated — use [OpenAiCompatibleCloudAiRepository].
 class OpenRouterCloudAiRepository implements CloudAiRepository {
-  OpenRouterCloudAiRepository({OpenRouterApiClient? client})
-      : _client = client ?? OpenRouterApiClient();
+  OpenRouterCloudAiRepository({OpenAiCompatibleCloudAiRepository? delegate})
+      : _delegate = delegate ?? OpenAiCompatibleCloudAiRepository();
 
-  final OpenRouterApiClient _client;
+  final OpenAiCompatibleCloudAiRepository _delegate;
 
   @override
   Stream<String> streamCompletion({
@@ -14,12 +15,14 @@ class OpenRouterCloudAiRepository implements CloudAiRepository {
     required String modelId,
     required String systemPrompt,
     required String userPrompt,
+    String? baseUrl,
   }) {
-    return _client.streamChatCompletion(
+    return _delegate.streamCompletion(
       apiKey: apiKey,
       modelId: modelId,
       systemPrompt: systemPrompt,
       userPrompt: userPrompt,
+      baseUrl: baseUrl,
     );
   }
 
@@ -30,24 +33,15 @@ class OpenRouterCloudAiRepository implements CloudAiRepository {
     required String systemPrompt,
     required List<ChatMessage> conversationHistory,
     required String userMessage,
+    String? baseUrl,
   }) {
-    final messages = conversationHistory
-        .where((m) => m.content.trim().isNotEmpty && !m.isStreaming)
-        .map(
-          (m) => {
-            'role': m.role == MessageRole.user ? 'user' : 'assistant',
-            'content': m.content.trim(),
-          },
-        )
-        .toList();
-
-    messages.add({'role': 'user', 'content': userMessage});
-
-    return _client.streamChatMessages(
+    return _delegate.streamChat(
       apiKey: apiKey,
       modelId: modelId,
       systemPrompt: systemPrompt,
-      messages: messages,
+      conversationHistory: conversationHistory,
+      userMessage: userMessage,
+      baseUrl: baseUrl,
     );
   }
 }

@@ -49,7 +49,7 @@ class AssistantBubble extends StatelessWidget {
   String? get _errorLabel {
     if (!hasError) return null;
     return switch (attemptedBackend) {
-      AiInferenceBackend.openRouter => 'Cloud error',
+      AiInferenceBackend.cloud => 'Cloud error',
       AiInferenceBackend.onDevice ||
       AiInferenceBackend.rulesOnly => 'On-device error',
       null => 'Coach error',
@@ -225,7 +225,7 @@ class AssistantBubble extends StatelessWidget {
                             _PillActionButton(
                               icon:
                                   alternateBackend ==
-                                      AiInferenceBackend.openRouter
+                                      AiInferenceBackend.cloud
                                   ? Icons.cloud_outlined
                                   : Icons.memory_rounded,
                               label: alternateBackendLabel!,

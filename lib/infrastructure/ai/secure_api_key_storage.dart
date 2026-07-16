@@ -8,22 +8,35 @@ class SecureApiKeyStorage {
               aOptions: AndroidOptions(encryptedSharedPreferences: true),
             );
 
-  static const _openRouterKey = 'openrouter_api_key';
+  /// Legacy key name — kept so existing OpenRouter installs keep working.
+  static const _cloudApiKey = 'openrouter_api_key';
   static const _huggingFaceTokenKey = 'huggingface_token';
 
   final FlutterSecureStorage _storage;
 
-  Future<String?> readOpenRouterKey() => _storage.read(key: _openRouterKey);
+  Future<String?> readCloudApiKey() => _storage.read(key: _cloudApiKey);
 
-  Future<void> writeOpenRouterKey(String key) =>
-      _storage.write(key: _openRouterKey, value: key);
+  Future<void> writeCloudApiKey(String key) =>
+      _storage.write(key: _cloudApiKey, value: key);
 
-  Future<void> deleteOpenRouterKey() => _storage.delete(key: _openRouterKey);
+  Future<void> deleteCloudApiKey() => _storage.delete(key: _cloudApiKey);
 
-  Future<bool> hasOpenRouterKey() async {
-    final key = await readOpenRouterKey();
+  Future<bool> hasCloudApiKey() async {
+    final key = await readCloudApiKey();
     return key != null && key.isNotEmpty;
   }
+
+  /// @Deprecated — use [readCloudApiKey].
+  Future<String?> readOpenRouterKey() => readCloudApiKey();
+
+  /// @Deprecated — use [writeCloudApiKey].
+  Future<void> writeOpenRouterKey(String key) => writeCloudApiKey(key);
+
+  /// @Deprecated — use [deleteCloudApiKey].
+  Future<void> deleteOpenRouterKey() => deleteCloudApiKey();
+
+  /// @Deprecated — use [hasCloudApiKey].
+  Future<bool> hasOpenRouterKey() => hasCloudApiKey();
 
   Future<String?> readHuggingFaceToken() =>
       _storage.read(key: _huggingFaceTokenKey);

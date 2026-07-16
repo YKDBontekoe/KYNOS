@@ -78,11 +78,11 @@ void main() {
       expect(message, contains('Try cloud coach'));
     });
 
-    test('maps openrouter auth failures to settings hint', () {
+    test('maps cloud auth failures to settings hint', () {
       final message = AiInferenceErrorPolicy.userFriendlyMessage(
-        StateError('OpenRouter request failed (401 Unauthorized)'),
+        StateError('Cloud LLM request failed (401 Unauthorized)'),
       );
-      expect(message, contains('OpenRouter API key'));
+      expect(message, contains('cloud API key'));
     });
 
     test('maps empty coach responses to retry hint', () {
