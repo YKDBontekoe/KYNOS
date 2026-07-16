@@ -7,6 +7,7 @@ import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/coach/today_directive.dart';
 import 'package:kynos/domain/entities/coach/training_plan.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/usecases/coach/build_proactive_health_agent_run_usecase.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
@@ -16,7 +17,6 @@ import 'package:kynos/features/coach_chat/presentation/widgets/proactive_health_
 import 'package:kynos/features/coach_chat/presentation/widgets/today_directive_card.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/features/coach_chat/providers/proactive_health_agent_provider.dart';
-import 'package:kynos/domain/usecases/coach/build_proactive_health_agent_run_usecase.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';

@@ -139,9 +139,9 @@ class BuildProactiveHealthAgentRunUseCase {
     final pack = const BuildMorningFactPackUseCase().call(context: context);
     return [
       morningPulse(context: context, factPack: pack),
-      if (riskRadar(context: context, factPack: pack) case final risk?) risk,
-      if (postRunDebrief(context: context) case final debrief?) debrief,
-      if (experimentLoop(context: context) case final experiment?) experiment,
+      ?riskRadar(context: context, factPack: pack),
+      ?postRunDebrief(context: context),
+      ?experimentLoop(context: context),
     ];
   }
 }
