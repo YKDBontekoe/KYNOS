@@ -33,7 +33,7 @@ final class CoachChatProvider
   CoachChat create() => CoachChat();
 }
 
-String _$coachChatHash() => r'02e38b01315473c696cdcf7e0cef4e78bff0e2a9';
+String _$coachChatHash() => r'02efb17b7255463c8dcf2d22f2f8ecbdeff412cf';
 
 abstract class _$CoachChat extends $AsyncNotifier<List<ChatMessage>> {
   FutureOr<List<ChatMessage>> build();
