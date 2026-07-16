@@ -8,6 +8,7 @@ import 'package:kynos/domain/entities/coach/training_plan.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/training_plan_providers.dart';
+import 'package:kynos/shared/providers/weekly_adaptation_provider.dart';
 import 'package:kynos/shared/widgets/kynos_card.dart';
 
 class PendingCoachActionCard extends ConsumerWidget {
@@ -43,6 +44,11 @@ class PendingCoachActionCard extends ConsumerWidget {
                       await ref
                           .read(trainingPlanDataProvider.notifier)
                           .activateFromAction(action);
+                      if (action.id.startsWith('weekly_adapt_')) {
+                        await ref
+                            .read(weeklyAdaptationProvider.notifier)
+                            .markConfirmed();
+                      }
                       return;
                     }
                     await ref
@@ -68,8 +74,30 @@ class PendingCoachActionCard extends ConsumerWidget {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map) return false;
-      final payloadId = decoded['id']?.toString();
-      return payloadId != null && payloadId == plan.id;
+      final payloadPlan = TrainingPlan.fromJson(
+        Map<String, Object?>.from(decoded),
+      );
+      // Weekly / day-swap proposals: confirmed when the proposed day matches.
+      final adaptedDayRaw = action.payload['adaptedDay']?.toString();
+      if (adaptedDayRaw != null) {
+        final adaptedAt = DateTime.tryParse(adaptedDayRaw);
+        if (adaptedAt != null) {
+          final proposed = payloadPlan.dayFor(adaptedAt);
+          final current = plan.dayFor(adaptedAt);
+          if (proposed == null || current == null) return false;
+          return current.sessionType == proposed.sessionType &&
+              current.title == proposed.title &&
+              current.adherence == PlanAdherenceStatus.swapped;
+        }
+      }
+      // Full plan activation: same id is enough only after days align on day 0.
+      if (payloadPlan.id != plan.id) return false;
+      if (payloadPlan.days.isEmpty || plan.days.isEmpty) return false;
+      final firstPayload = payloadPlan.days.first;
+      final firstCurrent = plan.dayFor(firstPayload.date);
+      return firstCurrent != null &&
+          firstCurrent.title == firstPayload.title &&
+          firstCurrent.sessionType == firstPayload.sessionType;
     } on Object {
       return false;
     }

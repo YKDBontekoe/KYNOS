@@ -44,32 +44,42 @@ class TrainingPlanData extends _$TrainingPlanData {
   }
 
   Future<void> markDone({String? note}) async {
-    await _setTodayAdherence(PlanAdherenceStatus.done, note: note);
+    await markAdherence(
+      date: DateTime.now(),
+      status: PlanAdherenceStatus.done,
+      note: note,
+    );
   }
 
   Future<void> markSkipped({String? note}) async {
-    await _setTodayAdherence(PlanAdherenceStatus.skipped, note: note);
+    await markAdherence(
+      date: DateTime.now(),
+      status: PlanAdherenceStatus.skipped,
+      note: note,
+    );
   }
 
-  Future<void> clear() async {
-    final result = await ref.read(trainingPlanRepositoryProvider).clear();
-    if (result.failure != null) throw result.failure!;
-    state = const AsyncData(null);
-  }
-
-  Future<void> _setTodayAdherence(
-    PlanAdherenceStatus status, {
+  /// Updates adherence for an arbitrary plan day (manual or auto-matched).
+  Future<void> markAdherence({
+    required DateTime date,
+    required PlanAdherenceStatus status,
     String? note,
   }) async {
     final current = state.value;
     if (current == null) return;
     final updated = _logAdherence(
       plan: current,
-      date: DateTime.now(),
+      date: date,
       status: status,
       note: note,
     );
     await _persist(updated);
+  }
+
+  Future<void> clear() async {
+    final result = await ref.read(trainingPlanRepositoryProvider).clear();
+    if (result.failure != null) throw result.failure!;
+    state = const AsyncData(null);
   }
 
   Future<void> _persist(TrainingPlan plan) async {

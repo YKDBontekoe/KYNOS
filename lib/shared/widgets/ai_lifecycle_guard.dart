@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/plan_health_sync_provider.dart';
 import 'package:logger/logger.dart';
 
 /// Disposes the on-device AI isolate when the app backgrounds to avoid stale LiteRT state.
@@ -61,6 +62,8 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
       ref.invalidate(recentRunsProvider);
       ref.invalidate(importedWorkoutCountProvider);
       ref.invalidate(healthPermissionsProvider);
+      // Auto-adherence + post-run debrief after health refresh.
+      ref.read(planHealthSyncProvider.notifier).syncAfterHealthRefresh();
     }
     ref.read(aiReconnectStateProvider.notifier).markNeedsReconnect();
   }

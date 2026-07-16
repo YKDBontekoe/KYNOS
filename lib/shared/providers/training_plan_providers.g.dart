@@ -81,7 +81,7 @@ final class TrainingPlanDataProvider
   TrainingPlanData create() => TrainingPlanData();
 }
 
-String _$trainingPlanDataHash() => r'a199dc11161c24656af931b90fdba435115d9d50';
+String _$trainingPlanDataHash() => r'483183b4dd499455d784c808bc8cc9eff5ebe1ac';
 
 abstract class _$TrainingPlanData extends $AsyncNotifier<TrainingPlan?> {
   FutureOr<TrainingPlan?> build();
