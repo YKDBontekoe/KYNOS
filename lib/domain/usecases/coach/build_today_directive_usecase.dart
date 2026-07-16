@@ -25,12 +25,12 @@ class BuildTodayDirectiveUseCase {
 
     final urgentNote = todayCheckIn?.note;
     if (urgentNote != null && HealthSafetyPolicy.hasUrgentText(urgentNote)) {
-      return TodayDirective(
+      return const TodayDirective(
         headline: 'Stop and seek medical care if needed',
         detail:
             'Your check-in note looks urgent. Do not train. Follow medical guidance.',
         source: TodayDirectiveSource.readinessFallback,
-        rationale: const ['Urgent symptom language in today’s check-in'],
+        rationale: ['Urgent symptom language in today’s check-in'],
         sessionType: PlanSessionType.rest,
         forcedRecovery: true,
         adherence: PlanAdherenceStatus.pending,
