@@ -4,14 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:kynos/app/router.dart';
 import 'package:kynos/app/shell_navigation_scope.dart';
 import 'package:kynos/core/theme/theme.dart';
-import 'package:kynos/features/character/presentation/pages/character_page.dart';
-import 'package:kynos/features/training/presentation/pages/training_page.dart';
 import 'package:kynos/shared/providers/shell_chrome_provider.dart';
 import 'package:kynos/shared/widgets/kynos_tab_bar.dart';
 import 'package:kynos/shared/widgets/nav_icon.dart';
 import 'package:kynos/shared/widgets/responsive_center.dart';
 
-/// Root app shell — content fills the screen with a floating glass tab dock.
+/// Root app shell — coach-only home with a settings affordance in the dock.
 class ShellPage extends ConsumerWidget {
   const ShellPage({super.key, required this.navigationShell});
 
@@ -19,16 +17,7 @@ class ShellPage extends ConsumerWidget {
 
   static const _tabItems = [
     KynosTabItem(label: 'Coach', icon: NavIconPaths.coach),
-    KynosTabItem(label: 'Health', icon: NavIconPaths.health),
-    KynosTabItem(label: 'Journey', icon: NavIconPaths.journey),
   ];
-
-  void _onTabSelected(int index) {
-    navigationShell.goBranch(
-      index,
-      initialLocation: index == navigationShell.currentIndex,
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +25,7 @@ class ShellPage extends ConsumerWidget {
     final chromeVisible = ref.watch(shellChromeProvider);
 
     return ShellNavigationScope(
-      goToBranch: _onTabSelected,
+      goToBranch: (_) {},
       child: Scaffold(
         backgroundColor: kynos.background,
         body: Stack(
@@ -62,10 +51,7 @@ class ShellPage extends ConsumerWidget {
               ),
             ),
             ResponsiveCenter(
-              child: _AnimatedShellBody(
-                tabIndex: navigationShell.currentIndex,
-                child: navigationShell,
-              ),
+              child: navigationShell,
             ),
             Positioned(
               left: 0,
@@ -91,8 +77,8 @@ class ShellPage extends ConsumerWidget {
                     ? KynosTabBar(
                         key: const ValueKey('shell-tab-bar'),
                         items: _tabItems,
-                        selectedIndex: navigationShell.currentIndex,
-                        onSelected: _onTabSelected,
+                        selectedIndex: 0,
+                        onSelected: (_) {},
                         onSettings: () => context.push(Routes.settings),
                       )
                     : const SizedBox.shrink(key: ValueKey('shell-tab-bar-hidden')),
@@ -102,91 +88,5 @@ class ShellPage extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-/// Directional fade/slide on tab index change while preserving [IndexedStack] state.
-class _AnimatedShellBody extends StatefulWidget {
-  const _AnimatedShellBody({required this.tabIndex, required this.child});
-
-  final int tabIndex;
-  final Widget child;
-
-  @override
-  State<_AnimatedShellBody> createState() => _AnimatedShellBodyState();
-}
-
-class _AnimatedShellBodyState extends State<_AnimatedShellBody>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late Animation<Offset> _slide;
-  late Animation<double> _fade;
-  int _previousIndex = 0;
-  int _direction = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    _previousIndex = widget.tabIndex;
-    _controller = AnimationController(vsync: this, duration: Motion.medium)
-      ..value = 1;
-    _buildAnimations();
-  }
-
-  void _buildAnimations() {
-    final slideOffset = 0.08 * _direction;
-    final curved = CurvedAnimation(parent: _controller, curve: Motion.curve);
-    _slide = Tween<Offset>(
-      begin: Offset(slideOffset, 0),
-      end: Offset.zero,
-    ).animate(curved);
-    _fade = curved;
-  }
-
-  @override
-  void didUpdateWidget(_AnimatedShellBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.tabIndex != oldWidget.tabIndex) {
-      _direction = widget.tabIndex > _previousIndex ? 1 : -1;
-      _previousIndex = widget.tabIndex;
-      _buildAnimations();
-      _controller.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: FadeTransition(
-        opacity: _fade,
-        child: SlideTransition(position: _slide, child: widget.child),
-      ),
-    );
-  }
-}
-
-/// Health tab — unified health hub (dashboard + training).
-class HealthTab extends StatelessWidget {
-  const HealthTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const TrainingPage();
-  }
-}
-
-/// Journey tab — sustainable wellbeing progression and camp.
-class JourneyTab extends StatelessWidget {
-  const JourneyTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const CharacterPage();
   }
 }

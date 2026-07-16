@@ -1,9 +1,6 @@
 import 'package:kynos/domain/entities/health_summary.dart';
-import 'package:kynos/domain/usecases/gamification/compute_xp_usecase.dart';
 import 'package:kynos/domain/usecases/insights/generate_post_run_debrief_usecase.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
-import 'package:kynos/shared/providers/character_providers.dart';
-import 'package:kynos/shared/providers/gamification_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,13 +10,11 @@ part 'post_run_debrief_provider.g.dart';
 class PostRunDebriefState {
   const PostRunDebriefState({
     required this.debrief,
-    required this.xpAmount,
     required this.workoutId,
     required this.generatedAt,
   });
 
   final PostRunDebrief debrief;
-  final int xpAmount;
   final String workoutId;
   final DateTime generatedAt;
 
@@ -33,7 +28,6 @@ class PostRunDebriefState {
 @Riverpod(keepAlive: true)
 class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
   static const _prefsKey = 'processed_run_ids';
-  final _computeXp = const ComputeXpUseCase();
   final Set<String> _inFlightRunIds = {};
 
   @override
@@ -53,12 +47,6 @@ class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
     state = const AsyncLoading();
 
     try {
-      final character = await ref.read(runnerCharacterProvider.future);
-      if (character == null) {
-        state = const AsyncData(null);
-        return;
-      }
-
       final history = await ref.read(healthHistoryProvider(days: 7).future);
       HealthSummary? sameDay;
       for (final s in history) {
@@ -74,30 +62,11 @@ class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
         aiCoach: ref.read(aiCoachRepositoryProvider),
       ).call(session: latest, sameDaySummary: sameDay);
 
-      final xpGain = _computeXp.call(
-        session: latest,
-        character: character,
-        sameDaySummary: sameDay,
-      );
-
-      final updated = character.withXpGain(
-        xpGain.amount,
-        statDeltas: xpGain.statDeltas,
-      );
-      final saveResult =
-          await ref.read(characterRepositoryProvider).saveCharacter(updated);
-      if (saveResult != null) {
-        state = AsyncError(saveResult, StackTrace.current);
-        return;
-      }
-      ref.invalidate(runnerCharacterProvider);
-
       await _markProcessed(latest.id, processed);
 
       state = AsyncData(
         PostRunDebriefState(
           debrief: debrief,
-          xpAmount: xpGain.amount,
           workoutId: latest.id,
           generatedAt: DateTime.now(),
         ),
@@ -118,6 +87,7 @@ class PostRunDebriefNotifier extends _$PostRunDebriefNotifier {
 
   Future<void> _markProcessed(String id, Set<String> existing) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKey, [...existing, id]);
+    final updated = {...existing, id}.toList();
+    await prefs.setStringList(_prefsKey, updated);
   }
 }

@@ -113,11 +113,12 @@ void main() {
     expect(find.byTooltip('New conversation'), findsOneWidget);
     expect(find.byKey(const Key('kynos_floating_nav_control')), findsNothing);
     expect(find.byType(KynosTabBar), findsOneWidget);
-    expect(find.text('Health'), findsOneWidget);
-    expect(find.text('Journey'), findsOneWidget);
+    expect(find.text('Coach'), findsOneWidget);
+    expect(find.text('Health'), findsNothing);
+    expect(find.text('Journey'), findsNothing);
   });
 
-  testWidgets('Health tab shows content under floating dock', (tester) async {
+  testWidgets('Coach-only shell has no Health or Journey tabs', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -133,13 +134,11 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.tap(find.text('Health'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
     expect(tester.takeException(), isNull);
+    expect(find.byType(CoachChatPage), findsOneWidget);
     expect(find.byType(KynosTabBar), findsOneWidget);
-    expect(find.text('Today'), findsOneWidget);
-    expect(find.textContaining('Sleep, recovery'), findsOneWidget);
+    expect(find.text('Coach'), findsOneWidget);
+    expect(find.text('Health'), findsNothing);
+    expect(find.text('Journey'), findsNothing);
   });
 }

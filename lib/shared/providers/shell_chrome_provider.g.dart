@@ -10,24 +10,24 @@ part of 'shell_chrome_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// Controls visibility of the shell floating tab dock.
 ///
-/// Modal sheets opened from nested branch navigators can sit under the dock
-/// unless they use the root navigator; explicitly hiding chrome also matches
-/// the product intent for focused menus like Model & mode.
+/// Tracks an open-sheet depth count so chained modal sheets
+/// (`pop` then immediately `show` another) stay chrome-hidden until the
+/// last sheet dismisses.
 
 @ProviderFor(ShellChrome)
 final shellChromeProvider = ShellChromeProvider._();
 
 /// Controls visibility of the shell floating tab dock.
 ///
-/// Modal sheets opened from nested branch navigators can sit under the dock
-/// unless they use the root navigator; explicitly hiding chrome also matches
-/// the product intent for focused menus like Model & mode.
+/// Tracks an open-sheet depth count so chained modal sheets
+/// (`pop` then immediately `show` another) stay chrome-hidden until the
+/// last sheet dismisses.
 final class ShellChromeProvider extends $NotifierProvider<ShellChrome, bool> {
   /// Controls visibility of the shell floating tab dock.
   ///
-  /// Modal sheets opened from nested branch navigators can sit under the dock
-  /// unless they use the root navigator; explicitly hiding chrome also matches
-  /// the product intent for focused menus like Model & mode.
+  /// Tracks an open-sheet depth count so chained modal sheets
+  /// (`pop` then immediately `show` another) stay chrome-hidden until the
+  /// last sheet dismisses.
   ShellChromeProvider._()
     : super(
         from: null,
@@ -55,13 +55,13 @@ final class ShellChromeProvider extends $NotifierProvider<ShellChrome, bool> {
   }
 }
 
-String _$shellChromeHash() => r'5b4721efe3dbe73a823ebf9fec70b03ea893d0b0';
+String _$shellChromeHash() => r'4d403da9accc20c6b0dfdf7fc926094de0f12b1f';
 
 /// Controls visibility of the shell floating tab dock.
 ///
-/// Modal sheets opened from nested branch navigators can sit under the dock
-/// unless they use the root navigator; explicitly hiding chrome also matches
-/// the product intent for focused menus like Model & mode.
+/// Tracks an open-sheet depth count so chained modal sheets
+/// (`pop` then immediately `show` another) stay chrome-hidden until the
+/// last sheet dismisses.
 
 abstract class _$ShellChrome extends $Notifier<bool> {
   bool build();
