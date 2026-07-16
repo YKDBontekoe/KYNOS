@@ -13,12 +13,9 @@ void openCoachChat(
   String? seed,
   CoachSeedTopic topic = CoachSeedTopic.general,
   String? runId,
-  String? questId,
   String? threadId,
 }) {
-  if (seed != null && seed.trim().isNotEmpty ||
-      runId != null ||
-      questId != null) {
+  if (seed != null && seed.trim().isNotEmpty || runId != null) {
     ref
         .read(coachChatSeedProvider.notifier)
         .setSeed(
@@ -26,7 +23,6 @@ void openCoachChat(
             message: seed?.trim(),
             topic: topic,
             runId: runId,
-            questId: questId,
           ),
         );
   }

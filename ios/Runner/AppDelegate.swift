@@ -3,7 +3,6 @@ import UIKit
 import HealthKit
 import CoreLocation
 import MapKit
-import GameKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -28,10 +27,6 @@ import GameKit
         AppleRouteMapViewFactory(messenger: mapRegistrar.messenger()),
         withId: "kynos/apple_route_map"
       )
-    }
-
-    if let gameKitRegistrar = registry.registrar(forPlugin: "GameKitChannel") {
-      GameKitChannel.register(with: gameKitRegistrar)
     }
 
     if let thermalRegistrar = registry.registrar(forPlugin: "DeviceThermalChannel") {
@@ -62,134 +57,6 @@ final class DeviceThermalChannel: NSObject {
     default:
       result(FlutterMethodNotImplemented)
     }
-  }
-}
-
-// MARK: - GameKit Channel
-
-final class GameKitChannel: NSObject {
-  private var viewController: UIViewController?
-
-  static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "kynos/gamekit", binaryMessenger: registrar.messenger())
-    let instance = GameKitChannel()
-    channel.setMethodCallHandler(instance.handle)
-  }
-
-  private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "signIn":
-      signIn(result: result)
-    case "submitScore":
-      guard let args = call.arguments as? [String: Any],
-            let leaderboardId = args["leaderboard_id"] as? String,
-            let score = args["score"] as? Int else {
-        result(FlutterError(code: "bad_args", message: "Missing leaderboard_id or score", details: nil))
-        return
-      }
-      submitScore(leaderboardId: leaderboardId, score: score, result: result)
-    case "unlockAchievement":
-      guard let args = call.arguments as? [String: Any],
-            let achievementId = args["achievement_id"] as? String else {
-        result(FlutterError(code: "bad_args", message: "Missing achievement_id", details: nil))
-        return
-      }
-      let percentComplete = args["percent_complete"] as? Double ?? 100.0
-      unlockAchievement(achievementId: achievementId, percentComplete: percentComplete, result: result)
-    case "showLeaderboard":
-      guard let args = call.arguments as? [String: Any],
-            let leaderboardId = args["leaderboard_id"] as? String else {
-        result(FlutterError(code: "bad_args", message: "Missing leaderboard_id", details: nil))
-        return
-      }
-      showLeaderboard(leaderboardId: leaderboardId, result: result)
-    case "showAchievements":
-      showAchievements(result: result)
-    default:
-      result(FlutterMethodNotImplemented)
-    }
-  }
-
-  private func signIn(result: @escaping FlutterResult) {
-    let localPlayer = GKLocalPlayer.local
-    localPlayer.authenticateHandler = { [weak self] viewController, error in
-      if let vc = viewController {
-        self?.viewController = vc
-        DispatchQueue.main.async {
-          UIApplication.shared.windows.first?.rootViewController?.present(vc, animated: true)
-        }
-        return
-      }
-      if let error = error {
-        result(FlutterError(code: "auth_error", message: error.localizedDescription, details: nil))
-        return
-      }
-      result(localPlayer.isAuthenticated)
-    }
-  }
-
-  private func submitScore(leaderboardId: String, score: Int, result: @escaping FlutterResult) {
-    guard GKLocalPlayer.local.isAuthenticated else {
-      result(nil)
-      return
-    }
-    GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local,
-      leaderboardIDs: [leaderboardId]) { error in
-      if let error = error {
-        result(FlutterError(code: "submit_error", message: error.localizedDescription, details: nil))
-      } else {
-        result(nil)
-      }
-    }
-  }
-
-  private func unlockAchievement(achievementId: String, percentComplete: Double, result: @escaping FlutterResult) {
-    guard GKLocalPlayer.local.isAuthenticated else {
-      result(nil)
-      return
-    }
-    let achievement = GKAchievement(identifier: achievementId)
-    achievement.percentComplete = percentComplete
-    achievement.showsCompletionBanner = true
-    GKAchievement.report([achievement]) { error in
-      if let error = error {
-        result(FlutterError(code: "achievement_error", message: error.localizedDescription, details: nil))
-      } else {
-        result(nil)
-      }
-    }
-  }
-
-  private func showLeaderboard(leaderboardId: String, result: @escaping FlutterResult) {
-    guard GKLocalPlayer.local.isAuthenticated else {
-      result(nil)
-      return
-    }
-    let vc = GKGameCenterViewController(leaderboardID: leaderboardId, playerScope: .global, timeScope: .week)
-    vc.gameCenterDelegate = self
-    DispatchQueue.main.async {
-      UIApplication.shared.windows.first?.rootViewController?.present(vc, animated: true)
-    }
-    result(nil)
-  }
-
-  private func showAchievements(result: @escaping FlutterResult) {
-    guard GKLocalPlayer.local.isAuthenticated else {
-      result(nil)
-      return
-    }
-    let vc = GKGameCenterViewController(state: .achievements)
-    vc.gameCenterDelegate = self
-    DispatchQueue.main.async {
-      UIApplication.shared.windows.first?.rootViewController?.present(vc, animated: true)
-    }
-    result(nil)
-  }
-}
-
-extension GameKitChannel: GKGameCenterControllerDelegate {
-  func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
-    gameCenterViewController.dismiss(animated: true)
   }
 }
 

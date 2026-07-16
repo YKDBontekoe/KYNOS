@@ -6,13 +6,13 @@ enum CoachDataSource {
   weeklyMomentum('Weekly momentum'),
   todayInsights('Today insights'),
   trainingInsights('Training insights'),
-  characterQuests('Character & quests'),
   gaitBiomechanics('Gait biomechanics'),
   athletePreferences('Athlete preferences'),
   postRunDebrief('Post-run debrief'),
   healthCheckIns('Daily check-ins'),
   coachMemory('Coach memory'),
-  wellbeingExperiments('Wellbeing experiments');
+  wellbeingExperiments('Wellbeing experiments'),
+  trainingPlan('Training plan');
 
   const CoachDataSource(this.label);
   final String label;

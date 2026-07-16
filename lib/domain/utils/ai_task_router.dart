@@ -11,7 +11,6 @@ abstract final class AiTaskRouter {
       AiTaskKind.quickRefine => false,
       AiTaskKind.coachChat => true,
       AiTaskKind.trainingPlan => true,
-      AiTaskKind.questNarrative => true,
       AiTaskKind.runDebrief => true,
       AiTaskKind.dataQuery => true,
     };

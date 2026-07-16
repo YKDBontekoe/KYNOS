@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kynos/shared/providers/ai_reconnect_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
-import 'package:kynos/shared/providers/measurable_quest_sync_provider.dart';
 import 'package:logger/logger.dart';
 
 /// Disposes the on-device AI isolate when the app backgrounds to avoid stale LiteRT state.
@@ -68,7 +67,6 @@ class _AiLifecycleGuardState extends ConsumerState<AiLifecycleGuard>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(measurableQuestSyncProvider);
     return widget.child;
   }
 }

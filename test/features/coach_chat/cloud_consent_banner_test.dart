@@ -24,7 +24,6 @@ void main() {
                   'Weekly momentum',
                   'Today insights',
                   'Training insights',
-                  'Character & quests',
                   'Gait biomechanics',
                   'Athlete preferences',
                   'Post-run debrief',

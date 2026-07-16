@@ -17,7 +17,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Understand Your Energy'), findsOneWidget);
+    expect(find.text('Your Coach Starts Here'), findsOneWidget);
     expect(find.text('Skip'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
   });

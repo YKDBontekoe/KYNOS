@@ -89,9 +89,7 @@ abstract final class CoachConversationCodec {
       updatedAt: DateTime.parse(map['updatedAt'] as String),
       messageCount: map['messageCount'] as int? ?? 0,
       lastMessagePreview: map['lastMessagePreview'] as String?,
-      seedTopic: CoachSeedTopic.values.byName(
-        map['seedTopic'] as String? ?? CoachSeedTopic.general.name,
-      ),
+      seedTopic: _seedTopicFromName(map['seedTopic'] as String?),
       isPinned: map['isPinned'] as bool? ?? false,
       isArchived: map['isArchived'] as bool? ?? false,
     );
@@ -289,7 +287,8 @@ abstract final class CoachConversationCodec {
     return CoachContextPreferences(
       enabledSources: sourcesRaw
           .whereType<String>()
-          .map(CoachDataSource.values.byName)
+          .map(_dataSourceFromName)
+          .whereType<CoachDataSource>()
           .toSet(),
       cloudLevelOverride: levelName == null
           ? null
@@ -303,19 +302,32 @@ abstract final class CoachConversationCodec {
       'message': seed.message,
       'topic': seed.topic.name,
       'runId': seed.runId,
-      'questId': seed.questId,
     };
   }
 
   static CoachChatSeedData _seedFromMap(Map<String, dynamic> map) {
     return CoachChatSeedData(
       message: map['message'] as String?,
-      topic: CoachSeedTopic.values.byName(
-        map['topic'] as String? ?? CoachSeedTopic.general.name,
-      ),
+      topic: _seedTopicFromName(map['topic'] as String?),
       runId: map['runId'] as String?,
-      questId: map['questId'] as String?,
     );
+  }
+
+  /// Maps persisted seed topic names; unknown/removed values fall back to general.
+  static CoachSeedTopic _seedTopicFromName(String? name) {
+    if (name == null || name.isEmpty) return CoachSeedTopic.general;
+    for (final topic in CoachSeedTopic.values) {
+      if (topic.name == name) return topic;
+    }
+    return CoachSeedTopic.general;
+  }
+
+  /// Maps persisted data-source names; unknown/removed values are dropped.
+  static CoachDataSource? _dataSourceFromName(String name) {
+    for (final source in CoachDataSource.values) {
+      if (source.name == name) return source;
+    }
+    return null;
   }
 
   static List<ChatMessage> decodeLegacyMessages(String? raw) {

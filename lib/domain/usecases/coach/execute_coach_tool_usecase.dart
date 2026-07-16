@@ -4,6 +4,7 @@ import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
 import 'package:kynos/domain/repositories/health_repository.dart';
 import 'package:kynos/domain/usecases/coach/coach_tool_context_queries.dart';
 import 'package:kynos/domain/usecases/coach/coach_tool_health_queries.dart';
+import 'package:kynos/domain/usecases/coach/coach_tool_plan_queries.dart';
 import 'package:kynos/domain/usecases/coach/coach_tool_wellbeing_queries.dart';
 
 /// Executes agentic coach tool calls.
@@ -23,6 +24,7 @@ class ExecuteCoachToolUseCase {
   final CoachToolHealthQueries _healthQueries;
   final _contextQueries = const CoachToolContextQueries();
   final _wellbeingQueries = const CoachToolWellbeingQueries();
+  final _planQueries = const CoachToolPlanQueries();
 
   Future<CoachToolResult> call({
     required CoachToolCall toolCall,
@@ -86,12 +88,6 @@ class ExecuteCoachToolUseCase {
             context,
             preferences,
           );
-        case 'get_character_progress':
-          return _contextQueries.getCharacterProgress(
-            toolCall,
-            context,
-            preferences,
-          );
         case 'get_personal_bests':
           return _contextQueries.getPersonalBests(
             toolCall,
@@ -100,6 +96,22 @@ class ExecuteCoachToolUseCase {
           );
         case 'compute_pace_plan':
           return _contextQueries.computePacePlan(toolCall);
+        case 'get_active_training_plan':
+          return _planQueries.getActiveTrainingPlan(
+            toolCall,
+            context,
+            preferences,
+          );
+        case 'get_today_directive':
+          return _planQueries.getTodayDirective(
+            toolCall,
+            context,
+            preferences,
+          );
+        case 'propose_training_plan':
+          return _planQueries.proposeTrainingPlan(toolCall, context);
+        case 'adjust_plan_week':
+          return _planQueries.adjustPlanWeek(toolCall, context);
         default:
           return CoachToolResult(
             toolCall: toolCall,

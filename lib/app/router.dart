@@ -24,7 +24,7 @@ import 'package:kynos/shared/providers/onboarding_provider.dart';
 abstract final class Routes {
   static const onboarding = '/onboarding';
 
-  /// The coach-first home tab.
+  /// The coach-only home.
   static const dashboard = '/';
   static const health = '/health';
   static const journey = '/journey';
@@ -97,32 +97,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.health,
-                pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey,
-                  child: const HealthTab(),
-                ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: Routes.journey,
-                pageBuilder: (context, state) => NoTransitionPage(
-                  key: state.pageKey,
-                  child: const JourneyTab(),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
-      GoRoute(path: Routes.training, redirect: (_, _) => Routes.health),
-      GoRoute(path: Routes.character, redirect: (_, _) => Routes.journey),
+      // Legacy tab paths redirect to coach home.
+      GoRoute(path: Routes.health, redirect: (_, _) => Routes.dashboard),
+      GoRoute(path: Routes.journey, redirect: (_, _) => Routes.dashboard),
+      GoRoute(path: Routes.training, redirect: (_, _) => Routes.dashboard),
+      GoRoute(path: Routes.character, redirect: (_, _) => Routes.dashboard),
       GoRoute(
         path: Routes.runHistory,
         pageBuilder: (context, state) => KynosPageTransitions.standard(

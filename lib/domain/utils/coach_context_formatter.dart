@@ -26,6 +26,29 @@ abstract final class CoachContextFormatter {
       'Readiness: ${context.readinessScore.round()}/100 — ${context.readinessSummary}',
     );
 
+    final plan = context.activePlan;
+    final directive = context.todayDirective;
+    if (plan != null || directive != null) {
+      final lines = <String>[];
+      if (plan != null) {
+        lines.add(
+          'Active plan: ${plan.title} · goal ${plan.goal} · '
+          '${plan.weeks} weeks'
+          '${plan.weeklyVolumeTargetKm != null ? ' · ~${plan.weeklyVolumeTargetKm!.toStringAsFixed(0)} km/wk' : ''}',
+        );
+      }
+      if (directive != null) {
+        lines.add(
+          'Today’s directive: ${directive.headline}. ${directive.detail}'
+          '${directive.forcedRecovery ? ' (recovery override)' : ''}',
+        );
+        if (directive.rationale.isNotEmpty) {
+          lines.add('Why: ${directive.rationale.take(3).join('; ')}');
+        }
+      }
+      sections.add(lines.join('\n'));
+    }
+
     final healthBrief = context.dailyHealthBrief;
     if (healthBrief != null) {
       sections.add(
@@ -94,15 +117,6 @@ abstract final class CoachContextFormatter {
         );
       }
 
-      final character = context.character;
-      if (character != null) {
-        final weakest = character.stats.weakest;
-        sections.add(
-          'Character: ${character.characterClass.name} Lv${character.level}, '
-          'weakest stat ${weakest.fullName}',
-        );
-      }
-
       final insights = context.todayInsights;
       if (insights != null) {
         sections.add('Today insight: ${insights.readinessBrief}');
@@ -129,10 +143,6 @@ abstract final class CoachContextFormatter {
           'Gait model: β₀=${c.b0?.toStringAsFixed(3)}, '
           'β₁=${c.b1?.toStringAsFixed(4)}, β₂=${c.b2?.toStringAsFixed(4)}',
         );
-      }
-
-      for (final quest in context.activeQuests) {
-        sections.add('Active quest: ${quest.title} — ${quest.objective}');
       }
 
       final debrief = context.postRunDebriefSummary;

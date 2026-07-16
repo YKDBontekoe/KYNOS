@@ -250,8 +250,6 @@ class _ConversationListSheetState extends ConsumerState<ConversationListSheet> {
       CoachSeedTopic.run => 'Run focus',
       CoachSeedTopic.training => 'Training',
       CoachSeedTopic.gait => 'Gait',
-      CoachSeedTopic.quest => 'Quest',
-      CoachSeedTopic.characterClass => 'Character class',
       CoachSeedTopic.weeklyGoal => 'Weekly goal',
       CoachSeedTopic.postRunDebrief => 'Post-run debrief',
     };

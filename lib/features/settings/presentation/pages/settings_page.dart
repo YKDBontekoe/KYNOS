@@ -170,6 +170,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   onTap: () => context.push(Routes.manualRun),
                 ),
                 Divider(color: kynos.separator, height: 1),
+                _ActionTile(
+                  title: 'Run history',
+                  icon: Icons.history_outlined,
+                  onTap: () => context.push(Routes.runHistory),
+                ),
+                if (!kIsWeb) ...[
+                  Divider(color: kynos.separator, height: 1),
+                  _ActionTile(
+                    title: 'KYNOS Lab (gait)',
+                    icon: Icons.science_outlined,
+                    onTap: () => context.push(Routes.nexusLab),
+                  ),
+                ],
+                Divider(color: kynos.separator, height: 1),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(Icons.storage_outlined, color: kynos.stand),

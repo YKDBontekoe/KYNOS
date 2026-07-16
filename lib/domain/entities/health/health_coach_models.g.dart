@@ -240,6 +240,7 @@ Map<String, dynamic> _$PendingCoachActionToJson(_PendingCoachAction instance) =>
 const _$CoachActionTypeEnumMap = {
   CoachActionType.createExperiment: 'createExperiment',
   CoachActionType.saveMemory: 'saveMemory',
+  CoachActionType.activateTrainingPlan: 'activateTrainingPlan',
 };
 
 _HealthCoachState _$HealthCoachStateFromJson(Map<String, dynamic> json) =>

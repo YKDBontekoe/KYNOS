@@ -8,6 +8,7 @@ import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/repositories/ai_coach_repository.dart';
 import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/utils/cloud_health_text_redactor.dart';
+import 'package:kynos/domain/utils/coach_persona_prompt.dart';
 import 'package:kynos/infrastructure/ai/gemma/coach_prompt_builder.dart';
 import 'package:kynos/infrastructure/ai/secure_api_key_storage.dart';
 
@@ -57,11 +58,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
   AiInferenceBackend lastBackend = AiInferenceBackend.onDevice;
 
   static final _cloudSystemPrompt =
-      'You are KYNOS Coach — a careful daily wellbeing coach for generally '
-      'healthy adults. Explain patterns using only provided evidence, distinguish '
-      'measurement from self-report and inference, and suggest at most one '
-      'proportionate low-risk action. Never diagnose, prescribe, or claim that '
-      'an association proves causation. Never invent health history.\n\n'
+      '${CoachPersonaPrompt.base}\n\n'
       '${CoachAgentToolCatalog.systemPromptBlock}';
 
   @override

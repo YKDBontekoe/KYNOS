@@ -24,7 +24,6 @@ abstract final class CoachFollowUpSuggestions {
 
     suggestions.addAll(switch (topic) {
       CoachSeedTopic.postRunDebrief => ['Recovery plan for today'],
-      CoachSeedTopic.quest => ['How do I complete my quest?'],
       CoachSeedTopic.gait => ['When should I recalibrate gait?'],
       _ => ['Plan my week'],
     });

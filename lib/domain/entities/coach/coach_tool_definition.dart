@@ -1,3 +1,5 @@
+import 'package:kynos/domain/utils/coach_persona_prompt.dart';
+
 /// Describes one tool the coach agent may call for on-demand data or math.
 class CoachToolDefinition {
   const CoachToolDefinition({
@@ -110,10 +112,28 @@ abstract final class CoachAgentToolCatalog {
       actionLabel: 'Reviewing your training load',
     ),
     CoachToolDefinition(
-      name: 'get_character_progress',
-      purpose: 'Level, class, weakest stat, active quests',
+      name: 'get_active_training_plan',
+      purpose: 'Active multi-week plan summary and upcoming sessions',
       argsHint: 'none',
-      actionLabel: 'Checking your character progress',
+      actionLabel: 'Reviewing your training plan',
+    ),
+    CoachToolDefinition(
+      name: 'get_today_directive',
+      purpose: 'Deterministic do-this-today session from plan and readiness',
+      argsHint: 'none',
+      actionLabel: 'Resolving today’s directive',
+    ),
+    CoachToolDefinition(
+      name: 'propose_training_plan',
+      purpose: 'Propose a multi-week plan; user must confirm before activate',
+      argsHint: 'weeks 3-8, weekly_volume_km optional, long_run_weekday 1-7 optional',
+      actionLabel: 'Preparing a training plan',
+    ),
+    CoachToolDefinition(
+      name: 'adjust_plan_week',
+      purpose: 'Propose swapping today’s session; user must confirm',
+      argsHint: 'session_type rest|easy|longRun|tempo|intervals|recovery, title, distance_km optional',
+      actionLabel: 'Preparing a plan adjustment',
     ),
     CoachToolDefinition(
       name: 'get_personal_bests',
@@ -144,10 +164,7 @@ abstract final class CoachAgentToolCatalog {
     final lines = definitions
         .map((d) => '- ${d.name}(${d.argsHint}): ${d.purpose}')
         .join('\n');
-    return 'You are a private daily wellbeing coach for generally healthy adults. '
-        'Interpret patterns without diagnosing. Distinguish measured data, self-report, '
-        'and inference. Recommend at most one proportionate low-risk action. '
-        'Never claim that an association proves causation.\n\n'
+    return '${CoachPersonaPrompt.toolPreamble}'
         'Tools you may call for more data, deterministic analysis, or native visuals:\n$lines\n'
         'To call one, reply with ONLY: TOOL_CALL: {"name":"<tool>","arguments":{...}}\n'
         'Then wait for the result before calling another tool or answering. '

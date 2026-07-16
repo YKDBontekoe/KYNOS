@@ -3,16 +3,15 @@ import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/acwr.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
-import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_personalization_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
-import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/post_run_debrief_provider.dart';
 import 'package:kynos/shared/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
+import 'package:kynos/shared/providers/training_plan_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_context_provider.g.dart';
@@ -32,10 +31,10 @@ Future<CoachContext> coachContextForConversation(
   final recentRuns = await ref.watch(
     recentRunsProvider(days: 60, limit: 5).future,
   );
-  final character = await ref.watch(runnerCharacterProvider.future);
-  final quests = await ref.watch(dailyQuestsProvider.future);
   final healthCoachData = await ref.watch(healthCoachDataProvider.future);
   final healthBrief = await ref.watch(dailyHealthBriefProvider.future);
+  final activePlan = await ref.watch(trainingPlanDataProvider.future);
+  final todayDirective = ref.watch(todayDirectiveProvider);
 
   final todayInsights = ref.watch(todayInsightsStateProvider).value?.insights;
   final trainingInsights = ref
@@ -83,8 +82,6 @@ Future<CoachContext> coachContextForConversation(
       .call(
         healthHistory: healthHistory,
         recentRuns: recentRuns,
-        character: character,
-        activeQuests: quests,
         todayInsights: todayInsights,
         trainingInsights: trainingInsights,
         weeklyMomentum: weeklyMomentum,
@@ -99,5 +96,7 @@ Future<CoachContext> coachContextForConversation(
         healthCheckIns: healthCoachData.checkIns,
         coachMemories: healthCoachData.memories,
         wellbeingExperiments: healthCoachData.experiments,
+        activePlan: activePlan,
+        todayDirective: todayDirective,
       );
 }

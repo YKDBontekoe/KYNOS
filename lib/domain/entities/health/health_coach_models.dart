@@ -12,7 +12,7 @@ enum FindingBasis { measured, selfReported, inferred }
 
 enum ExperimentStatus { proposed, active, completed, cancelled }
 
-enum CoachActionType { createExperiment, saveMemory }
+enum CoachActionType { createExperiment, saveMemory, activateTrainingPlan }
 
 @freezed
 abstract class HealthCheckIn with _$HealthCheckIn {
