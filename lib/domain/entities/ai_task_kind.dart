@@ -3,7 +3,6 @@ enum AiTaskKind {
   quickRefine,
   coachChat,
   trainingPlan,
-  questNarrative,
   runDebrief,
   dataQuery,
 }

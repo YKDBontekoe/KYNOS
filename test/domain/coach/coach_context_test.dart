@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
-import 'package:kynos/domain/entities/gamification/quest.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/insight_confidence.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
@@ -68,46 +67,6 @@ void main() {
       expect(context.seedTopic, CoachSeedTopic.run);
     });
 
-    test('includes active quests only', () {
-      final quests = [
-        Quest(
-          id: '1',
-          type: QuestType.daily,
-          difficulty: QuestDifficulty.normal,
-          title: 'Morning miles',
-          narrative: 'Run',
-          objective: 'Run 5km',
-          status: QuestStatus.active,
-          xpReward: 50,
-          statRewards: const {},
-          generatedAt: DateTime(2026, 7, 6),
-          expiresAt: DateTime.now().add(const Duration(days: 1)),
-        ),
-        Quest(
-          id: '2',
-          type: QuestType.daily,
-          difficulty: QuestDifficulty.easy,
-          title: 'Done',
-          narrative: 'Done',
-          objective: 'Rest',
-          status: QuestStatus.completed,
-          xpReward: 10,
-          statRewards: const {},
-          generatedAt: DateTime(2026, 7, 5),
-          expiresAt: DateTime(2026, 7, 6),
-          completedAt: DateTime(2026, 7, 5),
-        ),
-      ];
-
-      final context = useCase.call(
-        healthHistory: const [],
-        recentRuns: const [],
-        activeQuests: quests,
-      );
-
-      expect(context.activeQuests, hasLength(1));
-      expect(context.activeQuests.first.id, '1');
-    });
   });
 
   group('CoachContextFormatter', () {

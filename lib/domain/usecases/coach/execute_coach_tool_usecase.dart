@@ -86,12 +86,6 @@ class ExecuteCoachToolUseCase {
             context,
             preferences,
           );
-        case 'get_character_progress':
-          return _contextQueries.getCharacterProgress(
-            toolCall,
-            context,
-            preferences,
-          );
         case 'get_personal_bests':
           return _contextQueries.getPersonalBests(
             toolCall,

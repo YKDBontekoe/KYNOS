@@ -6,8 +6,6 @@ enum CoachSeedTopic {
   run,
   training,
   gait,
-  quest,
-  characterClass,
   weeklyGoal,
   postRunDebrief,
 }

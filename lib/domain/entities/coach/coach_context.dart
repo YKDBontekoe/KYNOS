@@ -2,8 +2,6 @@ import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
-import 'package:kynos/domain/entities/gamification/quest.dart';
-import 'package:kynos/domain/entities/gamification/runner_character.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
@@ -22,14 +20,11 @@ class CoachContext {
     this.recentRuns = const [],
     this.todayInsights,
     this.trainingInsights,
-    this.character,
-    this.activeQuests = const [],
     this.weeklyMomentum,
     this.gaitCoefficients = const (b0: null, b1: null, b2: null),
     this.isGaitCalibrated = false,
     this.seedTopic = CoachSeedTopic.general,
     this.focusRunId,
-    this.focusQuestId,
     this.postRunDebriefSummary,
     this.athleteProfile,
     this.morningCheckIn,
@@ -48,14 +43,11 @@ class CoachContext {
   final List<WorkoutSession> recentRuns;
   final TodayInsights? todayInsights;
   final TrainingInsights? trainingInsights;
-  final RunnerCharacter? character;
-  final List<Quest> activeQuests;
   final WeeklyMomentum? weeklyMomentum;
   final ({double? b0, double? b1, double? b2}) gaitCoefficients;
   final bool isGaitCalibrated;
   final CoachSeedTopic seedTopic;
   final String? focusRunId;
-  final String? focusQuestId;
   final String? postRunDebriefSummary;
   final AthleteCoachProfile? athleteProfile;
   final MorningCheckIn? morningCheckIn;

@@ -3,10 +3,8 @@ import 'package:kynos/domain/entities/coach/coach_chat_seed.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/utils/acwr.dart';
 import 'package:kynos/domain/utils/weekly_momentum.dart';
-import 'package:kynos/shared/providers/character_providers.dart';
 import 'package:kynos/shared/providers/coach_personalization_provider.dart';
 import 'package:kynos/shared/providers/coach_usecase_providers.dart';
-import 'package:kynos/shared/providers/daily_quests_provider.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
 import 'package:kynos/shared/providers/nexus_lab_provider.dart';
@@ -32,8 +30,6 @@ Future<CoachContext> coachContextForConversation(
   final recentRuns = await ref.watch(
     recentRunsProvider(days: 60, limit: 5).future,
   );
-  final character = await ref.watch(runnerCharacterProvider.future);
-  final quests = await ref.watch(dailyQuestsProvider.future);
   final healthCoachData = await ref.watch(healthCoachDataProvider.future);
   final healthBrief = await ref.watch(dailyHealthBriefProvider.future);
 
@@ -83,8 +79,6 @@ Future<CoachContext> coachContextForConversation(
       .call(
         healthHistory: healthHistory,
         recentRuns: recentRuns,
-        character: character,
-        activeQuests: quests,
         todayInsights: todayInsights,
         trainingInsights: trainingInsights,
         weeklyMomentum: weeklyMomentum,

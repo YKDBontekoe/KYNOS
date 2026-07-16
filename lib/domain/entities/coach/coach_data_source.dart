@@ -6,7 +6,6 @@ enum CoachDataSource {
   weeklyMomentum('Weekly momentum'),
   todayInsights('Today insights'),
   trainingInsights('Training insights'),
-  characterQuests('Character & quests'),
   gaitBiomechanics('Gait biomechanics'),
   athletePreferences('Athlete preferences'),
   postRunDebrief('Post-run debrief'),

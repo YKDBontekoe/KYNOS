@@ -94,15 +94,6 @@ abstract final class CoachContextFormatter {
         );
       }
 
-      final character = context.character;
-      if (character != null) {
-        final weakest = character.stats.weakest;
-        sections.add(
-          'Character: ${character.characterClass.name} Lv${character.level}, '
-          'weakest stat ${weakest.fullName}',
-        );
-      }
-
       final insights = context.todayInsights;
       if (insights != null) {
         sections.add('Today insight: ${insights.readinessBrief}');
@@ -129,10 +120,6 @@ abstract final class CoachContextFormatter {
           'Gait model: β₀=${c.b0?.toStringAsFixed(3)}, '
           'β₁=${c.b1?.toStringAsFixed(4)}, β₂=${c.b2?.toStringAsFixed(4)}',
         );
-      }
-
-      for (final quest in context.activeQuests) {
-        sections.add('Active quest: ${quest.title} — ${quest.objective}');
       }
 
       final debrief = context.postRunDebriefSummary;

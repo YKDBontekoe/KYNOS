@@ -51,11 +51,6 @@ class DescribeCoachContextUseCase {
         context.trainingInsights == null
             ? 'No training insights'
             : context.trainingInsights!.sessionIntent,
-      CoachDataSource.characterQuests =>
-        context.character == null
-            ? 'No character data'
-            : '${context.character!.characterClass.name} Lv${context.character!.level}'
-                  '${context.activeQuests.isNotEmpty ? ' · ${context.activeQuests.length} quests' : ''}',
       CoachDataSource.gaitBiomechanics =>
         context.isGaitCalibrated
             ? 'Gait model calibrated'

@@ -4,7 +4,6 @@ library;
 export 'animated_async_content.dart';
 export 'animated_progress_bar.dart';
 export 'charts/health_trend_chart.dart';
-export 'daily_quest_teaser.dart';
 export 'glass_card.dart';
 export 'kynos_bottom_nav.dart';
 export 'kynos_card.dart';

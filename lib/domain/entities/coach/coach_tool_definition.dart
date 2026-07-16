@@ -110,12 +110,6 @@ abstract final class CoachAgentToolCatalog {
       actionLabel: 'Reviewing your training load',
     ),
     CoachToolDefinition(
-      name: 'get_character_progress',
-      purpose: 'Level, class, weakest stat, active quests',
-      argsHint: 'none',
-      actionLabel: 'Checking your character progress',
-    ),
-    CoachToolDefinition(
       name: 'get_personal_bests',
       purpose: 'Recent personal-best callouts',
       argsHint: 'none',

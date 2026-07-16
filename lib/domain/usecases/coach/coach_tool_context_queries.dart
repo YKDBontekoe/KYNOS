@@ -59,37 +59,6 @@ class CoachToolContextQueries {
     );
   }
 
-  CoachToolResult getCharacterProgress(
-    CoachToolCall call,
-    CoachContext context,
-    CoachContextPreferences prefs,
-  ) {
-    if (!prefs.isEnabled(CoachDataSource.characterQuests)) {
-      return CoachToolResultHelpers.disabled(call, CoachDataSource.characterQuests);
-    }
-
-    final character = context.character;
-    if (character == null) {
-      return CoachToolResult(
-        toolCall: call,
-        isError: false,
-        promptSummary: 'No character data yet.',
-        displayLabel: 'No character yet',
-      );
-    }
-
-    final quests = context.activeQuests.map((q) => q.title).join(', ');
-    final summary = 'Lv${character.level} ${character.characterClass.name}, '
-        'weakest stat ${character.stats.weakest.fullName}.'
-        '${quests.isEmpty ? '' : ' Active quests: $quests.'}';
-    return CoachToolResult(
-      toolCall: call,
-      isError: false,
-      promptSummary: summary,
-      displayLabel: 'Character progress checked',
-    );
-  }
-
   CoachToolResult getPersonalBests(
     CoachToolCall call,
     CoachContext context,

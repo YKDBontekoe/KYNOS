@@ -36,12 +36,6 @@ class FilterCoachContextUseCase {
       trainingInsights: preferences.isEnabled(CoachDataSource.trainingInsights)
           ? context.trainingInsights
           : null,
-      character: preferences.isEnabled(CoachDataSource.characterQuests)
-          ? context.character
-          : null,
-      activeQuests: preferences.isEnabled(CoachDataSource.characterQuests)
-          ? context.activeQuests
-          : const [],
       weeklyMomentum: preferences.isEnabled(CoachDataSource.weeklyMomentum)
           ? context.weeklyMomentum
           : null,
@@ -53,7 +47,6 @@ class FilterCoachContextUseCase {
           : false,
       seedTopic: context.seedTopic,
       focusRunId: context.focusRunId,
-      focusQuestId: context.focusQuestId,
       postRunDebriefSummary:
           preferences.isEnabled(CoachDataSource.postRunDebrief)
           ? context.postRunDebriefSummary

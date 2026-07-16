@@ -137,19 +137,6 @@ void main() {
     });
   });
 
-  group('get_character_progress', () {
-    test('reports no character data when absent', () async {
-      final result = await useCase.call(
-        toolCall: const CoachToolCall(name: 'get_character_progress'),
-        context: context,
-        preferences: allEnabled(),
-      );
-
-      expect(result.isError, isFalse);
-      expect(result.promptSummary, contains('No character'));
-    });
-  });
-
   group('get_personal_bests', () {
     test('reports no new personal bests with sparse history', () async {
       final result = await useCase.call(

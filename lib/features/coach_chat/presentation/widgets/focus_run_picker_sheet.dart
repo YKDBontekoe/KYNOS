@@ -109,8 +109,7 @@ class FocusRunPickerSheet extends ConsumerWidget {
       updatedAt: DateTime.now(),
       clearSeed: conversation.seed != null &&
           (conversation.seed!.message == null ||
-              conversation.seed!.message!.isEmpty) &&
-          conversation.seed!.questId == null,
+              conversation.seed!.message!.isEmpty),
     );
     await ref.read(coachConversationsProvider.notifier).updateSummary(updated);
     ref.invalidate(activeCoachConversationProvider);
