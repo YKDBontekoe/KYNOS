@@ -11,6 +11,7 @@ import 'package:kynos/shared/providers/nexus_lab_provider.dart';
 import 'package:kynos/shared/providers/post_run_debrief_provider.dart';
 import 'package:kynos/shared/providers/today_insights_provider.dart';
 import 'package:kynos/shared/providers/training_insights_provider.dart';
+import 'package:kynos/shared/providers/training_plan_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'coach_context_provider.g.dart';
@@ -32,6 +33,8 @@ Future<CoachContext> coachContextForConversation(
   );
   final healthCoachData = await ref.watch(healthCoachDataProvider.future);
   final healthBrief = await ref.watch(dailyHealthBriefProvider.future);
+  final activePlan = await ref.watch(trainingPlanDataProvider.future);
+  final todayDirective = ref.watch(todayDirectiveProvider);
 
   final todayInsights = ref.watch(todayInsightsStateProvider).value?.insights;
   final trainingInsights = ref
@@ -93,5 +96,7 @@ Future<CoachContext> coachContextForConversation(
         healthCheckIns: healthCoachData.checkIns,
         coachMemories: healthCoachData.memories,
         wellbeingExperiments: healthCoachData.experiments,
+        activePlan: activePlan,
+        todayDirective: todayDirective,
       );
 }

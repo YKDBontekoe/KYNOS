@@ -26,6 +26,29 @@ abstract final class CoachContextFormatter {
       'Readiness: ${context.readinessScore.round()}/100 — ${context.readinessSummary}',
     );
 
+    final plan = context.activePlan;
+    final directive = context.todayDirective;
+    if (plan != null || directive != null) {
+      final lines = <String>[];
+      if (plan != null) {
+        lines.add(
+          'Active plan: ${plan.title} · goal ${plan.goal} · '
+          '${plan.weeks} weeks'
+          '${plan.weeklyVolumeTargetKm != null ? ' · ~${plan.weeklyVolumeTargetKm!.toStringAsFixed(0)} km/wk' : ''}',
+        );
+      }
+      if (directive != null) {
+        lines.add(
+          'Today’s directive: ${directive.headline}. ${directive.detail}'
+          '${directive.forcedRecovery ? ' (recovery override)' : ''}',
+        );
+        if (directive.rationale.isNotEmpty) {
+          lines.add('Why: ${directive.rationale.take(3).join('; ')}');
+        }
+      }
+      sections.add(lines.join('\n'));
+    }
+
     final healthBrief = context.dailyHealthBrief;
     if (healthBrief != null) {
       sections.add(

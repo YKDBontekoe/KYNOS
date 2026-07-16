@@ -89,6 +89,9 @@ class HealthCoachData extends _$HealthCoachData {
           ),
         );
         return;
+      case CoachActionType.activateTrainingPlan:
+        // Handled by [TrainingPlanData.activateFromAction].
+        return;
     }
   }
 

@@ -69,6 +69,12 @@ class FilterCoachContextUseCase {
           preferences.isEnabled(CoachDataSource.wellbeingExperiments)
           ? context.wellbeingExperiments
           : const [],
+      activePlan: preferences.isEnabled(CoachDataSource.trainingPlan)
+          ? context.activePlan
+          : null,
+      todayDirective: preferences.isEnabled(CoachDataSource.trainingPlan)
+          ? context.todayDirective
+          : null,
     );
   }
 

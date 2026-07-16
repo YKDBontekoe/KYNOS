@@ -36,9 +36,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final List<OnboardingItem> items = const [
     OnboardingItem(
       imagePath: 'assets/images/onboarding_health_data.png',
-      title: 'Understand Your Energy',
+      title: 'Your Coach Starts Here',
       description:
-          'Connect sleep, recovery, movement, and how you feel into one personal daily picture.',
+          'Open KYNOS to a clear session for today — not a dashboard of charts. '
+          'Connect health data so the coach can prescribe with real signals.',
     ),
     OnboardingItem(
       imagePath: 'assets/images/onboarding_privacy.png',

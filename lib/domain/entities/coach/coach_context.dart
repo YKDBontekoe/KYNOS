@@ -2,6 +2,8 @@ import 'package:kynos/domain/entities/coach/athlete_coach_profile.dart';
 import 'package:kynos/domain/entities/coach/coach_seed_topic.dart';
 import 'package:kynos/domain/entities/coach/daily_coach_brief.dart';
 import 'package:kynos/domain/entities/coach/morning_check_in.dart';
+import 'package:kynos/domain/entities/coach/today_directive.dart';
+import 'package:kynos/domain/entities/coach/training_plan.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
 import 'package:kynos/domain/entities/insights/today_insights.dart';
@@ -33,6 +35,8 @@ class CoachContext {
     this.healthCheckIns = const [],
     this.coachMemories = const [],
     this.wellbeingExperiments = const [],
+    this.activePlan,
+    this.todayDirective,
   });
 
   final double readinessScore;
@@ -56,6 +60,8 @@ class CoachContext {
   final List<HealthCheckIn> healthCheckIns;
   final List<CoachMemory> coachMemories;
   final List<WellbeingExperiment> wellbeingExperiments;
+  final TrainingPlan? activePlan;
+  final TodayDirective? todayDirective;
 
   /// Short badge line for the coach app bar.
   String get contextBadge {

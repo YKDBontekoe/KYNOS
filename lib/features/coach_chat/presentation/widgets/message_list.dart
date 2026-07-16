@@ -4,16 +4,20 @@ import 'package:gap/gap.dart';
 import 'package:kynos/core/theme/theme.dart';
 import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
+import 'package:kynos/domain/entities/coach/today_directive.dart';
+import 'package:kynos/domain/entities/coach/training_plan.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/today_directive_card.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
+import 'package:kynos/shared/providers/training_plan_providers.dart';
 import 'package:kynos/shared/widgets/kynos_loading_line.dart';
 import 'package:kynos/shared/widgets/kynos_user_bubble.dart';
 
@@ -171,6 +175,9 @@ class CoachChatEmptyState extends ConsumerWidget {
     final brief = ref.watch(dailyHealthBriefProvider);
     final summary = ref.watch(healthSummaryProvider);
     final coachData = ref.watch(healthCoachDataProvider).value;
+    final directive = ref.watch(todayDirectiveProvider);
+    final accountability = ref.watch(coachAccountabilityProvider);
+    final plan = ref.watch(trainingPlanDataProvider).value;
     final kynos = context.kynosTheme;
     final now = DateTime.now();
     final todayCheckIn = coachData?.checkIns
@@ -198,6 +205,12 @@ class CoachChatEmptyState extends ConsumerWidget {
       ref.invalidate(dailyHealthBriefProvider);
     }
 
+    final suggestions = _emptyStateSuggestions(
+      directive: directive,
+      accountability: accountability,
+      plan: plan,
+    );
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         Spacing.md,
@@ -207,7 +220,7 @@ class CoachChatEmptyState extends ConsumerWidget {
       ),
       children: [
         Text(
-          'How can I help?',
+          'Today’s session',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.6,
@@ -215,7 +228,8 @@ class CoachChatEmptyState extends ConsumerWidget {
         ),
         const Gap(Spacing.xs),
         Text(
-          readinessLine ?? 'Ask about your recovery, training, or next run.',
+          readinessLine ??
+              'Own the day — confirm the session, or ask why it matters.',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -223,6 +237,18 @@ class CoachChatEmptyState extends ConsumerWidget {
               ),
         ),
         const Gap(Spacing.lg),
+        TodayDirectiveCard(
+          directive: directive,
+          onAsk: (prompt) {
+            if (accountability.morningBriefDue) {
+              ref
+                  .read(coachAccountabilityProvider.notifier)
+                  .markMorningBriefShown();
+            }
+            onSuggestionTap(prompt);
+          },
+        ),
+        const Gap(Spacing.md),
         brief.when(
           loading: () => const KynosLoadingLine(
             label: 'Preparing today’s coaching note…',
@@ -243,19 +269,52 @@ class CoachChatEmptyState extends ConsumerWidget {
               ),
         ),
         const Gap(Spacing.sm),
-        for (final suggestion in const [
-          'What should I do today?',
-          'Why has my energy changed?',
-          'Compare this week with last week',
-        ]) ...[
+        for (final suggestion in suggestions) ...[
           _CoachPrompt(
             label: suggestion,
-            onTap: () => onSuggestionTap(suggestion),
+            onTap: () {
+              if (accountability.morningBriefDue) {
+                ref
+                    .read(coachAccountabilityProvider.notifier)
+                    .markMorningBriefShown();
+              }
+              onSuggestionTap(suggestion);
+            },
           ),
           const Gap(Spacing.sm),
         ],
       ],
     );
+  }
+
+  List<String> _emptyStateSuggestions({
+    required TodayDirective directive,
+    required CoachAccountabilityState accountability,
+    required TrainingPlan? plan,
+  }) {
+    final suggestions = <String>[];
+    if (accountability.morningBriefDue) {
+      suggestions.add(
+        'Morning brief: what should I lock in for today?',
+      );
+    }
+    if (accountability.yesterdaySkipped) {
+      suggestions.add(
+        'I skipped yesterday — how do we protect the week?',
+      );
+    }
+    suggestions.add(directive.promptSeed);
+    if (directive.source != TodayDirectiveSource.buildPlanCta) {
+      suggestions.add('Why is today’s session prescribed this way?');
+    }
+    if (plan != null) {
+      suggestions.add('Show me this week on my plan');
+    } else if (!suggestions.contains(
+      'Build my multi-week training plan based on my goals.',
+    )) {
+      suggestions.add('Build my multi-week training plan based on my goals.');
+    }
+    return suggestions.take(4).toList(growable: false);
   }
 }
 

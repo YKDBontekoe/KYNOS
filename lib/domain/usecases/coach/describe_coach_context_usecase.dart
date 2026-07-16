@@ -3,6 +3,7 @@ import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/coach/coach_context_preferences.dart';
 import 'package:kynos/domain/entities/coach/coach_data_source.dart';
 import 'package:kynos/domain/entities/coach/coach_data_source_snapshot.dart';
+import 'package:kynos/domain/entities/coach/today_directive.dart';
 
 /// Builds UI metadata for coach context sources.
 class DescribeCoachContextUseCase {
@@ -75,7 +76,22 @@ class DescribeCoachContextUseCase {
         context.wellbeingExperiments.isEmpty
             ? 'No wellbeing experiments'
             : '${context.wellbeingExperiments.length} experiments',
+      CoachDataSource.trainingPlan => _trainingPlanPreview(context),
     };
+  }
+
+  String _trainingPlanPreview(CoachContext context) {
+    final plan = context.activePlan;
+    if (plan == null) {
+      return context.todayDirective?.source == TodayDirectiveSource.buildPlanCta
+          ? 'No plan — build CTA ready'
+          : 'No active plan';
+    }
+    final directive = context.todayDirective;
+    if (directive != null) {
+      return '${plan.title} · today: ${directive.headline}';
+    }
+    return '${plan.title} · ${plan.weeks} weeks';
   }
 
   String _runsPreview(CoachContext context) {
