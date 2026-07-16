@@ -2,6 +2,7 @@ import 'package:kynos/domain/entities/ai_inference_backend.dart';
 import 'package:kynos/domain/entities/ai_task_kind.dart';
 import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/domain/entities/cloud_llm_endpoint.dart';
 import 'package:kynos/domain/entities/coach/coach_context.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
 import 'package:kynos/domain/entities/health_summary.dart';
@@ -19,12 +20,14 @@ class HybridAiCoachConfig {
     required this.cloudDataLevel,
     required this.selectedModelId,
     required this.selectedModelName,
+    this.cloudBaseUrl = CloudLlmEndpoint.openRouterBaseUrl,
   });
 
   final bool cloudTasksEnabled;
   final CloudDataLevel cloudDataLevel;
   final String? selectedModelId;
   final String? selectedModelName;
+  final String cloudBaseUrl;
 
   bool get canUseCloud =>
       cloudTasksEnabled &&
@@ -34,7 +37,7 @@ class HybridAiCoachConfig {
 
 typedef HybridAiCoachConfigReader = Future<HybridAiCoachConfig> Function();
 
-/// Routes coach requests between on-device Gemma (isolate) and OpenRouter.
+/// Routes coach requests between on-device Gemma (isolate) and cloud LLM.
 class HybridAiCoachRepository implements AiCoachRepository {
   HybridAiCoachRepository({
     required AiCoachRepository localRepository,
@@ -74,13 +77,13 @@ class HybridAiCoachRepository implements AiCoachRepository {
     CloudDataLevel? cloudDataLevelOverride,
   }) async* {
     final config = await _configReader();
-    final apiKey = await _keyStorage.readOpenRouterKey();
+    final apiKey = await _keyStorage.readCloudApiKey();
     final hasKey = apiKey != null && apiKey.isNotEmpty;
     final cloudAvailable =
         config.canUseCloud && hasKey && config.selectedModelId != null;
 
     final useCloud = switch (preferredBackend) {
-      AiInferenceBackend.openRouter => true,
+      AiInferenceBackend.cloud => true,
       AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly => false,
       null => false,
     };
@@ -88,13 +91,15 @@ class HybridAiCoachRepository implements AiCoachRepository {
     if (useCloud) {
       if (!cloudAvailable) {
         throw StateError(
-          'Cloud coach is not configured. Add an OpenRouter key and model in Settings.',
+          'Cloud coach is not configured. Add a cloud API key, base URL, '
+          'and model in Settings.',
         );
       }
-      lastBackend = AiInferenceBackend.openRouter;
+      lastBackend = AiInferenceBackend.cloud;
       yield* _streamCloud(
         apiKey: apiKey,
         modelId: cloudModelIdOverride ?? config.selectedModelId!,
+        baseUrl: config.cloudBaseUrl,
         userMessage: userMessage,
         healthContext: healthContext,
         coachContext: coachContext,
@@ -122,6 +127,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
   Stream<AiChunk> _streamCloud({
     required String apiKey,
     required String modelId,
+    required String baseUrl,
     required String userMessage,
     required List<HealthSummary>? healthContext,
     required CoachContext? coachContext,
@@ -149,6 +155,7 @@ class HybridAiCoachRepository implements AiCoachRepository {
     final stream = _cloud.streamCompletion(
       apiKey: apiKey,
       modelId: modelId,
+      baseUrl: baseUrl,
       systemPrompt: _cloudSystemPrompt,
       userPrompt: userTurn.toString(),
     );

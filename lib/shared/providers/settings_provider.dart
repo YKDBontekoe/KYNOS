@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kynos/domain/catalog/on_device_model_catalog.dart';
 import 'package:kynos/domain/entities/cloud_data_level.dart';
+import 'package:kynos/domain/entities/cloud_llm_endpoint.dart';
 import 'package:kynos/shared/providers/shared_preferences_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,6 +13,7 @@ class SettingsState {
     required this.languageCode,
     required this.cloudTasksEnabled,
     required this.cloudDataLevel,
+    required this.cloudBaseUrl,
     required this.selectedCloudModelId,
     required this.selectedCloudModelName,
     required this.selectedLocalModelId,
@@ -23,6 +25,7 @@ class SettingsState {
   final String languageCode;
   final bool cloudTasksEnabled;
   final CloudDataLevel cloudDataLevel;
+  final String cloudBaseUrl;
   final String? selectedCloudModelId;
   final String? selectedCloudModelName;
   final String selectedLocalModelId;
@@ -37,6 +40,8 @@ class SettingsState {
   bool get isSelectedLocalModelInstalled =>
       installedLocalModelId != null &&
       installedLocalModelId == selectedLocalModelId;
+
+  bool get isOpenRouterEndpoint => CloudLlmEndpoint.isOpenRouter(cloudBaseUrl);
 }
 
 @Riverpod(keepAlive: true)
@@ -45,6 +50,7 @@ class Settings extends _$Settings {
   static const _languageKey = 'languageCode';
   static const _cloudTasksKey = 'cloudTasksEnabled';
   static const _cloudDataLevelKey = 'cloudDataLevel';
+  static const _cloudBaseUrlKey = 'cloudBaseUrl';
   static const _cloudModelIdKey = 'selectedCloudModelId';
   static const _cloudModelNameKey = 'selectedCloudModelName';
   static const _localModelIdKey = 'selectedLocalModelId';
@@ -57,6 +63,7 @@ class Settings extends _$Settings {
     final levelName = prefs.getString(_cloudDataLevelKey);
     final defaultModel =
         OnDeviceModelCatalog.byId(OnDeviceModelCatalog.defaultModelId);
+    final storedBaseUrl = prefs.getString(_cloudBaseUrlKey);
     return SettingsState(
       isDarkMode: prefs.getBool(_themeKey) ?? false,
       languageCode: prefs.getString(_languageKey) ?? 'en',
@@ -65,6 +72,9 @@ class Settings extends _$Settings {
         (l) => l.name == levelName,
         orElse: () => CloudDataLevel.minimal,
       ),
+      cloudBaseUrl: (storedBaseUrl == null || storedBaseUrl.isEmpty)
+          ? CloudLlmEndpoint.openRouterBaseUrl
+          : CloudLlmEndpoint.normalizeBaseUrl(storedBaseUrl),
       selectedCloudModelId: prefs.getString(_cloudModelIdKey),
       selectedCloudModelName: prefs.getString(_cloudModelNameKey),
       selectedLocalModelId:
@@ -101,6 +111,15 @@ class Settings extends _$Settings {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString(_cloudDataLevelKey, level.name);
     state = _copy(state, cloudDataLevel: level);
+  }
+
+  Future<void> updateCloudBaseUrl(String baseUrl) async {
+    final normalized = CloudLlmEndpoint.normalizeBaseUrl(baseUrl);
+    if (normalized.isEmpty) return;
+    if (state.cloudBaseUrl == normalized) return;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString(_cloudBaseUrlKey, normalized);
+    state = _copy(state, cloudBaseUrl: normalized);
   }
 
   Future<void> updateSelectedCloudModel({
@@ -146,6 +165,7 @@ class Settings extends _$Settings {
       languageCode: state.languageCode,
       cloudTasksEnabled: state.cloudTasksEnabled,
       cloudDataLevel: state.cloudDataLevel,
+      cloudBaseUrl: state.cloudBaseUrl,
       selectedCloudModelId: null,
       selectedCloudModelName: null,
       selectedLocalModelId: state.selectedLocalModelId,
@@ -160,6 +180,7 @@ class Settings extends _$Settings {
     String? languageCode,
     bool? cloudTasksEnabled,
     CloudDataLevel? cloudDataLevel,
+    String? cloudBaseUrl,
     String? selectedCloudModelId,
     String? selectedCloudModelName,
     String? selectedLocalModelId,
@@ -171,6 +192,7 @@ class Settings extends _$Settings {
       languageCode: languageCode ?? current.languageCode,
       cloudTasksEnabled: cloudTasksEnabled ?? current.cloudTasksEnabled,
       cloudDataLevel: cloudDataLevel ?? current.cloudDataLevel,
+      cloudBaseUrl: cloudBaseUrl ?? current.cloudBaseUrl,
       selectedCloudModelId:
           selectedCloudModelId ?? current.selectedCloudModelId,
       selectedCloudModelName:

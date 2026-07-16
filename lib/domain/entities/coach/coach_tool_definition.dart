@@ -159,6 +159,28 @@ abstract final class CoachAgentToolCatalog {
   static String actionLabelFor(String name) =>
       byName(name)?.actionLabel ?? 'Using $name';
 
+  /// Tiny tool subset for constrained RAM/thermal devices.
+  static const List<CoachToolDefinition> constrainedMicroDefinitions = [
+    CoachToolDefinition(
+      name: 'get_today_directive',
+      purpose: 'Today’s prescribed session',
+      argsHint: 'none',
+      actionLabel: 'Resolving today’s directive',
+    ),
+    CoachToolDefinition(
+      name: 'get_daily_health_brief',
+      purpose: 'Today’s wellbeing brief',
+      argsHint: 'none',
+      actionLabel: 'Reviewing today’s health brief',
+    ),
+    CoachToolDefinition(
+      name: 'get_training_load',
+      purpose: 'ACWR and weekly load',
+      argsHint: 'none',
+      actionLabel: 'Reviewing your training load',
+    ),
+  ];
+
   /// Instruction block appended to the coach system prompt.
   static String get systemPromptBlock {
     final lines = definitions
@@ -169,5 +191,16 @@ abstract final class CoachAgentToolCatalog {
         'To call one, reply with ONLY: TOOL_CALL: {"name":"<tool>","arguments":{...}}\n'
         'Then wait for the result before calling another tool or answering. '
         'Never mention tools or TOOL_CALL in your final answer to the person.';
+  }
+
+  /// Ultra-compact tool block for constrained-tier micro-agent (~200 chars tools).
+  static String get constrainedSystemPromptBlock {
+    final lines = constrainedMicroDefinitions
+        .map((d) => '- ${d.name}: ${d.purpose}')
+        .join('\n');
+    return 'Micro-tools (call at most one, then answer):\n$lines\n'
+        'To call: TOOL_CALL: {"name":"<tool>","arguments":{}}\n'
+        'Prefer answering from MORNING facts when present. '
+        'Never mention TOOL_CALL in the final answer.';
   }
 }

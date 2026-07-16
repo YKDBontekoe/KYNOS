@@ -12,6 +12,7 @@ import 'package:kynos/domain/entities/coach/coach_tool_call.dart';
 import 'package:kynos/domain/entities/coach/coach_tool_definition.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
 import 'package:kynos/domain/entities/health/health_visual_artifact.dart';
+import 'package:kynos/domain/usecases/coach/build_morning_fact_pack_usecase.dart';
 import 'package:kynos/domain/utils/ai_inference_error_policy.dart';
 import 'package:kynos/domain/utils/coach_fallback_reply.dart';
 import 'package:kynos/domain/utils/coach_tool_call_parser.dart';
@@ -37,6 +38,7 @@ const _inferenceTimeout = Duration(seconds: 120);
 /// Maximum agentic tool calls per assistant turn — bounds latency and keeps
 /// on-device token budgets in check (see [GemmaInferenceLimits]).
 const _maxToolStepsPerTurn = 4;
+const _maxConstrainedToolStepsPerTurn = 1;
 const _toolTimeout = Duration(seconds: 12);
 
 @Riverpod(keepAlive: true)
@@ -245,10 +247,16 @@ class CoachChat extends _$CoachChat {
 
       final tier = await _resolveInferenceTier();
       final prefersCloud =
-          preferredBackend == AiInferenceBackend.openRouter ||
+          preferredBackend == AiInferenceBackend.cloud ||
           settings.backendMode == CoachBackendMode.cloud;
+      // Constrained devices get a 1-step micro-tool loop; full/cloud keep 4.
       final enableToolLoop =
-          prefersCloud || tier == GemmaInferenceTier.full;
+          prefersCloud ||
+          tier == GemmaInferenceTier.full ||
+          tier == GemmaInferenceTier.constrained;
+      final maxToolSteps = prefersCloud || tier == GemmaInferenceTier.full
+          ? _maxToolStepsPerTurn
+          : _maxConstrainedToolStepsPerTurn;
 
       await _streamAgenticAnswer(
         assistantId: assistantId,
@@ -259,6 +267,7 @@ class CoachChat extends _$CoachChat {
         preferredBackend: preferredBackend,
         cloudLevel: cloudLevel,
         enableToolLoop: enableToolLoop,
+        maxToolSteps: maxToolSteps,
       );
 
       if (_cancelRequested) return;
@@ -290,9 +299,9 @@ class CoachChat extends _$CoachChat {
         isCloudCoachConfiguredProvider.future,
       );
       final canSwitchToCloud =
-          cloudConfigured && attemptedBackend != AiInferenceBackend.openRouter;
+          cloudConfigured && attemptedBackend != AiInferenceBackend.cloud;
       final canSwitchToOnDevice =
-          attemptedBackend == AiInferenceBackend.openRouter;
+          attemptedBackend == AiInferenceBackend.cloud;
 
       final friendly = AiInferenceErrorPolicy.userFriendlyMessage(
         e,
@@ -337,12 +346,20 @@ class CoachChat extends _$CoachChat {
     required AiInferenceBackend? preferredBackend,
     required CloudDataLevel cloudLevel,
     required bool enableToolLoop,
+    int maxToolSteps = _maxToolStepsPerTurn,
   }) async {
     final sendCoach = ref.read(sendCoachMessageUseCaseProvider);
     final executeTool = ref.read(executeCoachToolUseCaseProvider);
     final chatRepository = ref.read(chatAiCoachRepositoryProvider);
 
-    var nextUserMessage = userMessage;
+    // Seed constrained turns with a Dart-computed morning fact pack so the
+    // tiny model often answers without calling tools.
+    final morningPack = const BuildMorningFactPackUseCase().call(
+      context: coachContext,
+    );
+    var nextUserMessage = maxToolSteps <= _maxConstrainedToolStepsPerTurn
+        ? '${morningPack.promptBlock}\n\n$userMessage'
+        : userMessage;
     CoachContext? contextForThisCall = coachContext;
     final toolSteps = <CoachToolStep>[];
     final toolResults = <CoachToolResult>[];
@@ -351,7 +368,7 @@ class CoachChat extends _$CoachChat {
     final pendingActions = <PendingCoachAction>[];
     final executedCalls = <String>{};
 
-    final maxSteps = enableToolLoop ? _maxToolStepsPerTurn : 0;
+    final maxSteps = enableToolLoop ? maxToolSteps : 0;
 
     for (var step = 0; step <= maxSteps; step++) {
       if (_cancelRequested) return;
@@ -412,6 +429,30 @@ class CoachChat extends _$CoachChat {
       }
 
       final callKey = '${toolCall.name}:${jsonEncode(toolCall.arguments)}';
+      final allowedOnConstrained = CoachAgentToolCatalog
+          .constrainedMicroDefinitions
+          .any((d) => d.name == toolCall.name);
+      if (maxToolSteps <= _maxConstrainedToolStepsPerTurn &&
+          !allowedOnConstrained) {
+        toolResults.add(
+          CoachToolResult(
+            toolCall: toolCall,
+            isError: true,
+            promptSummary:
+                'That tool is unavailable on this device. '
+                'Answer using MORNING facts or call one micro-tool only.',
+            displayLabel: 'Tool not available here',
+          ),
+        );
+        nextUserMessage = _buildToolFollowUpPrompt(
+          originalQuestion: userMessage,
+          toolResults: toolResults,
+          isFinalAttempt: true,
+          backend: chatRepository.lastBackend,
+          cloudLevel: cloudLevel,
+        );
+        continue;
+      }
       if (!executedCalls.add(callKey)) {
         toolResults.add(
           CoachToolResult(
@@ -523,7 +564,7 @@ class CoachChat extends _$CoachChat {
     AiInferenceBackend backend,
     CloudDataLevel cloudLevel,
   ) {
-    if (backend != AiInferenceBackend.openRouter) return summary;
+    if (backend != AiInferenceBackend.cloud) return summary;
     return switch (cloudLevel) {
       CloudDataLevel.none =>
         'The requested analysis completed locally, but health-derived results '
@@ -610,8 +651,8 @@ class CoachChat extends _$CoachChat {
   AiInferenceBackend? _alternateBackend(AiInferenceBackend? attempted) {
     return switch (attempted) {
       AiInferenceBackend.onDevice ||
-      AiInferenceBackend.rulesOnly => AiInferenceBackend.openRouter,
-      AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
+      AiInferenceBackend.rulesOnly => AiInferenceBackend.cloud,
+      AiInferenceBackend.cloud => AiInferenceBackend.onDevice,
       null => null,
     };
   }

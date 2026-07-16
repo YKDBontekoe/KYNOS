@@ -14,9 +14,11 @@ const _onDeviceResponseFormat = CoachPersonaPrompt.responseFormat;
 /// Legacy alias kept for callers/tests that reference the base instruction.
 const coachSystemInstruction = _baseCoachSystemInstruction;
 
-/// Tier-aware system instruction. Agentic tool calling is only offered on
-/// [GemmaInferenceTier.full] devices — lower tiers have too little context
-/// budget (see [GemmaInferenceLimits]) to reliably run a multi-step tool loop.
+/// Tier-aware system instruction.
+///
+/// Full tier gets the complete tool catalog. Constrained tier gets a tiny
+/// 3-tool micro catalog so small models stay agentic without blowing the
+/// prompt budget (see [GemmaInferenceLimits]).
 String coachSystemInstructionFor(GemmaInferenceTier tier) {
   return switch (tier) {
     GemmaInferenceTier.full =>
@@ -24,7 +26,9 @@ String coachSystemInstructionFor(GemmaInferenceTier tier) {
           '$_onDeviceResponseFormat\n\n'
           '${CoachAgentToolCatalog.systemPromptBlock}',
     GemmaInferenceTier.constrained =>
-      '$_constrainedCoachSystemInstruction\n\n$_onDeviceResponseFormat',
+      '$_constrainedCoachSystemInstruction\n\n'
+          '$_onDeviceResponseFormat\n\n'
+          '${CoachAgentToolCatalog.constrainedSystemPromptBlock}',
     GemmaInferenceTier.disabled => _baseCoachSystemInstruction,
   };
 }

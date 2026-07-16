@@ -17,13 +17,13 @@ class InferenceModeBar extends ConsumerWidget {
 
   String _missingCloudStep(SettingsState settings, bool hasKey) {
     if (!settings.cloudTasksEnabled) {
-      return 'Turn on OpenRouter fallback in Settings, then pick a model.';
+      return 'Turn on cloud coaching in Settings, then pick a model.';
     }
-    if (!hasKey) return 'Add your OpenRouter API key in Settings to continue.';
+    if (!hasKey) return 'Add your cloud API key in Settings to continue.';
     if (!settings.hasSelectedCloudModel) {
       return 'Choose a cloud model to finish setup.';
     }
-    return 'Add an OpenRouter key and model in Settings.';
+    return 'Add a cloud API key, base URL, and model in Settings.';
   }
 
   @override

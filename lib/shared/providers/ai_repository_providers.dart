@@ -4,7 +4,7 @@ import 'package:kynos/domain/repositories/cloud_ai_repository.dart';
 import 'package:kynos/domain/repositories/openrouter_models_repository.dart';
 import 'package:kynos/infrastructure/ai/hybrid_ai_coach_repository.dart';
 import 'package:kynos/infrastructure/ai/isolate_ai_coach_repository.dart';
-import 'package:kynos/infrastructure/ai/openrouter/openrouter_cloud_ai_repository.dart';
+import 'package:kynos/infrastructure/ai/openai_compatible/openai_compatible_cloud_ai_repository.dart';
 import 'package:kynos/infrastructure/ai/openrouter/openrouter_models_repository_impl.dart';
 import 'package:kynos/shared/providers/openrouter_api_key_provider.dart';
 import 'package:kynos/shared/providers/settings_provider.dart';
@@ -16,12 +16,13 @@ export 'package:kynos/infrastructure/ai/gemma/gemma_device_ram_probe.dart'
 export 'package:kynos/infrastructure/ai/gemma/gemma_runtime.dart'
     show GemmaRuntime;
 
-/// Whether coach chat can run via OpenRouter without a local model install.
+/// Whether coach chat can run via a configured cloud endpoint without a local model.
 final isCloudCoachConfiguredProvider = FutureProvider<bool>((ref) async {
   final settings = ref.watch(settingsProvider);
   if (!settings.cloudTasksEnabled || !settings.hasSelectedCloudModel) {
     return false;
   }
+  if (settings.cloudBaseUrl.trim().isEmpty) return false;
   final apiKey = await ref.read(openRouterApiKeyManagerProvider.future);
   return apiKey != null && apiKey.isNotEmpty;
 });
@@ -31,7 +32,7 @@ final openRouterModelsRepositoryProvider = Provider<OpenRouterModelsRepository>(
 );
 
 final cloudAiRepositoryProvider = Provider<CloudAiRepository>(
-  (ref) => OpenRouterCloudAiRepository(),
+  (ref) => OpenAiCompatibleCloudAiRepository(),
 );
 
 HybridAiCoachRepository _createHybridRepo(
@@ -52,6 +53,7 @@ HybridAiCoachRepository _createHybridRepo(
         cloudDataLevel: settings.cloudDataLevel,
         selectedModelId: settings.selectedCloudModelId,
         selectedModelName: settings.selectedCloudModelName,
+        cloudBaseUrl: settings.cloudBaseUrl,
       );
     },
   );
@@ -74,7 +76,7 @@ final localRefinementAiCoachRepositoryProvider =
   return repo;
 });
 
-/// Hybrid coach for interactive chat — local isolate + optional OpenRouter cloud.
+/// Hybrid coach for interactive chat — local isolate + optional cloud LLM.
 final chatAiCoachRepositoryProvider = Provider<AiCoachRepository>((ref) {
   final local = ref.watch(localChatAiCoachRepositoryProvider);
   return _createHybridRepo(ref, local);

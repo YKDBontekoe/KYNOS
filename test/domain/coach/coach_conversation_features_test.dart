@@ -33,10 +33,10 @@ void main() {
   });
 
   group('CoachBackendModeMapper', () {
-    test('maps cloud mode to openRouter backend', () {
+    test('maps cloud mode to cloud backend', () {
       expect(
         CoachBackendModeMapper.toPreferredBackend(CoachBackendMode.cloud),
-        isNotNull,
+        AiInferenceBackend.cloud,
       );
     });
 

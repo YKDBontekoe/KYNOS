@@ -106,10 +106,49 @@ void main() {
     expect(fakeAi.capturedUserMessages, hasLength(1));
   });
 
-  test('skips tool loop on constrained tier and answers directly', () async {
+  test('runs one-step micro-tool loop on constrained tier', () async {
+    final fakeAi = _ScriptedAgenticAiCoachRepository(
+      scriptedTurns: [
+        'TOOL_CALL: {"name":"get_training_load","arguments":{}}',
+        'SIGNALS: ACWR is elevated\nANSWER: Keep today easy.\nACTION: Easy jog or rest',
+      ],
+    );
+    final prefs = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        healthRepositoryProvider.overrideWithValue(_FakeHealthRepository()),
+        chatAiCoachRepositoryProvider.overrideWithValue(fakeAi),
+        gemmaInferenceTierProvider.overrideWith(
+          (ref) async => GemmaInferenceTier.constrained,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(coachConversationsProvider.notifier)
+        .ensureActiveConversation();
+    await container.read(coachChatProvider.future);
+
+    await container
+        .read(coachChatProvider.notifier)
+        .sendMessage('How is my load?');
+
+    final assistant = container.read(coachChatProvider).value!.last;
+    expect(assistant.hasError, isFalse);
+    expect(assistant.content, contains('Keep today easy'));
+    expect(assistant.content, isNot(contains('TOOL_CALL')));
+    expect(assistant.toolSteps, isNotNull);
+    expect(assistant.toolSteps, hasLength(1));
+    expect(fakeAi.capturedUserMessages, hasLength(2));
+    expect(fakeAi.capturedUserMessages.first, contains('MORNING:'));
+  });
+
+  test('rejects non-micro tools on constrained tier', () async {
     final fakeAi = _ScriptedAgenticAiCoachRepository(
       scriptedTurns: [
         'TOOL_CALL: {"name":"get_recent_runs","arguments":{"limit":2}}',
+        'SIGNALS: none\nANSWER: Use the morning facts.\nACTION: Easy day',
       ],
     );
     final prefs = await SharedPreferences.getInstance();
@@ -134,10 +173,12 @@ void main() {
         .sendMessage('How was my last run?');
 
     final assistant = container.read(coachChatProvider).value!.last;
-    expect(assistant.toolSteps, isNull);
     expect(assistant.content, isNot(contains('TOOL_CALL')));
-    expect(assistant.hasError, isTrue);
-    expect(fakeAi.capturedUserMessages, hasLength(1));
+    expect(fakeAi.capturedUserMessages, hasLength(2));
+    expect(
+      fakeAi.capturedUserMessages.last,
+      contains('unavailable on this device'),
+    );
   });
 
   test('stops looping after the max tool step budget and answers', () async {

@@ -7,13 +7,16 @@ import 'package:kynos/domain/entities/chat_message.dart';
 import 'package:kynos/domain/entities/coach/today_directive.dart';
 import 'package:kynos/domain/entities/coach/training_plan.dart';
 import 'package:kynos/domain/entities/health/health_coach_models.dart';
+import 'package:kynos/domain/usecases/coach/build_proactive_health_agent_run_usecase.dart';
 import 'package:kynos/domain/utils/readiness_score.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/animated_message_entrance.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/assistant_bubble.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/daily_health_brief_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/health_check_in_sheet.dart';
+import 'package:kynos/features/coach_chat/presentation/widgets/proactive_health_agent_card.dart';
 import 'package:kynos/features/coach_chat/presentation/widgets/today_directive_card.dart';
 import 'package:kynos/features/coach_chat/providers/coach_chat_provider.dart';
+import 'package:kynos/features/coach_chat/providers/proactive_health_agent_provider.dart';
 import 'package:kynos/shared/providers/ai_repository_providers.dart';
 import 'package:kynos/shared/providers/health_coach_providers.dart';
 import 'package:kynos/shared/providers/health_providers.dart';
@@ -128,7 +131,7 @@ class MessageBubble extends ConsumerWidget {
         () => ref
             .read(coachChatProvider.notifier)
             .retryWithAlternateBackend(message.id),
-      AiInferenceBackend.openRouter =>
+      AiInferenceBackend.cloud =>
         () => ref
             .read(coachChatProvider.notifier)
             .retryWithAlternateBackend(message.id),
@@ -145,7 +148,7 @@ class MessageBubble extends ConsumerWidget {
     return switch (message.attemptedBackend) {
       AiInferenceBackend.onDevice ||
       AiInferenceBackend.rulesOnly when cloudConfigured => 'Try cloud coach',
-      AiInferenceBackend.openRouter => 'Try on-device',
+      AiInferenceBackend.cloud => 'Try on-device',
       _ => null,
     };
   }
@@ -158,8 +161,8 @@ class MessageBubble extends ConsumerWidget {
     return switch (message.attemptedBackend) {
       AiInferenceBackend.onDevice || AiInferenceBackend.rulesOnly
           when cloudConfigured =>
-        AiInferenceBackend.openRouter,
-      AiInferenceBackend.openRouter => AiInferenceBackend.onDevice,
+        AiInferenceBackend.cloud,
+      AiInferenceBackend.cloud => AiInferenceBackend.onDevice,
       _ => null,
     };
   }
@@ -260,6 +263,31 @@ class CoachChatEmptyState extends ConsumerWidget {
             checkInLabel: todayCheckIn == null ? 'Check in' : 'Update',
           ),
         ),
+        const Gap(Spacing.md),
+        ref.watch(proactiveHealthAgentRunsProvider).when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (runs) {
+                final visible = runs
+                    .where(
+                      (r) =>
+                          r.kind != ProactiveHealthAgentKind.morningPulse,
+                    )
+                    .toList();
+                if (visible.isEmpty) return const SizedBox.shrink();
+                return Column(
+                  children: [
+                    for (final run in visible) ...[
+                      ProactiveHealthAgentCard(
+                        run: run,
+                        onAsk: onSuggestionTap,
+                      ),
+                      const Gap(Spacing.md),
+                    ],
+                  ],
+                );
+              },
+            ),
         const Gap(Spacing.lg),
         Text(
           'Try asking',
