@@ -1,3 +1,20 @@
+# [1.25.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.24.0...v1.25.0) (2026-07-16)
+
+
+### Bug Fixes
+
+* **coach_chat:** show approve action on cloud consent banner ([#107](https://github.com/YKDBontekoe/KYNOS/issues/107)) ([272e358](https://github.com/YKDBontekoe/KYNOS/commit/272e358582dcda7b8fa29f43f3bb387a6db7722d))
+* **coach:** drop raw Colors.black barrier on coach sheets ([c505562](https://github.com/YKDBontekoe/KYNOS/commit/c505562c8db446024ac8930eb7f3036816781e08))
+* **coach:** hide shell nav while model & mode sheet is open ([4dac827](https://github.com/YKDBontekoe/KYNOS/commit/4dac82774f4d707ed57eeffcc85a5a8b432e14b7))
+* **coach:** polish model & mode sheet above shell nav ([817dc38](https://github.com/YKDBontekoe/KYNOS/commit/817dc38283a466f0e65b6b11631d418b48cfcc6d))
+* **coach:** remove shell tab bar from tree while menus open ([e33df50](https://github.com/YKDBontekoe/KYNOS/commit/e33df503892805add639e39f27f0248e0b7fdcbe))
+* **coach:** use sheet depth for shell chrome visibility ([0fe0d4f](https://github.com/YKDBontekoe/KYNOS/commit/0fe0d4fefe2ae112b70f41f7a43a30bfdf8bbc62))
+
+
+### Features
+
+* make coach the sole surface with assertive training plans ([#108](https://github.com/YKDBontekoe/KYNOS/issues/108)) ([c2329f6](https://github.com/YKDBontekoe/KYNOS/commit/c2329f6c70aeea65e4125df216d58181835fa1d2))
+
 # [1.24.0](https://github.com/YKDBontekoe/KYNOS/compare/v1.23.0...v1.24.0) (2026-07-15)
 
 
