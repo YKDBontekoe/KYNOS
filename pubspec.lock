@@ -418,10 +418,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_gemma_litertlm
-      sha256: "3da535a4da7c12564a53bbc6bbab8911f4a7bf7a6959a647108ff9fcf2c9a64e"
+      sha256: "28094c6b4c80cab4c6927365137f4b0f3a0631a39399dc6dee70b6f5b92e0963"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.1.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
