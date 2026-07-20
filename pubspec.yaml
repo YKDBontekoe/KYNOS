@@ -28,7 +28,7 @@ dependencies:
   meta: ^1.18.0
   logger: ^2.5.0
   flutter_gemma: ^1.2.3
-  flutter_gemma_litertlm: ^1.0.3
+  flutter_gemma_litertlm: ^1.1.0
   lottie: ^3.5.1
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^9.2.4
